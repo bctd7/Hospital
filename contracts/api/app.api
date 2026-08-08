@@ -1,0 +1,23 @@
+syntax = "v1"
+
+info (
+	title:   "Hospital App API"
+	desc:    "医院微信小程序后端 API"
+	author:  "Hospital"
+	version: "v1"
+)
+
+type HealthResponse {
+	Status  string `json:"status"`
+	Service string `json:"service"`
+	Version string `json:"version"`
+}
+
+@server (
+	prefix: /api/v1
+	group:  system
+)
+service app-api {
+	@handler health
+	get /health returns (HealthResponse)
+}

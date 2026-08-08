@@ -1,0 +1,28 @@
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.local.yaml
+*.local.yml
+
+# IDEs
+.idea/
+.vscode/
+
+# Go build and test output
+/bin/
+/dist/
+/tmp/
+*.exe
+*.test
+*.out
+coverage*.txt
+coverage*.html
+
+# Logs and runtime data
+*.log
+data/
+
+# OS files
+.DS_Store
+Thumbs.db
