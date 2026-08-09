@@ -1,4 +1,4 @@
-# Identity Service
+# Identity 身份服务
 
 Identity Service 是账号身份、工作人员科室、角色、权限和登录会话的数据拥有者。普通业务服务使用 `common/authn` 和 `common/authz` 本地校验 Access Token；只有登录会话和敏感授权变更需要调用 Identity。
 

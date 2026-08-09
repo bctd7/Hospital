@@ -1,4 +1,4 @@
-# Mini App
+# 微信小程序
 
 这里用于放置微信小程序源码。当前使用测试 AppID，前端技术栈为 uni-app + Vue 3 + TypeScript + Vite。
 

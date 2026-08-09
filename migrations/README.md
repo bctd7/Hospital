@@ -1,4 +1,4 @@
-# Database Migrations
+# 数据库迁移
 
 数据库结构必须由版本化迁移管理，不能只依赖 ORM、goctl 或容器初始化脚本自动建表。
 

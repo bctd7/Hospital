@@ -1,39 +1,39 @@
-# Production deployment and server migration
+# 生产部署与服务器迁移
 
-This directory is the repeatable deployment entry point for the public test backend. It runs MySQL, Redis, Identity RPC, and App API on one ECS instance without Kafka.
+本目录是公网测试后端的可重复部署入口。在一台 ECS 上运行 MySQL、Redis、Identity RPC 和 App API，当前阶段不启用 Kafka。
 
-## What each file does
+## 文件作用
 
-- `Dockerfile`: builds reproducible Linux images for the two Go services.
-- `docker-compose.yml`: starts the complete stack, runs pending Identity migrations, keeps MySQL/Redis private, publishes only the App API, and limits memory usage.
-- `config/`: contains production service discovery and logging settings.
-- `env.example`: documents required secrets without storing real values in Git.
-- `scripts/deploy.sh`: validates, builds, starts, and health-checks an update.
-- `scripts/backup.sh`: creates a compressed, transaction-consistent MySQL backup.
-- `scripts/export-images.ps1`: pulls official base images and builds a portable image archive on Windows.
-- `scripts/import-images.sh`: loads a portable image archive on Ubuntu and deploys without contacting Docker Hub.
+- `Dockerfile`：构建可重复生成的 Go 服务 Linux 镜像；
+- `docker-compose.yml`：启动完整服务栈、执行待运行的 Identity 迁移、限制资源，并且只向宿主机发布 App API；
+- `config/`：保存生产环境的服务发现和日志配置；
+- `env.example`：说明必需配置项，不保存真实密钥；
+- `scripts/deploy.sh`：校验配置、构建、启动并检查服务健康状态；
+- `scripts/backup.sh`：生成事务一致的 MySQL 压缩备份；
+- `scripts/export-images.ps1`：在 Windows 开发机拉取基础镜像、构建服务镜像并导出归档；
+- `scripts/import-images.sh`：在 Ubuntu 服务器导入镜像归档，无需访问 Docker Hub 即可部署。
 
-The real `deploy/production/.env.production` is server-only and ignored by Git and Docker build context.
+真实配置文件 `deploy/production/.env.production` 仅保存在服务器，已经被 Git 和 Docker 构建上下文忽略。
 
-## First deployment
+## 首次部署
 
-Prerequisites: Ubuntu 22.04, Docker Engine with Compose v2, a project-specific SSH key, and an ECS security group that exposes TCP 22 only for administration and TCP 8888 for the CloudBase AnyService source.
+前置条件：Ubuntu 22.04、Docker Engine、Compose v2、项目专用 SSH 密钥。ECS 安全组只对管理来源开放 TCP 22，并为 CloudBase AnyService 源站开放 TCP 8888。
 
 ```bash
 cd /opt/hospital/deploy/production
 cp env.example .env.production
-# Fill every placeholder with a production value.
+# 填写所有占位配置
 chmod 600 .env.production
 chmod +x scripts/*.sh
 ./scripts/deploy.sh
 curl --fail http://127.0.0.1:8888/api/v1/health
 ```
 
-Do not expose MySQL `3306`, Redis `6379`, or Identity RPC `8080` in the ECS security group.
+安全组不要开放 MySQL `3306`、Redis `6379` 或 Identity RPC `8080`。
 
-## Uploading a later version
+## 后续更新
 
-Upload the changed repository files to `/opt/hospital`, then run:
+将对应版本的仓库文件上传到 `/opt/hospital` 后执行：
 
 ```bash
 cd /opt/hospital/deploy/production
@@ -41,13 +41,13 @@ cd /opt/hospital/deploy/production
 ./scripts/deploy.sh
 ```
 
-Rebuilding service containers does not delete the named MySQL and Redis volumes. A schema change must be delivered as a reviewed migration under `migrations/`; never use `docker compose down -v` as an update mechanism.
+重建服务容器不会删除具名 MySQL、Redis 数据卷。表结构变化必须通过 `migrations/` 下经过评审的新迁移交付，禁止使用 `docker compose down -v` 更新服务。
 
-`identity-migrate` builds and runs the repository's `tools/db-migrate` executable, backed by the pinned `golang-migrate` Go dependency. Every deployment runs `up`; already-recorded versions are skipped and only pending migrations execute. A failed migration prevents Identity RPC and App API from being replaced with a partially compatible release. Production migration remains an explicit deployment action after backup; CI validates migrations against an isolated test database and never connects directly to production.
+`identity-migrate` 构建并运行 `tools/db-migrate`，依赖版本由仓库锁定。每次部署执行 `up`：已登记版本会跳过，只运行待执行版本。迁移失败时，Identity RPC 和 App API 不会继续启动为不兼容版本。生产迁移必须在备份后明确执行；CI 只连接隔离测试数据库，不连接生产库。
 
-## When Docker Hub is unavailable
+## Docker Hub 不可用时
 
-Alibaba Cloud's Docker Hub accelerator does not guarantee that every exact image tag is cached. For this test deployment, build and export the five required images on the Windows development machine:
+阿里云 Docker Hub 加速器不能保证缓存每个精确镜像标签。测试部署可以在 Windows 开发机生成包含全部依赖的镜像归档：
 
 ```powershell
 .\deploy\production\scripts\export-images.ps1 `
@@ -57,16 +57,16 @@ scp -i "$env:USERPROFILE\.ssh\hospital_ecs" `
     root@SERVER_IP:/tmp/hospital-images.tar.gz
 ```
 
-Then import and deploy on Ubuntu without any registry pull:
+在 Ubuntu 服务器导入并部署：
 
 ```bash
 cd /opt/hospital/deploy/production
 ./scripts/import-images.sh /tmp/hospital-images.tar.gz
 ```
 
-For a long-lived production environment, push these pinned images to a private Alibaba Cloud ACR repository and change the Compose `image` references to ACR. Do not treat the Docker Hub mirror as a reliable release dependency.
+长期运行时应将固定版本镜像推送到阿里云 ACR 私有仓库，并把 Compose 镜像地址改为 ACR；不要把 Docker Hub 镜像加速器当作可靠发布源。
 
-Useful checks:
+常用检查命令：
 
 ```bash
 docker compose --env-file .env.production -f docker-compose.yml ps
@@ -74,13 +74,13 @@ docker compose --env-file .env.production -f docker-compose.yml logs --tail=200 
 curl --fail http://127.0.0.1:8888/api/v1/health
 ```
 
-## Moving to another server
+## 更换服务器
 
-1. Keep the old server running and run `scripts/backup.sh`.
-2. Create the new Ubuntu server and restrict its security group before deployment.
-3. Upload the same repository revision and `.env.production` to `/opt/hospital` on the new server. Keeping the token signing keys avoids invalidating existing access tokens. Rotate infrastructure passwords only after the database restore is verified.
-4. Run `scripts/deploy.sh` once so MySQL creates its volumes and service accounts.
-5. Stop the application containers on the new server and restore the backup:
+1. 保持旧服务器运行，执行 `scripts/backup.sh`；
+2. 创建新的 Ubuntu 服务器，先收紧安全组；
+3. 把同一仓库版本和 `.env.production` 上传到新服务器 `/opt/hospital`。保留 Token 签名密钥可以避免现有 Access Token 立即失效；基础设施密码应在数据库恢复验证后再轮换；
+4. 先执行一次 `scripts/deploy.sh`，创建 MySQL 数据卷和服务账号；
+5. 停止新服务器的应用容器并恢复备份：
 
    ```bash
    cd /opt/hospital/deploy/production
@@ -90,15 +90,15 @@ curl --fail http://127.0.0.1:8888/api/v1/health
    ./scripts/deploy.sh
    ```
 
-6. Verify the new server locally with `curl http://127.0.0.1:8888/api/v1/health` and exercise login/CRUD through a test account.
-7. In CloudBase AnyService, change only the origin public IP from the old ECS address to the new one while keeping the CloudBase environment ID and service name unchanged. In that case the miniapp does not need to be rebuilt or uploaded again.
-8. If the miniapp later uses direct HTTPS instead of AnyService, update `VITE_API_BASE_URL`, the WeChat request allowlist, DNS, and the TLS certificate, then rebuild and upload the miniapp.
-9. Keep the old server stopped but recoverable until final verification. To roll back, point AnyService back to the old public IP and restart the old stack.
+6. 在新服务器本机调用健康检查，并使用测试账号验证登录和关键接口；
+7. 在 CloudBase AnyService 中只修改源站公网 IP，保持云环境 ID 和服务标识不变。此时小程序无需重新构建或上传；
+8. 如果未来改为小程序直接请求 HTTPS，则需要更新 `VITE_API_BASE_URL`、微信请求合法域名、DNS 和 TLS 证书，然后重新构建上传；
+9. 新服务器验证完成前，旧服务器保持停止但可恢复。需要回滚时，把 AnyService 指回旧 IP 并重新启动旧服务。
 
-Redis stores refresh-session state. A MySQL-only migration may require users to log in again, which is acceptable for this test environment. If uninterrupted sessions become necessary, add a tested Redis backup/restore procedure before migration.
+Redis 保存 Refresh Session。只迁移 MySQL 可能要求用户重新登录；测试环境可以接受。如果未来要求会话无感迁移，需要先增加并验证 Redis 备份恢复流程。
 
-## Backup handling
+## 备份管理
 
-Backups contain account and phone-related records. Keep them outside the Git repository, restrict file permissions, copy them to a second protected location, and remove obsolete copies according to the project's retention policy. Test a restore before relying on a backup.
+备份包含账号和手机号相关记录。备份不得提交 Git，应限制文件权限、复制到第二个受保护位置，并按照保留周期清理。正式依赖备份前必须实际验证恢复流程。
 
-The backup script does not automatically delete old files. This avoids silent data loss, but disk usage must be monitored on the 40 GiB ECS system disk.
+备份脚本不会自动删除旧文件，以避免静默数据丢失；需要持续监控 40 GiB ECS 系统盘用量。
