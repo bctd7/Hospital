@@ -130,8 +130,8 @@ appointment_slot_reservations  预约对具体时段容量的占用
 管理页面增加独立的 `management_version`：
 
 - 医生公开资料、科室、医生身份或账号状态发生管理变更时递增；
-- 管理员列表和详情对外统一返回为 `version`；
-- 写请求携带当前 `version`，版本不一致返回 `409`；
+- 管理员账号列表和详情明确返回 `management_version`；
+- 账号、医生写请求携带当前 `management_version`，版本不一致返回 `409`；
 - 涉及角色、科室或账号状态的变更同时递增 `authorization_version`；
 - 只修改头像、显示名称或擅长描述时不递增 `authorization_version`，避免无意义地刷新 Token。
 
@@ -349,8 +349,9 @@ GET /api/v1/admin/identity/accounts/:accountId
 - 普通账号当前没有 Identity 昵称时名称可以为空，前端使用脱敏手机号作为展示兜底，不允许 Identity
   跨库连接未来的 Patient 数据库完成分页；
 - 完整手机号继续使用现有精确查询接口，分页和详情只返回脱敏手机号；
-- 列表返回稳定账号 ID、可选名称、可选头像、脱敏手机号、身份、可选科室、账号状态和 `version`；
-- `version` 对应账号 `management_version`，与 Token 使用的 `authorization_version` 分开；
+- 列表返回稳定账号 ID、可选名称、可选头像、脱敏手机号、身份、可选科室、账号状态和
+  `management_version`；
+- `management_version` 与 Token 使用的 `authorization_version` 分开；
 - 详情补充手机号验证状态、创建/更新时间、角色、可选工号、医生公开资料、医生状态、
   `authorization_version` 及后端计算的 `available_actions`；
 - 查询必须数据库分页并限制最大页大小，不允许读出全部账号后在内存中过滤。
