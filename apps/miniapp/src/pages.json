@@ -57,21 +57,9 @@
       }
     },
     {
-      "path": "pages/profile/waitlist/index",
-      "style": {
-        "navigationBarTitleText": "候补订单"
-      }
-    },
-    {
       "path": "pages/profile/message-management/index",
       "style": {
         "navigationBarTitleText": "消息管理"
-      }
-    },
-    {
-      "path": "pages/profile/account/index",
-      "style": {
-        "navigationBarTitleText": "账号设置"
       }
     }
   ],

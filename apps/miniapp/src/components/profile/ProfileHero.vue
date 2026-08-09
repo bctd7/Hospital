@@ -12,9 +12,6 @@ withDefaults(
   },
 );
 
-const emit = defineEmits<{
-  settings: [];
-}>();
 </script>
 
 <template>
@@ -27,16 +24,6 @@ const emit = defineEmits<{
     <view class="profile-hero__content">
       <ProfileAvatar :src="avatarUrl" />
       <text class="profile-hero__nickname">{{ nickname }}</text>
-      <view
-        class="profile-hero__settings"
-        role="button"
-        aria-label="进入账号设置"
-        hover-class="profile-hero__settings--pressed"
-        @tap="emit('settings')"
-      >
-        <text>账号设置</text>
-        <text class="profile-hero__arrow">›</text>
-      </view>
     </view>
   </view>
 </template>
@@ -69,29 +56,6 @@ const emit = defineEmits<{
   line-height: 1.4;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.profile-hero__settings {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  padding: 16rpx 2rpx 16rpx 26rpx;
-  margin-left: 20rpx;
-  color: rgba(255, 255, 255, 0.96);
-  font-size: 28rpx;
-  line-height: 1.4;
-}
-
-.profile-hero__settings--pressed {
-  opacity: 0.72;
-}
-
-.profile-hero__arrow {
-  margin-left: 8rpx;
-  font-family: Arial, sans-serif;
-  font-size: 48rpx;
-  font-weight: 200;
-  line-height: 1;
 }
 
 .profile-hero__orb,

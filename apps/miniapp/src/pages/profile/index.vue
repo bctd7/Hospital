@@ -26,13 +26,6 @@ const menuItems: MenuEntry[] = [
     route: "/pages/profile/appointments/index",
   },
   {
-    id: "waitlist",
-    title: "候补订单",
-    symbol: "候",
-    tone: "cyan",
-    route: "/pages/profile/waitlist/index",
-  },
-  {
     id: "favorites",
     title: "我的关注",
     symbol: "关",
@@ -68,20 +61,11 @@ function navigateTo(item: MenuEntry) {
   });
 }
 
-function openAccountSettings() {
-  uni.navigateTo({
-    url: "/pages/profile/account/index",
-  });
-}
 </script>
 
 <template>
   <view class="profile-page">
-    <ProfileHero
-      :avatar-url="avatarUrl"
-      :nickname="nickname"
-      @settings="openAccountSettings"
-    />
+    <ProfileHero :avatar-url="avatarUrl" :nickname="nickname" />
     <ActionMenu :items="menuItems" flat compact @select="navigateTo" />
   </view>
 </template>
