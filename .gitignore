@@ -8,16 +8,21 @@
 # IDEs
 .idea/
 .vscode/
+project.private.config.json
 
 # Go build and test output
 /bin/
-/dist/
+dist/
 /tmp/
 *.exe
 *.test
 *.out
 coverage*.txt
 coverage*.html
+
+# JavaScript dependencies and caches
+node_modules/
+.pnpm-store/
 
 # Logs and runtime data
 *.log

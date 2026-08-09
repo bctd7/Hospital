@@ -1,0 +1,16 @@
+{
+  "description": "Hospital 微信小程序开发工程",
+  "compileType": "miniprogram",
+  "miniprogramRoot": "dist/build/mp-weixin/",
+  "appid": "wx7d3274311006576d",
+  "projectname": "Hospital",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "postcss": true,
+    "minified": true,
+    "newFeature": true,
+    "bigPackageSizeSupport": true
+  },
+  "condition": {}
+}
