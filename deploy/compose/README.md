@@ -6,7 +6,7 @@
 
 | 组件 | 镜像 | 主机地址 | 用途 |
 |---|---|---|---|
-| MySQL | `mysql:8.4.11` | `127.0.0.1:3306` | 业务事实库 |
+| MySQL | `mysql:8.4.11` | `127.0.0.1:3306` | 业务事实库；首期包含独立 `hospital_identity` 数据库和账号 |
 | Redis | `redis:7.4.10-alpine` | `127.0.0.1:6379` | 缓存、幂等和短期状态 |
 | Kafka | `apache/kafka:4.2.0` | `127.0.0.1:9092` | 可选的异步事件系统 |
 
@@ -22,6 +22,8 @@ docker compose `
   -f deploy/compose/docker-compose.yml `
   up -d mysql redis
 ```
+
+MySQL 初始化脚本只会在数据卷第一次创建时运行。已有 `mysql-data` 卷不会自动重放 Identity 初始迁移；后续数据库升级必须使用正式迁移工具，不通过删除数据卷模拟升级。
 
 需要 Kafka 时：
 

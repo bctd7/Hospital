@@ -1,0 +1,11 @@
+USE hospital_identity;
+
+DROP TABLE IF EXISTS identity_outbox_events;
+DROP TABLE IF EXISTS identity_authorization_audit;
+DROP TABLE IF EXISTS identity_account_roles;
+DROP TABLE IF EXISTS identity_role_permissions;
+DROP TABLE IF EXISTS identity_permissions;
+DROP TABLE IF EXISTS identity_roles;
+DROP TABLE IF EXISTS identity_staff_profiles;
+DROP TABLE IF EXISTS identity_departments;
+DROP TABLE IF EXISTS identity_accounts;

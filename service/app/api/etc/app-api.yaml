@@ -16,3 +16,14 @@ Middlewares:
   Timeout: true
   Metrics: true
   MaxBytes: true
+
+IdentityRPC:
+  Endpoints:
+    - 127.0.0.1:8080
+  NonBlock: true
+
+Token:
+  Issuer: hospital-identity
+  Audience: hospital-services
+  AccessPublicKeyBase64: ${IDENTITY_ACCESS_PUBLIC_KEY_BASE64}
+  AccessTTLSeconds: 900

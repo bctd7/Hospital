@@ -6,6 +6,8 @@ package handler
 import (
 	"net/http"
 
+	auth "hospital/service/app/api/internal/handler/auth"
+	identityadmin "hospital/service/app/api/internal/handler/identityadmin"
 	system "hospital/service/app/api/internal/handler/system"
 	"hospital/service/app/api/internal/svc"
 
@@ -13,6 +15,81 @@ import (
 )
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/auth/phone/code",
+				Handler: auth.SendPhoneLoginCodeHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/auth/phone/login",
+				Handler: auth.PhoneLoginHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/auth/wechat/login",
+				Handler: auth.WeChatLoginHandler(serverCtx),
+			},
+		},
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AccessToken},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/auth/me",
+					Handler: auth.CurrentIdentityHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/auth/me/phone",
+					Handler: auth.SetMyPhoneHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/auth/token/refresh",
+				Handler: auth.RefreshTokenHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/auth/token/revoke",
+				Handler: auth.RevokeTokenHandler(serverCtx),
+			},
+		},
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AccessToken},
+			[]rest.Route{
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/identity/accounts/search-by-phone",
+					Handler: identityadmin.SearchAccountByPhoneHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/identity/doctors/promote",
+					Handler: identityadmin.PromoteDoctorHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
 	server.AddRoutes(
 		[]rest.Route{
 			{

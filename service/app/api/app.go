@@ -24,14 +24,17 @@ func main() {
 	flag.Parse()
 
 	var c config.Config
-	conf.MustLoad(*configFile, &c)
+	conf.MustLoad(*configFile, &c, conf.UseEnv())
 	logx.AddGlobalFields(logx.Field(projectlog.FieldEnvironment, c.Environment))
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
 	server.Use(httpaccess.Middleware())
 
-	ctx := svc.NewServiceContext(c)
+	ctx, err := svc.NewServiceContext(c)
+	if err != nil {
+		panic(err)
+	}
 	handler.RegisterHandlers(server, ctx)
 
 	projectlog.Info(

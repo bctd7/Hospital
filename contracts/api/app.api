@@ -1,5 +1,7 @@
 syntax = "v1"
 
+import "identity-auth.api"
+
 info (
 	title:   "Hospital App API"
 	desc:    "医院微信小程序后端 API"

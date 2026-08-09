@@ -3,8 +3,77 @@
 
 package types
 
+type CurrentIdentityResponse struct {
+	AccountID            string   `json:"account_id"`
+	AccountType          string   `json:"account_type"`
+	Status               string   `json:"status"`
+	Roles                []string `json:"roles"`
+	DepartmentID         string   `json:"department_id,optional"`
+	Permissions          []string `json:"permissions"`
+	AuthorizationVersion int64    `json:"authorization_version"`
+}
+
 type HealthResponse struct {
 	Status  string `json:"status"`
 	Service string `json:"service"`
 	Version string `json:"version"`
+}
+
+type PhoneBindingResponse struct {
+	PhoneMasked        string `json:"phone_masked"`
+	VerificationStatus string `json:"verification_status"`
+	VerificationSource string `json:"verification_source"`
+}
+
+type PhoneLoginRequest struct {
+	Phone            string `json:"phone"`
+	VerificationCode string `json:"verification_code"`
+}
+
+type PromoteDoctorRequest struct {
+	AccountID       string `json:"account_id"`
+	DepartmentID    string `json:"department_id"`
+	OfflineVerified bool   `json:"offline_verified"`
+	OperationID     string `json:"operation_id"`
+}
+
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
+type RevokeTokenResponse struct {
+	Revoked bool `json:"revoked"`
+}
+
+type SearchAccountByPhoneRequest struct {
+	Phone string `json:"phone"`
+}
+
+type SearchAccountByPhoneResponse struct {
+	Identity CurrentIdentityResponse `json:"identity"`
+	Phone    PhoneBindingResponse    `json:"phone"`
+}
+
+type SendPhoneLoginCodeRequest struct {
+	Phone string `json:"phone"`
+}
+
+type SendPhoneLoginCodeResponse struct {
+	Accepted          bool  `json:"accepted"`
+	RetryAfterSeconds int64 `json:"retry_after_seconds"`
+}
+
+type SetPhoneRequest struct {
+	Phone string `json:"phone"`
+}
+
+type TokenResponse struct {
+	AccessToken             string `json:"access_token"`
+	RefreshToken            string `json:"refresh_token"`
+	AccessExpiresInSeconds  int64  `json:"access_expires_in_seconds"`
+	RefreshExpiresInSeconds int64  `json:"refresh_expires_in_seconds"`
+}
+
+type WeChatLoginRequest struct {
+	LoginCode string `json:"login_code"`
 }
