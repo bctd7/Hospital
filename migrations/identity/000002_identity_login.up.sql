@@ -1,5 +1,3 @@
-USE hospital_identity;
-
 -- 可选外部登录身份：当前保留微信兼容映射；手机号短信认证已成为主登录方式。
 -- 不保存登录 code、AppSecret 或 session_key，外部身份也不作为平台账号主键。
 CREATE TABLE identity_external_identities (

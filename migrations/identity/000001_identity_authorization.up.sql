@@ -1,5 +1,3 @@
-USE hospital_identity;
-
 -- 平台账号主表：只保存所有账号共有的身份状态，不保存微信、手机号、科室或角色明细。
 CREATE TABLE identity_accounts (
     id                    CHAR(36)     NOT NULL,

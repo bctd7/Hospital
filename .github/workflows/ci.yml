@@ -1,0 +1,108 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - plan
+      - "feature/**"
+      - "chore/**"
+      - "fix/**"
+    paths-ignore:
+      - "plan/**"
+      - "**/*.md"
+  pull_request:
+    paths-ignore:
+      - "plan/**"
+      - "**/*.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Install goctl
+        run: go install github.com/zeromicro/go-zero/tools/goctl@v1.10.3
+      - name: Validate API contract
+        run: goctl api validate -api contracts/api/app.api
+      - name: Run Go tests
+        run: go test ./...
+      - name: Run Go vet
+        run: go vet ./...
+
+  miniapp:
+    name: Miniapp
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/miniapp
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: apps/miniapp/.nvmrc
+          cache: npm
+          cache-dependency-path: apps/miniapp/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Run unit tests
+        run: npm test -- --run
+      - name: Check TypeScript
+        run: npm run type-check
+      - name: Build WeChat miniapp
+        run: npm run build:mp-weixin
+
+  migrations:
+    name: Identity migrations
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4.11
+        env:
+          MYSQL_ROOT_PASSWORD: hospital_ci_root
+          MYSQL_DATABASE: hospital_identity
+          MYSQL_USER: hospital_identity
+          MYSQL_PASSWORD: hospital_identity_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -phospital_ci_root --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      APP_ENV: ci
+      IDENTITY_MYSQL_DSN: hospital_identity:hospital_identity_ci@tcp(127.0.0.1:3306)/hospital_identity?charset=utf8mb4&parseTime=true&loc=UTC
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Apply all migrations
+        shell: pwsh
+        run: ./scripts/migrate.ps1 -Service identity -Direction up
+      - name: Show current version
+        shell: pwsh
+        run: ./scripts/migrate.ps1 -Service identity -Direction version
+      - name: Roll back the latest migration
+        shell: pwsh
+        run: ./scripts/migrate.ps1 -Service identity -Direction down -Steps 1
+      - name: Reapply the latest migration
+        shell: pwsh
+        run: ./scripts/migrate.ps1 -Service identity -Direction up
