@@ -1,5 +1,3 @@
-USE hospital_identity;
-
 DROP TABLE IF EXISTS identity_outbox_events;
 DROP TABLE IF EXISTS identity_authorization_audit;
 DROP TABLE IF EXISTS identity_account_roles;

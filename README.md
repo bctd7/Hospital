@@ -104,7 +104,7 @@ go run ./service/app/api `
 也可以执行基础校验脚本：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts/check-foundation.ps1
+powershell -ExecutionPolicy Bypass -File scripts/check.ps1
 ```
 
 ## 工程约束
