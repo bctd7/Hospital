@@ -33,7 +33,7 @@ jobs:
           go-version-file: go.mod
           cache: true
       - name: Install goctl
-        run: go install github.com/zeromicro/go-zero/tools/goctl@v1.10.3
+        run: go install github.com/zeromicro/go-zero/tools/goctl@v1.10.2
       - name: Validate API contract
         run: goctl api validate -api contracts/api/app.api
       - name: Run Go tests
