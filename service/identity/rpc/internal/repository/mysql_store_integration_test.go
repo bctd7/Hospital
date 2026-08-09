@@ -60,6 +60,76 @@ func TestMySQLAuthorizationChange(t *testing.T) {
 	assertCount(t, store, ctx, "identity_outbox_events", "aggregate_id", integrationDoctorID, 1)
 }
 
+func TestMySQLWeChatRegistrationPhoneAndDoctorPromotion(t *testing.T) {
+	dataSource := os.Getenv("IDENTITY_TEST_MYSQL_DSN")
+	if dataSource == "" {
+		t.Skip("IDENTITY_TEST_MYSQL_DSN is not set")
+	}
+	store, err := NewMySQLStore(dataSource)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer store.Close()
+	ctx := context.Background()
+	const (
+		adminID      = "10000000-0000-0000-0000-000000000101"
+		departmentID = "10000000-0000-0000-0000-000000000102"
+		operationID  = "10000000-0000-0000-0000-000000000103"
+	)
+	if _, err := store.db.ExecContext(ctx, "INSERT INTO identity_departments (id, code, name) VALUES (?, 'login-test', 'Login Test')", departmentID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.db.ExecContext(ctx, "INSERT INTO identity_accounts (id, account_type, status) VALUES (?, 'staff', 'active')", adminID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.db.ExecContext(ctx, "INSERT INTO identity_account_roles (account_id, role_id) SELECT ?, id FROM identity_roles WHERE code = 'super_admin'", adminID); err != nil {
+		t.Fatal(err)
+	}
+	var patientID string
+	defer func() {
+		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_outbox_events WHERE aggregate_id = ?", patientID)
+		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_authorization_audit WHERE target_account_id = ?", patientID)
+		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_account_roles WHERE account_id IN (?, ?)", adminID, patientID)
+		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_staff_profiles WHERE account_id = ?", patientID)
+		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_account_phones WHERE account_id = ?", patientID)
+		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_external_identities WHERE account_id = ?", patientID)
+		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_accounts WHERE id IN (?, ?)", adminID, patientID)
+		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_departments WHERE id = ?", departmentID)
+	}()
+
+	patientID, err = store.FindOrCreateWeChatAccount(ctx, "wx-app", "openid-integration")
+	if err != nil {
+		t.Fatal(err)
+	}
+	repeatedID, err := store.FindOrCreateWeChatAccount(ctx, "wx-app", "openid-integration")
+	if err != nil || repeatedID != patientID {
+		t.Fatalf("wechat registration was not idempotent: id=%s err=%v", repeatedID, err)
+	}
+	fingerprint := make([]byte, 32)
+	fingerprint[0] = 1
+	if _, err := store.SetSelfReportedPhone(ctx, patientID, fingerprint, "138****8000"); err != nil {
+		t.Fatal(err)
+	}
+
+	manager := authorization.NewManager(store)
+	principal, err := manager.PromoteToDepartmentDoctor(
+		ctx, adminID, patientID, departmentID, true, operationID, "integration-login-request",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if principal.AccountType != authn.AccountTypeStaff || !principal.HasRole(authn.RoleDepartmentDoctor) || principal.DepartmentID != departmentID {
+		t.Fatalf("unexpected promoted identity: %#v", principal)
+	}
+	lookup, err := store.FindAccountByPhone(ctx, fingerprint)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if lookup.Phone.VerificationStatus != "verified" || lookup.Phone.VerificationSource != "admin" {
+		t.Fatalf("phone was not admin verified: %#v", lookup.Phone)
+	}
+}
+
 func seedIdentityTestData(t *testing.T, store *MySQLStore, ctx context.Context) {
 	t.Helper()
 	statements := []struct {

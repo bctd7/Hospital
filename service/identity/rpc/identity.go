@@ -39,6 +39,7 @@ func main() {
 	})
 	s.AddUnaryInterceptors(authn.UnaryServerInterceptor(
 		ctx.TokenManager,
+		identityv1.IdentityService_WeChatLogin_FullMethodName,
 		identityv1.IdentityService_RefreshAccessToken_FullMethodName,
 		identityv1.IdentityService_RevokeRefreshToken_FullMethodName,
 	))

@@ -7,24 +7,34 @@ package identityservice
 import (
 	"context"
 
-	"hospital/contracts/gen/identity/v1"
+	identityv1 "hospital/contracts/gen/identity/v1"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 
 type (
-	AssignRoleRequest              = identityv1.AssignRoleRequest
-	AuthorizationContext           = identityv1.AuthorizationContext
-	ChangeAccountStatusRequest     = identityv1.ChangeAccountStatusRequest
-	ChangeStaffDepartmentRequest   = identityv1.ChangeStaffDepartmentRequest
-	GetAuthorizationContextRequest = identityv1.GetAuthorizationContextRequest
-	RefreshAccessTokenRequest      = identityv1.RefreshAccessTokenRequest
-	RevokeRefreshTokenRequest      = identityv1.RevokeRefreshTokenRequest
-	RevokeRefreshTokenResponse     = identityv1.RevokeRefreshTokenResponse
-	TokenPair                      = identityv1.TokenPair
+	AccountLookup                    = identityv1.AccountLookup
+	AssignRoleRequest                = identityv1.AssignRoleRequest
+	AuthorizationContext             = identityv1.AuthorizationContext
+	ChangeAccountStatusRequest       = identityv1.ChangeAccountStatusRequest
+	ChangeStaffDepartmentRequest     = identityv1.ChangeStaffDepartmentRequest
+	FindAccountByPhoneRequest        = identityv1.FindAccountByPhoneRequest
+	GetAuthorizationContextRequest   = identityv1.GetAuthorizationContextRequest
+	PhoneBinding                     = identityv1.PhoneBinding
+	PromoteToDepartmentDoctorRequest = identityv1.PromoteToDepartmentDoctorRequest
+	RefreshAccessTokenRequest        = identityv1.RefreshAccessTokenRequest
+	RevokeRefreshTokenRequest        = identityv1.RevokeRefreshTokenRequest
+	RevokeRefreshTokenResponse       = identityv1.RevokeRefreshTokenResponse
+	SetMyPhoneRequest                = identityv1.SetMyPhoneRequest
+	TokenPair                        = identityv1.TokenPair
+	WeChatLoginRequest               = identityv1.WeChatLoginRequest
 
 	IdentityService interface {
+		WeChatLogin(ctx context.Context, in *WeChatLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
+		SetMyPhone(ctx context.Context, in *SetMyPhoneRequest, opts ...grpc.CallOption) (*PhoneBinding, error)
+		FindAccountByPhone(ctx context.Context, in *FindAccountByPhoneRequest, opts ...grpc.CallOption) (*AccountLookup, error)
+		PromoteToDepartmentDoctor(ctx context.Context, in *PromoteToDepartmentDoctorRequest, opts ...grpc.CallOption) (*AuthorizationContext, error)
 		GetAuthorizationContext(ctx context.Context, in *GetAuthorizationContextRequest, opts ...grpc.CallOption) (*AuthorizationContext, error)
 		AssignRole(ctx context.Context, in *AssignRoleRequest, opts ...grpc.CallOption) (*AuthorizationContext, error)
 		ChangeStaffDepartment(ctx context.Context, in *ChangeStaffDepartmentRequest, opts ...grpc.CallOption) (*AuthorizationContext, error)
@@ -42,6 +52,26 @@ func NewIdentityService(cli zrpc.Client) IdentityService {
 	return &defaultIdentityService{
 		cli: cli,
 	}
+}
+
+func (m *defaultIdentityService) WeChatLogin(ctx context.Context, in *WeChatLoginRequest, opts ...grpc.CallOption) (*TokenPair, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.WeChatLogin(ctx, in, opts...)
+}
+
+func (m *defaultIdentityService) SetMyPhone(ctx context.Context, in *SetMyPhoneRequest, opts ...grpc.CallOption) (*PhoneBinding, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.SetMyPhone(ctx, in, opts...)
+}
+
+func (m *defaultIdentityService) FindAccountByPhone(ctx context.Context, in *FindAccountByPhoneRequest, opts ...grpc.CallOption) (*AccountLookup, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.FindAccountByPhone(ctx, in, opts...)
+}
+
+func (m *defaultIdentityService) PromoteToDepartmentDoctor(ctx context.Context, in *PromoteToDepartmentDoctorRequest, opts ...grpc.CallOption) (*AuthorizationContext, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.PromoteToDepartmentDoctor(ctx, in, opts...)
 }
 
 func (m *defaultIdentityService) GetAuthorizationContext(ctx context.Context, in *GetAuthorizationContextRequest, opts ...grpc.CallOption) (*AuthorizationContext, error) {

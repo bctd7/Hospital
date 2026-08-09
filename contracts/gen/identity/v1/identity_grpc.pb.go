@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v7.34.1
-// source: contracts/proto/identity/v1/identity.proto
+// source: identity.proto
 
 package identityv1
 
@@ -19,18 +19,26 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	IdentityService_GetAuthorizationContext_FullMethodName = "/hospital.identity.v1.IdentityService/GetAuthorizationContext"
-	IdentityService_AssignRole_FullMethodName              = "/hospital.identity.v1.IdentityService/AssignRole"
-	IdentityService_ChangeStaffDepartment_FullMethodName   = "/hospital.identity.v1.IdentityService/ChangeStaffDepartment"
-	IdentityService_ChangeAccountStatus_FullMethodName     = "/hospital.identity.v1.IdentityService/ChangeAccountStatus"
-	IdentityService_RefreshAccessToken_FullMethodName      = "/hospital.identity.v1.IdentityService/RefreshAccessToken"
-	IdentityService_RevokeRefreshToken_FullMethodName      = "/hospital.identity.v1.IdentityService/RevokeRefreshToken"
+	IdentityService_WeChatLogin_FullMethodName               = "/hospital.identity.v1.IdentityService/WeChatLogin"
+	IdentityService_SetMyPhone_FullMethodName                = "/hospital.identity.v1.IdentityService/SetMyPhone"
+	IdentityService_FindAccountByPhone_FullMethodName        = "/hospital.identity.v1.IdentityService/FindAccountByPhone"
+	IdentityService_PromoteToDepartmentDoctor_FullMethodName = "/hospital.identity.v1.IdentityService/PromoteToDepartmentDoctor"
+	IdentityService_GetAuthorizationContext_FullMethodName   = "/hospital.identity.v1.IdentityService/GetAuthorizationContext"
+	IdentityService_AssignRole_FullMethodName                = "/hospital.identity.v1.IdentityService/AssignRole"
+	IdentityService_ChangeStaffDepartment_FullMethodName     = "/hospital.identity.v1.IdentityService/ChangeStaffDepartment"
+	IdentityService_ChangeAccountStatus_FullMethodName       = "/hospital.identity.v1.IdentityService/ChangeAccountStatus"
+	IdentityService_RefreshAccessToken_FullMethodName        = "/hospital.identity.v1.IdentityService/RefreshAccessToken"
+	IdentityService_RevokeRefreshToken_FullMethodName        = "/hospital.identity.v1.IdentityService/RevokeRefreshToken"
 )
 
 // IdentityServiceClient is the client API for IdentityService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type IdentityServiceClient interface {
+	WeChatLogin(ctx context.Context, in *WeChatLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
+	SetMyPhone(ctx context.Context, in *SetMyPhoneRequest, opts ...grpc.CallOption) (*PhoneBinding, error)
+	FindAccountByPhone(ctx context.Context, in *FindAccountByPhoneRequest, opts ...grpc.CallOption) (*AccountLookup, error)
+	PromoteToDepartmentDoctor(ctx context.Context, in *PromoteToDepartmentDoctorRequest, opts ...grpc.CallOption) (*AuthorizationContext, error)
 	GetAuthorizationContext(ctx context.Context, in *GetAuthorizationContextRequest, opts ...grpc.CallOption) (*AuthorizationContext, error)
 	AssignRole(ctx context.Context, in *AssignRoleRequest, opts ...grpc.CallOption) (*AuthorizationContext, error)
 	ChangeStaffDepartment(ctx context.Context, in *ChangeStaffDepartmentRequest, opts ...grpc.CallOption) (*AuthorizationContext, error)
@@ -45,6 +53,46 @@ type identityServiceClient struct {
 
 func NewIdentityServiceClient(cc grpc.ClientConnInterface) IdentityServiceClient {
 	return &identityServiceClient{cc}
+}
+
+func (c *identityServiceClient) WeChatLogin(ctx context.Context, in *WeChatLoginRequest, opts ...grpc.CallOption) (*TokenPair, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TokenPair)
+	err := c.cc.Invoke(ctx, IdentityService_WeChatLogin_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) SetMyPhone(ctx context.Context, in *SetMyPhoneRequest, opts ...grpc.CallOption) (*PhoneBinding, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PhoneBinding)
+	err := c.cc.Invoke(ctx, IdentityService_SetMyPhone_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) FindAccountByPhone(ctx context.Context, in *FindAccountByPhoneRequest, opts ...grpc.CallOption) (*AccountLookup, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AccountLookup)
+	err := c.cc.Invoke(ctx, IdentityService_FindAccountByPhone_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) PromoteToDepartmentDoctor(ctx context.Context, in *PromoteToDepartmentDoctorRequest, opts ...grpc.CallOption) (*AuthorizationContext, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AuthorizationContext)
+	err := c.cc.Invoke(ctx, IdentityService_PromoteToDepartmentDoctor_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *identityServiceClient) GetAuthorizationContext(ctx context.Context, in *GetAuthorizationContextRequest, opts ...grpc.CallOption) (*AuthorizationContext, error) {
@@ -111,6 +159,10 @@ func (c *identityServiceClient) RevokeRefreshToken(ctx context.Context, in *Revo
 // All implementations must embed UnimplementedIdentityServiceServer
 // for forward compatibility.
 type IdentityServiceServer interface {
+	WeChatLogin(context.Context, *WeChatLoginRequest) (*TokenPair, error)
+	SetMyPhone(context.Context, *SetMyPhoneRequest) (*PhoneBinding, error)
+	FindAccountByPhone(context.Context, *FindAccountByPhoneRequest) (*AccountLookup, error)
+	PromoteToDepartmentDoctor(context.Context, *PromoteToDepartmentDoctorRequest) (*AuthorizationContext, error)
 	GetAuthorizationContext(context.Context, *GetAuthorizationContextRequest) (*AuthorizationContext, error)
 	AssignRole(context.Context, *AssignRoleRequest) (*AuthorizationContext, error)
 	ChangeStaffDepartment(context.Context, *ChangeStaffDepartmentRequest) (*AuthorizationContext, error)
@@ -127,6 +179,18 @@ type IdentityServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedIdentityServiceServer struct{}
 
+func (UnimplementedIdentityServiceServer) WeChatLogin(context.Context, *WeChatLoginRequest) (*TokenPair, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method WeChatLogin not implemented")
+}
+func (UnimplementedIdentityServiceServer) SetMyPhone(context.Context, *SetMyPhoneRequest) (*PhoneBinding, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetMyPhone not implemented")
+}
+func (UnimplementedIdentityServiceServer) FindAccountByPhone(context.Context, *FindAccountByPhoneRequest) (*AccountLookup, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindAccountByPhone not implemented")
+}
+func (UnimplementedIdentityServiceServer) PromoteToDepartmentDoctor(context.Context, *PromoteToDepartmentDoctorRequest) (*AuthorizationContext, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PromoteToDepartmentDoctor not implemented")
+}
 func (UnimplementedIdentityServiceServer) GetAuthorizationContext(context.Context, *GetAuthorizationContextRequest) (*AuthorizationContext, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAuthorizationContext not implemented")
 }
@@ -164,6 +228,78 @@ func RegisterIdentityServiceServer(s grpc.ServiceRegistrar, srv IdentityServiceS
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&IdentityService_ServiceDesc, srv)
+}
+
+func _IdentityService_WeChatLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(WeChatLoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).WeChatLogin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_WeChatLogin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).WeChatLogin(ctx, req.(*WeChatLoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_SetMyPhone_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetMyPhoneRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).SetMyPhone(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_SetMyPhone_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).SetMyPhone(ctx, req.(*SetMyPhoneRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_FindAccountByPhone_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FindAccountByPhoneRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).FindAccountByPhone(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_FindAccountByPhone_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).FindAccountByPhone(ctx, req.(*FindAccountByPhoneRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_PromoteToDepartmentDoctor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PromoteToDepartmentDoctorRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).PromoteToDepartmentDoctor(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_PromoteToDepartmentDoctor_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).PromoteToDepartmentDoctor(ctx, req.(*PromoteToDepartmentDoctorRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _IdentityService_GetAuthorizationContext_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -282,6 +418,22 @@ var IdentityService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*IdentityServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "WeChatLogin",
+			Handler:    _IdentityService_WeChatLogin_Handler,
+		},
+		{
+			MethodName: "SetMyPhone",
+			Handler:    _IdentityService_SetMyPhone_Handler,
+		},
+		{
+			MethodName: "FindAccountByPhone",
+			Handler:    _IdentityService_FindAccountByPhone_Handler,
+		},
+		{
+			MethodName: "PromoteToDepartmentDoctor",
+			Handler:    _IdentityService_PromoteToDepartmentDoctor_Handler,
+		},
+		{
 			MethodName: "GetAuthorizationContext",
 			Handler:    _IdentityService_GetAuthorizationContext_Handler,
 		},
@@ -307,5 +459,5 @@ var IdentityService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "contracts/proto/identity/v1/identity.proto",
+	Metadata: "identity.proto",
 }

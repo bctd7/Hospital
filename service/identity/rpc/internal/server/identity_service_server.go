@@ -7,7 +7,7 @@ package server
 import (
 	"context"
 
-	"hospital/contracts/gen/identity/v1"
+	identityv1 "hospital/contracts/gen/identity/v1"
 	"hospital/service/identity/rpc/internal/logic"
 	"hospital/service/identity/rpc/internal/svc"
 )
@@ -21,6 +21,26 @@ func NewIdentityServiceServer(svcCtx *svc.ServiceContext) *IdentityServiceServer
 	return &IdentityServiceServer{
 		svcCtx: svcCtx,
 	}
+}
+
+func (s *IdentityServiceServer) WeChatLogin(ctx context.Context, in *identityv1.WeChatLoginRequest) (*identityv1.TokenPair, error) {
+	l := logic.NewWeChatLoginLogic(ctx, s.svcCtx)
+	return l.WeChatLogin(in)
+}
+
+func (s *IdentityServiceServer) SetMyPhone(ctx context.Context, in *identityv1.SetMyPhoneRequest) (*identityv1.PhoneBinding, error) {
+	l := logic.NewSetMyPhoneLogic(ctx, s.svcCtx)
+	return l.SetMyPhone(in)
+}
+
+func (s *IdentityServiceServer) FindAccountByPhone(ctx context.Context, in *identityv1.FindAccountByPhoneRequest) (*identityv1.AccountLookup, error) {
+	l := logic.NewFindAccountByPhoneLogic(ctx, s.svcCtx)
+	return l.FindAccountByPhone(in)
+}
+
+func (s *IdentityServiceServer) PromoteToDepartmentDoctor(ctx context.Context, in *identityv1.PromoteToDepartmentDoctorRequest) (*identityv1.AuthorizationContext, error) {
+	l := logic.NewPromoteToDepartmentDoctorLogic(ctx, s.svcCtx)
+	return l.PromoteToDepartmentDoctor(in)
 }
 
 func (s *IdentityServiceServer) GetAuthorizationContext(ctx context.Context, in *identityv1.GetAuthorizationContextRequest) (*identityv1.AuthorizationContext, error) {

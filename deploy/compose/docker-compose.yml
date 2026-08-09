@@ -21,6 +21,7 @@ services:
       - mysql-data:/var/lib/mysql
       - ./mysql/init/001-create-service-databases.sh:/docker-entrypoint-initdb.d/001-create-service-databases.sh:ro
       - ../../migrations/identity/000001_identity_authorization.up.sql:/docker-entrypoint-initdb.d/100-identity-authorization.sql:ro
+      - ../../migrations/identity/000002_identity_login.up.sql:/docker-entrypoint-initdb.d/101-identity-login.sql:ro
     healthcheck:
       test:
         - CMD-SHELL

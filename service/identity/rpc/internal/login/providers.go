@@ -7,6 +7,7 @@ import (
 
 var (
 	ErrProviderNotConfigured = errors.New("login provider is not configured")
+	ErrProviderUnavailable   = errors.New("login provider is unavailable")
 	ErrInvalidCredential     = errors.New("login credential is invalid or expired")
 )
 

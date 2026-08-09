@@ -11,8 +11,10 @@ import (
 	redis "github.com/redis/go-redis/v9"
 
 	"hospital/common/authn"
+	"hospital/service/identity/rpc/internal/account"
 	"hospital/service/identity/rpc/internal/authorization"
 	"hospital/service/identity/rpc/internal/config"
+	"hospital/service/identity/rpc/internal/login"
 	"hospital/service/identity/rpc/internal/repository"
 	"hospital/service/identity/rpc/internal/session"
 )
@@ -20,6 +22,7 @@ import (
 type ServiceContext struct {
 	Config               config.Config
 	AuthorizationManager *authorization.Manager
+	AccountManager       *account.Manager
 	SessionManager       *session.Manager
 	TokenManager         *authn.TokenManager
 	identityStore        *repository.MySQLStore
@@ -74,9 +77,28 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		store.Close()
 		return nil, fmt.Errorf("create identity session manager: %w", err)
 	}
+	phoneLookupKey, err := base64.StdEncoding.DecodeString(c.PhoneLookupKeyBase64)
+	if err != nil {
+		redisClient.Close()
+		store.Close()
+		return nil, fmt.Errorf("decode identity phone lookup key: %w", err)
+	}
+	accountManager, err := account.NewManager(
+		store,
+		login.NewWeChatClient(c.WeChat.AppID, c.WeChat.AppSecret, c.WeChat.Code2SessionURL, nil),
+		sessionManager,
+		c.WeChat.AppID,
+		phoneLookupKey,
+	)
+	if err != nil {
+		redisClient.Close()
+		store.Close()
+		return nil, fmt.Errorf("create identity account manager: %w", err)
+	}
 	return &ServiceContext{
 		Config: c, identityStore: store, redisClient: redisClient, TokenManager: tokenManager,
 		AuthorizationManager: authorization.NewManager(store),
+		AccountManager:       accountManager,
 		SessionManager:       sessionManager,
 	}, nil
 }

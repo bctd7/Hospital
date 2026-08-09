@@ -7,26 +7,40 @@ type (
 		LoginCode string `json:"login_code"`
 	}
 
-	BindWeChatPhoneRequest {
-		PhoneCode string `json:"phone_code"`
+	CurrentIdentityResponse {
+		AccountID            string   `json:"account_id"`
+		AccountType          string   `json:"account_type"`
+		Status               string   `json:"status"`
+		Roles                []string `json:"roles"`
+		DepartmentID         string   `json:"department_id,optional"`
+		Permissions          []string `json:"permissions"`
+		AuthorizationVersion int64    `json:"authorization_version"`
 	}
 
-	SendSMSCodeRequest {
-		Phone   string `json:"phone"`
-		Purpose string `json:"purpose,options=login|bind_phone|recover_account"`
-	}
-
-	SMSLoginRequest {
+	SetPhoneRequest {
 		Phone string `json:"phone"`
-		Code  string `json:"code"`
 	}
 
-	BindPhoneResponse {
-		MaskedPhone string `json:"masked_phone"`
+	PhoneBindingResponse {
+		PhoneMasked       string `json:"phone_masked"`
+		VerificationStatus string `json:"verification_status"`
+		VerificationSource string `json:"verification_source"`
 	}
 
-	SendSMSCodeResponse {
-		RetryAfterSeconds int64 `json:"retry_after_seconds"`
+	SearchAccountByPhoneRequest {
+		Phone string `json:"phone"`
+	}
+
+	SearchAccountByPhoneResponse {
+		Identity CurrentIdentityResponse `json:"identity"`
+		Phone    PhoneBindingResponse    `json:"phone"`
+	}
+
+	PromoteDoctorRequest {
+		AccountID       string `json:"account_id"`
+		DepartmentID    string `json:"department_id"`
+		OfflineVerified bool   `json:"offline_verified"`
+		OperationID     string `json:"operation_id"`
 	}
 )
 
@@ -37,14 +51,30 @@ type (
 service app-api {
 	@handler weChatLogin
 	post /auth/wechat/login (WeChatLoginRequest) returns (TokenResponse)
+}
 
-	@handler bindWeChatPhone
-	post /auth/wechat/phone (BindWeChatPhoneRequest) returns (BindPhoneResponse)
+@server (
+	prefix:     /api/v1
+	group:      auth
+	middleware: AccessToken
+)
+service app-api {
+	@handler currentIdentity
+	get /auth/me returns (CurrentIdentityResponse)
 
-	@handler sendSMSCode
-	post /auth/sms/code (SendSMSCodeRequest) returns (SendSMSCodeResponse)
+	@handler setMyPhone
+	put /auth/me/phone (SetPhoneRequest) returns (PhoneBindingResponse)
+}
 
-	@handler smsLogin
-	post /auth/sms/login (SMSLoginRequest) returns (TokenResponse)
+@server (
+	prefix:     /api/v1
+	group:      identityadmin
+	middleware: AccessToken
+)
+service app-api {
+	@handler searchAccountByPhone
+	post /admin/identity/accounts/search-by-phone (SearchAccountByPhoneRequest) returns (SearchAccountByPhoneResponse)
 
+	@handler promoteDoctor
+	post /admin/identity/doctors/promote (PromoteDoctorRequest) returns (CurrentIdentityResponse)
 }

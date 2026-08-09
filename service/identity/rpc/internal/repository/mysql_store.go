@@ -9,15 +9,139 @@ import (
 	"sort"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
+	mysql "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 
 	"hospital/common/authn"
+	"hospital/service/identity/rpc/internal/account"
 	"hospital/service/identity/rpc/internal/authorization"
 )
 
 type MySQLStore struct {
 	db *sql.DB
+}
+
+func (s *MySQLStore) FindOrCreateWeChatAccount(ctx context.Context, appID, openID string) (string, error) {
+	if appID == "" || openID == "" {
+		return "", account.ErrInvalidExternalIdentity
+	}
+	var accountID string
+	err := s.db.QueryRowContext(ctx, `
+SELECT account_id
+FROM identity_external_identities
+WHERE provider = 'wechat' AND provider_app_id = ? AND provider_subject = ?`, appID, openID).Scan(&accountID)
+	if err == nil {
+		return accountID, nil
+	}
+	if !errors.Is(err, sql.ErrNoRows) {
+		return "", fmt.Errorf("find wechat identity: %w", err)
+	}
+
+	accountID = uuid.NewString()
+	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
+	if err != nil {
+		return "", fmt.Errorf("begin wechat registration: %w", err)
+	}
+	defer tx.Rollback()
+	if _, err := tx.ExecContext(ctx, `
+INSERT INTO identity_accounts (id, account_type, status)
+VALUES (?, 'patient', 'active')`, accountID); err != nil {
+		return "", fmt.Errorf("create patient account: %w", err)
+	}
+	if _, err := tx.ExecContext(ctx, `
+INSERT INTO identity_external_identities
+    (id, account_id, provider, provider_app_id, provider_subject)
+VALUES (?, ?, 'wechat', ?, ?)`, uuid.NewString(), accountID, appID, openID); err != nil {
+		if isDuplicateEntry(err) {
+			_ = tx.Rollback()
+			return s.findWeChatAccount(ctx, appID, openID)
+		}
+		return "", fmt.Errorf("bind wechat identity: %w", err)
+	}
+	if err := tx.Commit(); err != nil {
+		return "", fmt.Errorf("commit wechat registration: %w", err)
+	}
+	return accountID, nil
+}
+
+func (s *MySQLStore) findWeChatAccount(ctx context.Context, appID, openID string) (string, error) {
+	var accountID string
+	err := s.db.QueryRowContext(ctx, `
+SELECT account_id
+FROM identity_external_identities
+WHERE provider = 'wechat' AND provider_app_id = ? AND provider_subject = ?`, appID, openID).Scan(&accountID)
+	if err != nil {
+		return "", fmt.Errorf("find concurrent wechat registration: %w", err)
+	}
+	return accountID, nil
+}
+
+func (s *MySQLStore) SetSelfReportedPhone(ctx context.Context, accountID string, fingerprint []byte, masked string) (account.PhoneBinding, error) {
+	result, err := s.db.ExecContext(ctx, `
+UPDATE identity_account_phones
+SET phone_fingerprint = ?, phone_masked = ?, verification_status = 'self_reported',
+    verification_source = 'self_reported', verified_at = NULL,
+    updated_at = CURRENT_TIMESTAMP(3)
+WHERE account_id = ?`, fingerprint, masked, accountID)
+	if err != nil {
+		if isDuplicateEntry(err) {
+			return account.PhoneBinding{}, account.ErrPhoneInUse
+		}
+		return account.PhoneBinding{}, fmt.Errorf("save self-reported phone: %w", err)
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return account.PhoneBinding{}, fmt.Errorf("read phone update result: %w", err)
+	}
+	if affected == 0 {
+		var exists bool
+		if err := s.db.QueryRowContext(ctx, `
+SELECT EXISTS(SELECT 1 FROM identity_account_phones WHERE account_id = ?)`, accountID).Scan(&exists); err != nil {
+			return account.PhoneBinding{}, fmt.Errorf("check existing phone binding: %w", err)
+		}
+		if exists {
+			return account.PhoneBinding{
+				Masked: masked, VerificationStatus: account.PhoneStatusSelfReported,
+				VerificationSource: account.PhoneSourceSelfReported,
+			}, nil
+		}
+		_, err = s.db.ExecContext(ctx, `
+INSERT INTO identity_account_phones
+    (account_id, phone_fingerprint, phone_masked, verification_status, verification_source, verified_at)
+VALUES (?, ?, ?, 'self_reported', 'self_reported', NULL)`, accountID, fingerprint, masked)
+		if err != nil {
+			if isDuplicateEntry(err) {
+				return account.PhoneBinding{}, account.ErrPhoneInUse
+			}
+			return account.PhoneBinding{}, fmt.Errorf("insert self-reported phone: %w", err)
+		}
+	}
+	return account.PhoneBinding{
+		Masked: masked, VerificationStatus: account.PhoneStatusSelfReported,
+		VerificationSource: account.PhoneSourceSelfReported,
+	}, nil
+}
+
+func (s *MySQLStore) FindAccountByPhone(ctx context.Context, fingerprint []byte) (account.Lookup, error) {
+	var accountID string
+	var binding account.PhoneBinding
+	err := s.db.QueryRowContext(ctx, `
+SELECT account_id, phone_masked, verification_status, verification_source
+FROM identity_account_phones
+WHERE phone_fingerprint = ?`, fingerprint).Scan(
+		&accountID, &binding.Masked, &binding.VerificationStatus, &binding.VerificationSource,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return account.Lookup{}, authorization.ErrNotFound
+	}
+	if err != nil {
+		return account.Lookup{}, fmt.Errorf("find account by phone: %w", err)
+	}
+	principal, err := s.GetAuthorizationContext(ctx, accountID)
+	if err != nil {
+		return account.Lookup{}, err
+	}
+	return account.Lookup{Principal: principal, Phone: binding}, nil
 }
 
 func NewMySQLStore(dataSource string) (*MySQLStore, error) {
@@ -124,6 +248,75 @@ WHERE id = ?`, status, accountID)
 		return fmt.Errorf("change identity account status: %w", err)
 	}
 	return requireAffected(result, "account")
+}
+
+func (s *mysqlTxStore) PromoteToDepartmentDoctor(ctx context.Context, accountID, departmentID string, verifyPhone bool) error {
+	var departmentExists bool
+	if err := s.tx.QueryRowContext(ctx, `
+SELECT EXISTS(
+    SELECT 1 FROM identity_departments WHERE id = ? AND status = 'active'
+)`, departmentID).Scan(&departmentExists); err != nil {
+		return fmt.Errorf("check doctor department: %w", err)
+	}
+	if !departmentExists {
+		return fmt.Errorf("%w: active department", authorization.ErrNotFound)
+	}
+
+	var phoneStatus string
+	if err := s.tx.QueryRowContext(ctx, `
+SELECT verification_status
+FROM identity_account_phones
+WHERE account_id = ?
+FOR UPDATE`, accountID).Scan(&phoneStatus); errors.Is(err, sql.ErrNoRows) {
+		return fmt.Errorf("%w: account phone", authorization.ErrNotFound)
+	} else if err != nil {
+		return fmt.Errorf("lock doctor phone: %w", err)
+	}
+	if phoneStatus != account.PhoneStatusVerified && !verifyPhone {
+		return fmt.Errorf("%w: phone verification is required", authorization.ErrInvalid)
+	}
+	if verifyPhone {
+		if _, err := s.tx.ExecContext(ctx, `
+UPDATE identity_account_phones
+SET verification_status = 'verified', verification_source = 'admin',
+    verified_at = CURRENT_TIMESTAMP(3), updated_at = CURRENT_TIMESTAMP(3)
+WHERE account_id = ?`, accountID); err != nil {
+			return fmt.Errorf("verify doctor phone: %w", err)
+		}
+	}
+
+	if _, err := s.tx.ExecContext(ctx, `
+UPDATE identity_accounts
+SET account_type = 'staff', authorization_version = authorization_version + 1,
+    updated_at = CURRENT_TIMESTAMP(3)
+WHERE id = ?`, accountID); err != nil {
+		return fmt.Errorf("promote staff account: %w", err)
+	}
+	if _, err := s.tx.ExecContext(ctx, `
+INSERT INTO identity_staff_profiles (account_id, department_id)
+VALUES (?, ?)
+ON DUPLICATE KEY UPDATE department_id = VALUES(department_id), updated_at = CURRENT_TIMESTAMP(3)`, accountID, departmentID); err != nil {
+		return fmt.Errorf("save doctor department: %w", err)
+	}
+	_, err := s.tx.ExecContext(ctx, `
+INSERT INTO identity_account_roles (account_id, role_id)
+SELECT ?, id FROM identity_roles WHERE code = 'department_doctor' AND status = 'active'
+ON DUPLICATE KEY UPDATE role_id = VALUES(role_id), created_at = CURRENT_TIMESTAMP(3)`, accountID)
+	if err != nil {
+		return fmt.Errorf("assign department doctor role: %w", err)
+	}
+	var roleCode string
+	if err := s.tx.QueryRowContext(ctx, `
+SELECT r.code
+FROM identity_account_roles ar
+JOIN identity_roles r ON r.id = ar.role_id
+WHERE ar.account_id = ?`, accountID).Scan(&roleCode); err != nil {
+		return fmt.Errorf("verify department doctor role: %w", err)
+	}
+	if roleCode != authn.RoleDepartmentDoctor {
+		return fmt.Errorf("%w: active department doctor role", authorization.ErrNotFound)
+	}
+	return nil
 }
 
 func (s *mysqlTxStore) RecordChange(ctx context.Context, change authorization.Change) error {
@@ -258,4 +451,9 @@ func requireAffected(result sql.Result, resource string) error {
 		return fmt.Errorf("%w: %s", authorization.ErrNotFound, resource)
 	}
 	return nil
+}
+
+func isDuplicateEntry(err error) bool {
+	var mysqlErr *mysql.MySQLError
+	return errors.As(err, &mysqlErr) && mysqlErr.Number == 1062
 }

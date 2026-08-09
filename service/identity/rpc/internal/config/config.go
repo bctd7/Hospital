@@ -21,4 +21,10 @@ type Config struct {
 		AccessTTLSeconds       int64 `json:",default=900"`
 		RefreshTTLSeconds      int64 `json:",default=2592000"`
 	}
+	WeChat struct {
+		AppID           string `json:",optional"`
+		AppSecret       string `json:",optional"`
+		Code2SessionURL string `json:",default=https://api.weixin.qq.com/sns/jscode2session"`
+	}
+	PhoneLookupKeyBase64 string
 }

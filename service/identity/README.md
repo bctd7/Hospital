@@ -51,3 +51,15 @@ go run ./service/identity/rpc -f service/identity/rpc/etc/identity-rpc.yaml
 - 多设备会话列表与一键退出全部设备；
 - 普通 Access Token 的即时撤销；
 - 多级权限审批、临时授权和多科室任职。
+
+## 微信注册与医生开通
+
+当前版本已经开放真实微信基础登录：
+
+- `POST /api/v1/auth/wechat/login` 使用 `wx.login` code 换取 OpenID；
+- 新 OpenID 自动创建患者账号并签发 Access Token 与 Refresh Token；
+- `GET /api/v1/auth/me` 返回当前 Token 中的账号类型、角色、科室和权限；
+- `PUT /api/v1/auth/me/phone` 登记自报手机号，数据库只保存 HMAC 指纹和脱敏号码；
+- 超级管理员可以按完整手机号精确查找账号，并在线下确认后开通为指定科室医生。
+
+个人主体无法依赖微信手机号快捷验证，因此 `self_reported` 手机号不能单独证明医生身份。完整规则和接口见 `plan/05-wechat-registration-and-doctor-onboarding.md`。

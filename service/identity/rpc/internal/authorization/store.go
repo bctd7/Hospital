@@ -40,5 +40,6 @@ type TxStore interface {
 	SetRole(ctx context.Context, accountID, roleCode string) error
 	SetDepartment(ctx context.Context, accountID, departmentID string) error
 	SetAccountStatus(ctx context.Context, accountID, status string) error
+	PromoteToDepartmentDoctor(ctx context.Context, accountID, departmentID string, verifyPhone bool) error
 	RecordChange(ctx context.Context, change Change) error
 }

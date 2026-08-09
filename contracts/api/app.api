@@ -1,6 +1,6 @@
 syntax = "v1"
 
-import "identity-session.api"
+import "identity-auth.api"
 
 info (
 	title:   "Hospital App API"

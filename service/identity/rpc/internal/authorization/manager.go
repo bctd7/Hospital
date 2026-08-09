@@ -17,10 +17,34 @@ const (
 	ActionRoleAssigned         = "identity.role.assigned"
 	ActionDepartmentChanged    = "identity.department.changed"
 	ActionAccountStatusChanged = "identity.account.status_changed"
+	ActionDoctorPromoted       = "identity.doctor.promoted"
 )
 
 type Manager struct {
 	store Store
+}
+
+func (m *Manager) PromoteToDepartmentDoctor(
+	ctx context.Context,
+	operatorID, targetID, departmentID string,
+	offlineVerified bool,
+	operationID, requestID string,
+) (authn.Principal, error) {
+	if !offlineVerified {
+		return authn.Principal{}, fmt.Errorf("%w: offline identity verification is required", ErrInvalid)
+	}
+	if err := validateID(departmentID, "department_id"); err != nil {
+		return authn.Principal{}, err
+	}
+	return m.change(ctx, operatorID, targetID, operationID, requestID, ActionDoctorPromoted, func(tx TxStore, target authn.Principal) error {
+		if target.Status != authn.AccountStatusActive {
+			return fmt.Errorf("%w: only active accounts can be promoted", ErrInvalid)
+		}
+		if target.HasRole(authn.RoleSuperAdmin) {
+			return fmt.Errorf("%w: super administrator cannot be promoted to doctor", ErrForbidden)
+		}
+		return tx.PromoteToDepartmentDoctor(ctx, targetID, departmentID, true)
+	})
 }
 
 func NewManager(store Store) *Manager {

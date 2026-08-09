@@ -5,12 +5,50 @@ package hospital.identity.v1;
 option go_package = "hospital/contracts/gen/identity/v1;identityv1";
 
 service IdentityService {
+  rpc WeChatLogin(WeChatLoginRequest) returns (TokenPair);
+  rpc SetMyPhone(SetMyPhoneRequest) returns (PhoneBinding);
+  rpc FindAccountByPhone(FindAccountByPhoneRequest) returns (AccountLookup);
+  rpc PromoteToDepartmentDoctor(PromoteToDepartmentDoctorRequest) returns (AuthorizationContext);
   rpc GetAuthorizationContext(GetAuthorizationContextRequest) returns (AuthorizationContext);
   rpc AssignRole(AssignRoleRequest) returns (AuthorizationContext);
   rpc ChangeStaffDepartment(ChangeStaffDepartmentRequest) returns (AuthorizationContext);
   rpc ChangeAccountStatus(ChangeAccountStatusRequest) returns (AuthorizationContext);
   rpc RefreshAccessToken(RefreshAccessTokenRequest) returns (TokenPair);
   rpc RevokeRefreshToken(RevokeRefreshTokenRequest) returns (RevokeRefreshTokenResponse);
+}
+
+message WeChatLoginRequest {
+  string login_code = 1;
+  string request_id = 2;
+}
+
+message SetMyPhoneRequest {
+  string phone = 1;
+  string request_id = 2;
+}
+
+message PhoneBinding {
+  string phone_masked = 1;
+  string verification_status = 2;
+  string verification_source = 3;
+}
+
+message FindAccountByPhoneRequest {
+  string phone = 1;
+  string request_id = 2;
+}
+
+message AccountLookup {
+  AuthorizationContext authorization = 1;
+  PhoneBinding phone = 2;
+}
+
+message PromoteToDepartmentDoctorRequest {
+  string target_account_id = 1;
+  string department_id = 2;
+  bool offline_verified = 3;
+  string operation_id = 4;
+  string request_id = 5;
 }
 
 message GetAuthorizationContextRequest {

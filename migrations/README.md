@@ -11,7 +11,12 @@ migrations/
     └── 000001_init.down.sql
 ```
 
-当前已经建立 `identity/000001_identity_authorization`，用于 Identity Service 的账号授权事实、审计和 Outbox。正式迁移工具仍需在 Goose、Atlas 或 golang-migrate 中确定一个；本地全新 MySQL 卷会通过 Compose 初始化脚本执行首个迁移。
+当前已经建立：
+
+- `identity/000001_identity_authorization`：账号授权事实、审计和 Outbox；
+- `identity/000002_identity_login`：微信外部身份绑定和用户自报手机号。
+
+正式迁移工具仍需在 Goose、Atlas 或 golang-migrate 中确定一个；本地全新 MySQL 卷会通过 Compose 初始化脚本按编号执行迁移。
 
 约束：
 

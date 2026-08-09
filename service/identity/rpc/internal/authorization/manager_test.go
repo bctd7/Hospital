@@ -61,6 +61,36 @@ func TestAuthorizationChangeRejectsSelfMutation(t *testing.T) {
 	}
 }
 
+func TestPromoteToDepartmentDoctorRequiresOfflineVerification(t *testing.T) {
+	store := newFakeStore()
+	manager := NewManager(store)
+	_, err := manager.PromoteToDepartmentDoctor(
+		context.Background(), adminID, doctorID, departmentB, false, operationOne, "request-1",
+	)
+	if !errors.Is(err, ErrInvalid) {
+		t.Fatalf("expected invalid offline verification, got %v", err)
+	}
+}
+
+func TestPromoteToDepartmentDoctorSetsStaffRoleAndDepartment(t *testing.T) {
+	store := newFakeStore()
+	patient := store.principals[doctorID]
+	patient.AccountType = authn.AccountTypePatient
+	patient.Roles = nil
+	patient.DepartmentID = ""
+	store.principals[doctorID] = patient
+	manager := NewManager(store)
+	result, err := manager.PromoteToDepartmentDoctor(
+		context.Background(), adminID, doctorID, departmentB, true, operationOne, "request-1",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.AccountType != authn.AccountTypeStaff || !result.HasRole(authn.RoleDepartmentDoctor) || result.DepartmentID != departmentB {
+		t.Fatalf("unexpected promoted identity: %#v", result)
+	}
+}
+
 type fakeStore struct {
 	mu         sync.Mutex
 	principals map[string]authn.Principal
@@ -133,6 +163,16 @@ func (s *fakeStore) SetAccountStatus(_ context.Context, accountID, status string
 		return ErrNotFound
 	}
 	principal.Status = status
+	principal.AuthorizationVersion++
+	s.principals[accountID] = principal
+	return nil
+}
+
+func (s *fakeStore) PromoteToDepartmentDoctor(_ context.Context, accountID, departmentID string, _ bool) error {
+	principal := s.principals[accountID]
+	principal.AccountType = authn.AccountTypeStaff
+	principal.DepartmentID = departmentID
+	principal.Roles = []string{authn.RoleDepartmentDoctor}
 	principal.AuthorizationVersion++
 	s.principals[accountID] = principal
 	return nil

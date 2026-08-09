@@ -91,6 +91,10 @@ func (deniedAuthorizationStore) SetAccountStatus(context.Context, string, string
 	panic("SetAccountStatus must not be called for a denied operator")
 }
 
+func (deniedAuthorizationStore) PromoteToDepartmentDoctor(context.Context, string, string, bool) error {
+	panic("PromoteToDepartmentDoctor must not be called for a denied operator")
+}
+
 func (deniedAuthorizationStore) RecordChange(context.Context, authorization.Change) error {
 	panic("RecordChange must not be called for a denied operator")
 }
