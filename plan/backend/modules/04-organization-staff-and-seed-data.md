@@ -17,8 +17,8 @@
 
 本阶段先建立以下业务基础：
 
-1. 单医院下院区、科室的稳定组织层级；
-2. 超级管理员新增、修改、停用和恢复组织单元；
+1. 单医院下多个院区及其直属科室的稳定组织层级；
+2. 超级管理员新增、修改、停用和恢复院区、科室；医院根节点只读展示；
 3. 超级管理员将已注册账号开通为医生、维护任职科室和撤销医生身份；
 4. 为所有用户提供同源的公共科室和医生目录，为超级管理员提供维护接口；
 5. 为本地开发提供可重复导入、不会进入生产环境的 mock 数据。
@@ -30,8 +30,8 @@
 
 ### 2.1 本期实现
 
-- 一个医院及其院区、科室组成的树状组织；
-- 组织单元列表、详情、新增、修改、停用和恢复；
+- 一个医院、多个院区和院区直属科室组成的三层组织；
+- 医院基本信息公共只读展示，院区和科室支持列表、详情、新增、修改、停用和恢复；
 - 所有用户都可以动态查询科室目录和科室下的医生列表；
 - 超级管理员可以分页查询用户并查看最小必要的账号、身份和科室信息；
 - 按完整手机号精确查找已经注册的账号；
@@ -54,6 +54,8 @@
 - 从医院 HR、HIS 或统一身份系统自动同步；
 - 批量导入真实生产数据；
 - 科室合并、拆分和历史数据迁移工具；
+- 多医院切换、创建第二个医院、在小程序中修改医院根节点；
+- 子科室以及任意深度组织树；
 - 超级管理员任意修改手机号、昵称或物理删除账号的通用账号 CRUD。
 
 首版规模下不单独建立医疗人员目录。医生姓名、头像 URL、`description` 等变化频率较低的展示字段
@@ -87,9 +89,9 @@
 | `version` | 管理修改使用的乐观锁版本 |
 | `created_at`、`updated_at` | 创建和修改时间 |
 
-首期只允许存在一个医院根节点，不支持多医院或租户切换。医院下面建立院区，院区下面建立科室。
-科室如确有上下级需要，可以允许科室下面建立子科室，但不能出现循环引用，也不能将医院挂在科室
-下面。医院根节点由部署初始化，管理员可以修改基本信息，但不能创建第二个医院或删除医院根节点。
+首期只允许存在一个医院根节点，不支持多医院或租户切换。医院下面可以建立多个院区，科室必须
+直接挂在某个院区下；首期明确禁止科室下再建子科室，也不支持任意层级移动。医院根节点由部署初始化，
+小程序只读取并展示其名称等基本信息，不提供创建、修改、停用或删除医院根节点的管理能力。
 
 其他服务只保存组织单元 ID 和必要历史快照，不直接读写 Identity 数据库。例如预约可以保存
 `department_id` 以及预约时的科室名称快照，但科室主数据只有 Identity 可以修改。
@@ -196,24 +198,24 @@ appointment_slot_reservations  预约对具体时段容量的占用
 - 新增接口首期只接受 `campus` 和 `department`；
 - `unit_type` 必须与父节点类型匹配；
 - 同一父节点下编码不得重复；
-- 超级管理员小程序首版不录入编码。创建 `department` 时由服务端生成稳定且同一父节点下唯一的
+- 超级管理员小程序首版不录入编码。创建 `campus` 或 `department` 时由服务端生成稳定且同一父节点下唯一的
   `code`，并在响应中返回；后续接入人工编码或 HIS 编码前，不得要求当前页面补传该字段；
 - 名称允许以后修改，业务引用必须使用 ID；
 - 请求携带 `operation_id`，重复提交返回同一个操作结果。
 
 ### 4.2 修改
 
-首期允许修改名称和展示属性。以下变更需要限制：
+首期允许修改院区和科室名称；科室可以显式调整到另一个有效院区。以下变更需要限制：
 
 - 已被引用的稳定 ID 永远不能修改；
 - 已进入业务使用的组织编码原则上不修改；
-- 不允许移动后造成层级循环；
+- 院区不允许移动父节点，科室目标父节点必须是有效院区；
 - 当前只有一个医院，不提供跨医院移动和医院切换；
 - 修改名称不反向覆盖历史预约中的名称快照。
 
 ### 4.3 删除、停用和恢复
 
-超级管理员小程序页面的“删除科室”首期采用停用语义，不物理删除业务主数据：
+超级管理员小程序页面的“删除院区/科室”首期采用停用语义，不物理删除业务主数据：
 
 ```text
 DELETE 组织单元
@@ -224,10 +226,10 @@ DELETE 组织单元
   -> 写审计、Outbox 并提升受影响授权版本
 ```
 
-- 有有效子科室时必须先处理子节点；
-- 有有效医生时必须先调岗或撤销任职；
+- 院区有有效直属科室时必须先处理科室；
+- 科室有有效医生时必须先调岗或撤销任职；
 - 被预约、报告等历史业务引用不阻止停用，但禁止物理删除；
-- 停用后不能创建新的业务关联，历史查询仍能识别原科室；
+- 停用后不能创建新的业务关联，历史查询仍能识别原院区或科室；
 - 恢复时父级必须仍然有效。
 
 仅本地 mock 数据可以通过专用的本地数据重置流程清理，生产管理接口不提供级联物理删除。
@@ -328,14 +330,14 @@ HMAC Key 和验证信息不得进入普通日志。
 
 | 能力 | 授权规则 |
 |---|---|
-| 查看有效科室及科室内医生 | 所有人可访问公共只读接口，不要求医生或管理员权限 |
-| 新增、修改、停用和恢复部门 | `identity.department.manage` |
+| 查看医院、有效院区、有效科室及科室内医生 | 所有人可访问公共只读接口，不要求医生或管理员权限 |
+| 新增、修改、停用和恢复院区、科室 | `identity.department.manage` |
 | 查询管理员用户列表和详情 | `identity.authorization.manage` 或 `identity.account.manage` |
 | 开通、调岗和撤销医生身份 | `identity.authorization.manage` |
 | 禁用和恢复普通账号 | `identity.account.manage`，不属于部门目录操作 |
 
-患者、医生、超级管理员以及未登录访客调用同一组公共只读目录接口，获得相同结构的有效科室和有效
-医生数据。公共查询不授予任何写权限；所有新增、修改、停用、恢复、调岗和撤销操作仍只允许超级
+患者、医生、超级管理员以及未登录访客调用同一组公共只读目录接口，获得相同的医院、有效院区、
+有效科室和有效医生数据。公共查询不授予任何写权限；所有新增、修改、停用、恢复、调岗和撤销操作仍只允许超级
 管理员按 permission 执行。公共接口需要限流和缓存，但不要求 `department_doctor` 或
 `super_admin` 身份。
 
@@ -356,9 +358,25 @@ HMAC Key 和验证信息不得进入普通日志。
 ### 7.1 共用响应对象
 
 ```text
+HospitalSummary
+  hospital_id: string
+  code: string
+  name: string
+  version: integer
+
+CampusSummary
+  campus_id: string
+  hospital_id: string
+  code: string
+  name: string
+  department_count: integer
+  status: active | disabled
+  version: integer
+
 DepartmentSummary
   department_id: string
-  parent_id?: string
+  campus_id: string
+  campus_name: string
   code: string
   name: string
   doctor_count: integer
@@ -371,6 +389,17 @@ DoctorSummary
   department_id: string
   avatar_url?: string
   description?: string
+  version: integer
+
+AdminOrganizationUnit
+  unit_id: string
+  parent_id?: string
+  unit_type: campus | department
+  code: string
+  name: string
+  status: active | disabled
+  child_count: integer
+  doctor_count: integer
   version: integer
 
 AdminAccountSummary
@@ -396,7 +425,8 @@ AdminAccountDetail extends AdminAccountSummary
   updated_at: RFC3339 string
 ```
 
-`doctor_id` 首期直接使用稳定 `account_id`。`DepartmentSummary.status` 在公共接口中固定为 `active`，仍
+`doctor_id` 首期直接使用稳定 `account_id`。`CampusSummary.status` 和 `DepartmentSummary.status` 在
+公共接口中固定为 `active`，仍
 必须返回，以便公共目录和管理员列表复用同一前端类型。可选字符串无值时应省略，不得用空字符串或
 `null` 伪造已填写数据；数组必须返回空数组而不是 `null`。
 
@@ -415,30 +445,35 @@ PUT /api/v1/auth/me/display-profile
 `identity_account_profiles`；昵称修改提升 `management_version`，但不提升 `authorization_version`
 或使 Token 失效。返回值不得把昵称描述为真实姓名。
 
-### 7.3 公共科室与医生目录
+### 7.3 公共医院、院区、科室与医生目录
 
 ```http
-GET /api/v1/directory/departments
+GET /api/v1/directory/organization-context
+GET /api/v1/directory/departments?campus_id=:campusId
 GET /api/v1/directory/departments/:departmentId/doctors?page=1&page_size=20
 ```
 
-- 科室响应为 `{ "items": DepartmentSummary[] }`，只包含有效 `department`；
+- 组织上下文响应为 `{ "hospital": HospitalSummary, "campuses": CampusSummary[] }`，医院为唯一根节点，
+  院区只包含有效 `campus`；如果医院根节点不存在或不可用，返回服务端配置错误而不是伪造名称；
+- 科室响应为 `{ "items": DepartmentSummary[] }`，`campus_id` 必填且只返回该有效院区下的有效
+  `department`；缺失或非法 `campus_id` 返回 `400`，院区不存在或已停用返回 `404`；
 - 医生响应为 `{ "items": DoctorSummary[], "page": 1, "page_size": 20, "total": 0 }`，只包含账号正常、
   医生档案有效且属于目标科室的医生；
-- 两个接口允许所有人查询，不要求工作人员或管理员权限；
+- 三个接口允许所有人查询，不要求工作人员或管理员权限；
 - `doctor_count` 必须与相同过滤条件下医生分页接口的 `total` 一致；
 - 科室 `version` 来自组织单元版本，医生 `version` 来自账号 `management_version`；
 - `page` 从 1 开始，默认 `page_size=20`，服务端限制最大值；非法分页参数返回 `400`；
-- 部门数量使用聚合查询，医生列表使用 `department_id` 分页索引，禁止逐部门 N+1 查询；
-- 排序必须稳定：部门按编码和 ID，医生按显示名称、工号和账号 ID 兜底。
+- `department_count` 只统计院区下的有效科室；部门数量使用聚合查询，医生列表使用
+  `department_id` 分页索引，禁止逐院区、逐部门 N+1 查询；
+- 排序必须稳定：院区、部门按编码和 ID，医生按显示名称、工号和账号 ID 兜底。
 
 前端按部门懒加载医生，不要求后端一次返回全部医生。开发 seed 必须先写入本地数据库再通过同一接口
 返回。接口不得返回手机号、OpenID、Token、角色、账号状态、审计信息或其他管理员字段。
 
-### 7.4 超级管理员部门接口
+### 7.4 超级管理员院区与科室接口
 
 ```http
-GET    /api/v1/admin/identity/organization-units?unit_type=department&status=all
+GET    /api/v1/admin/identity/organization-units?unit_type=campus|department&parent_id=&status=all
 GET    /api/v1/admin/identity/organization-units/:unitId
 POST   /api/v1/admin/identity/organization-units
 PUT    /api/v1/admin/identity/organization-units/:unitId
@@ -446,16 +481,18 @@ DELETE /api/v1/admin/identity/organization-units/:unitId
 POST   /api/v1/admin/identity/organization-units/:unitId/enable
 ```
 
-页面使用的 `unit_type=department` 列表必须返回平铺的 `{ "items": DepartmentSummary[] }`，不能混入
-医院或院区节点，也不能改成树形响应。`status` 支持 `active`、`disabled`、`all`，默认 `active`；
-管理员列表中的 `doctor_count` 只统计有效医生。详情及所有写操作返回最新 `DepartmentSummary`。
+列表返回平铺的 `{ "items": AdminOrganizationUnit[] }`，不返回整棵树。`unit_type` 必须明确为
+`campus` 或 `department`，不能查询或管理医院根节点；查询科室时 `parent_id` 必须是院区 ID。
+`status` 支持 `active`、`disabled`、`all`，默认 `active`。院区的 `child_count` 统计有效直属科室，
+科室的 `doctor_count` 统计有效医生；不适用的计数字段返回 `0`。详情及所有写操作返回最新
+`AdminOrganizationUnit`。
 
 请求体固定为：
 
 ```text
 POST /organization-units
-  unit_type: department
-  parent_id?: string
+  unit_type: campus | department
+  parent_id: string
   name: string
   operation_id: UUID
 
@@ -471,14 +508,16 @@ POST /organization-units/:unitId/enable
   operation_id: UUID
 ```
 
-首版页面不录入 `code`，服务端创建时生成并返回稳定唯一编码；编辑接口不得修改 ID、`unit_type` 或
-`code`。`parent_id` 未提交时，仅在系统存在唯一有效默认院区时自动归属该院区；存在多个可选院区时
-返回 `400 PARENT_ORGANIZATION_REQUIRED`，不能随机选择。`PUT` 只修改实际提交的字段；JSON 中缺失
-`parent_id` 表示保持不变，不能解释为清空父级。
+首版页面不录入 `code`，服务端创建时生成并返回同一父节点下稳定唯一的编码；编辑接口不得修改 ID、
+`unit_type` 或 `code`。创建院区时 `parent_id` 必须是唯一医院根 ID；创建科室时 `parent_id` 必须是
+有效院区 ID，禁止省略、禁止由服务端随机或默认选择院区。`PUT` 只修改实际提交的字段；科室可通过
+显式提交新的有效院区 `parent_id` 调整归属，院区不得移动到其他父节点。JSON 中缺失 `parent_id`
+表示保持不变，不能解释为清空父级。
 
-`DELETE` 只停用，不物理删除。存在有效子节点时返回 `409 ORGANIZATION_HAS_ACTIVE_CHILDREN`，存在有效
-医生时返回 `409 DEPARTMENT_HAS_ACTIVE_DOCTORS`。恢复时父节点必须有效。公共目录只包含有效科室；
-“已停用科室”视图必须调用本组管理员列表。
+`DELETE` 只停用，不物理删除。院区存在有效科室时返回
+`409 ORGANIZATION_HAS_ACTIVE_CHILDREN`；科室存在有效医生时返回
+`409 DEPARTMENT_HAS_ACTIVE_DOCTORS`。恢复时父节点必须有效，禁止级联停用或恢复。公共目录只包含
+有效院区和有效科室；“已停用院区/科室”视图必须调用本组管理员列表。
 
 ### 7.5 超级管理员用户查询
 
@@ -589,8 +628,8 @@ POST /accounts/:accountId/enable
 - 用户详情读取及所有身份、账号写操作记录操作者、目标账号、request ID、operation ID 和结果，不得
   记录完整手机号、Token、验证码或数据库内部错误。
 
-这些接口供超级管理员专属“用户管理”二级页面使用。部门管理页只展示科室和公共医生目录，不排列
-调岗、撤销或禁用按钮。
+这些接口供超级管理员专属“用户管理”二级页面使用。部门管理页展示医院、院区、科室和公共医生
+目录，但不排列调岗、撤销或禁用按钮。
 
 ## 8. RPC 边界
 
@@ -719,11 +758,12 @@ mock 数据。后端不得仅实现路径占位或返回旧授权上下文后要
 
 ## 12. 验收标准
 
-- 可以建立“医院—院区—科室”层级，非法层级和循环关系被拒绝；
-- 未登录访客、普通用户、医生和超级管理员都可通过同一公共接口获取有效科室及选中科室的医生；
+- 可以建立“唯一医院—多个院区—院区直属科室”三层结构，子科室、第二个医院和非法层级被拒绝；
+- 未登录访客、普通用户、医生和超级管理员都可通过同一公共接口获取医院、有效院区、选中院区的
+  有效科室及选中科室的医生；
 - 部门或医生数据库数据发生变化后，接口结果随之变化，不依赖前端硬编码清单；
-- 超级管理员可以新增、修改、停用和恢复组织单元；
-- 有子节点或有效医生的科室不能直接停用；
+- 超级管理员可以新增、修改、停用和恢复院区、科室，但不能通过小程序修改医院根节点；
+- 有有效科室的院区、有有效医生的科室不能直接停用；
 - 已注册普通账号可以被开通为某一个科室的医生；
 - 超级管理员可以分页查询用户并查看账号、身份、科室和可用操作；
 - 用户昵称同步到后端后，可在不同手机登录同一微信小程序时读取；昵称允许重名且不被当作实名；
@@ -745,8 +785,9 @@ mock 数据。后端不得仅实现路径占位或返回旧授权上下文后要
 
 ## 13. 已确定的实施决定
 
-1. 使用统一组织单元表表达唯一医院、院区和科室；
-2. “删除科室”统一采用停用语义，不提供生产物理删除；
-3. 撤销医生身份后保留普通用户身份和全部历史记录；
-4. 首版工作人员资料为显示名称、可选工号、唯一所属科室、头像 URL 和擅长描述；
-5. local SMS Provider 不是部门/用户页面接口的前置条件；需要多账号本地登录联调时再按第 9.3 节单独启用。
+1. 使用统一组织单元表表达唯一医院、多个院区和院区直属科室；首期不允许子科室；
+2. 小程序动态展示医院但不管理医院根节点；超级管理员管理院区和科室；
+3. “删除院区/科室”统一采用停用语义，不提供生产物理删除或级联停用；
+4. 撤销医生身份后保留普通用户身份和全部历史记录；
+5. 首版工作人员资料为显示名称、可选工号、唯一所属科室、头像 URL 和擅长描述；
+6. local SMS Provider 不是部门/用户页面接口的前置条件；需要多账号本地登录联调时再按第 9.3 节单独启用。
