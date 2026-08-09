@@ -1,14 +1,20 @@
 <script setup lang="ts">
+import ProfileAvatar from "./ProfileAvatar.vue";
+
 withDefaults(
   defineProps<{
-    title?: string;
-    description?: string;
+    avatarUrl?: string;
+    nickname?: string;
   }>(),
   {
-    title: "个人中心",
-    description: "管理就诊人、预约与常用设置",
+    avatarUrl: "",
+    nickname: "微信用户",
   },
 );
+
+const emit = defineEmits<{
+  settings: [];
+}>();
 </script>
 
 <template>
@@ -19,12 +25,17 @@ withDefaults(
     <view class="profile-hero__wave profile-hero__wave--front" />
 
     <view class="profile-hero__content">
-      <view class="profile-hero__mark" aria-hidden="true">
-        <view class="profile-hero__mark-ring" />
-      </view>
-      <view class="profile-hero__copy">
-        <text class="profile-hero__title">{{ title }}</text>
-        <text class="profile-hero__description">{{ description }}</text>
+      <ProfileAvatar :src="avatarUrl" />
+      <text class="profile-hero__nickname">{{ nickname }}</text>
+      <view
+        class="profile-hero__settings"
+        role="button"
+        aria-label="进入账号设置"
+        hover-class="profile-hero__settings--pressed"
+        @tap="emit('settings')"
+      >
+        <text>账号设置</text>
+        <text class="profile-hero__arrow">›</text>
       </view>
     </view>
   </view>
@@ -34,9 +45,9 @@ withDefaults(
 .profile-hero {
   position: relative;
   min-height: 300rpx;
-  padding: calc(var(--status-bar-height) + 52rpx) 40rpx 70rpx;
+  padding: calc(var(--status-bar-height) + 58rpx) 28rpx 62rpx;
   overflow: hidden;
-  background: linear-gradient(135deg, #4d99ea 0%, #087fe1 58%, #0f70db 100%);
+  background: linear-gradient(135deg, #559cea 0%, #087fe1 62%, #0e71dd 100%);
 }
 
 .profile-hero__content {
@@ -44,48 +55,43 @@ withDefaults(
   z-index: 3;
   display: flex;
   align-items: center;
-  max-width: 660rpx;
+  width: 100%;
 }
 
-.profile-hero__mark {
+.profile-hero__nickname {
+  min-width: 0;
+  flex: 1;
+  margin-left: 30rpx;
+  overflow: hidden;
+  color: #ffffff;
+  font-size: 38rpx;
+  font-weight: 600;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-hero__settings {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
-  justify-content: center;
-  width: 104rpx;
-  height: 104rpx;
-  margin-right: 28rpx;
-  background: rgba(255, 255, 255, 0.18);
-  border: 2rpx solid rgba(255, 255, 255, 0.56);
-  border-radius: 34rpx;
-  box-shadow: 0 16rpx 42rpx rgba(7, 73, 151, 0.2);
+  padding: 16rpx 2rpx 16rpx 26rpx;
+  margin-left: 20rpx;
+  color: rgba(255, 255, 255, 0.96);
+  font-size: 28rpx;
+  line-height: 1.4;
 }
 
-.profile-hero__mark-ring {
-  width: 38rpx;
-  height: 38rpx;
-  border: 12rpx solid #ffffff;
-  border-radius: 50%;
+.profile-hero__settings--pressed {
+  opacity: 0.72;
 }
 
-.profile-hero__copy {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-}
-
-.profile-hero__title {
-  color: #ffffff;
-  font-size: 44rpx;
-  font-weight: 700;
-  line-height: 1.35;
-}
-
-.profile-hero__description {
-  margin-top: 10rpx;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 25rpx;
-  line-height: 1.5;
+.profile-hero__arrow {
+  margin-left: 8rpx;
+  font-family: Arial, sans-serif;
+  font-size: 48rpx;
+  font-weight: 200;
+  line-height: 1;
 }
 
 .profile-hero__orb,
@@ -95,41 +101,41 @@ withDefaults(
 }
 
 .profile-hero__orb {
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 50%;
 }
 
 .profile-hero__orb--left {
-  top: -100rpx;
-  left: -70rpx;
-  width: 280rpx;
-  height: 280rpx;
+  top: -116rpx;
+  left: -76rpx;
+  width: 300rpx;
+  height: 300rpx;
 }
 
 .profile-hero__orb--right {
-  top: 20rpx;
-  right: 38rpx;
-  width: 126rpx;
-  height: 126rpx;
+  top: 34rpx;
+  right: 68rpx;
+  width: 118rpx;
+  height: 118rpx;
 }
 
 .profile-hero__wave {
-  right: -160rpx;
-  bottom: -170rpx;
+  bottom: -200rpx;
   width: 850rpx;
-  height: 290rpx;
+  height: 300rpx;
   border-radius: 50%;
-  transform: rotate(-7deg);
 }
 
 .profile-hero__wave--back {
-  background: rgba(22, 103, 222, 0.42);
+  right: -150rpx;
+  background: rgba(21, 100, 218, 0.44);
+  transform: rotate(-7deg);
 }
 
 .profile-hero__wave--front {
-  right: 180rpx;
-  bottom: -225rpx;
-  background: rgba(17, 91, 205, 0.34);
+  right: 190rpx;
+  bottom: -240rpx;
+  background: rgba(14, 83, 195, 0.32);
   transform: rotate(8deg);
 }
 </style>

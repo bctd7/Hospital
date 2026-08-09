@@ -4,6 +4,7 @@ import type { MenuEntry } from "@/types/menu";
 defineProps<{
   item: MenuEntry;
   last?: boolean;
+  compact?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -14,7 +15,7 @@ const emit = defineEmits<{
 <template>
   <view
     class="menu-item"
-    :class="{ 'menu-item--last': last }"
+    :class="{ 'menu-item--last': last, 'menu-item--compact': compact }"
     hover-class="menu-item--pressed"
     role="button"
     :aria-label="item.description ? `${item.title}，${item.description}` : item.title"
@@ -23,7 +24,7 @@ const emit = defineEmits<{
     <view class="menu-item__symbol" :class="`menu-item__symbol--${item.tone}`" aria-hidden="true">
       <text>{{ item.symbol }}</text>
     </view>
-    <view class="menu-item__copy">
+    <view class="menu-item__copy" :class="{ 'menu-item__copy--compact': compact }">
       <text class="menu-item__title">{{ item.title }}</text>
       <text v-if="item.description" class="menu-item__description">{{ item.description }}</text>
     </view>
@@ -112,5 +113,36 @@ const emit = defineEmits<{
   font-size: 58rpx;
   font-weight: 200;
   line-height: 1;
+}
+
+.menu-item--compact {
+  min-height: 104rpx;
+  padding-top: 16rpx;
+  padding-bottom: 16rpx;
+}
+
+.menu-item--compact .menu-item__symbol {
+  width: 60rpx;
+  height: 60rpx;
+  margin-right: 24rpx;
+  font-size: 23rpx;
+  border-radius: 20rpx;
+}
+
+.menu-item__copy--compact {
+  flex-direction: row;
+  align-items: center;
+}
+
+.menu-item__copy--compact .menu-item__title {
+  flex: 0 0 auto;
+  font-size: 29rpx;
+}
+
+.menu-item__copy--compact .menu-item__description {
+  min-width: 0;
+  margin-top: 0;
+  margin-left: 36rpx;
+  font-size: 24rpx;
 }
 </style>

@@ -1,6 +1,13 @@
 {
   "pages": [
     {
+      "path": "pages/entry/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "进入小程序"
+      }
+    },
+    {
       "path": "pages/home/index",
       "style": {
         "navigationBarTitleText": "首页"
@@ -47,6 +54,24 @@
       "path": "pages/profile/settings/index",
       "style": {
         "navigationBarTitleText": "设置"
+      }
+    },
+    {
+      "path": "pages/profile/waitlist/index",
+      "style": {
+        "navigationBarTitleText": "候补订单"
+      }
+    },
+    {
+      "path": "pages/profile/message-management/index",
+      "style": {
+        "navigationBarTitleText": "消息管理"
+      }
+    },
+    {
+      "path": "pages/profile/account/index",
+      "style": {
+        "navigationBarTitleText": "账号设置"
       }
     }
   ],
