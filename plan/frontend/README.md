@@ -19,6 +19,7 @@
 
 ## 当前基线
 
+- 唯一客户端形态：微信小程序；不规划 Web/H5 管理后台或另一套原生 App；
 - 工程：`apps/miniapp`，uni-app + Vue 3 + TypeScript + Vite；
 - 一级页面：首页、挂号、消息、我的，使用标准 TabBar；
 - 主认证：手机号 + 阿里云 PNVS 短信验证码；

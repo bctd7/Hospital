@@ -32,6 +32,8 @@
 - 所有用户都可以动态查询科室目录和科室下的医生列表；
 - 超级管理员可以分页查询用户并查看最小必要的账号、身份和科室信息；
 - 按完整手机号精确查找已经注册的账号；
+- 用户可同步可选账号昵称，超级管理员可按昵称或医生显示名称分页查询候选；
+- 手机号精确查询和昵称候选查询统一进入用户详情，再执行身份和账号操作；
 - 将普通账号开通为医生；
 - 医生基础身份资料和公开展示资料；
 - 一个医生只能属于一个当前科室；
@@ -49,7 +51,7 @@
 - 从医院 HR、HIS 或统一身份系统自动同步；
 - 批量导入真实生产数据；
 - 科室合并、拆分和历史数据迁移工具；
-- 超级管理员的通用账号 CRUD。
+- 超级管理员任意修改手机号、昵称或物理删除账号的通用账号 CRUD。
 
 首版规模下不单独建立医疗人员目录。医生姓名、头像 URL、`description` 等变化频率较低的展示字段
 直接保存在 Identity 医生档案中。这里的 `description` 只是一段“该医生擅长哪些内容”的固定
@@ -89,7 +91,25 @@
 其他服务只保存组织单元 ID 和必要历史快照，不直接读写 Identity 数据库。例如预约可以保存
 `department_id` 以及预约时的科室名称快照，但科室主数据只有 Identity 可以修改。
 
-### 3.2 医生档案
+### 3.2 账号展示资料
+
+为管理员昵称备选搜索增加服务端账号展示资料 `identity_account_profiles`，它与患者实名资料、医生档案
+分开：
+
+| 字段 | 作用 |
+|---|---|
+| `account_id` | 唯一对应 Hospital 账号 |
+| `nickname` | 用户自行确认的可选昵称，允许重名，不作为登录或实名依据 |
+| `created_at`、`updated_at` | 创建和修改时间 |
+
+当前小程序 `hospital:display-profile` 只保存在设备 Storage，不能作为管理员在另一部手机登录同一
+小程序时的搜索数据源。用户在就诊人管理页面确认昵称后，通过受保护接口同步到 Identity。昵称去除
+首尾空白、限制长度并拒绝控制字符；管理员查询采用规范化前缀匹配和分页，不允许把昵称设为唯一键。
+
+手机号仍是首选的精确定位方式。昵称只返回候选账号，超级管理员必须结合脱敏手机号、身份、状态和
+科室核对详情；任何写操作最终都使用不可变 `account_id`。
+
+### 3.3 医生档案
 
 当前不区分“工作人员”和“医生”两套业务对象：存在有效医生档案的工作人员就是医生，公共目录也
 只返回医生。现有数据库表 `identity_staff_profiles` 继续保存医生身份事实，不再额外建立
@@ -124,12 +144,12 @@ appointment_slot_reservations  预约对具体时段容量的占用
 最终表名和字段在 Appointment 模块计划中确定；Identity 只向 Appointment 提供稳定的医生
 `account_id` 和当前 `department_id`。
 
-### 3.3 管理并发版本
+### 3.4 管理并发版本
 
 账号的 `authorization_version` 只服务 Token 权限变更，不应因为修改头像或擅长描述而失效。为用户
 管理页面增加独立的 `management_version`：
 
-- 医生公开资料、科室、医生身份或账号状态发生管理变更时递增；
+- 账号昵称、医生公开资料、科室、医生身份或账号状态发生管理变更时递增；
 - 管理员账号列表和详情明确返回 `management_version`；
 - 账号、医生写请求携带当前 `management_version`，版本不一致返回 `409`；
 - 涉及角色、科室或账号状态的变更同时递增 `authorization_version`；
@@ -137,7 +157,7 @@ appointment_slot_reservations  预约对具体时段容量的占用
 
 组织单元使用自己的 `version`，不能拿账号版本更新科室，也不能用时间字符串代替并发控制。
 
-### 3.4 科室归属
+### 3.5 科室归属
 
 当前业务规则明确限制一个医生只能属于一个科室，因此不新增医生—科室多对多任职表，也不引入
 “主科室”概念。`department_id` 继续保存在 `identity_staff_profiles` 中，并且必须指向类型为
@@ -152,7 +172,7 @@ appointment_slot_reservations  预约对具体时段容量的占用
 - 停用的科室不能接收新医生；
 - 调岗前后的科室 ID 进入授权审计，历史预约等业务记录不随调岗修改。
 
-### 3.5 角色、任职和账号的区别
+### 3.6 角色、任职和账号的区别
 
 三个对象不能混为一个删除操作：
 
@@ -188,7 +208,7 @@ appointment_slot_reservations  预约对具体时段容量的占用
 
 ### 4.3 删除、停用和恢复
 
-管理端的“删除科室”首期采用停用语义，不物理删除业务主数据：
+超级管理员小程序页面的“删除科室”首期采用停用语义，不物理删除业务主数据：
 
 ```text
 DELETE 组织单元
@@ -258,6 +278,41 @@ HMAC Key 和验证信息不得进入普通日志。
 
 医生创建过的预约处理记录、检查记录和审计记录不能随身份撤销而删除。
 
+### 5.4 统一用户定位和账号禁用
+
+开通医生、调岗、撤销医生身份、禁用和恢复账号统一从管理员用户搜索开始：
+
+```text
+完整手机号
+  -> 规范化并计算 HMAC 指纹
+  -> 精确查找绑定账号
+
+昵称或医生显示名称
+  -> 服务端前缀匹配并分页返回候选
+  -> 管理员结合脱敏手机号、身份、科室和状态核对
+
+选中账号
+  -> 读取 account_id、management_version、available_actions
+  -> 进入详情执行对应身份或账号操作
+```
+
+手机号和昵称只用于定位账号，禁用、恢复、开通医生、调岗和撤销等写接口始终接收 `account_id`。
+手机号可能换绑，昵称也可能重复或修改，不能直接作为写操作主键。
+
+禁用账号后的短信登录流程：
+
+```text
+发送验证码
+  -> 维持统一响应，不提前暴露账号状态
+验证码校验成功
+  -> 手机号指纹定位到已有账号
+  -> status = disabled
+  -> 返回 ACCOUNT_DISABLED，不签发 Access Token / Refresh Token
+```
+
+禁用账号不等同于禁止发送验证码；短信轰炸、异常号码和费用控制属于独立风控状态及手机号/IP 限流。
+实现时必须将 `ErrInactiveAccount` 映射为稳定的账号禁用业务错误，不能返回笼统 `500`。
+
 ## 6. 权限设计
 
 首期复用当前权限目录，不在页面规划阶段发明与代码不一致的权限码：
@@ -281,11 +336,22 @@ HMAC Key 和验证信息不得进入普通日志。
 ## 7. 为前端预留的 HTTP 接口
 
 所有数据由 `app-api` 从 Identity Service 动态查询，前端不得内置科室或医生清单。公共只读目录
-位于 `/api/v1/directory`，患者预约页、医生端和管理端共用；写接口位于
+位于 `/api/v1/directory`，小程序内的患者预约页、医生页和超级管理员页共用；写接口位于
 `/api/v1/admin/identity`，仅超级管理员按 permission 调用。HTTP 层负责参数转换、限流、管理接口
 鉴权和响应映射，最终读写由 Identity RPC 完成。
 
-### 7.1 公共科室与医生目录
+### 7.1 本人账号展示资料
+
+```http
+GET /api/v1/auth/me/display-profile
+PUT /api/v1/auth/me/display-profile
+```
+
+接口要求 Access Token。`PUT` 首期只接受昵称，完成裁剪、长度和控制字符校验后写入
+`identity_account_profiles`；昵称修改提升 `management_version`，但不提升 `authorization_version`
+或使 Token 失效。返回值不得把昵称描述为真实姓名。
+
+### 7.2 公共科室与医生目录
 
 ```http
 GET /api/v1/directory/departments
@@ -309,7 +375,7 @@ GET /api/v1/directory/departments/:departmentId/doctors?page=1&page_size=20
 用于后台录入和数据导入，也不能替代 ID。调用流程固定为：先查询科室得到 `department_id`，再使用
 该 ID 查询医生或创建预约。
 
-### 7.2 管理员组织接口
+### 7.3 管理员组织接口
 
 ```http
 GET    /api/v1/admin/identity/organization-units
@@ -327,7 +393,7 @@ POST   /api/v1/admin/identity/organization-units/:unitId/enable
 `status=disabled` 或 `status=all`；不能要求前端从公共目录恢复已经被过滤的数据。预约页面不能直接
 复用包含停用数据和管理字段的管理员响应。
 
-### 7.3 管理员用户、医生与账号接口
+### 7.4 管理员用户、医生与账号接口
 
 保留现有接口：
 
@@ -339,22 +405,25 @@ POST /api/v1/admin/identity/doctors/promote
 本期补充用户列表和详情：
 
 ```http
-GET /api/v1/admin/identity/accounts?page=1&page_size=20&name=&identity_type=&status=&department_id=
+GET /api/v1/admin/identity/accounts?page=1&page_size=20&nickname=&identity_type=&status=&department_id=
 GET /api/v1/admin/identity/accounts/:accountId
 ```
 
 - `identity_type` 是根据账号、角色和有效医生档案计算出的 `patient`、`doctor` 或 `super_admin`，
   不新增一列重复保存；
-- 支持按身份、账号状态和科室筛选；`name` 首期只查询医生 `display_name`；
-- 普通账号当前没有 Identity 昵称时名称可以为空，前端使用脱敏手机号作为展示兜底，不允许 Identity
-  跨库连接未来的 Patient 数据库完成分页；
+- 支持按身份、账号状态和科室筛选；`nickname` 查询账号昵称和医生 `display_name`，采用前缀匹配；
+- 普通账号昵称可以为空，前端使用脱敏手机号作为展示兜底，不允许 Identity 跨库连接未来的 Patient
+  数据库完成分页；
 - 完整手机号继续使用现有精确查询接口，分页和详情只返回脱敏手机号；
-- 列表返回稳定账号 ID、可选名称、可选头像、脱敏手机号、身份、可选科室、账号状态和
+- 列表返回稳定账号 ID、可选昵称、可选医生显示名称、可选头像、脱敏手机号、身份、可选科室、账号状态和
   `management_version`；
 - `management_version` 与 Token 使用的 `authorization_version` 分开；
 - 详情补充手机号验证状态、创建/更新时间、角色、可选工号、医生公开资料、医生状态、
   `authorization_version` 及后端计算的 `available_actions`；
 - 查询必须数据库分页并限制最大页大小，不允许读出全部账号后在内存中过滤。
+
+手机号搜索通过现有 `POST .../search-by-phone` 精确返回账号；昵称允许重名，只返回分页候选。两条搜索
+链路最终都进入相同用户详情，并使用详情中的 `account_id` 执行开通医生、调岗、撤销、禁用或恢复。
 
 分页列表和详情不回显完整手机号：当前数据库只保存手机号 HMAC 指纹和脱敏值，没有可恢复明文。
 若以后确需回显，必须单独设计加密存储、密钥轮换和访问审计，不能把手机号改为数据库明文。
@@ -392,6 +461,7 @@ operation ID 和结果；不得在响应、审计或普通日志中记录完整�
 Identity RPC 需要补充与 HTTP 对应的内部能力：
 
 - `ListOrganizationUnits`、`GetOrganizationUnit`；
+- `GetAccountDisplayProfile`、`UpdateAccountDisplayProfile`；
 - `ListPublicDepartments`、`ListDoctorsByDepartment`；
 - `ListAdminAccounts`、`GetAdminAccount`；
 - `CreateOrganizationUnit`、`UpdateOrganizationUnit`；
@@ -482,6 +552,7 @@ LOCAL_SMS_CODE=<仅保存在本地环境>
 - 任职科室不存在或不是科室类型；
 - 医生没有科室或目标组织单元不是科室；
 - 头像不是合法的 HTTP(S) URL，或擅长描述超过长度限制；
+- 昵称为空、含控制字符或超过长度限制；
 - 操作者权限不足；
 - 重复 `operation_id`；
 - 并发更新版本冲突。
@@ -494,19 +565,19 @@ LOCAL_SMS_CODE=<仅保存在本地环境>
 
 计划审核通过后，从最新 `main` 创建新的业务分支，按以下顺序实现：
 
-1. 增加新的 Identity 迁移，演进组织单元和工作人员档案；
+1. 增加新的 Identity 迁移，演进组织单元、账号展示资料和医生档案；
 2. 更新 permission 契约、角色初始化和授权测试；
 3. 更新 Identity Proto 并生成 RPC 骨架；
 4. 实现 Repository、事务、审计、Outbox 和授权版本更新；
 5. 更新 `app-api` 的 `.api` 契约并生成 HTTP 骨架；
-6. 实现公共科室、医生目录以及管理员组织、用户、医生和账号接口；
+6. 实现本人昵称同步、公共科室和医生目录以及管理员组织、用户、医生和账号接口；
 7. 实现 local seed 工具与环境保护；
 8. 如联调需要，再实现严格受限的 local SMS Provider；
 9. 补充单元测试、MySQL/Redis 集成测试和 API 权限测试；
 10. 分别使用未登录访客、普通用户、医生和超级管理员验证公共目录；
 11. 使用超级管理员完成一次组织维护、医生开通、调岗、撤销和普通用户回退的联调回归。
 
-本阶段完成页面与接口方案，不要求同步实现管理端代码；接口、契约、错误码和 mock 数据准备好后，
+本阶段完成页面与接口方案，不要求同步实现超级管理员小程序页面代码；接口、契约、错误码和 mock 数据准备好后，
 前端再按独立任务开始开发。
 
 ## 12. 验收标准
@@ -518,10 +589,14 @@ LOCAL_SMS_CODE=<仅保存在本地环境>
 - 有子节点或有效医生的科室不能直接停用；
 - 已注册普通账号可以被开通为某一个科室的医生；
 - 超级管理员可以分页查询用户并查看账号、身份、科室和可用操作；
+- 用户昵称同步到后端后，可在不同手机登录同一微信小程序时读取；昵称允许重名且不被当作实名；
+- 超级管理员可以用完整手机号精确定位账号，也可以按昵称或医生显示名称查询分页候选；
+- 开通医生、调岗、撤销医生身份、禁用和恢复账号最终都按选中账号的 `account_id` 执行；
 - 一个有效医生始终有且只有一个所属科室；
 - 医生详情可以返回头像 URL 和纯文本擅长描述，修改后动态生效；
 - 调岗、撤销医生和禁用账号具有不同结果；
 - 禁用账号后所有身份不能登录，恢复账号不会自动恢复已撤销的医生身份；
+- 禁用账号在验证码校验成功后返回 `ACCOUNT_DISABLED` 且不签发 Token；验证码发送阶段不暴露状态；
 - 首版用户管理不能禁用、恢复或变更超级管理员身份；
 - 撤销医生后账号仍可作为普通用户使用，旧 Refresh Session 不能继续获得医生权限；
 - 普通用户和医生可以调用公共目录，但不能调用任何组织或医生管理接口；

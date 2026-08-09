@@ -20,7 +20,7 @@ POST /api/v1/admin/identity/doctors/promote
 ## 2. 用户查询
 
 ```http
-GET /api/v1/admin/identity/accounts?page=1&page_size=20&name=&identity_type=&status=&department_id=
+GET /api/v1/admin/identity/accounts?page=1&page_size=20&nickname=&identity_type=&status=&department_id=
 GET /api/v1/admin/identity/accounts/:accountId
 POST /api/v1/admin/identity/accounts/search-by-phone
 ```
@@ -30,6 +30,7 @@ POST /api/v1/admin/identity/accounts/search-by-phone
 ```text
 AdminAccountSummary
   account_id
+  nickname?
   display_name?
   avatar_url?
   masked_phone?
@@ -40,8 +41,8 @@ AdminAccountSummary
   management_version
 ```
 
-`identity_type` 由账号、角色和有效医生档案动态计算，不新增重复保存字段。普通账号在 Identity 中
-没有可展示名称时允许为空，前端使用脱敏手机号兜底；`name` 首期只查询医生显示名称。
+`identity_type` 由账号、角色和有效医生档案动态计算，不新增重复保存字段。`nickname` 是用户自行
+维护的可选账号展示资料，`display_name` 是医生档案名称；两者都可能为空，前端使用脱敏手机号兜底。
 
 详情在列表字段之上返回手机号验证状态、账号创建/更新时间、角色、可选工号、医生公开资料、医生
 状态、`authorization_version` 和服务端计算的 `available_actions`，但不返回 OpenID、Token、
@@ -51,7 +52,27 @@ AdminAccountSummary
 后端必须分页并限制最大 `page_size`。数据库应针对账号状态、工作人员身份和部门筛选建立必要索引，
 不能先取出全部账号再在内存中过滤。
 
+搜索栏采用两条明确链路：
+
+```text
+完整手机号
+  -> POST /accounts/search-by-phone
+  -> 规范化号码并计算 HMAC 指纹
+  -> 精确返回一个账号或未找到
+
+昵称或医生显示名称
+  -> GET /accounts?nickname=<text>
+  -> 服务端前缀匹配、分页返回候选
+  -> 允许重名，管理员必须进入详情再次确认
+```
+
+当前本机 Storage 中的昵称不能被后端搜索。昵称查询落地前，需要新增账号展示资料同步能力，由用户在
+就诊人管理页面确认后写入 Identity；昵称不唯一、不作为登录凭据，也不能证明真实姓名。
+
 ## 3. 身份和账号操作
+
+以下所有写接口都接收稳定 `account_id`，不接收手机号或昵称作为目标。手机号和昵称只负责在管理员
+搜索栏定位候选账号；这样即使手机号将来换绑或昵称修改，也不会操作错误的数据库记录。
 
 ### 3.1 开通医生
 
@@ -92,6 +113,7 @@ POST /api/v1/admin/identity/accounts/:accountId/enable
 ```
 
 - 禁用要求 `identity.account.manage`，使账号所有登录入口不可用并撤销全部 Refresh Session；
+- 管理员通常先通过完整手机号精确查询账号，核对详情后再按 `account_id` 调用禁用接口；
 - 禁用医生账号保留医生角色和档案；恢复后仍按原医生身份使用；
 - 已经先行撤销医生身份的账号，恢复登录能力时不会自动重新开通医生；
 - 首版拒绝通过本接口禁用任何 `super_admin`，避免自锁和最后管理员问题；

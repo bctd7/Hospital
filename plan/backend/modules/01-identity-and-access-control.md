@@ -24,12 +24,21 @@ Identity 不远程裁决每一条预约、方案或报告。业务服务本地�
 手机号 -> PNVS 发送/校验验证码
        -> phone_fingerprint 查找账号
        -> 不存在则创建 patient 账号
+       -> 已禁用账号拒绝签发 Token
        -> Redis Refresh Session
        -> Hospital Access Token + Refresh Token
 ```
 
 手机号是登录标识，不是数据库主键。数据库使用 UUID `account_id`，手机号只保存 HMAC-SHA256
 指纹、脱敏值和 `verified/sms` 状态。一个手机号指纹只能绑定一个账号。
+
+验证码发送和账号状态分开：发送接口维持统一响应，避免在验证前暴露账号状态；验证码校验成功后，
+禁用账号必须返回稳定 `ACCOUNT_DISABLED` 错误且不能签发 Token。禁止特定号码收码属于独立短信风控，
+不由普通账号禁用状态隐式承担。
+
+账号可以拥有用户自行确认的可选昵称，用于界面展示和管理员备选搜索。昵称允许重名，不参与登录、
+不作为实名依据，也不能替代 `account_id`。当前小程序昵称仍是本机数据，服务端同步和检索属于
+[组织、科室、医生与用户管理方案](./04-organization-staff-and-seed-data.md)的待实现内容。
 
 微信登录接口和 `identity_external_identities` 作为兼容能力保留。OpenID 不能证明手机号、真实
 姓名、患者身份或医生资格；微信 code、OpenID、`session_key` 不写业务日志。
@@ -39,7 +48,9 @@ Identity 不远程裁决每一条预约、方案或报告。业务服务本地�
 普通注册只能创建患者账号，用户不能在登录页自行选择医生或管理员身份。
 
 ```text
-super_admin 按完整手机号精确查找账号
+super_admin 按完整手机号精确查找，或按昵称查询候选账号
+  -> 核对脱敏手机号、身份、状态和科室
+  -> 选中稳定 account_id
   -> 线下确认人员和医生资格
   -> promote doctor(account_id, department_id, offline_verified)
   -> account_type = staff
@@ -53,8 +64,9 @@ super_admin 按完整手机号精确查找账号
 - `POST /api/v1/admin/identity/accounts/search-by-phone`；
 - `POST /api/v1/admin/identity/doctors/promote`。
 
-完整手机号只用于请求时计算指纹，不记录日志、不提供模糊搜索或账号枚举。未来前端的“身份录入”
-页面是超级管理员专属能力，使用同一工作人员端框架并按 permission 显示。
+完整手机号只用于请求时计算指纹，不记录日志、不提供模糊手机号搜索或账号枚举。昵称查询允许重名，
+只负责返回分页候选。开通医生、调岗、撤销身份、禁用和恢复账号都在用户详情按 `account_id` 执行，
+不能直接以手机号或昵称作为写接口目标。
 
 首位超级管理员通过部署阶段工具初始化：
 
