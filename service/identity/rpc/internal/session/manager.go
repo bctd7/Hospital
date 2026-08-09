@@ -15,6 +15,8 @@ type AccessTokenIssuer interface {
 	Issue(principal authn.Principal) (string, time.Time, error)
 }
 
+// Manager 编排 Refresh Session 的创建、轮换和注销。
+// 它不关心 Redis 和 MySQL 的具体写法，只通过 Store、PrincipalStore 和 AccessTokenIssuer 协作。
 type Manager struct {
 	store      Store
 	principals PrincipalStore
@@ -23,6 +25,7 @@ type Manager struct {
 	now        func() time.Time
 }
 
+// TokenPair 是一次登录或刷新后返回给客户端的完整凭证及其绝对过期时间。
 type TokenPair struct {
 	AccessToken      string
 	RefreshToken     string
@@ -30,6 +33,7 @@ type TokenPair struct {
 	RefreshExpiresAt time.Time
 }
 
+// NewManager 组装会话管理器；refreshTTL 控制一条登录会话的绝对生命周期。
 func NewManager(store Store, principals PrincipalStore, issuer AccessTokenIssuer, refreshTTL time.Duration) (*Manager, error) {
 	if store == nil || principals == nil || issuer == nil {
 		return nil, errors.New("refresh session dependencies are required")
@@ -40,8 +44,8 @@ func NewManager(store Store, principals PrincipalStore, issuer AccessTokenIssuer
 	return &Manager{store: store, principals: principals, issuer: issuer, refreshTTL: refreshTTL, now: time.Now}, nil
 }
 
-// Start creates a server-side refresh session after a login provider has
-// authenticated the account. It is intentionally not exposed as a public RPC.
+// Start 在微信或短信等登录方式已经确认账号身份后，首次签发 Access Token 和 Refresh Token。
+// 它只供 Identity 内部登录逻辑调用，不开放“传账号 ID 直接领 Token”的公共 RPC。
 func (m *Manager) Start(ctx context.Context, accountID string) (TokenPair, error) {
 	principal, err := m.principals.GetAuthorizationContext(ctx, accountID)
 	if err != nil {
@@ -75,6 +79,8 @@ func (m *Manager) Start(ctx context.Context, accountID string) (TokenPair, error
 	}, nil
 }
 
+// Refresh 校验现有 Refresh Token，重新读取账号最新权限，并一次性轮换 Access Token 和 Refresh Token。
+// 旧 Refresh Token 再次出现时会撤销当前会话，要求用户重新登录。
 func (m *Manager) Refresh(ctx context.Context, rawRefresh string) (TokenPair, error) {
 	sessionID, presentedHash, err := parseRefreshToken(rawRefresh)
 	if err != nil {
@@ -121,6 +127,7 @@ func (m *Manager) Refresh(ctx context.Context, rawRefresh string) (TokenPair, er
 	}, nil
 }
 
+// Revoke 校验客户端提交的 Refresh Token 后删除对应 Redis Session，用于退出登录。
 func (m *Manager) Revoke(ctx context.Context, rawRefresh string) error {
 	sessionID, refreshHash, err := parseRefreshToken(rawRefresh)
 	if err != nil {
@@ -129,6 +136,7 @@ func (m *Manager) Revoke(ctx context.Context, rawRefresh string) error {
 	return m.store.Revoke(ctx, sessionID, refreshHash)
 }
 
+// activePrincipal 阻止空账号或已停用账号创建、刷新登录凭证。
 func activePrincipal(principal authn.Principal) (authn.Principal, error) {
 	if principal.AccountID == "" || principal.Status != authn.AccountStatusActive {
 		return authn.Principal{}, authn.ErrInactiveAccount

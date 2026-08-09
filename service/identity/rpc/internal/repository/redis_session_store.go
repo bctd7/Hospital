@@ -45,6 +45,7 @@ type RedisSessionStore struct {
 	prefix string
 }
 
+// NewRedisSessionStore 创建 Store 的 Redis 实现；prefix 用于隔离不同环境或不同类型的 Key。
 func NewRedisSessionStore(client *redis.Client, prefix string) (*RedisSessionStore, error) {
 	if client == nil {
 		return nil, errors.New("identity redis client is required")
@@ -56,6 +57,7 @@ func NewRedisSessionStore(client *redis.Client, prefix string) (*RedisSessionSto
 	return &RedisSessionStore{client: client, prefix: prefix}, nil
 }
 
+// Create 将首次登录产生的 Session 写为 Redis Hash，并设置绝对过期时间。
 func (s *RedisSessionStore) Create(ctx context.Context, value session.Session) error {
 	ttl := time.Until(value.ExpiresAt)
 	if ttl <= 0 {
@@ -79,6 +81,7 @@ func (s *RedisSessionStore) Create(ctx context.Context, value session.Session) e
 	return nil
 }
 
+// Get 读取 Redis Hash，并还原为领域层使用的 session.Session。
 func (s *RedisSessionStore) Get(ctx context.Context, sessionID string) (session.Session, error) {
 	values, err := s.client.HGetAll(ctx, s.key(sessionID)).Result()
 	if err != nil {
@@ -102,6 +105,8 @@ func (s *RedisSessionStore) Get(ctx context.Context, sessionID string) (session.
 	}, nil
 }
 
+// Rotate 通过 Lua 在 Redis 内原子完成“比较旧哈希并写入新哈希”。
+// 若哈希不一致，说明可能发生并发刷新或旧 Token 重放，脚本会删除 Session。
 func (s *RedisSessionStore) Rotate(
 	ctx context.Context,
 	sessionID, expectedHash, replacementHash string,
@@ -125,6 +130,7 @@ func (s *RedisSessionStore) Rotate(
 	}
 }
 
+// Revoke 只删除与 expectedHash 匹配的 Session，避免仅知道 sessionID 就能让其他用户下线。
 func (s *RedisSessionStore) Revoke(ctx context.Context, sessionID, expectedHash string) error {
 	result, err := revokeRefreshSessionScript.Run(
 		ctx, s.client, []string{s.key(sessionID)}, expectedHash,
@@ -142,6 +148,7 @@ func (s *RedisSessionStore) Revoke(ctx context.Context, sessionID, expectedHash 
 	}
 }
 
+// key 统一生成 Redis Key，当前格式为 identity:refresh:{sessionID}。
 func (s *RedisSessionStore) key(sessionID string) string {
 	return s.prefix + sessionID
 }
