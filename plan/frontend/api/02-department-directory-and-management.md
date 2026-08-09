@@ -47,7 +47,7 @@ DoctorSummary
 GET    /api/v1/admin/identity/organization-units?unit_type=department&status=all
 GET    /api/v1/admin/identity/organization-units/:unitId
 POST   /api/v1/admin/identity/organization-units
-PATCH  /api/v1/admin/identity/organization-units/:unitId
+PUT    /api/v1/admin/identity/organization-units/:unitId
 DELETE /api/v1/admin/identity/organization-units/:unitId
 POST   /api/v1/admin/identity/organization-units/:unitId/enable
 ```
