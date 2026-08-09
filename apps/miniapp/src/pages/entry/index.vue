@@ -3,8 +3,8 @@ import { onLoad } from "@dcloudio/uni-app";
 import { ref } from "vue";
 
 import ProfileAvatar from "@/components/profile/ProfileAvatar.vue";
+import { initializeFromWechat } from "@/stores/session";
 import { getDisplayProfile, saveDisplayProfile } from "@/utils/displayProfile";
-import { attemptWechatCode } from "@/utils/wechatCode";
 
 interface ChooseAvatarEvent {
   detail: {
@@ -48,10 +48,18 @@ async function enterMiniapp() {
     nickname: nickname.value,
   });
 
-  await attemptWechatCode();
+  const authenticated = await initializeFromWechat();
 
   uni.switchTab({
     url: "/pages/home/index",
+    success: () => {
+      if (!authenticated) {
+        uni.showToast({
+          title: "暂以访客身份进入",
+          icon: "none",
+        });
+      }
+    },
     fail: () => {
       entering.value = false;
       uni.showToast({

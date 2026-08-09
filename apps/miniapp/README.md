@@ -1,6 +1,6 @@
 # Mini App
 
-这里用于放置微信小程序源码。当前尚未绑定正式 AppID，前端技术栈为 uni-app + Vue 3 + TypeScript + Vite。
+这里用于放置微信小程序源码。当前使用测试 AppID，前端技术栈为 uni-app + Vue 3 + TypeScript + Vite。
 
 规划文档集中维护在 [`plan/miniapp/`](../../plan/miniapp/)，不在源码目录中混放需求和设计文档。
 
@@ -11,7 +11,8 @@
 - 启动时展示可跳过的微信头像和昵称填写页；
 - “我的”页面展示资料头部及就诊人管理、预约、关注、设置和消息管理入口；
 - 页面共享统一的应用外壳和空状态组件；
-- 当前不发起任何后端业务请求，也不声称已经获取 OpenID。
+- 已接入微信 code 登录、Hospital Token、当前身份、单任务刷新和退出会话；
+- 登录失败时以访客身份进入，不在前端接收、保存或展示 OpenID。
 
 ## 目录结构
 
@@ -40,6 +41,14 @@ cd apps/miniapp
 npm install
 ```
 
+API 默认地址为 `http://127.0.0.1:8888`。需要覆盖时，在 `apps/miniapp/.env.local` 中配置：
+
+```text
+VITE_API_BASE_URL=http://电脑的局域网地址:8888
+```
+
+微信开发者工具模拟器可以访问本机 `127.0.0.1`；真机中的 `127.0.0.1` 指向手机自身，必须改为手机可访问的局域网或 HTTPS 地址。API Base URL 是公开的前端配置，不得在这里放 AppSecret。
+
 启动微信小程序开发构建：
 
 ```powershell
@@ -54,7 +63,23 @@ apps/miniapp/dist/dev/mp-weixin
 
 如果使用 `npm run build:mp-weixin` 进行普通构建，也可以直接导入 `apps/miniapp`。根目录的 `project.config.json` 会把 `dist/build/mp-weixin` 识别为小程序根目录。首次导入前需要完成一次构建，确保其中已经生成 `app.json`。请勿把 `apps/miniapp` 的上一级目录或 `src` 目录直接作为小程序根目录。
 
-首次导入时可以使用测试号；取得正式 AppID 后，在微信开发者工具或 `src/manifest.json` 的 `mp-weixin.appid` 中配置。开发环境访问本地后端时，可以在微信开发者工具中暂时关闭合法域名校验；真机联调仍需要手机可访问的 HTTPS 地址或局域网地址。
+当前测试 AppID 同时配置在 `src/manifest.json` 和根目录 `project.config.json`。开发环境访问本地后端时，可以在微信开发者工具中暂时关闭合法域名校验；真机联调仍需要手机可访问的 HTTPS 地址或局域网地址。
+
+## 登录联调
+
+入口页点击“进入小程序”后的调用链：
+
+```text
+uni.login
+  -> POST /api/v1/auth/wechat/login
+  -> 保存 Hospital Access/Refresh Token
+  -> GET /api/v1/auth/me
+  -> 成功进入 authenticated，失败进入 guest
+```
+
+小程序只把一次性 `code` 作为 `login_code` 发给 App API。OpenID 和 `session_key` 由 Identity 服务向微信换取并留在后端；App API 返回的是 Hospital Token，不返回 OpenID。
+
+本地真实登录前需要启动 App API、Identity RPC、MySQL 和 Redis，并在后端环境中配置 `WECHAT_MINIAPP_APP_ID`、`WECHAT_MINIAPP_APP_SECRET` 和签名密钥。不要把这些后端密钥复制到 `apps/miniapp`。
 
 生产构建：
 

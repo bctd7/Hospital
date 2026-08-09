@@ -1,29 +1,46 @@
-const WECHAT_CODE_TIMEOUT_MS = 1800;
+const WECHAT_CODE_TIMEOUT_MS = 5000;
 
-/**
- * 尝试获取微信临时 code，但在后端换码接口完成前不保存、不输出该 code。
- * 获取失败或超时都会正常结束，入口页面不得因此阻塞。
- */
-export function attemptWechatCode(): Promise<void> {
-  return new Promise((resolve) => {
+export class WechatCodeError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "WechatCodeError";
+  }
+}
+
+/** 获取一次性微信 code。调用方只能立即发送给 Hospital 后端，不能保存或输出。 */
+export function getWechatLoginCode(): Promise<string> {
+  return new Promise((resolve, reject) => {
     let finished = false;
 
-    const finish = () => {
+    const finish = (callback: () => void) => {
       if (finished) {
         return;
       }
 
       finished = true;
       clearTimeout(timer);
-      resolve();
+      callback();
     };
 
-    const timer = setTimeout(finish, WECHAT_CODE_TIMEOUT_MS);
+    const timer = setTimeout(() => {
+      finish(() => reject(new WechatCodeError("获取微信登录凭证超时")));
+    }, WECHAT_CODE_TIMEOUT_MS);
 
     uni.login({
       provider: "weixin",
-      success: finish,
-      fail: finish,
+      success: (result) => {
+        finish(() => {
+          if (result.code?.trim()) {
+            resolve(result.code);
+            return;
+          }
+
+          reject(new WechatCodeError("微信未返回有效登录凭证"));
+        });
+      },
+      fail: () => {
+        finish(() => reject(new WechatCodeError("获取微信登录凭证失败")));
+      },
     });
   });
 }

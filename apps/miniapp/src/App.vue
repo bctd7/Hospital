@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { onLaunch } from "@dcloudio/uni-app";
 
+import { restoreSession } from "@/stores/session";
+
 onLaunch(() => {
-  // 应用启动阶段只初始化前端基础能力，不阻塞一级页面展示。
+  restoreSession();
 });
 </script>
 

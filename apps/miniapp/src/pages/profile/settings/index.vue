@@ -1,7 +1,12 @@
 <script setup lang="ts">
+import { ref } from "vue";
+
 import InfoList from "@/components/info/InfoList.vue";
 import AppPage from "@/components/layout/AppPage.vue";
+import { logout, sessionState } from "@/stores/session";
 import type { InfoRow } from "@/types/menu";
+
+const loggingOut = ref(false);
 
 const generalRows: InfoRow[] = [
   {
@@ -32,6 +37,26 @@ const privacyRows: InfoRow[] = [
     value: "待接入",
   },
 ];
+
+async function logoutCurrentSession() {
+  if (loggingOut.value) {
+    return;
+  }
+
+  loggingOut.value = true;
+  await logout();
+
+  uni.reLaunch({
+    url: "/pages/entry/index",
+    fail: () => {
+      loggingOut.value = false;
+      uni.showToast({
+        title: "页面跳转失败，请重试",
+        icon: "none",
+      });
+    },
+  });
+}
 </script>
 
 <template>
@@ -42,7 +67,16 @@ const privacyRows: InfoRow[] = [
     <view class="settings-page__section">
       <InfoList title="隐私与账号" :rows="privacyRows" />
     </view>
-    <text class="settings-page__hint">当前仅展示页面结构，所有操作均未启用。</text>
+    <button
+      v-if="sessionState.status === 'authenticated'"
+      class="settings-page__logout"
+      :disabled="loggingOut"
+      :loading="loggingOut"
+      @tap="logoutCurrentSession"
+    >
+      退出当前登录
+    </button>
+    <text class="settings-page__hint">除退出当前登录外，其余设置操作暂未启用。</text>
   </AppPage>
 </template>
 
@@ -58,5 +92,25 @@ const privacyRows: InfoRow[] = [
   font-size: 22rpx;
   line-height: 1.65;
   text-align: center;
+}
+
+.settings-page__logout {
+  height: 88rpx;
+  margin-top: 32rpx;
+  color: #d64b4b;
+  font-size: 29rpx;
+  line-height: 88rpx;
+  background: #ffffff;
+  border: 1rpx solid #f0dada;
+  border-radius: 20rpx;
+}
+
+.settings-page__logout::after {
+  display: none;
+}
+
+.settings-page__logout[disabled] {
+  color: #dc8a8a;
+  background: #fff8f8;
 }
 </style>
