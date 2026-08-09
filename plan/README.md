@@ -23,6 +23,7 @@
 3. [02-service-and-data-boundaries.md](./02-service-and-data-boundaries.md)：服务拆分、数据库所有权、跨服务共享和一致性方案。
 4. [03-identity-and-access-control.md](./03-identity-and-access-control.md)：Identity Service、本地授权、部门范围和权限扩展。
 5. [04-logging-and-audit.md](./04-logging-and-audit.md)：日志、审计、公共代码和集中日志平台。
+6. [05-wechat-registration-and-doctor-onboarding.md](./05-wechat-registration-and-doctor-onboarding.md)：微信自动注册、手机号登记和医生身份开通。
 
 ### 客户端规划
 
