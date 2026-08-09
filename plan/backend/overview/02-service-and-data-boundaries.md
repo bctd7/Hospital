@@ -1,4 +1,4 @@
-# 服务与数据边界设计
+# 后端服务与数据边界
 
 > 文档状态：首版架构决定，业务细节待继续讨论
 >
@@ -25,15 +25,16 @@
 
 负责：
 
-- 微信账号和后台账号；
+- 登录账号、手机号和兼容的外部身份；
 - 登录、Token、账号状态；
-- 就诊人和账号—就诊人代理关系；
 - 医院、院区、部门以及工作人员归属；
 - 角色和权限身份事实。
 
-不负责预约状态、检查方案和报告内容。其他业务服务只保存 `account_id`、`patient_id`、`department_id` 等稳定标识及必要快照。
+不负责本人医疗资料、预约状态、检查方案和报告内容。其他业务服务只保存 `account_id`、
+`patient_profile_id`、`department_id` 等稳定标识及必要快照。
 
-就诊人管理是该服务的患者端功能，不需要再拆一个“就诊人微服务”。
+本人资料先作为清晰的 Patient 模块交付；是否独立部署由数据规模、安全边界和发布节奏决定，
+不能因为首期与 App API 同进程就重新放回 Identity。
 
 ### 2.2 预约检查服务
 
@@ -83,7 +84,7 @@ Planning Service 不拥有预约订单，也不能绕过 Appointment Service 锁
 
 | 患者侧功能 | 首期归属 | 原因 |
 |---|---|---|
-| 就诊人管理 | Identity Service | 属于账号、代理关系和身份数据 |
+| 本人就诊信息 | Patient 模块 | 属于医疗业务资料，不属于登录身份事实 |
 | 我的预约 | Appointment Service + app-api 聚合 | 是预约生命周期入口，不是新的业务数据领域 |
 | 报告查询 | 接口确认前只设计需求和适配契约，实现时再建立 Report Service | 依赖真实医院报告来源和安全边界 |
 | 就医通知 | 异步 Worker/消息模块 | 是预约、规划、报告事件的消费者 |
@@ -157,7 +158,8 @@ flowchart LR
 
 | 数据 | 数据拥有者 |
 |---|---|
-| 账号、就诊人、代理关系、部门 | Identity Service |
+| 账号、手机号、工作人员角色、部门 | Identity Service |
+| 本人患者档案 | Patient 模块 |
 | 检查项目、资源、号源、预约、执行状态 | Appointment Service |
 | 规则、计算任务、方案版本和方案步骤 | Planning Service |
 | 地图版本、地点、节点和路线 | Navigation Service |
@@ -170,6 +172,7 @@ flowchart LR
 ```text
 同一个 MySQL 实例（首期允许）
 ├── hospital_identity       Identity Service 专用数据库
+├── hospital_patient        Patient 模块逻辑数据库（进入实现时建立）
 ├── hospital_appointment    Appointment Service 专用数据库
 ├── hospital_planning       Planning Service 专用数据库
 └── hospital_navigation     Navigation Service 专用数据库
@@ -254,7 +257,8 @@ report.published.v1
 ### 阶段一：建立首期服务骨架
 
 - 保留 `app-api`；
-- 建立独立 Identity Service，先完成登录、Token、账号、就诊人和最小组织数据；
+- 独立 Identity Service 已完成手机号登录、Token、账号和最小工作人员身份能力；
+- Patient 模块在预约前补齐一对一本人档案，不放入 Identity；
 - 优先开发 Appointment Service；
 - Planning 和 Navigation 建立独立服务目录、契约、数据库和迁移目录；
 - 通知、公告、报告先作为模块或 Worker。
@@ -279,6 +283,6 @@ report.published.v1
 3. 一个方案内是否接受部分项目预约成功；
 4. 检查项目是否都可以由患者自行选择，还是部分项目需要提示人工确认；
 5. 首版地图只是楼层图与路线指引，还是必须计算实时路线；
-6. Identity Service 首期的患者端登录和工作人员登录采用哪些具体方式。
+6. Patient 模块首期直接使用 `account_id`，还是建立一对一 `patient_profile_id`。
 
 其中第 1 至第 3 项会直接决定预约订单、号源锁定和规划接口，应优先确认。
