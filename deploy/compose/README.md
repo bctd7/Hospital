@@ -23,7 +23,15 @@ docker compose `
   up -d mysql redis
 ```
 
-MySQL 初始化脚本只会在数据卷第一次创建时运行。已有 `mysql-data` 卷不会自动重放 Identity 初始迁移；后续数据库升级必须使用正式迁移工具，不通过删除数据卷模拟升级。
+推荐直接从仓库根目录执行：
+
+```powershell
+.\scripts\db-bootstrap-local.ps1
+```
+
+该脚本会启动 MySQL、幂等创建当前服务数据库和账号，并只执行尚未运行的迁移，不会删除已有数据。
+MySQL 初始化脚本仍只会在数据卷第一次创建时运行，表结构不再依赖初始化目录中的 SQL 挂载。
+旧数据库第一次接入版本管理时，按 `scripts/README.md` 完成一次基线登记。
 
 需要 Kafka 时：
 
