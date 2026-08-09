@@ -16,12 +16,14 @@ vi.mock("@/api/auth", () => authMocks);
 vi.mock("@/utils/wechatCode", () => codeMocks);
 
 import {
+  availableAppVariants,
   initializeFromWechat,
   initializeFromPhone,
   logout,
   refreshOnce,
   restoreSession,
   sessionState,
+  setAppVariant,
 } from "@/stores/session";
 
 const principal = {
@@ -104,6 +106,29 @@ describe("session store", () => {
     expect(sessionState.appVariant).toBe("staff");
   });
 
+  it("allows a staff identity to switch to patient and persists the choice", async () => {
+    authMocks.phoneLogin.mockResolvedValue(tokenResponse);
+    authMocks.getCurrentIdentity.mockResolvedValue(doctorPrincipal);
+    await initializeFromPhone("13800138000", "123456");
+
+    expect(availableAppVariants()).toEqual(["patient", "staff"]);
+    expect(setAppVariant("patient")).toBe(true);
+    expect(sessionState.appVariant).toBe("patient");
+
+    const persisted = storage.get("hospital:session") as { appVariant?: string };
+    expect(persisted.appVariant).toBe("patient");
+  });
+
+  it("does not allow a patient identity to enter the staff app", async () => {
+    authMocks.phoneLogin.mockResolvedValue(tokenResponse);
+    authMocks.getCurrentIdentity.mockResolvedValue(principal);
+    await initializeFromPhone("13800138000", "123456");
+
+    expect(availableAppVariants()).toEqual(["patient"]);
+    expect(setAppVariant("staff")).toBe(false);
+    expect(sessionState.appVariant).toBe("patient");
+  });
+
   it("derives the app variant again when restoring a session", () => {
     storage.set("hospital:session", {
       version: 1,
@@ -114,6 +139,7 @@ describe("session store", () => {
         refreshExpiresAt: Date.now() + 120000,
       },
       principal: doctorPrincipal,
+      // 旧版会话字段不得绕过当前角色与应用版本校验。
       activeMode: "doctor",
     });
 

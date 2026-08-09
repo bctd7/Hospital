@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+  applyAppVariantNavigation,
   hasIdentityPermission,
   openAppVariant,
   resolveAppVariant,
@@ -39,17 +40,35 @@ describe("app shell identity resolution", () => {
     expect(resolveAppVariant(doctor, false)).toBe("patient");
   });
 
-  it("opens the same staff placeholder for staff identities", () => {
+  it("opens staff identities in the shared four-tab shell", () => {
     const reLaunch = vi.fn();
     const switchTab = vi.fn();
-    vi.stubGlobal("uni", { reLaunch, switchTab });
+    const setTabBarItem = vi.fn((options) => options.complete?.());
+    vi.stubGlobal("uni", { reLaunch, setTabBarItem, switchTab });
 
     openAppVariant("staff");
 
-    expect(reLaunch).toHaveBeenCalledWith(
-      expect.objectContaining({ url: "/pages/staff/index" }),
+    expect(switchTab).toHaveBeenCalledWith(
+      expect.objectContaining({ url: "/pages/home/index" }),
     );
-    expect(switchTab).not.toHaveBeenCalled();
+    expect(reLaunch).not.toHaveBeenCalled();
+    expect(setTabBarItem).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 0, text: "工作台" }),
+    );
+  });
+
+  it("restores patient tab labels when switching back", () => {
+    const setTabBarItem = vi.fn((options) => options.complete?.());
+    vi.stubGlobal("uni", { setTabBarItem });
+
+    applyAppVariantNavigation("patient");
+
+    expect(setTabBarItem).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 0, text: "首页" }),
+    );
+    expect(setTabBarItem).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 1, text: "挂号" }),
+    );
   });
 
   it("uses permissions rather than separate doctor and admin page trees", () => {

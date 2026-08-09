@@ -7,8 +7,8 @@ const DEPARTMENT_DOCTOR_ROLE = "department_doctor";
 const SUPER_ADMIN_ROLE = "super_admin";
 
 /**
- * 工作人员业务尚未实现，当前只开启一个共用的空白身份占位页。
- * 后续页面树仍从 staff 分支继续扩展，不拆分医生版和超管版。
+ * 工作人员业务尚未实现，当前复用四个 Tab 页面并显示对应占位内容。
+ * 后续继续按权限扩展工作人员视图，不拆分医生版和超管版。
  */
 export const STAFF_APP_ENABLED = true;
 
@@ -43,6 +43,16 @@ export function resolveAppVariant(
   return identityVariant === "staff" && staffAppEnabled ? "staff" : "patient";
 }
 
+/** 保留用户主动选择的患者端；只有真实工作人员身份才能选择工作人员端。 */
+export function normalizeAppVariant(
+  selected: unknown,
+  principal: CurrentIdentityResponse | null,
+): AppVariant {
+  return selected === "staff" && resolveAppVariant(principal) === "staff"
+    ? "staff"
+    : "patient";
+}
+
 /** 前端只控制可见性；最终权限必须由后端按 Token 中的 permission 校验。 */
 export function hasIdentityPermission(
   principal: CurrentIdentityResponse | null,
@@ -52,10 +62,6 @@ export function hasIdentityPermission(
 }
 
 export function applyAppVariantNavigation(variant: AppVariant) {
-  if (variant === "staff") {
-    return;
-  }
-
   if (appliedVariant === variant || applyingVariant === variant) {
     return;
   }
@@ -92,14 +98,7 @@ export function openAppVariant(
   variant: AppVariant,
   onFailure?: () => void,
 ) {
-  if (variant === "staff") {
-    uni.reLaunch({
-      url: "/pages/staff/index",
-      fail: onFailure,
-    });
-    return;
-  }
-
+  applyAppVariantNavigation(variant);
   uni.switchTab({
     url: "/pages/home/index",
     fail: onFailure,

@@ -9,12 +9,13 @@ import {
 } from "@/api/auth";
 import { configureAuthAdapter } from "@/api/client";
 import type {
+  AppVariant,
   CurrentIdentityResponse,
   SessionTokenPair,
   SessionView,
   TokenResponse,
 } from "@/types/auth";
-import { resolveAppVariant } from "@/utils/appShell";
+import { normalizeAppVariant, resolveAppVariant } from "@/utils/appShell";
 import { getWechatLoginCode } from "@/utils/wechatCode";
 
 const SESSION_STORAGE_KEY = "hospital:session";
@@ -25,6 +26,7 @@ interface StoredSession {
   version: number;
   tokens: SessionTokenPair;
   principal: CurrentIdentityResponse;
+  appVariant?: AppVariant;
 }
 
 const state = reactive<SessionView>({
@@ -91,6 +93,7 @@ function persistSession() {
     version: SESSION_STORAGE_VERSION,
     tokens,
     principal: state.principal,
+    appVariant: state.appVariant,
   };
 
   try {
@@ -126,7 +129,9 @@ export function restoreSession() {
 
     tokens = stored.tokens;
     state.principal = stored.principal;
-    state.appVariant = resolveAppVariant(stored.principal);
+    state.appVariant = stored.appVariant
+      ? normalizeAppVariant(stored.appVariant, stored.principal)
+      : resolveAppVariant(stored.principal);
     state.status = "authenticated";
   } catch {
     setGuestSession();
@@ -135,6 +140,24 @@ export function restoreSession() {
 
 export function getAccessToken(): string {
   return tokens?.accessToken ?? "";
+}
+
+export function availableAppVariants(): AppVariant[] {
+  return resolveAppVariant(state.principal) === "staff"
+    ? ["patient", "staff"]
+    : ["patient"];
+}
+
+export function setAppVariant(variant: AppVariant): boolean {
+  if (!availableAppVariants().includes(variant)) {
+    state.appVariant = "patient";
+    persistSession();
+    return false;
+  }
+
+  state.appVariant = variant;
+  persistSession();
+  return true;
 }
 
 function hasUsableAccessToken(): boolean {
@@ -151,7 +174,7 @@ async function performRefresh(): Promise<boolean> {
   try {
     tokens = tokenPairFromResponse(await requestTokenRefresh(currentRefreshToken));
     state.principal = await getCurrentIdentity(false);
-    state.appVariant = resolveAppVariant(state.principal);
+    state.appVariant = normalizeAppVariant(state.appVariant, state.principal);
     state.status = "authenticated";
     persistSession();
     return true;
