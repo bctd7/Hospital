@@ -15,8 +15,10 @@ import {
   loadDepartments,
   loadDoctors,
 } from "@/utils/staffManagementCache";
+import { createEmptyDepartment } from "@/utils/staffManagementView";
 
 let lastSelectedDepartmentId = "";
+const emptyDepartment = createEmptyDepartment();
 
 const isStaffApp = computed(() => sessionState.appVariant === "staff");
 const isSuperAdmin = computed(
@@ -57,7 +59,7 @@ let doctorRequestGeneration = 0;
 const selectedDepartment = computed(() =>
   departments.value.find(
     (department) => department.departmentId === selectedDepartmentId.value,
-  ),
+  ) ?? emptyDepartment,
 );
 
 const visibleDepartments = computed(() =>
@@ -151,7 +153,7 @@ function openCreateDepartment() {
 }
 
 function openEditDepartment() {
-  if (!selectedDepartment.value) {
+  if (!selectedDepartment.value.departmentId) {
     return;
   }
   editorMode.value = "edit";
@@ -175,7 +177,7 @@ async function saveDepartment() {
         parentId: selectedDepartment.value?.parentId,
       });
       lastSelectedDepartmentId = created.departmentId;
-    } else if (selectedDepartment.value) {
+    } else if (selectedDepartment.value.departmentId) {
       await staffManagementApi.updateDepartment(
         selectedDepartment.value.departmentId,
         { name, parentId: selectedDepartment.value.parentId },
@@ -196,7 +198,7 @@ async function saveDepartment() {
 
 function changeDepartmentStatus(enabled: boolean) {
   const department = selectedDepartment.value;
-  if (!department || mutationPending.value) {
+  if (!department.departmentId || mutationPending.value) {
     return;
   }
   uni.showModal({

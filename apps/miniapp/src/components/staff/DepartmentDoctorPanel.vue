@@ -2,23 +2,19 @@
 import { computed } from "vue";
 
 import type { DepartmentSummary, DoctorSummary } from "@/types/staffManagement";
+import { createEmptyDepartment } from "@/utils/staffManagementView";
+
+const emptyDepartment = createEmptyDepartment();
 
 const props = withDefaults(defineProps<{
-  department?: DepartmentSummary;
+  department?: DepartmentSummary | null;
   doctors: DoctorSummary[];
   loading: boolean;
   error: string;
   canManage: boolean;
   canOpenDoctor: boolean;
 }>(), {
-  department: () => ({
-    departmentId: "",
-    code: "",
-    name: "",
-    doctorCount: 0,
-    status: "active",
-    version: 0,
-  }),
+  department: createEmptyDepartment,
 });
 
 defineEmits<{
@@ -28,7 +24,7 @@ defineEmits<{
   (event: "open-doctor", doctor: DoctorSummary): void;
 }>();
 
-const departmentView = computed(() => props.department);
+const departmentView = computed(() => props.department ?? emptyDepartment);
 const hasDepartment = computed(() => departmentView.value.departmentId.length > 0);
 </script>
 
