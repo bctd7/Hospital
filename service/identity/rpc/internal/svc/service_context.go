@@ -31,27 +31,27 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 	if err != nil {
 		return nil, err
 	}
-	privateKey, err := decodePrivateKey(c.Auth.AccessPrivateKeyBase64)
+	privateKey, err := decodePrivateKey(c.Token.AccessPrivateKeyBase64)
 	if err != nil {
 		store.Close()
 		return nil, fmt.Errorf("decode identity access private key: %w", err)
 	}
-	publicKey, err := decodePublicKey(c.Auth.AccessPublicKeyBase64)
+	publicKey, err := decodePublicKey(c.Token.AccessPublicKeyBase64)
 	if err != nil {
 		store.Close()
 		return nil, fmt.Errorf("decode identity access public key: %w", err)
 	}
 	tokenManager, err := authn.NewTokenManager(authn.TokenConfig{
-		Issuer: c.Auth.Issuer, Audience: c.Auth.Audience,
+		Issuer: c.Token.Issuer, Audience: c.Token.Audience,
 		SigningKey: privateKey, VerificationKey: publicKey,
-		TTL: time.Duration(c.Auth.AccessTTLSeconds) * time.Second,
+		TTL: time.Duration(c.Token.AccessTTLSeconds) * time.Second,
 	})
 	if err != nil {
 		store.Close()
 		return nil, fmt.Errorf("create identity token manager: %w", err)
 	}
 	redisClient := redis.NewClient(&redis.Options{
-		Addr: c.Redis.Addr, Password: c.Redis.Password, DB: c.Redis.DB,
+		Addr: c.SessionRedis.Addr, Password: c.SessionRedis.Password, DB: c.SessionRedis.DB,
 	})
 	pingCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -60,14 +60,14 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		store.Close()
 		return nil, fmt.Errorf("ping identity redis: %w", err)
 	}
-	sessionStore, err := repository.NewRedisSessionStore(redisClient, c.Redis.Prefix)
+	sessionStore, err := repository.NewRedisSessionStore(redisClient, c.SessionRedis.Prefix)
 	if err != nil {
 		redisClient.Close()
 		store.Close()
 		return nil, err
 	}
 	sessionManager, err := session.NewManager(
-		sessionStore, store, tokenManager, time.Duration(c.Auth.RefreshTTLSeconds)*time.Second,
+		sessionStore, store, tokenManager, time.Duration(c.Token.RefreshTTLSeconds)*time.Second,
 	)
 	if err != nil {
 		redisClient.Close()
