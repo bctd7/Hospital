@@ -31,7 +31,7 @@ const identityLabels = {
 </template>
 
 <style scoped>
-button::after { display: none; }
+.user-card::after { display: none; }
 .user-card { display:flex; align-items:center; width:100%; margin:0; padding:26rpx 24rpx; text-align:left; background:#fff; border-radius:0; border-bottom:1rpx solid #edf1f5; }
 .user-card:active { background:#f7fbff; }
 .user-avatar { display:flex; flex:0 0 auto; align-items:center; justify-content:center; width:76rpx; height:76rpx; color:#fff; font-size:28rpx; font-weight:700; background:linear-gradient(145deg,#62b9ef,#587ee8); border-radius:50%; }

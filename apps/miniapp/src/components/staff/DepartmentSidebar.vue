@@ -53,7 +53,9 @@ defineEmits<{
 </template>
 
 <style scoped>
-button::after {
+.toolbar-link::after,
+.add-department-button::after,
+.department-item::after {
   display: none;
 }
 

@@ -63,7 +63,7 @@ function submit() {
 </template>
 
 <style scoped>
-button::after { display:none; }
+.dialog-button::after { display:none; }
 .dialog-mask { position:fixed; z-index:30; inset:0; display:flex; align-items:center; justify-content:center; padding:42rpx; background:rgba(18,28,45,.48); }
 .profile-dialog { width:100%; padding:34rpx; box-sizing:border-box; background:#fff; border-radius:26rpx; }
 .profile-dialog__title { display:block; margin-bottom:28rpx; color:#202c41; font-size:32rpx; font-weight:700; }

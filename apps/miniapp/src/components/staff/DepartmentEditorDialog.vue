@@ -45,7 +45,7 @@ function handleInput(event: Event) {
 </template>
 
 <style scoped>
-button::after {
+.dialog-button::after {
   display: none;
 }
 

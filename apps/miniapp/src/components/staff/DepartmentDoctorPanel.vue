@@ -1,14 +1,25 @@
 <script setup lang="ts">
+import { computed } from "vue";
+
 import type { DepartmentSummary, DoctorSummary } from "@/types/staffManagement";
 
-defineProps<{
+const props = withDefaults(defineProps<{
   department?: DepartmentSummary;
   doctors: DoctorSummary[];
   loading: boolean;
   error: string;
   canManage: boolean;
   canOpenDoctor: boolean;
-}>();
+}>(), {
+  department: () => ({
+    departmentId: "",
+    code: "",
+    name: "",
+    doctorCount: 0,
+    status: "active",
+    version: 0,
+  }),
+});
 
 defineEmits<{
   (event: "edit"): void;
@@ -16,40 +27,43 @@ defineEmits<{
   (event: "retry", departmentId: string): void;
   (event: "open-doctor", doctor: DoctorSummary): void;
 }>();
+
+const departmentView = computed(() => props.department);
+const hasDepartment = computed(() => departmentView.value.departmentId.length > 0);
 </script>
 
 <template>
   <view class="doctor-panel">
-    <view v-if="department" class="doctor-panel__header">
+    <view v-if="hasDepartment" class="doctor-panel__header">
       <view>
-        <text class="doctor-panel__title">{{ department.name }}</text>
+        <text class="doctor-panel__title">{{ departmentView.name }}</text>
         <text class="doctor-panel__count">
-          {{ department.status === "active" ? `${department.doctorCount} 位医生` : "部门已停用" }}
+          {{ departmentView.status === "active" ? `${departmentView.doctorCount} 位医生` : "部门已停用" }}
         </text>
       </view>
       <view v-if="canManage" class="department-actions">
-        <button v-if="department.status === 'active'" class="action-link" @tap="$emit('edit')">
+        <button v-if="departmentView.status === 'active'" class="action-link" @tap="$emit('edit')">
           编辑
         </button>
         <button
           class="action-link"
-          :class="{ 'action-link--danger': department.status === 'active' }"
-          @tap="$emit('set-enabled', department.status !== 'active')"
+          :class="{ 'action-link--danger': departmentView.status === 'active' }"
+          @tap="$emit('set-enabled', departmentView.status !== 'active')"
         >
-          {{ department.status === "active" ? "停用" : "恢复" }}
+          {{ departmentView.status === "active" ? "停用" : "恢复" }}
         </button>
       </view>
     </view>
 
     <scroll-view class="doctor-list" scroll-y>
-      <view v-if="!department" class="panel-state">请选择部门</view>
-      <view v-else-if="department.status === 'disabled'" class="panel-state">
+      <view v-if="!hasDepartment" class="panel-state">请选择部门</view>
+      <view v-else-if="departmentView.status === 'disabled'" class="panel-state">
         恢复部门后才能重新关联医生
       </view>
       <view v-else-if="loading" class="panel-state">医生加载中...</view>
       <view v-else-if="error" class="panel-state panel-state--error">
         <text>{{ error }}</text>
-        <button @tap="$emit('retry', department.departmentId)">重试</button>
+        <button class="panel-state__retry" @tap="$emit('retry', departmentView.departmentId)">重试</button>
       </view>
       <view v-else-if="doctors.length === 0" class="panel-state">
         <text class="panel-state__icon">医</text>
@@ -78,7 +92,8 @@ defineEmits<{
 </template>
 
 <style scoped>
-button::after {
+.action-link::after,
+.panel-state__retry::after {
   display: none;
 }
 
@@ -219,7 +234,7 @@ button::after {
   text-align: center;
 }
 
-.panel-state button {
+.panel-state__retry {
   margin: 0;
   color: #1683d0;
   font-size: 23rpx;
