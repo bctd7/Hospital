@@ -4,14 +4,17 @@
 package main
 
 import (
+	"context"
 	"flag"
-	"fmt"
 
+	"hospital/common/observability/httpaccess"
+	projectlog "hospital/common/observability/logging"
 	"hospital/service/app/api/internal/config"
 	"hospital/service/app/api/internal/handler"
 	"hospital/service/app/api/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest"
 )
 
@@ -22,13 +25,20 @@ func main() {
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
+	logx.AddGlobalFields(logx.Field(projectlog.FieldEnvironment, c.Environment))
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
+	server.Use(httpaccess.Middleware())
 
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, ctx)
 
-	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
+	projectlog.Info(
+		context.Background(),
+		projectlog.EventServiceStarting,
+		logx.Field(projectlog.FieldHost, c.Host),
+		logx.Field(projectlog.FieldPort, c.Port),
+	)
 	server.Start()
 }

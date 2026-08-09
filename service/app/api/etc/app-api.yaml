@@ -1,3 +1,18 @@
 Name: app-api
+Environment: local
 Host: 0.0.0.0
 Port: 8888
+
+Log:
+  ServiceName: app-api
+  Mode: console
+  Encoding: json
+  Level: info
+
+Middlewares:
+  Trace: true
+  Log: false
+  Recover: true
+  Timeout: true
+  Metrics: true
+  MaxBytes: true
