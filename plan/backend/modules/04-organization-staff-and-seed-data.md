@@ -1,10 +1,13 @@
 # Identity 组织、科室、医生与用户管理
 
-> 文档状态：待审核方案
+> 文档状态：前后端契约已对齐，待后端实施
 >
-> 目标：补齐 Identity Service 当前缺少的组织、医生与管理员用户管理能力，为预约、科室数据权限和前端预留稳定接口。
+> 目标：补齐 Identity Service 当前缺少的组织、医生与管理员用户管理能力，为预约、科室数据权限和
+> 超级管理员部门/用户页面提供稳定接口。
 >
-> 当前阶段只编写方案，不修改数据库、RPC、HTTP 接口或前端代码。
+> 本文是后端实施基线；页面与前端调用约束见
+> [工作人员部门管理](../../frontend/pages/04-department-management.md)、
+> [超级管理员用户管理](../../frontend/pages/05-admin-user-management.md)及其 API 文档。
 
 ## 1. 为什么现在实现
 
@@ -71,7 +74,7 @@
     └── 检验科（department）
 ```
 
-建议将当前 `identity_departments` 演进为 `identity_organization_units`：
+实施时将当前 `identity_departments` 演进为 `identity_organization_units`：
 
 | 字段 | 作用 |
 |---|---|
@@ -193,6 +196,8 @@ appointment_slot_reservations  预约对具体时段容量的占用
 - 新增接口首期只接受 `campus` 和 `department`；
 - `unit_type` 必须与父节点类型匹配；
 - 同一父节点下编码不得重复；
+- 超级管理员小程序首版不录入编码。创建 `department` 时由服务端生成稳定且同一父节点下唯一的
+  `code`，并在响应中返回；后续接入人工编码或 HIS 编码前，不得要求当前页面补传该字段；
 - 名称允许以后修改，业务引用必须使用 ID；
 - 请求携带 `operation_id`，重复提交返回同一个操作结果。
 
@@ -247,6 +252,10 @@ DELETE 组织单元
 
 如果手机号尚未注册，只返回“未找到可开通账号”，不由管理员代替用户创建手机号账号。完整手机号、
 HMAC Key 和验证信息不得进入普通日志。
+
+账号曾经是医生、后来被撤销医生身份时，原医生档案以 `revoked` 状态保留。再次开通不能插入第二条
+医生档案，而是在同一事务中重新激活原档案、覆盖为本次确认的唯一科室和公开资料、重新授予医生角色，
+并递增管理版本和授权版本。账号仍处于 `disabled` 时必须先恢复账号，不能通过开通医生顺便绕过禁用。
 
 ### 5.2 修改医生
 
@@ -315,7 +324,7 @@ HMAC Key 和验证信息不得进入普通日志。
 
 ## 6. 权限设计
 
-首期复用当前权限目录，不在页面规划阶段发明与代码不一致的权限码：
+首期复用当前权限目录，不在本模块另造与权限契约不一致的权限码：
 
 | 能力 | 授权规则 |
 |---|---|
@@ -333,52 +342,103 @@ HMAC Key 和验证信息不得进入普通日志。
 `app-api` 使用 Access Token 中的权限提前拒绝无权请求；Identity RPC 对高风险写操作再次查询最新
 账号和权限事实，不能仅相信客户端传入的操作者 ID。
 
-## 7. 为前端预留的 HTTP 接口
+## 7. 前端已确认的 HTTP 契约
 
-所有数据由 `app-api` 从 Identity Service 动态查询，前端不得内置科室或医生清单。公共只读目录
-位于 `/api/v1/directory`，小程序内的患者预约页、医生页和超级管理员页共用；写接口位于
-`/api/v1/admin/identity`，仅超级管理员按 permission 调用。HTTP 层负责参数转换、限流、管理接口
-鉴权和响应映射，最终读写由 Identity RPC 完成。
+本节是 `app-api` 和 Identity RPC 的实施依据，字段名与前端 API 文档保持一致。所有 JSON 字段使用
+`snake_case`；列表统一使用 `items`，分页列表额外返回 `page`、`page_size` 和 `total`。单条查询和
+写操作直接返回资源对象，不再套 `data`。公共只读目录位于 `/api/v1/directory`；管理员接口位于
+`/api/v1/admin/identity`，必须使用 Hospital Access Token 并按 permission 鉴权。
 
-### 7.1 本人账号展示资料
+现有 `POST /accounts/search-by-phone` 和 `POST /doctors/promote` 只返回授权上下文，不能满足新页面。
+实施本模块时必须在 `.api`、Proto、生成代码和 Handler 中同步升级为本节响应，不允许让前端同时兼容
+旧、新两套响应。
+
+### 7.1 共用响应对象
+
+```text
+DepartmentSummary
+  department_id: string
+  parent_id?: string
+  code: string
+  name: string
+  doctor_count: integer
+  status: active | disabled
+  version: integer
+
+DoctorSummary
+  doctor_id: string
+  display_name: string
+  department_id: string
+  avatar_url?: string
+  description?: string
+  version: integer
+
+AdminAccountSummary
+  account_id: string
+  nickname?: string
+  display_name?: string
+  avatar_url?: string
+  masked_phone?: string
+  account_status: active | disabled
+  identity_type: patient | doctor | super_admin
+  department_id?: string
+  department_name?: string
+  management_version: integer
+
+AdminAccountDetail extends AdminAccountSummary
+  phone_verification_status?: string
+  staff_no?: string
+  description?: string
+  roles: string[]
+  authorization_version: integer
+  available_actions: AdminAccountAction[]
+  created_at: RFC3339 string
+  updated_at: RFC3339 string
+```
+
+`doctor_id` 首期直接使用稳定 `account_id`。`DepartmentSummary.status` 在公共接口中固定为 `active`，仍
+必须返回，以便公共目录和管理员列表复用同一前端类型。可选字符串无值时应省略，不得用空字符串或
+`null` 伪造已填写数据；数组必须返回空数组而不是 `null`。
+
+`identity_type` 是展示字段，不落冗余列，计算优先级固定为 `super_admin -> doctor -> patient`。账号
+被禁用但医生档案和角色仍有效时仍返回 `doctor`，同时 `account_status=disabled`；撤销医生身份后才
+返回 `patient`。`management_version` 与 Token 使用的 `authorization_version` 含义不同。
+
+### 7.2 本人账号展示资料
 
 ```http
 GET /api/v1/auth/me/display-profile
 PUT /api/v1/auth/me/display-profile
 ```
 
-接口要求 Access Token。`PUT` 首期只接受昵称，完成裁剪、长度和控制字符校验后写入
+接口要求 Access Token。`PUT` 首期只接受 `nickname`，完成裁剪、长度和控制字符校验后写入
 `identity_account_profiles`；昵称修改提升 `management_version`，但不提升 `authorization_version`
 或使 Token 失效。返回值不得把昵称描述为真实姓名。
 
-### 7.2 公共科室与医生目录
+### 7.3 公共科室与医生目录
 
 ```http
 GET /api/v1/directory/departments
 GET /api/v1/directory/departments/:departmentId/doctors?page=1&page_size=20
 ```
 
+- 科室响应为 `{ "items": DepartmentSummary[] }`，只包含有效 `department`；
+- 医生响应为 `{ "items": DoctorSummary[], "page": 1, "page_size": 20, "total": 0 }`，只包含账号正常、
+  医生档案有效且属于目标科室的医生；
 - 两个接口允许所有人查询，不要求工作人员或管理员权限；
-- 科室列表只返回有效的 `department`，包含稳定 `department_id`、编码、名称、医生数量和版本；
-- 医生列表按选中部门分页查询，只返回医生 ID、显示名称、部门 ID、头像 URL、擅长描述和版本；
-- 对外字段使用 `doctor_id`；首期它直接取内部稳定 `account_id`，不为同一个人再创建第二套 ID；
-- 不返回完整手机号、OpenID、Token、内部审计信息或管理员专用字段；
-- 部门数量和医生列表由数据库实时事实生成，不能由 API 或前端硬编码；
-- 部门人数使用聚合查询，医生列表使用按 `department_id` 的分页索引，禁止逐部门 N+1 查询；
-- 排序规则稳定，建议部门按展示顺序和编码，医生按显示名称、工号及账号 ID 兜底排序。
+- `doctor_count` 必须与相同过滤条件下医生分页接口的 `total` 一致；
+- 科室 `version` 来自组织单元版本，医生 `version` 来自账号 `management_version`；
+- `page` 从 1 开始，默认 `page_size=20`，服务端限制最大值；非法分页参数返回 `400`；
+- 部门数量使用聚合查询，医生列表使用 `department_id` 分页索引，禁止逐部门 N+1 查询；
+- 排序必须稳定：部门按编码和 ID，医生按显示名称、工号和账号 ID 兜底。
 
-前端按部门懒加载医生列表，不要求后端一次返回全部部门的全部医生。开发环境的 seed 数据也必须
-先写入本地数据库再经过同一接口返回，不能形成另一套前端静态数据源。
+前端按部门懒加载医生，不要求后端一次返回全部医生。开发 seed 必须先写入本地数据库再通过同一接口
+返回。接口不得返回手机号、OpenID、Token、角色、账号状态、审计信息或其他管理员字段。
 
-`department_id` 是识别同一个科室的唯一技术标识。它由后端生成并且永不复用；科室改名、停用或
-恢复时 ID 都不改变。`name` 只负责展示，不能用作数据库关联、前端列表 key 或预约请求参数；`code`
-用于后台录入和数据导入，也不能替代 ID。调用流程固定为：先查询科室得到 `department_id`，再使用
-该 ID 查询医生或创建预约。
-
-### 7.3 管理员组织接口
+### 7.4 超级管理员部门接口
 
 ```http
-GET    /api/v1/admin/identity/organization-units
+GET    /api/v1/admin/identity/organization-units?unit_type=department&status=all
 GET    /api/v1/admin/identity/organization-units/:unitId
 POST   /api/v1/admin/identity/organization-units
 PATCH  /api/v1/admin/identity/organization-units/:unitId
@@ -386,55 +446,84 @@ DELETE /api/v1/admin/identity/organization-units/:unitId
 POST   /api/v1/admin/identity/organization-units/:unitId/enable
 ```
 
-列表支持 `parent_id`、`unit_type`、`status` 查询，并可返回树形结果。`DELETE` 的业务语义是停用，
-不是从数据库物理删除。
+页面使用的 `unit_type=department` 列表必须返回平铺的 `{ "items": DepartmentSummary[] }`，不能混入
+医院或院区节点，也不能改成树形响应。`status` 支持 `active`、`disabled`、`all`，默认 `active`；
+管理员列表中的 `doctor_count` 只统计有效医生。详情及所有写操作返回最新 `DepartmentSummary`。
 
-公共目录只包含有效科室。超级管理员查看或恢复停用科室时，调用管理员列表并指定
-`status=disabled` 或 `status=all`；不能要求前端从公共目录恢复已经被过滤的数据。预约页面不能直接
-复用包含停用数据和管理字段的管理员响应。
+请求体固定为：
 
-### 7.4 管理员用户、医生与账号接口
+```text
+POST /organization-units
+  unit_type: department
+  parent_id?: string
+  name: string
+  operation_id: UUID
 
-保留现有接口：
+PATCH /organization-units/:unitId
+  name?: string
+  parent_id?: string
+  version: integer
+  operation_id: UUID
+
+DELETE /organization-units/:unitId
+POST /organization-units/:unitId/enable
+  version: integer
+  operation_id: UUID
+```
+
+首版页面不录入 `code`，服务端创建时生成并返回稳定唯一编码；编辑接口不得修改 ID、`unit_type` 或
+`code`。`parent_id` 未提交时，仅在系统存在唯一有效默认院区时自动归属该院区；存在多个可选院区时
+返回 `400 PARENT_ORGANIZATION_REQUIRED`，不能随机选择。`PATCH` 只修改实际提交的字段；JSON 中缺失
+`parent_id` 表示保持不变，不能解释为清空父级。
+
+`DELETE` 只停用，不物理删除。存在有效子节点时返回 `409 ORGANIZATION_HAS_ACTIVE_CHILDREN`，存在有效
+医生时返回 `409 DEPARTMENT_HAS_ACTIVE_DOCTORS`。恢复时父节点必须有效。公共目录只包含有效科室；
+“已停用科室”视图必须调用本组管理员列表。
+
+### 7.5 超级管理员用户查询
 
 ```http
+GET  /api/v1/admin/identity/accounts?page=1&page_size=20&nickname=&identity_type=&status=&department_id=
+GET  /api/v1/admin/identity/accounts/:accountId
 POST /api/v1/admin/identity/accounts/search-by-phone
-POST /api/v1/admin/identity/doctors/promote
 ```
 
-本期补充用户列表和详情：
+列表返回 `AdminAccountSummary` 分页对象，详情返回 `AdminAccountDetail`。`nickname` 同时对账号昵称和医生
+`display_name` 做规范化前缀匹配，允许重名；`identity_type`、`status` 和 `department_id` 是可选精确
+筛选。查询必须在数据库分页并限制最大页大小，不得读出全部账号后在内存中过滤。
 
-```http
-GET /api/v1/admin/identity/accounts?page=1&page_size=20&nickname=&identity_type=&status=&department_id=
-GET /api/v1/admin/identity/accounts/:accountId
+完整手机号精确查询沿用现有包装，响应升级为：
+
+```text
+SearchAccountByPhoneResponse
+  identity: AdminAccountSummary
+  phone:
+    phone_masked: string
+    verification_status: string
+    verification_source: string
 ```
 
-- `identity_type` 是根据账号、角色和有效医生档案计算出的 `patient`、`doctor` 或 `super_admin`，
-  不新增一列重复保存；
-- 支持按身份、账号状态和科室筛选；`nickname` 查询账号昵称和医生 `display_name`，采用前缀匹配；
-- 普通账号昵称可以为空，前端使用脱敏手机号作为展示兜底，不允许 Identity 跨库连接未来的 Patient
-  数据库完成分页；
-- 完整手机号继续使用现有精确查询接口，分页和详情只返回脱敏手机号；
-- 列表返回稳定账号 ID、可选昵称、可选医生显示名称、可选头像、脱敏手机号、身份、可选科室、账号状态和
-  `management_version`；
-- `management_version` 与 Token 使用的 `authorization_version` 分开；
-- 详情补充手机号验证状态、创建/更新时间、角色、可选工号、医生公开资料、医生状态、
-  `authorization_version` 及后端计算的 `available_actions`；
-- 查询必须数据库分页并限制最大页大小，不允许读出全部账号后在内存中过滤。
+其中 `identity` 不再是旧的 `CurrentIdentityResponse`。未找到返回 `404 ACCOUNT_NOT_FOUND`；响应、审计
+和普通日志均不得记录输入的完整手机号。手机号搜索、列表和详情的权限规则一致，均为
+`identity.authorization.manage` 或 `identity.account.manage`。
 
-手机号搜索通过现有 `POST .../search-by-phone` 精确返回账号；昵称允许重名，只返回分页候选。两条搜索
-链路最终都进入相同用户详情，并使用详情中的 `account_id` 执行开通医生、调岗、撤销、禁用或恢复。
+`available_actions` 只能从以下值中返回：`promote_doctor`、`edit_doctor`、`change_department`、
+`revoke_doctor`、`disable_account`、`enable_account`。服务端按最新操作者权限和目标状态计算：
 
-分页列表和详情不回显完整手机号：当前数据库只保存手机号 HMAC 指纹和脱敏值，没有可恢复明文。
-若以后确需回显，必须单独设计加密存储、密钥轮换和访问审计，不能把手机号改为数据库明文。
+| 目标状态 | 可返回动作 |
+|---|---|
+| 正常普通账号 | 有授权管理权限时 `promote_doctor`；有账号管理权限时 `disable_account` |
+| 正常医生账号 | 有授权管理权限时返回三个医生操作；有账号管理权限时 `disable_account` |
+| 已禁用普通账号或医生账号 | 有账号管理权限时仅 `enable_account` |
+| 任意超级管理员账号 | 空数组，首版只读 |
 
-`available_actions` 根据操作者最新权限和目标状态计算，可能包含 `promote_doctor`、`edit_doctor`、
-`change_department`、`revoke_doctor`、`disable_account`、`enable_account`。它帮助前端生成操作区，但
-不能代替写接口再次鉴权。
+前端还会与当前 Principal permission 取交集，但写接口必须再次鉴权。完整手机号仅用于定位候选；所有
+写操作只能使用稳定 `account_id`。
 
-本期确定的写接口：
+### 7.6 超级管理员医生和账号写接口
 
 ```http
+POST   /api/v1/admin/identity/doctors/promote
 PATCH  /api/v1/admin/identity/doctors/:accountId
 PUT    /api/v1/admin/identity/doctors/:accountId/department
 DELETE /api/v1/admin/identity/doctors/:accountId
@@ -442,19 +531,66 @@ POST   /api/v1/admin/identity/accounts/:accountId/disable
 POST   /api/v1/admin/identity/accounts/:accountId/enable
 ```
 
-- `PUT .../department` 原子替换医生当前唯一所属科室；
-- `DELETE .../doctors/:accountId` 表示撤销医生身份，不删除账号；
-- `PATCH .../doctors/:accountId` 可以维护显示名称、工号、头像 URL 和擅长描述；
-- `POST .../disable` 禁用账号所有登录身份，`POST .../enable` 只恢复登录能力；
-- 首版拒绝通过用户管理接口禁用、恢复或变更任何 `super_admin`；
-- 写接口必须携带 `operation_id`，避免网络重试造成重复变更。
+请求体固定为：
 
-禁用医生账号时保留医生角色和医生档案，只阻止登录；重新启用后仍恢复原医生身份。只有先执行
-“撤销医生身份”才会移除医生角色，之后再启用账号也不会自动重新开通医生。
+```text
+POST /doctors/promote
+  account_id: string
+  department_id: string
+  display_name: string
+  staff_no?: string
+  avatar_url?: string
+  description?: string
+  management_version: integer
+  offline_verified: true
+  operation_id: UUID
 
-这些接口供超级管理员专属“用户管理”二级页面使用。部门管理页只展示公共科室和医生目录，不直接
-排列调岗、撤销或禁用按钮。用户详情读取以及所有身份和账号写操作均记录操作者、目标账号、请求 ID、
-operation ID 和结果；不得在响应、审计或普通日志中记录完整手机号。
+PATCH /doctors/:accountId
+  display_name?: string
+  staff_no?: string
+  avatar_url?: string
+  description?: string
+  management_version: integer
+  operation_id: UUID
+
+PUT /doctors/:accountId/department
+  department_id: string
+  management_version: integer
+  operation_id: UUID
+
+DELETE /doctors/:accountId
+POST /accounts/:accountId/disable
+POST /accounts/:accountId/enable
+  management_version: integer
+  operation_id: UUID
+```
+
+六个写接口成功后都直接返回最新 `AdminAccountDetail`，使前端可以用同一详情状态刷新页面。现有
+`POST /doctors/promote` 返回 `CurrentIdentityResponse` 的契约在本模块实施时废止。调岗响应中的最新详情
+只能表示目标科室；RPC/Outbox/审计还必须同时记录原科室和目标科室 ID，供服务端事件消费者准确失效
+缓存。
+
+开通医生仅允许正常普通账号；曾被撤销的档案执行重新激活而不是插入第二条。编辑、调岗和撤销只
+允许当前医生；禁用账号保留医生角色、档案和科室，恢复后仍为医生；撤销医生身份后再恢复账号不会
+自动重新开通医生。所有接口拒绝变更 `super_admin`，也拒绝操作者修改自己的账号或身份。
+
+### 7.7 版本、幂等和错误响应
+
+- 组织写使用 `version`，账号和医生写使用 `management_version`；缺失返回 `400`，不匹配返回
+  `409 VERSION_CONFLICT` 并附最新版本；
+- `operation_id` 全局唯一；同一操作者对同一目标重放同一动作时返回原结果，用于其他目标或动作时返回
+  `409 OPERATION_ID_REUSED`；
+- 所有写请求必须先校验最新权限、目标状态和版本，再在单个 Identity 事务中修改主数据、写审计和
+  Outbox；
+- 身份、科室或账号状态变化递增 `management_version` 和 `authorization_version`；仅编辑展示资料只
+  递增 `management_version`；
+- `401` 表示会话无效，`403` 表示权限不足，`404` 表示目标不存在，`409` 表示状态或并发冲突，
+  `422` 表示字段语义不合法；错误响应必须包含稳定 `code` 和可展示的安全 `message`；
+- 用户详情读取及所有身份、账号写操作记录操作者、目标账号、request ID、operation ID 和结果，不得
+  记录完整手机号、Token、验证码或数据库内部错误。
+
+这些接口供超级管理员专属“用户管理”二级页面使用。部门管理页只展示科室和公共医生目录，不排列
+调岗、撤销或禁用按钮。
 
 ## 8. RPC 边界
 
@@ -557,9 +693,10 @@ LOCAL_SMS_CODE=<仅保存在本地环境>
 - 重复 `operation_id`；
 - 并发更新版本冲突。
 
-组织和工作人员更新建议携带 `updated_at` 或显式 `version` 做乐观锁，防止两个管理员互相覆盖。所有
-失败响应和日志继续使用脱敏手机号、`request_id`、`operation_id`、操作者 ID 和目标 ID，不能记录
-完整手机号或 Token。
+组织写请求必须携带组织单元 `version`，账号和医生写请求必须携带 `management_version`，不能再用
+`updated_at` 字符串代替乐观锁。版本冲突返回 `409`，要求前端重新读取后确认。所有失败响应和日志
+继续使用脱敏手机号、`request_id`、`operation_id`、操作者 ID 和目标 ID，不能记录完整手机号或
+Token。
 
 ## 11. 实施顺序
 
@@ -577,8 +714,8 @@ LOCAL_SMS_CODE=<仅保存在本地环境>
 10. 分别使用未登录访客、普通用户、医生和超级管理员验证公共目录；
 11. 使用超级管理员完成一次组织维护、医生开通、调岗、撤销和普通用户回退的联调回归。
 
-本阶段完成页面与接口方案，不要求同步实现超级管理员小程序页面代码；接口、契约、错误码和 mock 数据准备好后，
-前端再按独立任务开始开发。
+前端页面与调用契约已经确定；本阶段按第 7 节一次性落地 `.api`、Proto、RPC、数据库迁移、错误码和
+mock 数据。后端不得仅实现路径占位或返回旧授权上下文后要求前端临时兼容。
 
 ## 12. 验收标准
 
@@ -606,12 +743,10 @@ LOCAL_SMS_CODE=<仅保存在本地环境>
 - 数据迁移支持全新数据库升级，并有相应回滚或前向修复说明；
 - `scripts/check.ps1` 和 CI 全部通过。
 
-## 13. 需要审核确认的决定
+## 13. 已确定的实施决定
 
-进入代码实现前需要确认：
-
-1. 是否接受使用统一组织单元表表达唯一医院、院区和科室；
-2. “删除科室”是否接受统一采用停用语义；
-3. 撤销医生身份后是否确认保留普通用户身份和全部历史记录；
-4. 本地联调是否需要固定验证码的 local SMS Provider；
-5. 首版工作人员资料是否确定为显示名称、可选工号、唯一所属科室、头像 URL 和擅长描述。
+1. 使用统一组织单元表表达唯一医院、院区和科室；
+2. “删除科室”统一采用停用语义，不提供生产物理删除；
+3. 撤销医生身份后保留普通用户身份和全部历史记录；
+4. 首版工作人员资料为显示名称、可选工号、唯一所属科室、头像 URL 和擅长描述；
+5. local SMS Provider 不是部门/用户页面接口的前置条件；需要多账号本地登录联调时再按第 9.3 节单独启用。
