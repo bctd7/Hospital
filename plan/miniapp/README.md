@@ -15,14 +15,14 @@
 ## 文档索引
 
 1. [01-frontend-shell-design.md](./01-frontend-shell-design.md)：四个一级页面、标准 TabBar、工程目录、后端边界和第一阶段验收标准。
-2. [02-profile-center-design.md](./02-profile-center-design.md)：无账号信息的“我的”首页、就诊人管理边界和静态二级页面。
+2. [02-profile-center-design.md](./02-profile-center-design.md)：无账号信息的“我的”首页、就诊人管理边界和静态二级页面；当前不包含独立身份验证界面。
 
 后续页面和业务规划按顺序增加，例如：
 
 ```text
 03-registration-flow.md
 04-message-center.md
-05-login-and-session.md
+05-identity-and-session.md
 ```
 
 只有当相应业务范围和交互已经确认时才创建文档，不预先生成空规划文件。

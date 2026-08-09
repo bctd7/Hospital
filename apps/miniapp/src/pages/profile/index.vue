@@ -7,7 +7,7 @@ const menuItems: MenuEntry[] = [
   {
     id: "patients",
     title: "就诊人管理",
-    description: "登录、姓名与家庭就诊人",
+    description: "本人及家庭就诊人",
     symbol: "人",
     tone: "blue",
     route: "/pages/profile/patients/index",
@@ -50,7 +50,7 @@ function navigateTo(item: MenuEntry) {
     <ProfileHero />
     <view class="profile-page__body">
       <ActionMenu :items="menuItems" @select="navigateTo" />
-      <text class="profile-page__hint">当前页面仅展示前端布局，不会读取或保存账号与医疗数据。</text>
+      <text class="profile-page__hint">当前页面仅展示前端布局，不会读取或保存真实医疗数据。</text>
     </view>
   </view>
 </template>
