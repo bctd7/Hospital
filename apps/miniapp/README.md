@@ -123,6 +123,21 @@ npm run build:mp-weixin
 apps/miniapp/dist/build/mp-weixin
 ```
 
+### 微信体验版通过 AnyService 访问公网后端
+
+体验版使用 CloudBase AnyService 时，在 `apps/miniapp/.env.production` 配置：
+
+```dotenv
+VITE_API_TRANSPORT=cloudbase
+VITE_CLOUDBASE_ENV_ID=替换为云开发环境ID
+VITE_ANYSERVICE_NAME=hospitalapi
+VITE_STAFF_DATA_SOURCE=mock
+```
+
+`VITE_CLOUDBASE_ENV_ID` 必须与创建 AnyService 服务的 CloudBase 环境一致。此模式通过 `wx.cloud.callContainer` 请求，无需填写 `VITE_API_BASE_URL`，也无需把 ECS IP 配置为微信 request 合法域名。更换服务器且保持环境 ID 与服务标识不变时，只需在 AnyService 控制台修改源站 IP。
+
+当前阶段的体验版使用“真实短信登录与会话 + mock 科室、医生和用户管理数据”。等目录与管理 API 实现并部署后，把 `VITE_STAFF_DATA_SOURCE` 改为 `http`，重新构建和上传即可切换到真实业务数据。
+
 ## 依赖安全说明
 
 当前依赖版本来自 DCloud 官方 Vue 3/Vite TypeScript 模板，并由 `package-lock.json` 锁定。初始化时 `npm audit` 报告的问题来自 DCloud 编译器及其 Babel、Vite、国际化、压缩和图片处理等传递依赖；`npm audit fix --force` 会把 DCloud 包替换为不兼容版本，因此不能直接执行。

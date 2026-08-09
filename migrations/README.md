@@ -16,7 +16,12 @@ migrations/
 - `identity/000001_identity_authorization`：账号授权事实、审计和 Outbox；
 - `identity/000002_identity_login`：微信外部身份绑定和用户自报手机号。
 
-正式迁移工具仍需在 Goose、Atlas 或 golang-migrate 中确定一个；本地全新 MySQL 卷会通过 Compose 初始化脚本按编号执行迁移。
+正式迁移工具采用 `golang-migrate` v4，由仓库中的 `tools/db-migrate` 锁定依赖版本。Compose 只负责创建 MySQL 数据库和服务账号，表结构统一通过迁移执行器更新。
+
+```powershell
+.\scripts\migrate.ps1 -Service identity -Direction up
+.\scripts\migrate.ps1 -Service identity -Direction version
+```
 
 约束：
 

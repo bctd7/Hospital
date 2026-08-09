@@ -3,6 +3,9 @@
 interface ImportMetaEnv {
   readonly DEV: boolean;
   readonly VITE_API_BASE_URL?: string;
+  readonly VITE_API_TRANSPORT?: "direct" | "cloudbase";
+  readonly VITE_CLOUDBASE_ENV_ID?: string;
+  readonly VITE_ANYSERVICE_NAME?: string;
   readonly VITE_STAFF_DATA_SOURCE?: "mock" | "http";
 }
 

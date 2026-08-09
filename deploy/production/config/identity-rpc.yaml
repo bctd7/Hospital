@@ -1,0 +1,57 @@
+Name: hospital.identity.v1.rpc
+ListenOn: 0.0.0.0:8080
+Mode: pro
+
+Log:
+  ServiceName: identity-rpc
+  Mode: console
+  Encoding: json
+  Level: info
+
+Middlewares:
+  StatConf:
+    IgnoreContentMethods:
+      - /hospital.identity.v1.IdentityService/SendPhoneLoginCode
+      - /hospital.identity.v1.IdentityService/PhoneLogin
+      - /hospital.identity.v1.IdentityService/WeChatLogin
+      - /hospital.identity.v1.IdentityService/SetMyPhone
+      - /hospital.identity.v1.IdentityService/FindAccountByPhone
+      - /hospital.identity.v1.IdentityService/RefreshAccessToken
+      - /hospital.identity.v1.IdentityService/RevokeRefreshToken
+
+MySQL:
+  DataSource: ${IDENTITY_MYSQL_DSN}
+
+SessionRedis:
+  Addr: ${REDIS_HOST}:${REDIS_PORT}
+  Password: ${REDIS_PASSWORD}
+  DB: 0
+  Prefix: "identity:refresh:"
+
+Token:
+  Issuer: hospital-identity
+  Audience: hospital-services
+  AccessPrivateKeyBase64: ${IDENTITY_ACCESS_PRIVATE_KEY_BASE64}
+  AccessPublicKeyBase64: ${IDENTITY_ACCESS_PUBLIC_KEY_BASE64}
+  AccessTTLSeconds: 900
+  RefreshTTLSeconds: 2592000
+
+WeChat:
+  AppID: ${WECHAT_MINIAPP_APP_ID}
+  AppSecret: ${WECHAT_MINIAPP_APP_SECRET}
+  Code2SessionURL: ${WECHAT_CODE2SESSION_URL}
+
+PhoneLogin:
+  Enabled: ${ALIYUN_PNVS_ENABLED}
+  AccessKeyID: ${ALIBABA_CLOUD_ACCESS_KEY_ID}
+  AccessKeySecret: ${ALIBABA_CLOUD_ACCESS_KEY_SECRET}
+  RegionID: cn-shanghai
+  Endpoint: dypnsapi.aliyuncs.com
+  SignName: ${ALIYUN_PNVS_SIGN_NAME}
+  TemplateCode: "${ALIYUN_PNVS_TEMPLATE_CODE}"
+  SchemeName: ${ALIYUN_PNVS_SCHEME_NAME}
+  ValidSeconds: 300
+  IntervalSeconds: 60
+  CodeLength: 6
+
+PhoneLookupKeyBase64: ${IDENTITY_PHONE_LOOKUP_KEY_BASE64}

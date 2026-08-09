@@ -1,0 +1,29 @@
+Name: app-api
+Environment: production
+Host: 0.0.0.0
+Port: 8888
+
+Log:
+  ServiceName: app-api
+  Mode: console
+  Encoding: json
+  Level: info
+
+Middlewares:
+  Trace: true
+  Log: false
+  Recover: true
+  Timeout: true
+  Metrics: true
+  MaxBytes: true
+
+IdentityRPC:
+  Endpoints:
+    - identity-rpc:8080
+  NonBlock: true
+
+Token:
+  Issuer: hospital-identity
+  Audience: hospital-services
+  AccessPublicKeyBase64: ${IDENTITY_ACCESS_PUBLIC_KEY_BASE64}
+  AccessTTLSeconds: 900

@@ -1,0 +1,145 @@
+name: hospital-production
+
+services:
+  mysql:
+    image: mysql:8.4.11
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+      - --innodb-buffer-pool-size=512M
+      - --max-connections=100
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ../compose/mysql/init/001-create-service-databases.sh:/docker-entrypoint-initdb.d/001-create-service-databases.sh:ro
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mysqladmin ping -h 127.0.0.1 -uroot -p"$${MYSQL_ROOT_PASSWORD}" --silent
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    mem_limit: 1200m
+    networks:
+      - backend
+
+  identity-migrate:
+    build:
+      context: ../..
+      dockerfile: deploy/production/Dockerfile
+      target: db-migrate
+    restart: "no"
+    env_file:
+      - .env.production
+    command:
+      - -migrations
+      - /migrations
+      - -dsn-env
+      - IDENTITY_MYSQL_DSN
+      - -direction
+      - up
+    volumes:
+      - ../../migrations/identity:/migrations:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+    mem_limit: 128m
+    networks:
+      - backend
+
+  redis:
+    image: redis:7.4.10-alpine
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      TZ: Asia/Shanghai
+    command:
+      - sh
+      - -c
+      - >-
+        exec redis-server --appendonly yes --requirepass "$${REDIS_PASSWORD}"
+        --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - redis-cli -a "$${REDIS_PASSWORD}" ping 2>/dev/null | grep PONG
+      interval: 10s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    mem_limit: 384m
+    networks:
+      - backend
+
+  identity-rpc:
+    build:
+      context: ../..
+      dockerfile: deploy/production/Dockerfile
+      target: identity-rpc
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    depends_on:
+      identity-migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    expose:
+      - "8080"
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    mem_limit: 384m
+    networks:
+      - backend
+      - edge
+
+  app-api:
+    build:
+      context: ../..
+      dockerfile: deploy/production/Dockerfile
+      target: app-api
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    depends_on:
+      identity-rpc:
+        condition: service_started
+    ports:
+      - "${APP_BIND_ADDRESS:-0.0.0.0}:${APP_PORT:-8888}:8888"
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    mem_limit: 384m
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget -qO- http://127.0.0.1:8888/api/v1/health >/dev/null
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - backend
+      - edge
+
+networks:
+  backend:
+    name: hospital-production-backend
+    internal: true
+  edge:
+    name: hospital-production-edge
+
+volumes:
+  mysql-data:
+    name: hospital-production-mysql-data
+  redis-data:
+    name: hospital-production-redis-data
