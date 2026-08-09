@@ -6,12 +6,16 @@
 ## 接口技术
 
 - [认证、会话与身份接口](./api/01-authentication-and-session.md)
+- [部门目录与医生管理接口](./api/02-department-directory-and-management.md)
+- [超级管理员用户接口](./api/03-admin-user-management.md)
 
 ## 页面设计
 
 - [应用外壳与身份版本](./pages/01-app-shell-and-variants.md)
 - [登录入口与个人中心](./pages/02-entry-and-profile.md)
 - [本人就诊信息](./pages/03-self-patient.md)
+- [工作人员部门管理](./pages/04-department-management.md)
+- [超级管理员用户管理](./pages/05-admin-user-management.md)
 
 ## 当前基线
 
@@ -21,6 +25,8 @@
 - 会话：Hospital Access Token + Refresh Token，前端统一刷新和撤销；
 - 应用版本：患者端与工作人员端复用四个 Tab 页面，工作人员可主动切回患者端；
 - 工作人员：医生与超级管理员共享页面框架，具体入口按 permissions 区分；
+- 工作人员第二页：名称为“部门管理”，部门与医生数据全部由后端动态返回；
+- 超级管理员：从部门管理进入独立用户管理页，底栏仍保持四项；
 - 当前业务页以真实空状态为主，不伪造预约、消息、医生或患者数据。
 
 新增前端需求时，先判断它属于“接口契约”还是“页面交互”，放入对应目录；一个业务需要两部分
