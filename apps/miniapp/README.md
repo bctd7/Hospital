@@ -44,13 +44,13 @@ npm install
 npm run dev:mp-weixin
 ```
 
-命令会持续监听源码变化。日常开发可以直接在微信开发者工具中导入小程序工程目录：
+命令会持续监听源码变化，热更新模式下微信开发者工具需要导入：
 
 ```text
-apps/miniapp
+apps/miniapp/dist/dev/mp-weixin
 ```
 
-根目录的 `project.config.json` 会把 `dist/build/mp-weixin` 识别为小程序根目录。首次导入前需要执行一次 `npm run build:mp-weixin`，确保其中已经生成 `app.json`。请勿把 `apps/miniapp` 的上一级目录或 `src` 目录直接作为小程序根目录。
+如果使用 `npm run build:mp-weixin` 进行普通构建，也可以直接导入 `apps/miniapp`。根目录的 `project.config.json` 会把 `dist/build/mp-weixin` 识别为小程序根目录。首次导入前需要完成一次构建，确保其中已经生成 `app.json`。请勿把 `apps/miniapp` 的上一级目录或 `src` 目录直接作为小程序根目录。
 
 首次导入时可以使用测试号；取得正式 AppID 后，在微信开发者工具或 `src/manifest.json` 的 `mp-weixin.appid` 中配置。开发环境访问本地后端时，可以在微信开发者工具中暂时关闭合法域名校验；真机联调仍需要手机可访问的 HTTPS 地址或局域网地址。
 
