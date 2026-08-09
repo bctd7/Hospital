@@ -441,7 +441,7 @@ GET /api/v1/directory/departments/:departmentId/doctors?page=1&page_size=20
 GET    /api/v1/admin/identity/organization-units?unit_type=department&status=all
 GET    /api/v1/admin/identity/organization-units/:unitId
 POST   /api/v1/admin/identity/organization-units
-PATCH  /api/v1/admin/identity/organization-units/:unitId
+PUT    /api/v1/admin/identity/organization-units/:unitId
 DELETE /api/v1/admin/identity/organization-units/:unitId
 POST   /api/v1/admin/identity/organization-units/:unitId/enable
 ```
@@ -459,7 +459,7 @@ POST /organization-units
   name: string
   operation_id: UUID
 
-PATCH /organization-units/:unitId
+PUT /organization-units/:unitId
   name?: string
   parent_id?: string
   version: integer
@@ -473,7 +473,7 @@ POST /organization-units/:unitId/enable
 
 首版页面不录入 `code`，服务端创建时生成并返回稳定唯一编码；编辑接口不得修改 ID、`unit_type` 或
 `code`。`parent_id` 未提交时，仅在系统存在唯一有效默认院区时自动归属该院区；存在多个可选院区时
-返回 `400 PARENT_ORGANIZATION_REQUIRED`，不能随机选择。`PATCH` 只修改实际提交的字段；JSON 中缺失
+返回 `400 PARENT_ORGANIZATION_REQUIRED`，不能随机选择。`PUT` 只修改实际提交的字段；JSON 中缺失
 `parent_id` 表示保持不变，不能解释为清空父级。
 
 `DELETE` 只停用，不物理删除。存在有效子节点时返回 `409 ORGANIZATION_HAS_ACTIVE_CHILDREN`，存在有效
@@ -524,7 +524,7 @@ SearchAccountByPhoneResponse
 
 ```http
 POST   /api/v1/admin/identity/doctors/promote
-PATCH  /api/v1/admin/identity/doctors/:accountId
+PUT    /api/v1/admin/identity/doctors/:accountId
 PUT    /api/v1/admin/identity/doctors/:accountId/department
 DELETE /api/v1/admin/identity/doctors/:accountId
 POST   /api/v1/admin/identity/accounts/:accountId/disable
@@ -545,7 +545,7 @@ POST /doctors/promote
   offline_verified: true
   operation_id: UUID
 
-PATCH /doctors/:accountId
+PUT /doctors/:accountId
   display_name?: string
   staff_no?: string
   avatar_url?: string

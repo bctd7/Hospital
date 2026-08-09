@@ -90,11 +90,11 @@ POST /api/v1/admin/identity/doctors/promote
 ### 3.2 编辑资料与调岗
 
 ```http
-PATCH /api/v1/admin/identity/doctors/:accountId
+PUT /api/v1/admin/identity/doctors/:accountId
 PUT   /api/v1/admin/identity/doctors/:accountId/department
 ```
 
-- `PATCH` 维护工作人员显示名称、工号和公开医生资料；
+- `PUT` 维护工作人员显示名称、工号和公开医生资料；
 - `PUT .../department` 原子替换首版唯一所属科室；
 - 调岗成功后响应包含原科室和目标科室 ID，供前端准确失效缓存；
 - 不允许通过清空 `department_id` 产生无科室医生。
