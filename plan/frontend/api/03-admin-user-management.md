@@ -84,6 +84,9 @@ POST /api/v1/admin/identity/doctors/promote
 描述、`operation_id` 和账号 `management_version`。后端原子创建医生资料、授予角色并提升管理版本
 和授权版本。
 
+曾经被撤销医生身份的普通账号可以再次开通。后端必须重新激活原有 `revoked` 医生档案并更新科室和
+公开资料，不能插入第二条档案；已禁用账号必须先恢复，开通医生操作不能顺便恢复登录能力。
+
 ### 3.2 编辑资料与调岗
 
 ```http

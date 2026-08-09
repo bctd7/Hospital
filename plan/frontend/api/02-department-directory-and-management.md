@@ -45,11 +45,11 @@ DoctorSummary
 
 ```http
 GET    /api/v1/admin/identity/organization-units?unit_type=department&status=all
-GET    /api/v1/admin/identity/organization-units/:departmentId
+GET    /api/v1/admin/identity/organization-units/:unitId
 POST   /api/v1/admin/identity/organization-units
-PATCH  /api/v1/admin/identity/organization-units/:departmentId
-DELETE /api/v1/admin/identity/organization-units/:departmentId
-POST   /api/v1/admin/identity/organization-units/:departmentId/enable
+PATCH  /api/v1/admin/identity/organization-units/:unitId
+DELETE /api/v1/admin/identity/organization-units/:unitId
+POST   /api/v1/admin/identity/organization-units/:unitId/enable
 ```
 
 页面只提交和展示 `unit_type=department` 的组织单元；当前只有一个医院，存在多个院区时同时提交
@@ -58,7 +58,7 @@ POST   /api/v1/admin/identity/organization-units/:departmentId/enable
 默认左右列表继续使用公共目录，只展示有效科室。超级管理员进入“已停用科室”管理视图时，使用
 管理员查询获取停用数据并执行恢复；公共目录不能承担恢复查询。
 
-删除部门采用停用语义，不做物理删除。部门写接口携带 `operation_id` 和服务端返回的 `version`，
+删除部门采用停用语义，不做物理删除。部门写接口携带 `operation_id` 和当前组织单元 `version`，
 用于幂等与乐观锁；前端不在成功响应前擅自修改权威数据。
 
 开通医生、调岗、撤销医生身份和禁用账号统一由独立的
