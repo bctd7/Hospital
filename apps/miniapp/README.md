@@ -87,8 +87,10 @@ apps/miniapp/dist/dev/mp-weixin
 如果使用 `npm run build:mp-weixin` 进行普通构建，也可以直接导入 `apps/miniapp`。根目录的 `project.config.json` 会把 `dist/build/mp-weixin` 识别为小程序根目录。首次导入前需要完成一次构建，确保其中已经生成 `app.json`。请勿把 `apps/miniapp` 的上一级目录或 `src` 目录直接作为小程序根目录。
 
 如果开发者工具提示某个 `components/*.js`“已被代码依赖分析忽略”，请确认使用最新构建产物并重新
-编译；工程已关闭“过滤无依赖文件”，避免 uni-app 生成的局部组件被误判。旧工程设置仍生效时，
-在开发者工具“详情 → 本地设置”中手动关闭该选项后重新编译。
+编译；工程已同时关闭开发期的 `ignoreDevUnusedFiles` 和上传期的 `ignoreUploadUnusedFiles`，避免
+uni-app 生成的局部组件被误判。开发者工具生成的 `project.private.config.json` 优先级更高；旧工程
+仍报错时，在“详情 → 本地设置”关闭“过滤无依赖文件”，或者删除该私有配置后重新导入
+`apps/miniapp`。
 
 当前测试 AppID 同时配置在 `src/manifest.json` 和根目录 `project.config.json`。开发环境访问本地后端时，可以在微信开发者工具中暂时关闭合法域名校验；真机联调仍需要手机可访问的 HTTPS 地址或局域网地址。
 

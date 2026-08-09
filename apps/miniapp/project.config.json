@@ -11,6 +11,7 @@
     "minified": true,
     "newFeature": true,
     "bigPackageSizeSupport": true,
+    "ignoreDevUnusedFiles": false,
     "ignoreUploadUnusedFiles": false
   },
   "condition": {}
