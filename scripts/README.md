@@ -4,8 +4,7 @@
 
 - `check.ps1`：执行 API、事件、Compose、Go 和微信小程序全量检查；
 - `db-bootstrap-local.ps1`：仅在本地启动 MySQL、幂等创建服务数据库和账号，并执行迁移；
-- `migrate.ps1`：按服务执行数据库升级、回滚、版本查询或一次性基线登记；
-- `check-foundation.ps1`：兼容旧命令，内部直接调用 `check.ps1`。
+- `migrate.ps1`：按服务执行数据库升级、回滚、版本查询或一次性基线登记。
 
 本地首次准备数据库：
 
