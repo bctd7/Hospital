@@ -1,5 +1,6 @@
 USE hospital_identity;
 
+-- 平台账号主表：只保存所有账号共有的身份状态，不保存微信、手机号、科室或角色明细。
 CREATE TABLE identity_accounts (
     id                    CHAR(36)     NOT NULL,
     account_type          VARCHAR(32)  NOT NULL,
@@ -12,6 +13,7 @@ CREATE TABLE identity_accounts (
     CONSTRAINT chk_identity_accounts_status CHECK (status IN ('active', 'disabled'))
 ) ENGINE=InnoDB;
 
+-- 科室主数据：供工作人员当前归属和后续业务数据归属共同引用。
 CREATE TABLE identity_departments (
     id          CHAR(36)     NOT NULL,
     parent_id   CHAR(36)     NULL,
@@ -27,6 +29,7 @@ CREATE TABLE identity_departments (
     CONSTRAINT chk_identity_departments_status CHECK (status IN ('active', 'disabled'))
 ) ENGINE=InnoDB;
 
+-- 工作人员扩展档案：仅 staff 账号存在；当前一个工作人员只属于一个科室。
 CREATE TABLE identity_staff_profiles (
     account_id    CHAR(36)    NOT NULL,
     department_id CHAR(36)    NOT NULL,
@@ -39,6 +42,7 @@ CREATE TABLE identity_staff_profiles (
     CONSTRAINT fk_identity_staff_department FOREIGN KEY (department_id) REFERENCES identity_departments (id)
 ) ENGINE=InnoDB;
 
+-- 角色定义：描述“超级管理员”“部门医生”等稳定身份集合。
 CREATE TABLE identity_roles (
     id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     code        VARCHAR(64)     NOT NULL,
@@ -51,6 +55,7 @@ CREATE TABLE identity_roles (
     CONSTRAINT chk_identity_roles_status CHECK (status IN ('active', 'disabled'))
 ) ENGINE=InnoDB;
 
+-- 权限定义：描述可被业务服务本地判断的具体操作能力。
 CREATE TABLE identity_permissions (
     id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     code        VARCHAR(128)    NOT NULL,
@@ -65,6 +70,7 @@ CREATE TABLE identity_permissions (
     CONSTRAINT chk_identity_permissions_status CHECK (status IN ('active', 'disabled'))
 ) ENGINE=InnoDB;
 
+-- 角色与权限的多对多关系：一个角色可有多个权限，一个权限可被多个角色复用。
 CREATE TABLE identity_role_permissions (
     role_id       BIGINT UNSIGNED NOT NULL,
     permission_id BIGINT UNSIGNED NOT NULL,
@@ -74,6 +80,7 @@ CREATE TABLE identity_role_permissions (
     CONSTRAINT fk_identity_role_permissions_permission FOREIGN KEY (permission_id) REFERENCES identity_permissions (id)
 ) ENGINE=InnoDB;
 
+-- 账号当前角色：account_id 是主键，因此首期明确限制一个账号最多一个角色。
 CREATE TABLE identity_account_roles (
     account_id CHAR(36)        NOT NULL,
     role_id    BIGINT UNSIGNED NOT NULL,
@@ -84,6 +91,7 @@ CREATE TABLE identity_account_roles (
     CONSTRAINT fk_identity_account_roles_role FOREIGN KEY (role_id) REFERENCES identity_roles (id)
 ) ENGINE=InnoDB;
 
+-- 授权审计：永久记录谁在何时对哪个账号执行了什么权限或组织变更。
 CREATE TABLE identity_authorization_audit (
     id                  CHAR(36)     NOT NULL,
     operation_id        CHAR(36)     NOT NULL,
@@ -102,6 +110,7 @@ CREATE TABLE identity_authorization_audit (
     CONSTRAINT fk_identity_authorization_audit_target FOREIGN KEY (target_account_id) REFERENCES identity_accounts (id)
 ) ENGINE=InnoDB;
 
+-- 事务 Outbox：与授权变更同事务落库，供未来 Kafka 发布器可靠发送事件；不是用户资料表。
 CREATE TABLE identity_outbox_events (
     event_id       CHAR(36)     NOT NULL,
     aggregate_id  CHAR(36)     NOT NULL,
