@@ -1,39 +1,186 @@
-# 生产部署与服务器迁移
+# 线上操作手册
 
-本目录是公网测试后端的可重复部署入口。在一台 ECS 上运行 MySQL、Redis、Identity RPC 和 App API，当前阶段不启用 Kafka。
+当前调用链：
 
-## 文件作用
+```text
+微信小程序
+  → CloudBase AnyService（hospitalapi）
+  → ECS:8888
+  → App API
+  → Identity RPC
+  → MySQL / Redis
+```
 
-- `Dockerfile`：构建可重复生成的 Go 服务 Linux 镜像；
-- `docker-compose.yml`：启动完整服务栈、执行待运行的 Identity 迁移、限制资源，并且只向宿主机发布 App API；
-- `config/`：保存生产环境的服务发现和日志配置；
-- `env.example`：说明必需配置项，不保存真实密钥；
-- `scripts/deploy.sh`：校验配置、构建、启动并检查服务健康状态；
-- `scripts/backup.sh`：生成事务一致的 MySQL 压缩备份；
-- `scripts/export-images.ps1`：在 Windows 开发机拉取基础镜像、构建服务镜像并导出归档；
-- `scripts/import-images.sh`：在 Ubuntu 服务器导入镜像归档，无需访问 Docker Hub 即可部署。
+先判断你要做哪件事：
 
-真实配置文件 `deploy/production/.env.production` 仅保存在服务器，已经被 Git 和 Docker 构建上下文忽略。
+| 场景 | 需要重新部署后端 | 需要重新上传小程序 |
+|---|---:|---:|
+| 只换 ECS 服务器，CloudBase 环境和服务标识不变 | 是 | 否 |
+| 换 CloudBase 环境或 AnyService 服务标识 | 否 | 是 |
+| 修改 Go 后端代码 | 是 | 否 |
+| 修改小程序代码 | 否 | 是 |
+| 增加表或修改表结构 | 是 | 通常否 |
+| 增加一个全新的业务数据库 | 是 | 视前端接口是否变化而定 |
 
-## 首次部署
+## 一、更换 ECS 服务器
 
-前置条件：Ubuntu 22.04、Docker Engine、Compose v2、项目专用 SSH 密钥。ECS 安全组只对管理来源开放 TCP 22，并为 CloudBase AnyService 源站开放 TCP 8888。
+目标：把数据库、配置和服务搬到新服务器，最后只修改 AnyService 源站 IP。
+
+### 1. 在旧服务器备份
 
 ```bash
 cd /opt/hospital/deploy/production
-cp env.example .env.production
-# 填写所有占位配置
+./scripts/backup.sh
+```
+
+确认输出的 `.sql.gz` 存在，并执行：
+
+```bash
+gzip -t backups/hospital-时间戳.sql.gz
+```
+
+### 2. 准备新服务器
+
+- 安装 Ubuntu 22.04、Docker Engine 和 Compose v2；
+- 安全组开放 SSH `22` 和后端源站 `8888`；
+- 不开放 MySQL `3306`、Redis `6379`、Identity RPC `8080`；
+- 把同一版本仓库放到 `/opt/hospital`；
+- 把旧服务器的 `.env.production` 安全复制到新服务器：
+
+```text
+/opt/hospital/deploy/production/.env.production
+```
+
+必须保留原来的 Token 公私钥、手机号指纹密钥、微信 AppSecret 和短信配置。否则现有会话可能失效，手机号指纹也无法继续匹配旧账号。
+
+### 3. 首次启动并恢复数据
+
+```bash
+cd /opt/hospital/deploy/production
 chmod 600 .env.production
 chmod +x scripts/*.sh
 ./scripts/deploy.sh
-curl --fail http://127.0.0.1:8888/api/v1/health
+docker compose --env-file .env.production -f docker-compose.yml stop app-api identity-rpc
 ```
 
-安全组不要开放 MySQL `3306`、Redis `6379` 或 Identity RPC `8080`。
+把备份上传到新服务器后恢复：
 
-## 后续更新
+```bash
+gunzip -c /path/to/hospital-时间戳.sql.gz \
+  | docker compose --env-file .env.production -f docker-compose.yml exec -T mysql \
+    sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot'
 
-将对应版本的仓库文件上传到 `/opt/hospital` 后执行：
+./scripts/deploy.sh
+```
+
+### 4. 验证新服务器
+
+```bash
+curl --fail http://127.0.0.1:8888/api/v1/health
+docker compose --env-file .env.production -f docker-compose.yml ps
+```
+
+再测试一次真实短信登录。
+
+### 5. 切换 AnyService
+
+进入 CloudBase → AnyService → `hospitalapi`，只把源站从旧 IP 改为：
+
+```text
+新服务器公网IP:8888
+```
+
+CloudBase 环境 ID 和服务标识没有变化，因此小程序不需要重新构建或上传。
+
+### 6. 回滚
+
+新服务器验证完成前不要释放旧服务器。回滚时把 AnyService 源站 IP 改回旧服务器，并重新启动旧服务器服务。
+
+## 二、更换 CloudBase 或 AnyService
+
+这里的“更换 CloudBase”包括：换云开发环境、重新创建 AnyService、修改 AnyService 服务标识。
+
+### 1. 创建新服务
+
+在新的 CloudBase 环境中创建 AnyService：
+
+```text
+服务标识：hospitalapi
+源站协议：HTTP
+源站地址：ECS公网IP:8888
+```
+
+把新环境绑定到小程序 AppID：
+
+```text
+wx8ba66b98c93423fd
+```
+
+### 2. 修改小程序本地生产配置
+
+编辑不会提交 Git 的文件：
+
+```text
+apps/miniapp/.env.production
+```
+
+```dotenv
+VITE_API_TRANSPORT=cloudbase
+VITE_CLOUDBASE_ENV_ID=新的云开发环境ID
+VITE_ANYSERVICE_NAME=hospitalapi
+VITE_STAFF_DATA_SOURCE=mock
+```
+
+如果服务标识不是 `hospitalapi`，同时修改 `VITE_ANYSERVICE_NAME`。
+
+### 3. 重新构建并上传
+
+```powershell
+cd C:\Users\27902\GolandProjects\Hospital\apps\miniapp
+npm run type-check
+npm run test
+npm run build:mp-weixin
+```
+
+在微信开发者工具上传一个新版本，并到微信公众平台把它设为体验版。
+
+### 4. 验证
+
+在开发者工具 Console 调用 `/api/v1/health`，再在手机体验版完成一次短信登录。
+
+ECS、MySQL 和 Redis 没有变化，所以不需要搬数据库。
+
+## 三、加入新代码后如何发布
+
+### 情况 A：只修改小程序代码
+
+```powershell
+cd C:\Users\27902\GolandProjects\Hospital\apps\miniapp
+npm run type-check
+npm run test
+npm run build:mp-weixin
+```
+
+然后：
+
+```text
+微信开发者工具上传新版本
+→ 微信公众平台版本管理
+→ 设为体验版
+```
+
+不需要重启 ECS。
+
+### 情况 B：只修改 Go 后端代码
+
+先在本地检查并提交代码：
+
+```powershell
+cd C:\Users\27902\GolandProjects\Hospital
+.\scripts\check.ps1
+```
+
+让服务器获取同一个提交后执行：
 
 ```bash
 cd /opt/hospital/deploy/production
@@ -41,64 +188,104 @@ cd /opt/hospital/deploy/production
 ./scripts/deploy.sh
 ```
 
-重建服务容器不会删除具名 MySQL、Redis 数据卷。表结构变化必须通过 `migrations/` 下经过评审的新迁移交付，禁止使用 `docker compose down -v` 更新服务。
+验证：
 
-`identity-migrate` 构建并运行 `tools/db-migrate`，依赖版本由仓库锁定。每次部署执行 `up`：已登记版本会跳过，只运行待执行版本。迁移失败时，Identity RPC 和 App API 不会继续启动为不兼容版本。生产迁移必须在备份后明确执行；CI 只连接隔离测试数据库，不连接生产库。
+```bash
+curl --fail http://127.0.0.1:8888/api/v1/health
+docker compose --env-file .env.production -f docker-compose.yml logs --tail=100 app-api identity-rpc
+```
 
-## Docker Hub 不可用时
+后端接口兼容时，小程序不需要重新上传。
 
-阿里云 Docker Hub 加速器不能保证缓存每个精确镜像标签。测试部署可以在 Windows 开发机生成包含全部依赖的镜像归档：
+### 情况 C：服务器无法从 Docker Hub 拉镜像
+
+在 Windows 开发机导出镜像：
 
 ```powershell
 .\deploy\production\scripts\export-images.ps1 `
-    -OutputPath "$env:TEMP\hospital-images.tar.gz"
+  -OutputPath "$env:TEMP\hospital-images.tar.gz"
+
 scp -i "$env:USERPROFILE\.ssh\hospital_ecs" `
-    "$env:TEMP\hospital-images.tar.gz" `
-    root@SERVER_IP:/tmp/hospital-images.tar.gz
+  "$env:TEMP\hospital-images.tar.gz" `
+  root@服务器IP:/tmp/hospital-images.tar.gz
 ```
 
-在 Ubuntu 服务器导入并部署：
+服务器先备份，再导入并部署：
 
 ```bash
 cd /opt/hospital/deploy/production
+./scripts/backup.sh
 ./scripts/import-images.sh /tmp/hospital-images.tar.gz
 ```
 
-长期运行时应将固定版本镜像推送到阿里云 ACR 私有仓库，并把 Compose 镜像地址改为 ACR；不要把 Docker Hub 镜像加速器当作可靠发布源。
+### 情况 D：前后端都修改
 
-常用检查命令：
+先发布后端并验证健康，再上传小程序新版本。不要先上传依赖新接口的小程序。
 
-```bash
-docker compose --env-file .env.production -f docker-compose.yml ps
-docker compose --env-file .env.production -f docker-compose.yml logs --tail=200 app-api identity-rpc
-curl --fail http://127.0.0.1:8888/api/v1/health
+## 四、加入新数据库或修改表结构
+
+### 情况 A：只给现有 `hospital_identity` 增加表或字段
+
+不要修改已经执行过的 `000001`、`000002`。新增一组迁移，例如：
+
+```text
+migrations/identity/000003_add_xxx.up.sql
+migrations/identity/000003_add_xxx.down.sql
 ```
 
-## 更换服务器
+本地验证：
 
-1. 保持旧服务器运行，执行 `scripts/backup.sh`；
-2. 创建新的 Ubuntu 服务器，先收紧安全组；
-3. 把同一仓库版本和 `.env.production` 上传到新服务器 `/opt/hospital`。保留 Token 签名密钥可以避免现有 Access Token 立即失效；基础设施密码应在数据库恢复验证后再轮换；
-4. 先执行一次 `scripts/deploy.sh`，创建 MySQL 数据卷和服务账号；
-5. 停止新服务器的应用容器并恢复备份：
+```powershell
+.\scripts\migrate.ps1 -Service identity -Direction up
+.\scripts\migrate.ps1 -Service identity -Direction version
+.\scripts\check.ps1
+```
 
-   ```bash
-   cd /opt/hospital/deploy/production
-   gunzip -c /path/to/hospital-TIMESTAMP.sql.gz \
-     | docker compose --env-file .env.production -f docker-compose.yml exec -T mysql \
-       sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot'
-   ./scripts/deploy.sh
+发布时：
+
+```bash
+cd /opt/hospital/deploy/production
+./scripts/backup.sh
+./scripts/deploy.sh
+```
+
+`identity-migrate` 会跳过旧版本，只执行新的 `000003`。迁移失败时后端不会继续启动。
+
+### 情况 B：增加一个全新的业务数据库
+
+需要同时完成以下内容：
+
+1. 新建迁移目录：
+
+   ```text
+   migrations/新服务名/
    ```
 
-6. 在新服务器本机调用健康检查，并使用测试账号验证登录和关键接口；
-7. 在 CloudBase AnyService 中只修改源站公网 IP，保持云环境 ID 和服务标识不变。此时小程序无需重新构建或上传；
-8. 如果未来改为小程序直接请求 HTTPS，则需要更新 `VITE_API_BASE_URL`、微信请求合法域名、DNS 和 TLS 证书，然后重新构建上传；
-9. 新服务器验证完成前，旧服务器保持停止但可恢复。需要回滚时，把 AnyService 指回旧 IP 并重新启动旧服务。
+2. 在 `.env.example` 和 `deploy/production/env.example` 增加数据库账号、密码和 DSN；
+3. 更新 `deploy/compose/mysql/init/001-create-service-databases.sh`，为全新数据卷创建数据库和账号；
+4. 更新 `scripts/migrate.ps1`，让 `-Service` 支持新服务；
+5. 在 `deploy/production/docker-compose.yml` 增加对应的迁移任务，并让业务服务依赖迁移成功；
+6. 更新 `.github/workflows/ci.yml`，在隔离数据库中测试新迁移；
+7. 更新 `scripts/backup.sh`，把新数据库加入备份列表；
+8. 在业务服务配置中注入新 DSN；
+9. 先在空数据库完成一次 `up → down → up` 验证，再部署。
 
-Redis 保存 Refresh Session。只迁移 MySQL 可能要求用户重新登录；测试环境可以接受。如果未来要求会话无感迁移，需要先增加并验证 Redis 备份恢复流程。
+注意：`docker-entrypoint-initdb.d` 只在 MySQL 数据卷第一次初始化时运行。已有服务器增加新数据库时，不能只修改初始化脚本；还必须在部署前对现有 MySQL 实例执行一次经过评审的幂等数据库/账号创建脚本。
 
-## 备份管理
+## 五、任何操作完成后都检查
 
-备份包含账号和手机号相关记录。备份不得提交 Git，应限制文件权限、复制到第二个受保护位置，并按照保留周期清理。正式依赖备份前必须实际验证恢复流程。
+```bash
+curl --fail http://127.0.0.1:8888/api/v1/health
+docker compose --env-file .env.production -f docker-compose.yml ps
+docker compose --env-file .env.production -f docker-compose.yml logs --tail=100 app-api identity-rpc
+```
 
-备份脚本不会自动删除旧文件，以避免静默数据丢失；需要持续监控 40 GiB ECS 系统盘用量。
+然后在手机体验版验证：启动、短信登录、退出登录和关键页面。
+
+## 六、禁止事项
+
+- 不提交 `.env.production`、AppSecret、AccessKey、Token 私钥；
+- 不执行 `docker compose down -v`，它会删除数据库和 Redis 数据卷；
+- 不改写已经在共享环境执行过的迁移；
+- 不在没有备份的情况下执行生产数据库迁移；
+- 不在新服务器验证完成前释放旧服务器。
