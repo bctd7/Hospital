@@ -7,6 +7,7 @@ defineProps<{
   loading: boolean;
   error: string;
   canManage: boolean;
+  canOpenDoctor: boolean;
 }>();
 
 defineEmits<{
@@ -55,11 +56,12 @@ defineEmits<{
         <text>当前部门暂无医生</text>
       </view>
       <template v-else>
-        <button
+        <view
           v-for="doctor in doctors"
           :key="doctor.doctorId"
           class="doctor-item"
-          @tap="$emit('open-doctor', doctor)"
+          :class="{ 'doctor-item--interactive': canOpenDoctor }"
+          @tap="canOpenDoctor && $emit('open-doctor', doctor)"
         >
           <view class="doctor-avatar">{{ doctor.displayName.slice(0, 1) }}</view>
           <view class="doctor-item__body">
@@ -68,8 +70,8 @@ defineEmits<{
               {{ doctor.description || "暂无擅长描述" }}
             </text>
           </view>
-          <text class="doctor-item__arrow">›</text>
-        </button>
+          <text v-if="canOpenDoctor" class="doctor-item__arrow">›</text>
+        </view>
       </template>
     </scroll-view>
   </view>
@@ -154,7 +156,7 @@ button::after {
   border-bottom: 1rpx solid #f0f2f6;
 }
 
-.doctor-item:active {
+.doctor-item--interactive:active {
   background: #f7fbff;
 }
 

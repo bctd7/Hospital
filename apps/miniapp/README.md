@@ -50,9 +50,18 @@ VITE_API_BASE_URL=http://电脑的局域网地址:8888
 VITE_STAFF_DATA_SOURCE=mock
 ```
 
-`VITE_STAFF_DATA_SOURCE=mock` 只在开发构建生效。部门和用户演示数据全部隔离在
+`VITE_STAFF_DATA_SOURCE=mock` 在开发服务中生效。部门和用户演示数据全部隔离在
 `src/api/staffManagement.mock.ts`，页面只调用 `StaffManagementApi`，不直接引用静态数据。
-后端接口完成后把本地配置改为 `http` 即可联调，生产构建无条件使用 HTTP。
+后端接口完成后把本地配置改为 `http` 即可联调，普通生产构建无条件使用 HTTP。
+
+后端尚未完成、需要从 `apps/miniapp` 直接导入微信开发者工具查看演示数据时，先执行：
+
+```powershell
+npm run build:mp-weixin:mock
+```
+
+该命令显式生成 Mock 预览包到 `dist/build/mp-weixin`。发布前必须改用
+`npm run build:mp-weixin`；普通生产构建会剔除演示账号数据。
 
 后端联调完成后的 Mock 清理清单：
 
@@ -76,6 +85,10 @@ apps/miniapp/dist/dev/mp-weixin
 ```
 
 如果使用 `npm run build:mp-weixin` 进行普通构建，也可以直接导入 `apps/miniapp`。根目录的 `project.config.json` 会把 `dist/build/mp-weixin` 识别为小程序根目录。首次导入前需要完成一次构建，确保其中已经生成 `app.json`。请勿把 `apps/miniapp` 的上一级目录或 `src` 目录直接作为小程序根目录。
+
+如果开发者工具提示某个 `components/*.js`“已被代码依赖分析忽略”，请确认使用最新构建产物并重新
+编译；工程已关闭“过滤无依赖文件”，避免 uni-app 生成的局部组件被误判。旧工程设置仍生效时，
+在开发者工具“详情 → 本地设置”中手动关闭该选项后重新编译。
 
 当前测试 AppID 同时配置在 `src/manifest.json` 和根目录 `project.config.json`。开发环境访问本地后端时，可以在微信开发者工具中暂时关闭合法域名校验；真机联调仍需要手机可访问的 HTTPS 地址或局域网地址。
 

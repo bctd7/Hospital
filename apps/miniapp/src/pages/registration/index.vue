@@ -3,11 +3,9 @@ import { onShow } from "@dcloudio/uni-app";
 import { computed, ref } from "vue";
 
 import { STAFF_MANAGEMENT_USES_MOCK, staffManagementApi } from "@/api/staffManagement";
-import AppPage from "@/components/layout/AppPage.vue";
 import DepartmentDoctorPanel from "@/components/staff/DepartmentDoctorPanel.vue";
 import DepartmentEditorDialog from "@/components/staff/DepartmentEditorDialog.vue";
 import DepartmentSidebar from "@/components/staff/DepartmentSidebar.vue";
-import FeaturePlaceholder from "@/components/states/FeaturePlaceholder.vue";
 import { sessionState } from "@/stores/session";
 import type { DepartmentSummary, DoctorSummary } from "@/types/staffManagement";
 import { hasIdentityPermission } from "@/utils/appShell";
@@ -26,11 +24,13 @@ const isSuperAdmin = computed(
 );
 const canManageDepartments = computed(
   () =>
+    isStaffApp.value &&
     isSuperAdmin.value &&
     hasIdentityPermission(sessionState.principal, "identity.department.manage"),
 );
 const canOpenUserManagement = computed(
   () =>
+    isStaffApp.value &&
     isSuperAdmin.value &&
     (hasIdentityPermission(
       sessionState.principal,
@@ -69,9 +69,7 @@ const visibleDepartments = computed(() =>
 onShow(() => {
   navigationPending.value = false;
   uni.setNavigationBarTitle({ title: isStaffApp.value ? "部门管理" : "挂号" });
-  if (isStaffApp.value) {
-    void refreshDepartments(false);
-  }
+  void refreshDepartments(false);
 });
 
 async function refreshDepartments(force = false) {
@@ -249,7 +247,6 @@ function openUserManagement() {
 
 function openDoctor(doctor: DoctorSummary) {
   if (!canOpenUserManagement.value || navigationPending.value) {
-    uni.showToast({ title: "医生公开资料详情后续接入", icon: "none" });
     return;
   }
   navigationPending.value = true;
@@ -272,23 +269,11 @@ function messageOf(error: unknown, fallback: string): string {
 </script>
 
 <template>
-  <AppPage
-    v-if="!isStaffApp"
-    title="挂号"
-    description="检查项目、科室和排班将在业务接口确认后接入。"
-  >
-    <FeaturePlaceholder
-      label="患者端"
-      title="挂号功能建设中"
-      description="本页面暂不请求后端数据，后续将按照接口契约接入检查项目、医生排班和预约流程。"
-    />
-  </AppPage>
-
-  <view v-else class="department-page">
+  <view class="department-page">
     <view class="department-page__header">
       <view>
         <view class="department-page__title-row">
-          <text class="department-page__title">部门管理</text>
+          <text class="department-page__title">科室与医生</text>
           <text v-if="STAFF_MANAGEMENT_USES_MOCK" class="mock-badge">Mock</text>
         </view>
         <text class="department-page__subtitle">选择部门查看当前医生</text>
@@ -324,6 +309,7 @@ function messageOf(error: unknown, fallback: string): string {
         :loading="doctorLoading"
         :error="doctorError"
         :can-manage="canManageDepartments"
+        :can-open-doctor="canOpenUserManagement"
         @edit="openEditDepartment"
         @set-enabled="changeDepartmentStatus"
         @retry="retryDoctors"
