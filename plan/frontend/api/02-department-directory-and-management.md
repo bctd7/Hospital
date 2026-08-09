@@ -39,11 +39,13 @@ DoctorSummary
 `department_id` 是科室的唯一标识，名称修改后 ID 不变。前端列表 key、医生查询和预约请求都使用
 `department_id`，不能使用科室名称判断是否为同一个科室。
 
-## 3. 超级管理员写接口
+## 3. 超级管理员部门管理接口
 
 部门维护沿用现有权限 `identity.department.manage`：
 
 ```http
+GET    /api/v1/admin/identity/organization-units?unit_type=department&status=all
+GET    /api/v1/admin/identity/organization-units/:departmentId
 POST   /api/v1/admin/identity/organization-units
 PATCH  /api/v1/admin/identity/organization-units/:departmentId
 DELETE /api/v1/admin/identity/organization-units/:departmentId
@@ -52,6 +54,9 @@ POST   /api/v1/admin/identity/organization-units/:departmentId/enable
 
 页面只提交和展示 `unit_type=department` 的组织单元；当前只有一个医院，存在多个院区时同时提交
 合法的 `parent_id`，但不把完整组织树混入左右列表布局。
+
+默认左右列表继续使用公共目录，只展示有效科室。超级管理员进入“已停用科室”管理视图时，使用
+管理员查询获取停用数据并执行恢复；公共目录不能承担恢复查询。
 
 删除部门采用停用语义，不做物理删除。部门写接口携带 `operation_id` 和服务端返回的 `version`，
 用于幂等与乐观锁；前端不在成功响应前擅自修改权威数据。

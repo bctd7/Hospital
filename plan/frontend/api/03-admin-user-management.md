@@ -20,7 +20,7 @@ POST /api/v1/admin/identity/doctors/promote
 ## 2. 用户查询
 
 ```http
-GET /api/v1/admin/identity/accounts?page=1&page_size=20&query=&identity_type=&status=&department_id=
+GET /api/v1/admin/identity/accounts?page=1&page_size=20&name=&identity_type=&status=&department_id=
 GET /api/v1/admin/identity/accounts/:accountId
 POST /api/v1/admin/identity/accounts/search-by-phone
 ```
@@ -37,15 +37,18 @@ AdminAccountSummary
   identity_type = patient / doctor / super_admin
   department_id?
   department_name?
-  version
+  management_version
 ```
 
-详情在列表字段之上返回可选工号、医生公开资料和服务端计算的 `available_actions`，但不返回 OpenID、
-Token、验证码、完整审计记录或内部密钥。完整手机号仅作为管理员主动输入的精确查询条件；普通分页
-列表和详情默认只返回脱敏号码。
+`identity_type` 由账号、角色和有效医生档案动态计算，不新增重复保存字段。普通账号在 Identity 中
+没有可展示名称时允许为空，前端使用脱敏手机号兜底；`name` 首期只查询医生显示名称。
 
-姓名检索只能查询允许展示的昵称或工作人员显示名称，后端必须分页并限制最大 `page_size`。数据库
-应针对账号状态、工作人员身份和部门筛选建立必要索引，不能先取出全部账号再在内存中过滤。
+详情在列表字段之上返回可选工号、医生公开资料、`authorization_version` 和服务端计算的
+`available_actions`，但不返回 OpenID、Token、验证码、完整审计记录或内部密钥。完整手机号仅作为
+管理员主动输入的精确查询条件；当前数据库没有可恢复的手机号明文，分页和详情只返回脱敏号码。
+
+后端必须分页并限制最大 `page_size`。数据库应针对账号状态、工作人员身份和部门筛选建立必要索引，
+不能先取出全部账号再在内存中过滤。
 
 ## 3. 身份和账号操作
 
@@ -86,8 +89,9 @@ POST /api/v1/admin/identity/accounts/:accountId/disable
 POST /api/v1/admin/identity/accounts/:accountId/enable
 ```
 
-- 禁用要求 `identity.account.manage`，使账号所有登录身份不可用并撤销全部 Refresh Session；
-- 恢复只恢复账号登录能力，不自动恢复已经撤销的医生角色；
+- 禁用要求 `identity.account.manage`，使账号所有登录入口不可用并撤销全部 Refresh Session；
+- 禁用医生账号保留医生角色和档案；恢复后仍按原医生身份使用；
+- 已经先行撤销医生身份的账号，恢复登录能力时不会自动重新开通医生；
 - 首版拒绝通过本接口禁用任何 `super_admin`，避免自锁和最后管理员问题；
 - 禁用和恢复不物理删除账号及历史业务记录。
 
@@ -99,13 +103,14 @@ POST /api/v1/admin/identity/accounts/:accountId/enable
 | 开通医生、编辑医生、调岗、撤销医生身份 | `identity.authorization.manage` |
 | 禁用和恢复账号 | `identity.account.manage` |
 
-账号详情的 `available_actions` 由后端根据目标状态和操作者最新权限计算，前端取交集显示按钮。前端
-不能自行推导出服务端没有返回的高风险操作。
+账号详情的 `available_actions` 由后端根据目标状态和操作者最新权限计算，可包含
+`promote_doctor`、`edit_doctor`、`change_department`、`revoke_doctor`、`disable_account` 和
+`enable_account`。前端取交集显示按钮，不能自行推导服务端没有返回的高风险操作。
 
 ## 5. 幂等、并发与错误
 
 - 所有写请求携带 UUID `operation_id`；重复提交返回原操作结果；
-- 请求携带详情 `version` 做乐观锁，冲突时返回 `409` 并要求重新读取；
+- 请求携带详情 `management_version` 做乐观锁，冲突时返回 `409` 并要求重新读取；
 - 目标账号已调岗、已撤销、已禁用或已恢复时返回稳定业务码；
 - `401` 进入统一 Token 刷新，写请求只在明确可安全重试时重放；
 - `403` 刷新 Principal 并退出用户管理页；

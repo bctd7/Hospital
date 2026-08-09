@@ -323,8 +323,9 @@ POST   /api/v1/admin/identity/organization-units/:unitId/enable
 列表支持 `parent_id`、`unit_type`、`status` 查询，并可返回树形结果。`DELETE` 的业务语义是停用，
 不是从数据库物理删除。
 
-面向预约页面选择有效医院、院区和科室时，后续可以提供独立只读接口，不能直接复用包含停用数据和
-管理字段的管理员响应。
+公共目录只包含有效科室。超级管理员查看或恢复停用科室时，调用管理员列表并指定
+`status=disabled` 或 `status=all`；不能要求前端从公共目录恢复已经被过滤的数据。预约页面不能直接
+复用包含停用数据和管理字段的管理员响应。
 
 ### 7.3 管理员用户、医生与账号接口
 
@@ -338,15 +339,28 @@ POST /api/v1/admin/identity/doctors/promote
 本期补充用户列表和详情：
 
 ```http
-GET /api/v1/admin/identity/accounts?page=1&page_size=20&query=&identity_type=&status=&department_id=
+GET /api/v1/admin/identity/accounts?page=1&page_size=20&name=&identity_type=&status=&department_id=
 GET /api/v1/admin/identity/accounts/:accountId
 ```
 
-- 支持按身份、账号状态和科室筛选，姓名仅查询允许展示的昵称或工作人员显示名称；
+- `identity_type` 是根据账号、角色和有效医生档案计算出的 `patient`、`doctor` 或 `super_admin`，
+  不新增一列重复保存；
+- 支持按身份、账号状态和科室筛选；`name` 首期只查询医生 `display_name`；
+- 普通账号当前没有 Identity 昵称时名称可以为空，前端使用脱敏手机号作为展示兜底，不允许 Identity
+  跨库连接未来的 Patient 数据库完成分页；
 - 完整手机号继续使用现有精确查询接口，分页和详情只返回脱敏手机号；
-- 列表返回稳定账号 ID、名称、头像、身份、科室、账号状态和版本；
-- 详情补充工作人员公开资料及后端计算的 `available_actions`；
+- 列表返回稳定账号 ID、可选名称、可选头像、脱敏手机号、身份、可选科室、账号状态和 `version`；
+- `version` 对应账号 `management_version`，与 Token 使用的 `authorization_version` 分开；
+- 详情补充手机号验证状态、创建/更新时间、角色、可选工号、医生公开资料、医生状态、
+  `authorization_version` 及后端计算的 `available_actions`；
 - 查询必须数据库分页并限制最大页大小，不允许读出全部账号后在内存中过滤。
+
+分页列表和详情不回显完整手机号：当前数据库只保存手机号 HMAC 指纹和脱敏值，没有可恢复明文。
+若以后确需回显，必须单独设计加密存储、密钥轮换和访问审计，不能把手机号改为数据库明文。
+
+`available_actions` 根据操作者最新权限和目标状态计算，可能包含 `promote_doctor`、`edit_doctor`、
+`change_department`、`revoke_doctor`、`disable_account`、`enable_account`。它帮助前端生成操作区，但
+不能代替写接口再次鉴权。
 
 本期确定的写接口：
 
@@ -364,6 +378,9 @@ POST   /api/v1/admin/identity/accounts/:accountId/enable
 - `POST .../disable` 禁用账号所有登录身份，`POST .../enable` 只恢复登录能力；
 - 首版拒绝通过用户管理接口禁用、恢复或变更任何 `super_admin`；
 - 写接口必须携带 `operation_id`，避免网络重试造成重复变更。
+
+禁用医生账号时保留医生角色和医生档案，只阻止登录；重新启用后仍恢复原医生身份。只有先执行
+“撤销医生身份”才会移除医生角色，之后再启用账号也不会自动重新开通医生。
 
 这些接口供超级管理员专属“用户管理”二级页面使用。部门管理页只展示公共科室和医生目录，不直接
 排列调岗、撤销或禁用按钮。用户详情读取以及所有身份和账号写操作均记录操作者、目标账号、请求 ID、
@@ -388,10 +405,14 @@ Identity RPC 需要补充与 HTTP 对应的内部能力：
 1. 校验操作者最新权限；
 2. 校验目标账号和组织状态；
 3. 更新主数据；
-4. 提升受影响账号的 `authorization_version`；
+4. 所有账号/医生管理写入提升 `management_version`；只有角色、科室或账号状态变化才同时提升
+   `authorization_version`；
 5. 写入 `identity_authorization_audit`；
 6. 写入 `identity_outbox_events`；
 7. 提交事务后处理 Refresh Session 撤销。
+
+管理员用户详情属于敏感读取，需要记录操作者、目标账号、request ID 和结果；普通分页列表和公共
+目录记录访问日志与指标，但不为每一行分别写业务审计。
 
 不要由 `app-api` 直接连接 Identity 数据库，也不要把组织 Repository 提取到 `common` 供其他服务调用。
 
