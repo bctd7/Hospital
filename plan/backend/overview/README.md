@@ -7,5 +7,6 @@
 3. [可观测性](./03-observability.md)
 4. [业务能力全景](./04-business-capability-map.md)
 5. [业务设计与交付路线](./05-delivery-roadmap.md)
+6. [数据库迁移与 CI 实施计划](./06-database-migration-and-ci.md)
 
 具体业务规则、状态机、技术方案和算法放在 `../modules/`；HTTP/RPC 字段以 `contracts/` 为准。
