@@ -5,6 +5,7 @@
 ## 当前已确认
 
 - 产品形态：微信小程序优先，后端 API 可供未来独立 App 复用；
+- 小程序前端：uni-app + Vue 3 + TypeScript + Vite，一级导航为首页、挂号、消息、我的；
 - 后端：Go + go-zero；
 - 数据与基础设施：MySQL 8.4、Redis、Kafka、Docker；
 - 仓库：Monorepo；
@@ -22,6 +23,10 @@
 3. [02-service-and-data-boundaries.md](./02-service-and-data-boundaries.md)：服务拆分、数据库所有权、跨服务共享和一致性方案。
 4. [03-identity-and-access-control.md](./03-identity-and-access-control.md)：Identity Service、本地授权、部门范围和权限扩展。
 5. [04-logging-and-audit.md](./04-logging-and-audit.md)：日志、审计、公共代码和集中日志平台。
+
+### 客户端规划
+
+1. [微信小程序规划包](./miniapp/)：前端外壳、页面信息架构、接口边界和后续联调规划。
 
 ### 具体业务需求
 
