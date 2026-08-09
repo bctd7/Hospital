@@ -7,20 +7,21 @@
 - 技术栈：uni-app + Vue 3 + TypeScript + Vite；
 - 首版发布目标：微信小程序；
 - 一级导航：首页、挂号、消息、我的；
-- 第一阶段：只建立可切换的空白页面外壳，不依赖后端业务接口；
-- 当前静态页面：“我的”已包含就诊人管理、我的预约、我的关注和设置，不展示候补订单或消息管理；
+- 已实现基线：可切换的页面外壳和旧版静态“我的”页面；
+- 最新确认需求：增加可跳过的微信资料进入页，“我的”页按新参考图展示头像、昵称和六个功能入口；
+- OpenID 边界：前端只获取临时 `code`，OpenID 必须由后端调用微信接口换取；
 - 导航实现：优先使用标准 TabBar，不提前实现自定义导航；
 - 接口原则：业务规则确认后，先修改 `contracts/api/` 中的契约，再实现前后端联调。
 
 ## 文档索引
 
 1. [01-frontend-shell-design.md](./01-frontend-shell-design.md)：四个一级页面、标准 TabBar、工程目录、后端边界和第一阶段验收标准。
-2. [02-profile-center-design.md](./02-profile-center-design.md)：无账号信息的“我的”首页、就诊人管理边界和静态二级页面；当前不包含独立身份验证界面。
+2. [02-profile-center-design.md](./02-profile-center-design.md)：历史静态个人中心方案，已被最新需求取代。
+3. [03-entry-and-profile-requirements.md](./03-entry-and-profile-requirements.md)：最新需求基线，定义微信资料进入页、OpenID 边界、主应用容错进入和新版“我的”页面。
 
 后续页面和业务规划按顺序增加，例如：
 
 ```text
-03-registration-flow.md
 04-message-center.md
 05-identity-and-session.md
 ```
