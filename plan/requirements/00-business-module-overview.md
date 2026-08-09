@@ -2,7 +2,7 @@
 
 > 文档状态：讨论草案
 >
-> 参考：`Medicine/docs/plans/00-overall-framework.md`
+> 上位文档：`../01-overall-functional-framework.md`
 >
 > 说明：本文件从实际产品流程发散业务模块，不代表所有模块都进入首版，也不代表每个模块都要拆成微服务。
 

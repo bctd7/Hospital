@@ -1,6 +1,6 @@
 # Hospital 总体技术规划
 
-> 文档状态：初稿，用于确定技术方向，不作为最终服务拆分方案
+> 文档状态：技术架构基线
 >
 > 更新时间：2026-08-09
 >
@@ -16,10 +16,10 @@ Hospital 建设为面向微信小程序用户的医院检查业务平台，后�
 
 1. 确定系统技术基线、基础设施边界和交付标准。
 2. 明确已确定的技术选型以及按条件引入的扩展组件。
-3. 在服务边界尚未最终确定时，保持仓库、契约和数据归属可扩展。
+3. 在已确定的服务边界下保持仓库、契约和数据归属可独立演进。
 4. 控制架构复杂度，确保可靠性、交付效率和长期维护成本处于可接受范围。
 
-本阶段不预设具体微服务数量、名称和数据库表。服务边界将在业务流程、数据归属、发布节奏和非功能需求明确后单独设计。
+当前技术选型以本文为准；总体功能见 `01-overall-functional-framework.md`，已经确认的微服务和数据库边界见 `02-service-and-data-boundaries.md`。具体表结构仍在业务流程确认后单独设计。
 
 ## 2. 已确认的总体方向
 
@@ -71,24 +71,39 @@ HTTP Request
 
 ## 4. 总体逻辑架构
 
-在服务边界尚未确定时，先按层次表达，不提前画出若干具体微服务：
+当前总体技术调用关系如下，详细业务职责见 `02-service-and-data-boundaries.md`：
 
 ```mermaid
 flowchart TB
     MP["微信小程序"] --> EDGE["HTTPS 入口 / Nginx 或 Caddy"]
     EDGE --> API["go-zero API 接入层"]
 
-    API --> CAP["业务能力模块 / 未来的服务边界"]
-    CAP --> RPC["go-zero zRPC / gRPC"]
-    CAP --> DB[("MySQL 或 PostgreSQL")]
-    CAP --> REDIS[("Redis")]
-    CAP --> KAFKA[("Kafka")]
+    API --> ID["Identity RPC"]
+    API --> APPT["Appointment RPC"]
+    API --> PLAN["Planning RPC"]
+    API --> NAV["Navigation RPC"]
+
+    ID --> IDDB[("identity DB")]
+    APPT --> APPTDB[("appointment DB")]
+    PLAN --> PLANDB[("planning DB")]
+    NAV --> NAVDB[("navigation DB")]
+
+    APPT <--> PLAN
+    PLAN --> NAV
+    ID --> REDIS[("Redis")]
+    APPT --> REDIS
+    APPT --> KAFKA[("Kafka")]
+    PLAN --> KAFKA
+    NAV --> KAFKA
 
     KAFKA --> WORKER["异步消费者 / Worker"]
     WORKER --> DB
 
     API -. logs metrics traces .-> OBS["日志 + OpenTelemetry + Prometheus"]
-    CAP -. logs metrics traces .-> OBS
+    ID -. logs metrics traces .-> OBS
+    APPT -. logs metrics traces .-> OBS
+    PLAN -. logs metrics traces .-> OBS
+    NAV -. logs metrics traces .-> OBS
     WORKER -. logs metrics traces .-> OBS
 ```
 
@@ -103,7 +118,7 @@ flowchart TB
 | HTTP API | go-zero REST | 对微信小程序暴露 HTTPS/JSON API |
 | 内部通信 | go-zero zRPC + Protobuf | 只用于必须同步得到结果的跨服务调用 |
 | 代码生成 | goctl | 生成 API、RPC、Model 和 Dockerfile |
-| 关系数据库 | MySQL 8 或 PostgreSQL | 保存用户、订单/方案、规则、状态等业务事实 |
+| 关系数据库 | MySQL 8.4 | 保存用户、订单/方案、规则、状态等业务事实 |
 | 缓存 | Redis | 缓存、限流、幂等键、验证码和短期会话状态 |
 | 消息队列 | Kafka | 业务事件、异步任务和跨服务状态传播 |
 | 容器 | Docker | 每个可部署单元构建独立镜像 |
@@ -243,19 +258,22 @@ Kafka 不应替代同步查询。用户点击后必须立刻得到的查询结�
 
 ## 10. 可扩展的单仓库结构
 
-服务边界尚未确定时，仓库使用占位式结构，不预先创建一批空服务：
+仓库按照已经确认的服务边界逐步建立目录；未进入开发阶段的服务不必提前生成空骨架：
 
 ```text
 Hospital/
 ├── apps/
 │   └── miniapp/                    # 微信小程序
 ├── service/
-│   └── <business-domain>/          # 业务边界确定后创建
-│       ├── api/                    # 对外 HTTP API，可选
-│       ├── rpc/                    # 内部 zRPC，可选
-│       └── consumer/               # Kafka 消费者，可选
+│   ├── app/api/                    # 小程序与管理端 API 聚合
+│   ├── identity/rpc/               # 身份、就诊人、组织与 Token
+│   ├── appointment/rpc/            # 项目、号源、预约与执行
+│   ├── planning/rpc/               # 规则、候选方案与重排
+│   ├── navigation/rpc/             # 地图、地点与路线
+│   └── worker/                     # 通知、Outbox 等异步任务
 ├── common/
-│   ├── auth/                       # 通用认证基础能力
+│   ├── authn/                      # Token 验证与身份上下文
+│   ├── authz/                      # 通用角色和范围判断
 │   ├── errors/                     # 统一错误码和错误响应
 │   ├── middleware/                 # 跨服务 HTTP 中间件
 │   ├── observability/              # 日志、指标、追踪
@@ -265,7 +283,10 @@ Hospital/
 │   ├── proto/                      # Protobuf 契约
 │   └── events/                     # Kafka 事件 Schema
 ├── migrations/
-│   └── <business-domain>/          # 按数据归属管理迁移
+│   ├── identity/                   # Identity 数据库迁移
+│   ├── appointment/                # Appointment 数据库迁移
+│   ├── planning/                   # Planning 数据库迁移
+│   └── navigation/                 # Navigation 数据库迁移
 ├── deploy/
 │   ├── compose/                    # Docker Compose
 │   ├── docker/                     # Dockerfile 或模板
@@ -275,7 +296,7 @@ Hospital/
 │   ├── integration/
 │   └── contract/
 ├── scripts/                        # 代码生成、迁移和开发脚本
-├── plan/                           # 规划文档
+├── plan/                           # 架构规划与 requirements 需求文档
 ├── go.mod
 └── README.md
 ```
@@ -455,21 +476,21 @@ Docker 镜像构建
     -> 日志、Trace 和指标可以串起完整过程
 ```
 
-该链路完成验收后，再根据业务耦合、数据所有权和非功能需求决定哪些能力形成独立 RPC 服务，确保每个组件都有明确职责、容量依据和故障处理策略。
+该链路优先在 Appointment Service 中完成，并与 Identity、Planning 和 Navigation 的最小契约联通。后续服务必须继续遵守已经确认的数据所有权和本地授权边界。
 
 ## 18. 当前待决策项
 
 在开始生成正式服务代码前，需要进一步确认：
 
 1. 小程序采用原生 TypeScript，还是为确定的独立 App 计划选择跨端框架；
-2. MVP 的用户角色和最小核心流程；
-3. 第一条需要交付的业务链路；
+2. 患者端和工作人员端具体登录方式；
+3. 多项目预约的时段选择和全部成功/部分成功规则；
 4. 哪些数据属于敏感数据以及保留期限；
 5. Kafka 第一条领域事件及其生产者、消费者是什么；
 6. 生产环境采用云服务器、托管容器还是容器编排平台；
 7. 可用性、响应时间、恢复时间和数据恢复点目标。
 
-这些问题确定后，再输出微服务边界、数据库设计和实施任务，不在总体技术规划中凭空拆分服务。
+微服务和逻辑数据库边界已经在 `02-service-and-data-boundaries.md` 中确定。上述问题确认后，再输出数据库表、接口契约和实施任务。
 
 ## 19. 总体验收标准
 

@@ -2,7 +2,7 @@
 
 > 文档状态：讨论草案
 >
-> 参考：`Medicine/docs/plans/00-overall-framework.md`
+> 上位文档：`../01-overall-functional-framework.md`、`../02-service-and-data-boundaries.md`
 
 ## 1. 核心业务是什么
 

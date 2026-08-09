@@ -2,7 +2,7 @@
 
 > 文档状态：已形成首版业务规则，细节待继续讨论
 >
-> 参考：`Medicine/docs/plans/00-overall-framework.md`
+> 相关架构：`01-overall-functional-framework.md`、`02-service-and-data-boundaries.md`
 
 ## 1. 当前已经确认的规则
 
@@ -107,7 +107,7 @@ flowchart LR
 
 ## 6. 多服务架构下的职责划分
 
-后端会拆分为地图、检查顺序规划以及后续预约、报告等多个服务，因此建议建立独立的 **Identity Service（身份与组织服务）**。
+当前正式采用独立的 **Identity Service（身份与组织服务）**。它保存身份事实和签发 Token，但不是集中权限裁决服务。
 
 Identity Service 负责保存身份事实：
 
@@ -159,6 +159,8 @@ common/authz/    # 角色、部门范围和操作判断
 - 记录关键操作和跨部门访问。
 
 不建立所有请求都必须同步调用的独立权限判断服务。
+
+因此“Identity Service 独立部署”与“权限本地判断”并不冲突：前者解决身份数据由谁拥有，后者解决具体业务操作由谁决定。详细的数据共享方式见 `02-service-and-data-boundaries.md`。
 
 ## 8. 为未来扩展预留的维度
 
