@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package hospital.identity.v1;
+
+option go_package = "hospital/contracts/gen/identity/v1;identityv1";
+
+service IdentityService {
+  rpc GetAuthorizationContext(GetAuthorizationContextRequest) returns (AuthorizationContext);
+  rpc AssignRole(AssignRoleRequest) returns (AuthorizationContext);
+  rpc ChangeStaffDepartment(ChangeStaffDepartmentRequest) returns (AuthorizationContext);
+  rpc ChangeAccountStatus(ChangeAccountStatusRequest) returns (AuthorizationContext);
+  rpc RefreshAccessToken(RefreshAccessTokenRequest) returns (TokenPair);
+  rpc RevokeRefreshToken(RevokeRefreshTokenRequest) returns (RevokeRefreshTokenResponse);
+}
+
+message GetAuthorizationContextRequest {
+  string account_id = 1;
+  string request_id = 2;
+}
+
+message AssignRoleRequest {
+  string target_account_id = 1;
+  string role_code = 2;
+  string operation_id = 3;
+  string request_id = 4;
+}
+
+message ChangeStaffDepartmentRequest {
+  string target_account_id = 1;
+  string department_id = 2;
+  string operation_id = 3;
+  string request_id = 4;
+}
+
+message ChangeAccountStatusRequest {
+  string target_account_id = 1;
+  string status = 2;
+  string operation_id = 3;
+  string request_id = 4;
+}
+
+message AuthorizationContext {
+  string account_id = 1;
+  string account_type = 2;
+  string status = 3;
+  repeated string roles = 4;
+  string department_id = 5;
+  repeated string permissions = 6;
+  int64 authorization_version = 7;
+}
+
+message RefreshAccessTokenRequest {
+  string refresh_token = 1;
+  string request_id = 2;
+}
+
+message RevokeRefreshTokenRequest {
+  string refresh_token = 1;
+  string request_id = 2;
+}
+
+message RevokeRefreshTokenResponse {
+  bool revoked = 1;
+}
+
+message TokenPair {
+  string access_token = 1;
+  string refresh_token = 2;
+  int64 access_expires_in_seconds = 3;
+  int64 refresh_expires_in_seconds = 4;
+}

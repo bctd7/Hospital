@@ -1,0 +1,22 @@
+Name: hospital.identity.v1.rpc
+ListenOn: 0.0.0.0:8080
+Mode: console
+Log:
+  ServiceName: identity-rpc
+  Mode: console
+  Encoding: json
+  Level: info
+MySQL:
+  DataSource: ${IDENTITY_MYSQL_DSN}
+Redis:
+  Addr: ${REDIS_HOST}:${REDIS_PORT}
+  Password: ${REDIS_PASSWORD}
+  DB: 0
+  Prefix: identity:refresh:
+Auth:
+  Issuer: hospital-identity
+  Audience: hospital-services
+  AccessPrivateKeyBase64: ${IDENTITY_ACCESS_PRIVATE_KEY_BASE64}
+  AccessPublicKeyBase64: ${IDENTITY_ACCESS_PUBLIC_KEY_BASE64}
+  AccessTTLSeconds: 900
+  RefreshTTLSeconds: 2592000

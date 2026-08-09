@@ -1,0 +1,30 @@
+syntax = "v1"
+
+type (
+	RefreshTokenRequest {
+		RefreshToken string `json:"refresh_token"`
+	}
+
+	TokenResponse {
+		AccessToken             string `json:"access_token"`
+		RefreshToken            string `json:"refresh_token"`
+		AccessExpiresInSeconds  int64  `json:"access_expires_in_seconds"`
+		RefreshExpiresInSeconds int64  `json:"refresh_expires_in_seconds"`
+	}
+
+	RevokeTokenResponse {
+		Revoked bool `json:"revoked"`
+	}
+)
+
+@server (
+	prefix: /api/v1
+	group:  auth
+)
+service app-api {
+	@handler refreshToken
+	post /auth/token/refresh (RefreshTokenRequest) returns (TokenResponse)
+
+	@handler revokeToken
+	post /auth/token/revoke (RefreshTokenRequest) returns (RevokeTokenResponse)
+}

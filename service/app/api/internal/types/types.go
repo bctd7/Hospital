@@ -8,3 +8,18 @@ type HealthResponse struct {
 	Service string `json:"service"`
 	Version string `json:"version"`
 }
+
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
+type RevokeTokenResponse struct {
+	Revoked bool `json:"revoked"`
+}
+
+type TokenResponse struct {
+	AccessToken             string `json:"access_token"`
+	RefreshToken            string `json:"refresh_token"`
+	AccessExpiresInSeconds  int64  `json:"access_expires_in_seconds"`
+	RefreshExpiresInSeconds int64  `json:"refresh_expires_in_seconds"`
+}

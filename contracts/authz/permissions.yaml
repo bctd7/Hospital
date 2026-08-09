@@ -1,0 +1,93 @@
+version: 1
+permissions:
+  - code: identity.authorization.manage
+    service: identity
+    name: 管理角色、部门归属和账号状态
+
+  - code: identity.account.manage
+    service: identity
+    name: 管理账号
+
+  - code: identity.department.manage
+    service: identity
+    name: 管理组织和部门
+
+  - code: appointment.read
+    service: appointment
+    name: 查看预约
+
+  - code: appointment.create
+    service: appointment
+    name: 创建预约
+
+  - code: appointment.update
+    service: appointment
+    name: 修改预约
+
+  - code: appointment.cancel
+    service: appointment
+    name: 取消预约
+
+  - code: appointment.reschedule
+    service: appointment
+    name: 改签预约
+
+  - code: planning.read
+    service: planning
+    name: 查看检查方案
+
+  - code: planning.create
+    service: planning
+    name: 创建检查方案
+
+  - code: planning.adjust
+    service: planning
+    name: 人工调整检查方案
+
+  - code: navigation.read
+    service: navigation
+    name: 查看地图和路线
+
+  - code: navigation.edit
+    service: navigation
+    name: 编辑地图和地点
+
+  - code: navigation.publish
+    service: navigation
+    name: 发布地图版本
+
+  - code: report.read
+    service: report
+    name: 查看报告
+
+  - code: report.publish
+    service: report
+    name: 发布报告
+
+  - code: report.correct
+    service: report
+    name: 更正报告
+
+  - code: report.download
+    service: report
+    name: 下载报告
+
+  - code: report.export
+    service: report
+    name: 批量导出报告
+
+  - code: rule.read
+    service: planning
+    name: 查看检查规则
+
+  - code: rule.edit
+    service: planning
+    name: 编辑检查规则
+
+  - code: rule.review
+    service: planning
+    name: 审核检查规则
+
+  - code: rule.publish
+    service: planning
+    name: 发布检查规则

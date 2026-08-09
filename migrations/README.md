@@ -2,7 +2,7 @@
 
 数据库结构必须由迁移文件管理，不能只依赖 ORM 或 goctl 自动建表。
 
-选定 Goose、Atlas 或 golang-migrate 后，再按业务数据归属创建目录：
+迁移按业务数据归属创建目录：
 
 ```text
 migrations/
@@ -11,7 +11,7 @@ migrations/
     └── 000001_init.down.sql
 ```
 
-当前没有确定业务表，因此不创建空表或猜测字段。
+当前已经建立 `identity/000001_identity_authorization`，用于 Identity Service 的账号授权事实、审计和 Outbox。正式迁移工具仍需在 Goose、Atlas 或 golang-migrate 中确定一个；本地全新 MySQL 卷会通过 Compose 初始化脚本执行首个迁移。
 
 约束：
 

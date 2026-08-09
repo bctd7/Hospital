@@ -9,6 +9,8 @@ services:
       MYSQL_USER: ${MYSQL_USER:-hospital}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-hospital_dev}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-hospital_root_dev}
+      IDENTITY_MYSQL_USER: ${IDENTITY_MYSQL_USER:-hospital_identity}
+      IDENTITY_MYSQL_PASSWORD: ${IDENTITY_MYSQL_PASSWORD:-hospital_identity_dev}
       TZ: UTC
     command:
       - --character-set-server=utf8mb4
@@ -17,6 +19,8 @@ services:
       - "127.0.0.1:${MYSQL_PORT:-3306}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./mysql/init/001-create-service-databases.sh:/docker-entrypoint-initdb.d/001-create-service-databases.sh:ro
+      - ../../migrations/identity/000001_identity_authorization.up.sql:/docker-entrypoint-initdb.d/100-identity-authorization.sql:ro
     healthcheck:
       test:
         - CMD-SHELL

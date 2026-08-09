@@ -1,0 +1,50 @@
+syntax = "v1"
+
+import "identity-session.api"
+
+type (
+	WeChatLoginRequest {
+		LoginCode string `json:"login_code"`
+	}
+
+	BindWeChatPhoneRequest {
+		PhoneCode string `json:"phone_code"`
+	}
+
+	SendSMSCodeRequest {
+		Phone   string `json:"phone"`
+		Purpose string `json:"purpose,options=login|bind_phone|recover_account"`
+	}
+
+	SMSLoginRequest {
+		Phone string `json:"phone"`
+		Code  string `json:"code"`
+	}
+
+	BindPhoneResponse {
+		MaskedPhone string `json:"masked_phone"`
+	}
+
+	SendSMSCodeResponse {
+		RetryAfterSeconds int64 `json:"retry_after_seconds"`
+	}
+)
+
+@server (
+	prefix: /api/v1
+	group:  auth
+)
+service app-api {
+	@handler weChatLogin
+	post /auth/wechat/login (WeChatLoginRequest) returns (TokenResponse)
+
+	@handler bindWeChatPhone
+	post /auth/wechat/phone (BindWeChatPhoneRequest) returns (BindPhoneResponse)
+
+	@handler sendSMSCode
+	post /auth/sms/code (SendSMSCodeRequest) returns (SendSMSCodeResponse)
+
+	@handler smsLogin
+	post /auth/sms/login (SMSLoginRequest) returns (TokenResponse)
+
+}

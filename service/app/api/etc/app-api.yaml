@@ -16,3 +16,8 @@ Middlewares:
   Timeout: true
   Metrics: true
   MaxBytes: true
+
+IdentityRPC:
+  Endpoints:
+    - 127.0.0.1:8080
+  NonBlock: true
