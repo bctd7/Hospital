@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { onLoad } from "@dcloudio/uni-app";
-import { ref } from "vue";
+import { onUnmounted, ref } from "vue";
 
+import { sendPhoneLoginCode } from "@/api/auth";
 import ProfileAvatar from "@/components/profile/ProfileAvatar.vue";
-import { initializeFromWechat } from "@/stores/session";
+import { initializeFromPhone } from "@/stores/session";
 import { getDisplayProfile, saveDisplayProfile } from "@/utils/displayProfile";
+import { saveSelfPatientPreferences } from "@/utils/selfPatientPreferences";
 
 interface ChooseAvatarEvent {
   detail: {
@@ -21,6 +23,11 @@ interface NicknameInputEvent {
 const avatarUrl = ref("");
 const nickname = ref("");
 const entering = ref(false);
+const phone = ref("");
+const verificationCode = ref("");
+const sendingCode = ref(false);
+const countdown = ref(0);
+let countdownTimer: ReturnType<typeof setInterval> | null = null;
 
 onLoad(() => {
   const profile = getDisplayProfile();
@@ -37,8 +44,64 @@ function updateNickname(event: Event) {
   nickname.value = inputEvent.detail.value ?? "";
 }
 
+function updatePhone(event: Event) {
+  const inputEvent = event as unknown as NicknameInputEvent;
+  phone.value = (inputEvent.detail.value ?? "").replace(/\D/g, "").slice(0, 11);
+}
+
+function updateVerificationCode(event: Event) {
+  const inputEvent = event as unknown as NicknameInputEvent;
+  verificationCode.value = (inputEvent.detail.value ?? "").replace(/\D/g, "").slice(0, 8);
+}
+
+function startCountdown(seconds: number) {
+  countdown.value = Math.max(1, Math.floor(seconds));
+  if (countdownTimer) {
+    clearInterval(countdownTimer);
+  }
+  countdownTimer = setInterval(() => {
+    countdown.value -= 1;
+    if (countdown.value <= 0 && countdownTimer) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
+  }, 1000);
+}
+
+async function requestVerificationCode() {
+  if (sendingCode.value || countdown.value > 0) {
+    return;
+  }
+  if (!/^1[3-9]\d{9}$/.test(phone.value)) {
+    uni.showToast({ title: "请输入正确的手机号", icon: "none" });
+    return;
+  }
+  sendingCode.value = true;
+  try {
+    const result = await sendPhoneLoginCode(phone.value);
+    startCountdown(result.retry_after_seconds || 60);
+    uni.showToast({ title: "验证码已发送", icon: "success" });
+  } catch (error) {
+    uni.showToast({
+      title: error instanceof Error ? error.message : "验证码发送失败",
+      icon: "none",
+    });
+  } finally {
+    sendingCode.value = false;
+  }
+}
+
 async function enterMiniapp() {
   if (entering.value) {
+    return;
+  }
+
+  if (!/^1[3-9]\d{9}$/.test(phone.value)) {
+    uni.showToast({ title: "请输入正确的手机号", icon: "none" });
+    return;
+  }
+  if (!/^\d{4,8}$/.test(verificationCode.value)) {
+    uni.showToast({ title: "请输入短信验证码", icon: "none" });
     return;
   }
 
@@ -48,18 +111,20 @@ async function enterMiniapp() {
     nickname: nickname.value,
   });
 
-  const authenticated = await initializeFromWechat();
+  const authenticated = await initializeFromPhone(phone.value, verificationCode.value);
+
+  if (!authenticated) {
+    entering.value = false;
+    uni.showToast({ title: "手机号或验证码不正确", icon: "none" });
+    return;
+  }
+
+  saveSelfPatientPreferences({
+    phoneMasked: `${phone.value.slice(0, 3)}****${phone.value.slice(7)}`,
+  });
 
   uni.switchTab({
     url: "/pages/home/index",
-    success: () => {
-      if (!authenticated) {
-        uni.showToast({
-          title: "暂以访客身份进入",
-          icon: "none",
-        });
-      }
-    },
     fail: () => {
       entering.value = false;
       uni.showToast({
@@ -69,6 +134,12 @@ async function enterMiniapp() {
     },
   });
 }
+
+onUnmounted(() => {
+  if (countdownTimer) {
+    clearInterval(countdownTimer);
+  }
+});
 </script>
 
 <template>
@@ -99,6 +170,39 @@ async function enterMiniapp() {
           @input="updateNickname"
         />
       </view>
+
+      <view class="entry-page__field">
+        <text class="entry-page__label">手机号</text>
+        <input
+          class="entry-page__input"
+          type="number"
+          :value="phone"
+          maxlength="11"
+          placeholder="请输入手机号"
+          placeholder-class="entry-page__placeholder"
+          @input="updatePhone"
+        />
+      </view>
+
+      <view class="entry-page__field">
+        <text class="entry-page__label">验证码</text>
+        <input
+          class="entry-page__input"
+          type="number"
+          :value="verificationCode"
+          maxlength="8"
+          placeholder="请输入验证码"
+          placeholder-class="entry-page__placeholder"
+          @input="updateVerificationCode"
+        />
+        <button
+          class="entry-page__code-button"
+          :disabled="sendingCode || countdown > 0"
+          @tap="requestVerificationCode"
+        >
+          {{ countdown > 0 ? `${countdown}s` : sendingCode ? "发送中" : "获取验证码" }}
+        </button>
+      </view>
     </view>
 
     <view class="entry-page__footer">
@@ -108,9 +212,9 @@ async function enterMiniapp() {
         :loading="entering"
         @tap="enterMiniapp"
       >
-        {{ entering ? "正在进入" : "进入小程序" }}
+        {{ entering ? "正在登录" : "手机号登录 / 注册" }}
       </button>
-      <text class="entry-page__notice">头像和昵称仅用于页面展示，暂不代表就诊人身份。</text>
+      <text class="entry-page__notice">手机号验证用于账号登录；头像和昵称仅用于页面展示，不代表医疗实名。</text>
     </view>
   </view>
 </template>
@@ -192,6 +296,21 @@ async function enterMiniapp() {
 
 .entry-page__placeholder {
   color: #a4a8af;
+}
+
+.entry-page__code-button {
+  flex: 0 0 auto;
+  padding: 0 18rpx;
+  margin: 0;
+  color: #1684e6;
+  font-size: 24rpx;
+  line-height: 64rpx;
+  background: #eef7ff;
+  border-radius: 12rpx;
+}
+
+.entry-page__code-button::after {
+  display: none;
 }
 
 .entry-page__footer {

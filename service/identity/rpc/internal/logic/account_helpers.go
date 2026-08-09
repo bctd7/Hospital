@@ -14,15 +14,19 @@ import (
 func accountRPCError(err error) error {
 	switch {
 	case errors.Is(err, login.ErrInvalidCredential):
-		return status.Error(codes.Unauthenticated, "wechat login credential is invalid or expired")
+		return status.Error(codes.Unauthenticated, "login credential is invalid or expired")
 	case errors.Is(err, login.ErrProviderNotConfigured):
-		return status.Error(codes.FailedPrecondition, "wechat login is not configured")
+		return status.Error(codes.FailedPrecondition, "login provider is not configured")
 	case errors.Is(err, login.ErrProviderUnavailable):
-		return status.Error(codes.Unavailable, "wechat login provider is unavailable")
+		return status.Error(codes.Unavailable, "login provider is unavailable")
+	case errors.Is(err, login.ErrRateLimited):
+		return status.Error(codes.ResourceExhausted, "verification requests are too frequent")
 	case errors.Is(err, account.ErrInvalidPhone), errors.Is(err, account.ErrInvalidExternalIdentity):
 		return status.Error(codes.InvalidArgument, err.Error())
 	case errors.Is(err, account.ErrPhoneInUse), errors.Is(err, authorization.ErrConflict):
 		return status.Error(codes.AlreadyExists, err.Error())
+	case errors.Is(err, account.ErrVerifiedPhoneChange):
+		return status.Error(codes.FailedPrecondition, "verified login phone requires a dedicated change flow")
 	case errors.Is(err, authorization.ErrNotFound):
 		return status.Error(codes.NotFound, "identity account not found")
 	case errors.Is(err, authorization.ErrForbidden):

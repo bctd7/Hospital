@@ -22,15 +22,20 @@ type (
 	FindAccountByPhoneRequest        = identityv1.FindAccountByPhoneRequest
 	GetAuthorizationContextRequest   = identityv1.GetAuthorizationContextRequest
 	PhoneBinding                     = identityv1.PhoneBinding
+	PhoneLoginRequest                = identityv1.PhoneLoginRequest
 	PromoteToDepartmentDoctorRequest = identityv1.PromoteToDepartmentDoctorRequest
 	RefreshAccessTokenRequest        = identityv1.RefreshAccessTokenRequest
 	RevokeRefreshTokenRequest        = identityv1.RevokeRefreshTokenRequest
 	RevokeRefreshTokenResponse       = identityv1.RevokeRefreshTokenResponse
 	SetMyPhoneRequest                = identityv1.SetMyPhoneRequest
+	SendPhoneLoginCodeRequest        = identityv1.SendPhoneLoginCodeRequest
+	SendPhoneLoginCodeResponse       = identityv1.SendPhoneLoginCodeResponse
 	TokenPair                        = identityv1.TokenPair
 	WeChatLoginRequest               = identityv1.WeChatLoginRequest
 
 	IdentityService interface {
+		SendPhoneLoginCode(ctx context.Context, in *SendPhoneLoginCodeRequest, opts ...grpc.CallOption) (*SendPhoneLoginCodeResponse, error)
+		PhoneLogin(ctx context.Context, in *PhoneLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
 		WeChatLogin(ctx context.Context, in *WeChatLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
 		SetMyPhone(ctx context.Context, in *SetMyPhoneRequest, opts ...grpc.CallOption) (*PhoneBinding, error)
 		FindAccountByPhone(ctx context.Context, in *FindAccountByPhoneRequest, opts ...grpc.CallOption) (*AccountLookup, error)
@@ -47,6 +52,16 @@ type (
 		cli zrpc.Client
 	}
 )
+
+func (m *defaultIdentityService) SendPhoneLoginCode(ctx context.Context, in *SendPhoneLoginCodeRequest, opts ...grpc.CallOption) (*SendPhoneLoginCodeResponse, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.SendPhoneLoginCode(ctx, in, opts...)
+}
+
+func (m *defaultIdentityService) PhoneLogin(ctx context.Context, in *PhoneLoginRequest, opts ...grpc.CallOption) (*TokenPair, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.PhoneLogin(ctx, in, opts...)
+}
 
 func NewIdentityService(cli zrpc.Client) IdentityService {
 	return &defaultIdentityService{

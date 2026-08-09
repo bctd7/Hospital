@@ -9,8 +9,8 @@ RBAC 关系、审计和可靠事件，不是 11 张用户表。
 | 分组 | 表 | 当前职责与约束 |
 |---|---|---|
 | 账号 | `identity_accounts` | 平台账号主表；保存账号类型、状态和授权版本 |
-| 登录 | `identity_external_identities` | 外部身份与平台账号的映射；首期只使用微信 OpenID，不保存 AppSecret、登录 code 或 session_key |
-| 登录 | `identity_account_phones` | 当前手机号的 HMAC 指纹、脱敏值和验证状态；`account_id` 为主键，一个账号最多一个手机号 |
+| 登录 | `identity_external_identities` | 可选外部身份与平台账号的映射；当前保留微信兼容能力，不保存 AppSecret、登录 code 或 session_key |
+| 登录 | `identity_account_phones` | 当前主登录标识；保存手机号 HMAC 唯一指纹、脱敏值和验证状态，`account_id` 为主键 |
 | 组织 | `identity_departments` | 科室主数据和上下级关系 |
 | 组织 | `identity_staff_profiles` | 工作人员专属资料；`account_id` 为主键，一个工作人员首期只有一个当前科室 |
 | RBAC | `identity_roles` | 角色定义，例如超级管理员、部门医生 |
@@ -24,8 +24,8 @@ RBAC 关系、审计和可靠事件，不是 11 张用户表。
 
 ```text
 identity_accounts（平台账号）
-├── identity_external_identities（微信登录身份）
-├── identity_account_phones（当前手机号，0..1）
+├── identity_external_identities（可选微信兼容身份）
+├── identity_account_phones（唯一手机号主登录标识，0..1）
 ├── identity_staff_profiles（工作人员资料，0..1）
 └── identity_account_roles（当前角色，0..1）
       └── identity_roles
@@ -37,15 +37,14 @@ identity_authorization_audit -> 操作人账号 + 目标账号
 identity_outbox_events -> 待发布的授权变更事件
 ```
 
-`identity_accounts` 表示“系统认识哪个账号”，不等于患者业务中的“就诊人”。一个微信账号
-以后可以管理多个就诊人；姓名、身份证、医保资料、预约和报告不能放进 Identity 账号表。
+`identity_accounts` 表示“系统认识哪个账号”，不等于患者业务中的“就诊人”。手机号验证码
+证明号码控制权，但不证明医疗实名；姓名、身份证、医保资料、预约和报告不能放进 Identity 账号表。
 
 ## 为什么当前保留拆表
 
-- 微信 OpenID 是外部供应商标识，不作为平台账号主键。独立映射后，更换登录方式或增加另一
-  个小程序时不需要重建账号和业务数据。
-- 手机号有独立的验证来源、验证状态和脱敏规则。当前虽然只允许一个号码，仍与普通账号状态
-  分开，避免以后接入短信或微信验证时反复修改账号主表。
+- 微信 OpenID 是可选外部供应商标识，不作为平台账号主键。
+- 手机号是当前唯一登录标识，但号码会更换、回收且需要脱敏，因此仍使用不可变 UUID 作为账号
+  主键，并把手机号验证状态独立保存。
 - 工作人员资料只属于 staff 账号；患者账号不需要科室和工号。医生资格等更复杂资料未来也不
   应继续堆入账号主表。
 - 角色与权限需要被多个账号复用。当前一个账号只有一个角色，但角色拥有多个权限，权限也可

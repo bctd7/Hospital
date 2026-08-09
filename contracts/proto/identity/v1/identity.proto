@@ -5,6 +5,8 @@ package hospital.identity.v1;
 option go_package = "hospital/contracts/gen/identity/v1;identityv1";
 
 service IdentityService {
+  rpc SendPhoneLoginCode(SendPhoneLoginCodeRequest) returns (SendPhoneLoginCodeResponse);
+  rpc PhoneLogin(PhoneLoginRequest) returns (TokenPair);
   rpc WeChatLogin(WeChatLoginRequest) returns (TokenPair);
   rpc SetMyPhone(SetMyPhoneRequest) returns (PhoneBinding);
   rpc FindAccountByPhone(FindAccountByPhoneRequest) returns (AccountLookup);
@@ -15,6 +17,22 @@ service IdentityService {
   rpc ChangeAccountStatus(ChangeAccountStatusRequest) returns (AuthorizationContext);
   rpc RefreshAccessToken(RefreshAccessTokenRequest) returns (TokenPair);
   rpc RevokeRefreshToken(RevokeRefreshTokenRequest) returns (RevokeRefreshTokenResponse);
+}
+
+message SendPhoneLoginCodeRequest {
+  string phone = 1;
+  string request_id = 2;
+}
+
+message SendPhoneLoginCodeResponse {
+  bool accepted = 1;
+  int64 retry_after_seconds = 2;
+}
+
+message PhoneLoginRequest {
+  string phone = 1;
+  string verification_code = 2;
+  string request_id = 3;
 }
 
 message WeChatLoginRequest {

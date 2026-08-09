@@ -3,6 +3,20 @@ syntax = "v1"
 import "identity-session.api"
 
 type (
+	SendPhoneLoginCodeRequest {
+		Phone string `json:"phone"`
+	}
+
+	SendPhoneLoginCodeResponse {
+		Accepted          bool  `json:"accepted"`
+		RetryAfterSeconds int64 `json:"retry_after_seconds"`
+	}
+
+	PhoneLoginRequest {
+		Phone            string `json:"phone"`
+		VerificationCode string `json:"verification_code"`
+	}
+
 	WeChatLoginRequest {
 		LoginCode string `json:"login_code"`
 	}
@@ -49,6 +63,12 @@ type (
 	group:  auth
 )
 service app-api {
+	@handler sendPhoneLoginCode
+	post /auth/phone/code (SendPhoneLoginCodeRequest) returns (SendPhoneLoginCodeResponse)
+
+	@handler phoneLogin
+	post /auth/phone/login (PhoneLoginRequest) returns (TokenResponse)
+
 	@handler weChatLogin
 	post /auth/wechat/login (WeChatLoginRequest) returns (TokenResponse)
 }

@@ -2,12 +2,14 @@ import { reactive, readonly } from "vue";
 
 import {
   getCurrentIdentity,
+  phoneLogin,
   refreshToken as requestTokenRefresh,
   revokeToken,
   wechatLogin,
 } from "@/api/auth";
 import { configureAuthAdapter } from "@/api/client";
 import type {
+  AppMode,
   CurrentIdentityResponse,
   SessionTokenPair,
   SessionView,
@@ -18,22 +20,52 @@ import { getWechatLoginCode } from "@/utils/wechatCode";
 const SESSION_STORAGE_KEY = "hospital:session";
 const SESSION_STORAGE_VERSION = 1;
 const EXPIRY_CLOCK_SKEW_MS = 5000;
+const DEPARTMENT_DOCTOR_ROLE = "department_doctor";
 
 interface StoredSession {
   version: number;
   tokens: SessionTokenPair;
   principal: CurrentIdentityResponse;
+  activeMode?: AppMode;
 }
 
 const state = reactive<SessionView>({
   status: "idle",
   principal: null,
+  activeMode: "patient",
 });
 
 let tokens: SessionTokenPair | null = null;
 let refreshTask: Promise<boolean> | null = null;
 
 export const sessionState = readonly(state);
+
+function hasDoctorMode(principal: CurrentIdentityResponse | null): boolean {
+  return principal?.roles.includes(DEPARTMENT_DOCTOR_ROLE) ?? false;
+}
+
+function normalizeAppMode(
+  mode: unknown,
+  principal: CurrentIdentityResponse | null,
+): AppMode {
+  return mode === "doctor" && hasDoctorMode(principal) ? "doctor" : "patient";
+}
+
+export function availableAppModes(): AppMode[] {
+  return hasDoctorMode(state.principal) ? ["patient", "doctor"] : ["patient"];
+}
+
+export function setActiveMode(mode: AppMode): boolean {
+  if (!availableAppModes().includes(mode)) {
+    state.activeMode = "patient";
+    persistSession();
+    return false;
+  }
+
+  state.activeMode = mode;
+  persistSession();
+  return true;
+}
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
@@ -88,6 +120,7 @@ function persistSession() {
     version: SESSION_STORAGE_VERSION,
     tokens,
     principal: state.principal,
+    activeMode: state.activeMode,
   };
 
   try {
@@ -109,6 +142,7 @@ function setGuestSession() {
   tokens = null;
   state.principal = null;
   state.status = "guest";
+  state.activeMode = "patient";
   removePersistedSession();
 }
 
@@ -122,6 +156,7 @@ export function restoreSession() {
 
     tokens = stored.tokens;
     state.principal = stored.principal;
+    state.activeMode = normalizeAppMode(stored.activeMode, stored.principal);
     state.status = "authenticated";
   } catch {
     setGuestSession();
@@ -146,6 +181,7 @@ async function performRefresh(): Promise<boolean> {
   try {
     tokens = tokenPairFromResponse(await requestTokenRefresh(currentRefreshToken));
     state.principal = await getCurrentIdentity(false);
+    state.activeMode = normalizeAppMode(state.activeMode, state.principal);
     state.status = "authenticated";
     persistSession();
     return true;
@@ -182,6 +218,26 @@ export async function initializeFromWechat(): Promise<boolean> {
     const loginCode = await getWechatLoginCode();
     tokens = tokenPairFromResponse(await wechatLogin(loginCode));
     state.principal = await getCurrentIdentity(false);
+    state.activeMode = normalizeAppMode(state.activeMode, state.principal);
+    state.status = "authenticated";
+    persistSession();
+    return true;
+  } catch {
+    setGuestSession();
+    return false;
+  }
+}
+
+export async function initializeFromPhone(phone: string, verificationCode: string): Promise<boolean> {
+  if (state.status === "authenticated" && hasUsableAccessToken() && state.principal) {
+    return true;
+  }
+
+  state.status = "authenticating";
+  try {
+    tokens = tokenPairFromResponse(await phoneLogin(phone, verificationCode));
+    state.principal = await getCurrentIdentity(false);
+    state.activeMode = normalizeAppMode(state.activeMode, state.principal);
     state.status = "authenticated";
     persistSession();
     return true;

@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import { onLaunch } from "@dcloudio/uni-app";
+import { onLaunch, onShow } from "@dcloudio/uni-app";
 
-import { restoreSession } from "@/stores/session";
+import { restoreSession, sessionState } from "@/stores/session";
+import { applyAppModeNavigation } from "@/utils/appMode";
 
 onLaunch(() => {
   restoreSession();
+  applyAppModeNavigation(sessionState.activeMode);
+});
+
+onShow(() => {
+  applyAppModeNavigation(sessionState.activeMode);
 });
 </script>
 

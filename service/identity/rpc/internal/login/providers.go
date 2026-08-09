@@ -9,7 +9,25 @@ var (
 	ErrProviderNotConfigured = errors.New("login provider is not configured")
 	ErrProviderUnavailable   = errors.New("login provider is unavailable")
 	ErrInvalidCredential     = errors.New("login credential is invalid or expired")
+	ErrRateLimited           = errors.New("login verification request is rate limited")
 )
+
+// PhoneVerificationProvider delegates SMS code generation and verification to
+// the provider. Hospital never needs to receive or persist the plaintext code.
+type PhoneVerificationProvider interface {
+	SendLoginCode(ctx context.Context, phoneNumber string) error
+	VerifyLoginCode(ctx context.Context, phoneNumber, code string) error
+}
+
+type UnconfiguredPhoneVerificationProvider struct{}
+
+func (UnconfiguredPhoneVerificationProvider) SendLoginCode(context.Context, string) error {
+	return ErrProviderNotConfigured
+}
+
+func (UnconfiguredPhoneVerificationProvider) VerifyLoginCode(context.Context, string, string) error {
+	return ErrProviderNotConfigured
+}
 
 // WeChatSession is the server-side identity returned after exchanging the
 // short-lived code produced by wx.login. SessionKey must never be sent to the client.

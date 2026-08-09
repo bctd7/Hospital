@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v7.34.1
-// source: identity.proto
+// source: contracts/proto/identity/v1/identity.proto
 
 package identityv1
 
@@ -19,6 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	IdentityService_SendPhoneLoginCode_FullMethodName        = "/hospital.identity.v1.IdentityService/SendPhoneLoginCode"
+	IdentityService_PhoneLogin_FullMethodName                = "/hospital.identity.v1.IdentityService/PhoneLogin"
 	IdentityService_WeChatLogin_FullMethodName               = "/hospital.identity.v1.IdentityService/WeChatLogin"
 	IdentityService_SetMyPhone_FullMethodName                = "/hospital.identity.v1.IdentityService/SetMyPhone"
 	IdentityService_FindAccountByPhone_FullMethodName        = "/hospital.identity.v1.IdentityService/FindAccountByPhone"
@@ -35,6 +37,8 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type IdentityServiceClient interface {
+	SendPhoneLoginCode(ctx context.Context, in *SendPhoneLoginCodeRequest, opts ...grpc.CallOption) (*SendPhoneLoginCodeResponse, error)
+	PhoneLogin(ctx context.Context, in *PhoneLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
 	WeChatLogin(ctx context.Context, in *WeChatLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
 	SetMyPhone(ctx context.Context, in *SetMyPhoneRequest, opts ...grpc.CallOption) (*PhoneBinding, error)
 	FindAccountByPhone(ctx context.Context, in *FindAccountByPhoneRequest, opts ...grpc.CallOption) (*AccountLookup, error)
@@ -53,6 +57,26 @@ type identityServiceClient struct {
 
 func NewIdentityServiceClient(cc grpc.ClientConnInterface) IdentityServiceClient {
 	return &identityServiceClient{cc}
+}
+
+func (c *identityServiceClient) SendPhoneLoginCode(ctx context.Context, in *SendPhoneLoginCodeRequest, opts ...grpc.CallOption) (*SendPhoneLoginCodeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SendPhoneLoginCodeResponse)
+	err := c.cc.Invoke(ctx, IdentityService_SendPhoneLoginCode_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) PhoneLogin(ctx context.Context, in *PhoneLoginRequest, opts ...grpc.CallOption) (*TokenPair, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TokenPair)
+	err := c.cc.Invoke(ctx, IdentityService_PhoneLogin_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *identityServiceClient) WeChatLogin(ctx context.Context, in *WeChatLoginRequest, opts ...grpc.CallOption) (*TokenPair, error) {
@@ -159,6 +183,8 @@ func (c *identityServiceClient) RevokeRefreshToken(ctx context.Context, in *Revo
 // All implementations must embed UnimplementedIdentityServiceServer
 // for forward compatibility.
 type IdentityServiceServer interface {
+	SendPhoneLoginCode(context.Context, *SendPhoneLoginCodeRequest) (*SendPhoneLoginCodeResponse, error)
+	PhoneLogin(context.Context, *PhoneLoginRequest) (*TokenPair, error)
 	WeChatLogin(context.Context, *WeChatLoginRequest) (*TokenPair, error)
 	SetMyPhone(context.Context, *SetMyPhoneRequest) (*PhoneBinding, error)
 	FindAccountByPhone(context.Context, *FindAccountByPhoneRequest) (*AccountLookup, error)
@@ -179,6 +205,12 @@ type IdentityServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedIdentityServiceServer struct{}
 
+func (UnimplementedIdentityServiceServer) SendPhoneLoginCode(context.Context, *SendPhoneLoginCodeRequest) (*SendPhoneLoginCodeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendPhoneLoginCode not implemented")
+}
+func (UnimplementedIdentityServiceServer) PhoneLogin(context.Context, *PhoneLoginRequest) (*TokenPair, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PhoneLogin not implemented")
+}
 func (UnimplementedIdentityServiceServer) WeChatLogin(context.Context, *WeChatLoginRequest) (*TokenPair, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method WeChatLogin not implemented")
 }
@@ -228,6 +260,42 @@ func RegisterIdentityServiceServer(s grpc.ServiceRegistrar, srv IdentityServiceS
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&IdentityService_ServiceDesc, srv)
+}
+
+func _IdentityService_SendPhoneLoginCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendPhoneLoginCodeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).SendPhoneLoginCode(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_SendPhoneLoginCode_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).SendPhoneLoginCode(ctx, req.(*SendPhoneLoginCodeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_PhoneLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PhoneLoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).PhoneLogin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_PhoneLogin_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).PhoneLogin(ctx, req.(*PhoneLoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _IdentityService_WeChatLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -418,6 +486,14 @@ var IdentityService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*IdentityServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "SendPhoneLoginCode",
+			Handler:    _IdentityService_SendPhoneLoginCode_Handler,
+		},
+		{
+			MethodName: "PhoneLogin",
+			Handler:    _IdentityService_PhoneLogin_Handler,
+		},
+		{
 			MethodName: "WeChatLogin",
 			Handler:    _IdentityService_WeChatLogin_Handler,
 		},
@@ -459,5 +535,5 @@ var IdentityService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "identity.proto",
+	Metadata: "contracts/proto/identity/v1/identity.proto",
 }

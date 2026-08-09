@@ -19,6 +19,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodPost,
+				Path:    "/auth/phone/code",
+				Handler: auth.SendPhoneLoginCodeHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/auth/phone/login",
+				Handler: auth.PhoneLoginHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
 				Path:    "/auth/wechat/login",
 				Handler: auth.WeChatLoginHandler(serverCtx),
 			},

@@ -2,8 +2,6 @@ package account
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
 	"errors"
 	"fmt"
 	"regexp"
@@ -26,6 +24,7 @@ const (
 var (
 	ErrInvalidPhone            = errors.New("invalid phone number")
 	ErrPhoneInUse              = errors.New("phone number is already registered")
+	ErrVerifiedPhoneChange     = errors.New("verified login phone must be changed through verification")
 	ErrInvalidExternalIdentity = errors.New("invalid external identity")
 	mainlandPhone              = regexp.MustCompile(`^1[3-9][0-9]{9}$`)
 )
@@ -104,9 +103,7 @@ func (m *Manager) FindByPhone(ctx context.Context, operator authn.Principal, raw
 }
 
 func (m *Manager) fingerprint(phone string) []byte {
-	digest := hmac.New(sha256.New, m.phoneKey)
-	_, _ = digest.Write([]byte(phone))
-	return digest.Sum(nil)
+	return phoneFingerprint(m.phoneKey, phone)
 }
 
 func normalizePhone(value string) (string, error) {

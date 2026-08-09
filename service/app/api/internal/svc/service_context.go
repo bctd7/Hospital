@@ -13,6 +13,7 @@ import (
 
 	"hospital/common/authn"
 	"hospital/common/observability/logging"
+	identityv1 "hospital/contracts/gen/identity/v1"
 	"hospital/service/app/api/internal/config"
 	"hospital/service/app/api/internal/middleware"
 	"hospital/service/identity/rpc/identityservice"
@@ -41,6 +42,17 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		return nil, fmt.Errorf("create app api token verifier: %w", err)
 	}
 	accessToken := middleware.NewAccessTokenMiddleware(tokenManager)
+	for _, method := range []string{
+		identityv1.IdentityService_SendPhoneLoginCode_FullMethodName,
+		identityv1.IdentityService_PhoneLogin_FullMethodName,
+		identityv1.IdentityService_WeChatLogin_FullMethodName,
+		identityv1.IdentityService_SetMyPhone_FullMethodName,
+		identityv1.IdentityService_FindAccountByPhone_FullMethodName,
+		identityv1.IdentityService_RefreshAccessToken_FullMethodName,
+		identityv1.IdentityService_RevokeRefreshToken_FullMethodName,
+	} {
+		zrpc.DontLogClientContentForMethod(method)
+	}
 	return &ServiceContext{
 		Config:      c,
 		Identity:    identityservice.NewIdentityService(zrpc.MustNewClient(c.IdentityRPC)),

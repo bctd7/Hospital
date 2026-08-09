@@ -23,6 +23,7 @@ type ServiceContext struct {
 	Config               config.Config
 	AuthorizationManager *authorization.Manager
 	AccountManager       *account.Manager
+	PhoneLoginManager    *account.PhoneLoginManager
 	SessionManager       *session.Manager
 	TokenManager         *authn.TokenManager
 	identityStore        *repository.MySQLStore
@@ -95,10 +96,34 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		store.Close()
 		return nil, fmt.Errorf("create identity account manager: %w", err)
 	}
+	var phoneProvider login.PhoneVerificationProvider = login.UnconfiguredPhoneVerificationProvider{}
+	if c.PhoneLogin.Enabled {
+		phoneProvider, err = login.NewAlibabaPNVS(login.AlibabaPNVSConfig{
+			AccessKeyID: c.PhoneLogin.AccessKeyID, AccessKeySecret: c.PhoneLogin.AccessKeySecret,
+			RegionID: c.PhoneLogin.RegionID, Endpoint: c.PhoneLogin.Endpoint,
+			SignName: c.PhoneLogin.SignName, TemplateCode: c.PhoneLogin.TemplateCode,
+			SchemeName: c.PhoneLogin.SchemeName, ValidSeconds: c.PhoneLogin.ValidSeconds,
+			IntervalSeconds: c.PhoneLogin.IntervalSeconds, CodeLength: c.PhoneLogin.CodeLength,
+		})
+		if err != nil {
+			redisClient.Close()
+			store.Close()
+			return nil, fmt.Errorf("create phone login provider: %w", err)
+		}
+	}
+	phoneLoginManager, err := account.NewPhoneLoginManager(
+		store, phoneProvider, sessionManager, phoneLookupKey, c.PhoneLogin.IntervalSeconds,
+	)
+	if err != nil {
+		redisClient.Close()
+		store.Close()
+		return nil, fmt.Errorf("create phone login manager: %w", err)
+	}
 	return &ServiceContext{
 		Config: c, identityStore: store, redisClient: redisClient, TokenManager: tokenManager,
 		AuthorizationManager: authorization.NewManager(store),
 		AccountManager:       accountManager,
+		PhoneLoginManager:    phoneLoginManager,
 		SessionManager:       sessionManager,
 	}, nil
 }

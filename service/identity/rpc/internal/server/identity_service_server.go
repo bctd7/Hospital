@@ -23,6 +23,16 @@ func NewIdentityServiceServer(svcCtx *svc.ServiceContext) *IdentityServiceServer
 	}
 }
 
+func (s *IdentityServiceServer) SendPhoneLoginCode(ctx context.Context, in *identityv1.SendPhoneLoginCodeRequest) (*identityv1.SendPhoneLoginCodeResponse, error) {
+	l := logic.NewSendPhoneLoginCodeLogic(ctx, s.svcCtx)
+	return l.SendPhoneLoginCode(in)
+}
+
+func (s *IdentityServiceServer) PhoneLogin(ctx context.Context, in *identityv1.PhoneLoginRequest) (*identityv1.TokenPair, error) {
+	l := logic.NewPhoneLoginLogic(ctx, s.svcCtx)
+	return l.PhoneLogin(in)
+}
+
 func (s *IdentityServiceServer) WeChatLogin(ctx context.Context, in *identityv1.WeChatLoginRequest) (*identityv1.TokenPair, error) {
 	l := logic.NewWeChatLoginLogic(ctx, s.svcCtx)
 	return l.WeChatLogin(in)

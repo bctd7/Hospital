@@ -10,7 +10,8 @@ Identity Service 是账号身份、工作人员科室、角色、权限和登录
 - 旧 Refresh Token 重放检测和 Session 撤销；
 - 查询授权上下文，以及首期角色、科室和账号状态管理；
 - 权限变更幂等、审计和 Outbox；
-- 微信登录、微信手机号和短信验证码供应商接口预留。
+- 阿里云 PNVS 手机号验证码发送、校验、自动注册和登录；
+- 微信登录兼容接口，以及微信手机号供应商接口预留。
 
 Refresh Token 原文不会写入 Redis、数据库或日志。Redis 仅保存 SHA-256 哈希，默认绝对有效期为 30 天；Access Token 默认有效期为 15 分钟。
 
@@ -37,6 +38,11 @@ go run ./tools/identity-keygen
 go run ./service/identity/rpc -f service/identity/rpc/etc/identity-rpc.yaml
 ```
 
+启用真实手机号登录前，在阿里云号码认证控制台开通“短信认证服务”，从当前可用列表复制系统
+签名和登录/注册模板 Code，填写 `.env` 中的 PNVS 配置，并把
+`service/identity/rpc/etc/identity-rpc.yaml` 的 `PhoneLogin.Enabled` 改为 `true`。AccessKey 应来自
+最小权限 RAM 用户，不使用主账号 AccessKey。
+
 随后启动 `app-api`，对外提供：
 
 - `POST /api/v1/auth/token/refresh`
@@ -46,20 +52,20 @@ go run ./service/identity/rpc -f service/identity/rpc/etc/identity-rpc.yaml
 
 ## 尚未开放
 
-- 微信和短信真实登录；
-- Refresh Token 首次签发的公共入口——未来登录供应商验证成功后调用 `SessionManager.Start`；
 - 多设备会话列表与一键退出全部设备；
 - 普通 Access Token 的即时撤销；
 - 多级权限审批、临时授权和多科室任职。
 
-## 微信注册与医生开通
+## 手机号注册、登录与医生开通
 
-当前版本已经开放真实微信基础登录：
+当前主登录方案使用阿里云 PNVS 短信认证：
 
-- `POST /api/v1/auth/wechat/login` 使用 `wx.login` code 换取 OpenID；
-- 新 OpenID 自动创建患者账号并签发 Access Token 与 Refresh Token；
+- `POST /api/v1/auth/phone/code` 使用平台预置签名和模板发送动态验证码；
+- `POST /api/v1/auth/phone/login` 校验验证码，同一手机号复用账号，首次登录自动创建患者账号；
+- 手机号绑定保存为 `verified/sms`，数据库只保存 HMAC 指纹和脱敏号码；
 - `GET /api/v1/auth/me` 返回当前 Token 中的账号类型、角色、科室和权限；
-- `PUT /api/v1/auth/me/phone` 登记自报手机号，数据库只保存 HMAC 指纹和脱敏号码；
-- 超级管理员可以按完整手机号精确查找账号，并在线下确认后开通为指定科室医生。
+- 超级管理员可以按完整手机号精确查找账号，并开通为指定科室医生；
+- `POST /api/v1/auth/wechat/login` 暂时保留为兼容接口，新小程序入口不再调用。
 
-个人主体无法依赖微信手机号快捷验证，因此 `self_reported` 手机号不能单独证明医生身份。完整规则和接口见 `plan/05-wechat-registration-and-doctor-onboarding.md`。
+手机号是唯一登录标识，但内部 `account_id` 仍是不可变数据库主键。完整规则见
+`plan/miniapp/07-phone-primary-authentication.md`。

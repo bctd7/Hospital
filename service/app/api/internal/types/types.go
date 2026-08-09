@@ -25,6 +25,11 @@ type PhoneBindingResponse struct {
 	VerificationSource string `json:"verification_source"`
 }
 
+type PhoneLoginRequest struct {
+	Phone            string `json:"phone"`
+	VerificationCode string `json:"verification_code"`
+}
+
 type PromoteDoctorRequest struct {
 	AccountID       string `json:"account_id"`
 	DepartmentID    string `json:"department_id"`
@@ -47,6 +52,15 @@ type SearchAccountByPhoneRequest struct {
 type SearchAccountByPhoneResponse struct {
 	Identity CurrentIdentityResponse `json:"identity"`
 	Phone    PhoneBindingResponse    `json:"phone"`
+}
+
+type SendPhoneLoginCodeRequest struct {
+	Phone string `json:"phone"`
+}
+
+type SendPhoneLoginCodeResponse struct {
+	Accepted          bool  `json:"accepted"`
+	RetryAfterSeconds int64 `json:"retry_after_seconds"`
 }
 
 type SetPhoneRequest struct {

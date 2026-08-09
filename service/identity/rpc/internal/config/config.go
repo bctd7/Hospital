@@ -26,5 +26,18 @@ type Config struct {
 		AppSecret       string `json:",optional"`
 		Code2SessionURL string `json:",default=https://api.weixin.qq.com/sns/jscode2session"`
 	}
+	PhoneLogin struct {
+		Enabled         bool   `json:",default=false"`
+		AccessKeyID     string `json:",optional"`
+		AccessKeySecret string `json:",optional"`
+		RegionID        string `json:",default=cn-shanghai"`
+		Endpoint        string `json:",default=dypnsapi.aliyuncs.com"`
+		SignName        string `json:",optional"`
+		TemplateCode    string `json:",optional"`
+		SchemeName      string `json:",optional"`
+		ValidSeconds    int64  `json:",default=300"`
+		IntervalSeconds int64  `json:",default=60"`
+		CodeLength      int64  `json:",default=6"`
+	}
 	PhoneLookupKeyBase64 string
 }

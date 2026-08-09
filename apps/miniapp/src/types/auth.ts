@@ -1,10 +1,16 @@
 export type SessionStatus = "idle" | "authenticating" | "authenticated" | "guest";
+export type AppMode = "patient" | "doctor";
 
 export interface TokenResponse {
   access_token: string;
   refresh_token: string;
   access_expires_in_seconds: number;
   refresh_expires_in_seconds: number;
+}
+
+export interface SendPhoneLoginCodeResponse {
+  accepted: boolean;
+  retry_after_seconds: number;
 }
 
 export interface CurrentIdentityResponse {
@@ -21,6 +27,12 @@ export interface RevokeTokenResponse {
   revoked: boolean;
 }
 
+export interface PhoneBindingResponse {
+  phone_masked: string;
+  verification_status: string;
+  verification_source: string;
+}
+
 export interface SessionTokenPair {
   accessToken: string;
   refreshToken: string;
@@ -31,4 +43,5 @@ export interface SessionTokenPair {
 export interface SessionView {
   status: SessionStatus;
   principal: CurrentIdentityResponse | null;
+  activeMode: AppMode;
 }
