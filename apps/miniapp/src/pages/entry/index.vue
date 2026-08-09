@@ -4,7 +4,8 @@ import { onUnmounted, ref } from "vue";
 
 import { sendPhoneLoginCode } from "@/api/auth";
 import ProfileAvatar from "@/components/profile/ProfileAvatar.vue";
-import { initializeFromPhone } from "@/stores/session";
+import { initializeFromPhone, sessionState } from "@/stores/session";
+import { openAppVariant } from "@/utils/appShell";
 import { getDisplayProfile, saveDisplayProfile } from "@/utils/displayProfile";
 import { saveSelfPatientPreferences } from "@/utils/selfPatientPreferences";
 
@@ -123,15 +124,12 @@ async function enterMiniapp() {
     phoneMasked: `${phone.value.slice(0, 3)}****${phone.value.slice(7)}`,
   });
 
-  uni.switchTab({
-    url: "/pages/home/index",
-    fail: () => {
-      entering.value = false;
-      uni.showToast({
-        title: "暂时无法进入，请重试",
-        icon: "none",
-      });
-    },
+  openAppVariant(sessionState.appVariant, () => {
+    entering.value = false;
+    uni.showToast({
+      title: "暂时无法进入，请重试",
+      icon: "none",
+    });
   });
 }
 

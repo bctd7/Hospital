@@ -6,7 +6,7 @@ describe("self patient preferences", () => {
     vi.unstubAllGlobals();
   });
 
-  it("uses an enabled empty profile by default", async () => {
+  it("uses an empty masked phone by default", async () => {
     vi.stubGlobal("uni", {
       getStorageSync: vi.fn(() => undefined),
       setStorageSync: vi.fn(),
@@ -16,17 +16,13 @@ describe("self patient preferences", () => {
       "@/utils/selfPatientPreferences"
     );
 
-    expect(getSelfPatientPreferences()).toEqual({
-      enabled: true,
-      phoneMasked: "",
-    });
+    expect(getSelfPatientPreferences()).toEqual({ phoneMasked: "" });
   });
 
-  it("persists only the masked phone and status preference", async () => {
+  it("persists only the masked phone", async () => {
     const setStorageSync = vi.fn();
     vi.stubGlobal("uni", {
       getStorageSync: vi.fn(() => ({
-        enabled: true,
         phoneMasked: "",
       })),
       setStorageSync,
@@ -38,17 +34,14 @@ describe("self patient preferences", () => {
 
     expect(
       saveSelfPatientPreferences({
-        enabled: false,
         phoneMasked: "138****5678",
       }),
     ).toEqual({
-      enabled: false,
       phoneMasked: "138****5678",
     });
     expect(setStorageSync).toHaveBeenCalledWith(
       "hospital:self-patient-preferences",
       {
-        enabled: false,
         phoneMasked: "138****5678",
       },
     );

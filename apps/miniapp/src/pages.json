@@ -33,6 +33,13 @@
       }
     },
     {
+      "path": "pages/staff/index",
+      "style": {
+        "navigationStyle": "custom",
+        "navigationBarTitleText": "工作人员后台"
+      }
+    },
+    {
       "path": "pages/profile/patients/index",
       "style": {
         "navigationBarTitleText": "就诊人管理"

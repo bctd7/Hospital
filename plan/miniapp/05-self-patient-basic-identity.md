@@ -144,7 +144,7 @@ patient.status = missing / basic_verified
 ```
 
 不能因为 Identity 自动创建了 `account_type=patient` 就认为本人资料已经完成。医生账号虽然是
-`account_type=staff`，切换到患者模式后同样可以建立自己的唯一本人档案；`active_mode` 不改变
+`account_type=staff`，其本人档案仍按稳定账号关系建立；应用版本选择不改变
 账号类型，具体规则见 `06-account-mode-switching.md`。
 
 前端调用关系：

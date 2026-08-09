@@ -1,5 +1,5 @@
 export type SessionStatus = "idle" | "authenticating" | "authenticated" | "guest";
-export type AppMode = "patient" | "doctor";
+export type AppVariant = "patient" | "staff";
 
 export interface TokenResponse {
   access_token: string;
@@ -43,5 +43,5 @@ export interface SessionTokenPair {
 export interface SessionView {
   status: SessionStatus;
   principal: CurrentIdentityResponse | null;
-  activeMode: AppMode;
+  appVariant: AppVariant;
 }

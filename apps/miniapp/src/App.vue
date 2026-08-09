@@ -1,17 +1,23 @@
 <script setup lang="ts">
 import { onLaunch, onShow } from "@dcloudio/uni-app";
+import { watch } from "vue";
 
 import { restoreSession, sessionState } from "@/stores/session";
-import { applyAppModeNavigation } from "@/utils/appMode";
+import { applyAppVariantNavigation } from "@/utils/appShell";
 
 onLaunch(() => {
   restoreSession();
-  applyAppModeNavigation(sessionState.activeMode);
+  applyAppVariantNavigation(sessionState.appVariant);
 });
 
 onShow(() => {
-  applyAppModeNavigation(sessionState.activeMode);
+  applyAppVariantNavigation(sessionState.appVariant);
 });
+
+watch(
+  () => sessionState.appVariant,
+  (variant) => applyAppVariantNavigation(variant),
+);
 </script>
 
 <style>

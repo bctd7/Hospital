@@ -22,15 +22,8 @@ interface InputEvent {
   };
 }
 
-interface SwitchEvent {
-  detail: {
-    value?: boolean;
-  };
-}
-
 const avatarUrl = ref("");
 const nickname = ref("微信用户");
-const patientEnabled = ref(true);
 const phoneMasked = ref("");
 const editingNickname = ref(false);
 const loggingOut = ref(false);
@@ -53,7 +46,6 @@ onShow(() => {
 
   avatarUrl.value = profile.avatarUrl;
   nickname.value = profile.nickname;
-  patientEnabled.value = preferences.enabled;
   phoneMasked.value = preferences.phoneMasked;
 });
 
@@ -83,16 +75,6 @@ function finishNicknameEdit() {
   });
   nickname.value = profile.nickname;
   editingNickname.value = false;
-}
-
-function togglePatientStatus(event: Event) {
-  const switchEvent = event as unknown as SwitchEvent;
-  patientEnabled.value = switchEvent.detail.value ?? false;
-  saveSelfPatientPreferences({ enabled: patientEnabled.value });
-  uni.showToast({
-    title: patientEnabled.value ? "本人就诊信息已启用" : "本人就诊信息已停用",
-    icon: "none",
-  });
 }
 
 async function logoutCurrentSession() {
@@ -153,23 +135,6 @@ async function logoutCurrentSession() {
         </view>
       </view>
 
-      <view class="patients-row">
-        <view class="patients-row__copy">
-          <text class="patients-row__label">状态</text>
-          <text class="patients-row__description">是否启用本人就诊信息</text>
-        </view>
-        <view class="patients-row__value patients-row__value--switch">
-          <text class="patients-row__status" :class="{ 'patients-row__status--enabled': patientEnabled }">
-            {{ patientEnabled ? "已启用" : "已停用" }}
-          </text>
-          <switch
-            :checked="patientEnabled"
-            color="#1497e3"
-            aria-label="切换本人就诊信息状态"
-            @change="togglePatientStatus"
-          />
-        </view>
-      </view>
     </view>
 
     <view class="patients-card patients-card--phone">
@@ -277,10 +242,6 @@ async function logoutCurrentSession() {
   gap: 16rpx;
 }
 
-.patients-row__value--switch {
-  gap: 18rpx;
-}
-
 .patients-row__text,
 .patients-row__input {
   max-width: 390rpx;
@@ -308,15 +269,6 @@ async function logoutCurrentSession() {
   font-size: 50rpx;
   font-weight: 300;
   line-height: 1;
-}
-
-.patients-row__status {
-  color: #9aa2ad;
-  font-size: 24rpx;
-}
-
-.patients-row__status--enabled {
-  color: #1497e3;
 }
 
 .patients-page__hint {

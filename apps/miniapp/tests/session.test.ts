@@ -16,13 +16,11 @@ vi.mock("@/api/auth", () => authMocks);
 vi.mock("@/utils/wechatCode", () => codeMocks);
 
 import {
-  availableAppModes,
   initializeFromWechat,
   initializeFromPhone,
   logout,
   refreshOnce,
   restoreSession,
-  setActiveMode,
   sessionState,
 } from "@/stores/session";
 
@@ -96,34 +94,17 @@ describe("session store", () => {
     expect(storage.has("hospital:session")).toBe(false);
   });
 
-  it("does not allow a patient account to select doctor mode", async () => {
-    codeMocks.getWechatLoginCode.mockResolvedValue("one-time-code");
-    authMocks.wechatLogin.mockResolvedValue(tokenResponse);
-    authMocks.getCurrentIdentity.mockResolvedValue(principal);
-
-    await initializeFromWechat();
-
-    expect(availableAppModes()).toEqual(["patient"]);
-    expect(setActiveMode("doctor")).toBe(false);
-    expect(sessionState.activeMode).toBe("patient");
-  });
-
-  it("persists doctor mode only for an account with the doctor role", async () => {
+  it("selects the shared staff placeholder for a doctor", async () => {
     codeMocks.getWechatLoginCode.mockResolvedValue("one-time-code");
     authMocks.wechatLogin.mockResolvedValue(tokenResponse);
     authMocks.getCurrentIdentity.mockResolvedValue(doctorPrincipal);
 
     await initializeFromWechat();
 
-    expect(availableAppModes()).toEqual(["patient", "doctor"]);
-    expect(setActiveMode("doctor")).toBe(true);
-    expect(sessionState.activeMode).toBe("doctor");
-
-    const persisted = storage.get("hospital:session") as { activeMode?: string };
-    expect(persisted.activeMode).toBe("doctor");
+    expect(sessionState.appVariant).toBe("staff");
   });
 
-  it("falls back to patient mode when a stored doctor role is no longer present", () => {
+  it("derives the app variant again when restoring a session", () => {
     storage.set("hospital:session", {
       version: 1,
       tokens: {
@@ -132,16 +113,16 @@ describe("session store", () => {
         accessExpiresAt: Date.now() + 60000,
         refreshExpiresAt: Date.now() + 120000,
       },
-      principal,
+      principal: doctorPrincipal,
       activeMode: "doctor",
     });
 
     restoreSession();
 
-    expect(sessionState.activeMode).toBe("patient");
+    expect(sessionState.appVariant).toBe("staff");
   });
 
-  it("falls back to patient mode when refresh returns a principal without the doctor role", async () => {
+  it("recomputes the app variant after refreshing the principal", async () => {
     storage.set("hospital:session", {
       version: 1,
       tokens: {
@@ -151,7 +132,6 @@ describe("session store", () => {
         refreshExpiresAt: Date.now() + 60000,
       },
       principal: doctorPrincipal,
-      activeMode: "doctor",
     });
     restoreSession();
     authMocks.refreshToken.mockResolvedValue(tokenResponse);
@@ -159,21 +139,18 @@ describe("session store", () => {
 
     await expect(refreshOnce()).resolves.toBe(true);
 
-    expect(sessionState.activeMode).toBe("patient");
-    const persisted = storage.get("hospital:session") as { activeMode?: string };
-    expect(persisted.activeMode).toBe("patient");
+    expect(sessionState.appVariant).toBe("patient");
   });
 
-  it("resets doctor mode when the user logs out", async () => {
+  it("resets the app variant when the user logs out", async () => {
     authMocks.phoneLogin.mockResolvedValue(tokenResponse);
     authMocks.getCurrentIdentity.mockResolvedValue(doctorPrincipal);
     await initializeFromPhone("13800138000", "123456");
-    expect(setActiveMode("doctor")).toBe(true);
 
     await logout();
 
     expect(sessionState.status).toBe("guest");
-    expect(sessionState.activeMode).toBe("patient");
+    expect(sessionState.appVariant).toBe("patient");
     expect(storage.has("hospital:session")).toBe(false);
   });
 

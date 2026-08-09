@@ -6,7 +6,6 @@ import type {
 const SELF_PATIENT_PREFERENCES_STORAGE_KEY = "hospital:self-patient-preferences";
 
 const DEFAULT_SELF_PATIENT_PREFERENCES: Readonly<SelfPatientPreferences> = {
-  enabled: true,
   phoneMasked: "",
 };
 
@@ -16,7 +15,6 @@ function normalizePreferences(
   input?: SelfPatientPreferencesInput,
 ): SelfPatientPreferences {
   return {
-    enabled: input?.enabled ?? DEFAULT_SELF_PATIENT_PREFERENCES.enabled,
     phoneMasked: input?.phoneMasked?.trim().slice(0, 32) ?? "",
   };
 }

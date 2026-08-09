@@ -21,7 +21,7 @@
 2. [03-entry-and-profile-requirements.md](./03-entry-and-profile-requirements.md)：历史微信资料入口需求；认证入口以计划 07 为准。
 3. [04-login-and-identity-implementation.md](./04-login-and-identity-implementation.md)：历史微信登录调用链，保留用于理解兼容代码。
 4. [05-self-patient-basic-identity.md](./05-self-patient-basic-identity.md)：首版仅本人、已验证手机号、数据归属和医疗信息访问边界。
-5. [06-account-mode-switching.md](./06-account-mode-switching.md)：医生角色保持不变，通过本地会话在患者端和医生工作台之间切换。
+5. [06-account-mode-switching.md](./06-account-mode-switching.md)：由角色选择患者端或统一工作人员后台，医生与超管通过权限区分功能。
 6. [07-phone-primary-authentication.md](./07-phone-primary-authentication.md)：当前认证基线；使用阿里云 PNVS 短信认证，以手机号作为唯一登录标识。
 
 后续页面和业务规划按顺序增加，例如：
