@@ -2,11 +2,13 @@
 
 这里用于放置微信小程序源码。当前使用测试 AppID，前端技术栈为 uni-app + Vue 3 + TypeScript + Vite。
 
-规划文档集中维护在 [`plan/miniapp/`](../../plan/miniapp/)，不在源码目录中混放需求和设计文档。
+前端接口契约和页面设计集中维护在 [`plan/frontend/`](../../plan/frontend/)，不在源码目录中混放需求和设计文档。
 
 ## 当前实现
 
-- 首页、挂号、消息、我的四个独立一级页面；
+- 患者端保留首页、挂号、消息、我的四个一级页面；
+- 工作人员端第二页为可复用的部门管理页：医生只读，超级管理员可维护部门并进入用户管理；
+- 超级管理员可按完整手机号精确搜索，也可按昵称或医生名称筛选账号；用户详情承载开通医生、编辑资料、调岗、撤销医生身份及账号启停；
 - 使用 `pages.json` 配置的原生 TabBar；
 - 启动时展示可跳过的微信头像和昵称填写页；
 - “我的”页面展示资料头部及就诊人管理、预约、关注、设置和消息管理入口；
@@ -45,7 +47,19 @@ API 默认地址为 `http://127.0.0.1:8888`。需要覆盖时，在 `apps/miniap
 
 ```text
 VITE_API_BASE_URL=http://电脑的局域网地址:8888
+VITE_STAFF_DATA_SOURCE=mock
 ```
+
+`VITE_STAFF_DATA_SOURCE=mock` 只在开发构建生效。部门和用户演示数据全部隔离在
+`src/api/staffManagement.mock.ts`，页面只调用 `StaffManagementApi`，不直接引用静态数据。
+后端接口完成后把本地配置改为 `http` 即可联调，生产构建无条件使用 HTTP。
+
+后端联调完成后的 Mock 清理清单：
+
+1. 对照 `plan/frontend/api/` 完成真实接口回归；
+2. 删除 `staffManagement.mock.ts` 及对应 Mock 测试；
+3. 移除 `staffManagement.ts` 中的 Mock 选择和页面中的 Mock 提示；
+4. 删除 `VITE_STAFF_DATA_SOURCE` 配置，只保留 HTTP 实现。
 
 微信开发者工具模拟器可以访问本机 `127.0.0.1`；真机中的 `127.0.0.1` 指向手机自身，必须改为手机可访问的局域网或 HTTPS 地址。API Base URL 是公开的前端配置，不得在这里放 AppSecret。
 

@@ -63,6 +63,25 @@
       }
     }
   ],
+  "subPackages": [
+    {
+      "root": "pages/admin",
+      "pages": [
+        {
+          "path": "users/index",
+          "style": {
+            "navigationBarTitleText": "用户管理"
+          }
+        },
+        {
+          "path": "users/detail",
+          "style": {
+            "navigationBarTitleText": "用户详情"
+          }
+        }
+      ]
+    }
+  ],
   "globalStyle": {
     "navigationBarBackgroundColor": "#ffffff",
     "navigationBarTextStyle": "black",
