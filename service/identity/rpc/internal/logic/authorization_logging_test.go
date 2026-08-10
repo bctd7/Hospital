@@ -26,10 +26,12 @@ func TestAuthorizationFailureUsesFunctionalLogging(t *testing.T) {
 		AccountID: "20000000-0000-0000-0000-000000000001",
 		Status:    authn.AccountStatusActive,
 	})
-	logic := NewAssignRoleLogic(ctx, &svc.ServiceContext{
-		AuthorizationManager: authorization.NewManager(store),
-	})
-	_, err := logic.AssignRole(&identityv1.AssignRoleRequest{
+	manager, err := authorization.NewManager(store, testAuthorizationVersionWriter{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	logic := NewAssignRoleLogic(ctx, &svc.ServiceContext{AuthorizationManager: manager})
+	_, err = logic.AssignRole(&identityv1.AssignRoleRequest{
 		TargetAccountId: "20000000-0000-0000-0000-000000000002",
 		RoleCode:        authn.RoleDepartmentDoctor,
 		OperationId:     "20000000-0000-0000-0000-000000000003",
@@ -66,6 +68,12 @@ func restoreIdentityLogWriter(t *testing.T, destination io.Writer) {
 }
 
 type deniedAuthorizationStore struct{}
+
+type testAuthorizationVersionWriter struct{}
+
+func (testAuthorizationVersionWriter) SetAuthorizationVersion(context.Context, string, int64) error {
+	return nil
+}
 
 func (deniedAuthorizationStore) GetAuthorizationContext(_ context.Context, accountID string) (authn.Principal, error) {
 	return authn.Principal{AccountID: accountID, AccountType: authn.AccountTypeStaff, Status: authn.AccountStatusActive}, nil

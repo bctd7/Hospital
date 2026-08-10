@@ -34,6 +34,7 @@ func sessionRPCError(err error) error {
 		errors.Is(err, session.ErrSessionNotFound),
 		errors.Is(err, session.ErrSessionExpired),
 		errors.Is(err, session.ErrRefreshTokenReused),
+		errors.Is(err, session.ErrAuthorizationChanged),
 		errors.Is(err, authn.ErrInactiveAccount):
 		return status.Error(codes.Unauthenticated, "refresh token is invalid or expired")
 	default:

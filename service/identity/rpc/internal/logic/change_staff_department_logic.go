@@ -32,7 +32,7 @@ func (l *ChangeStaffDepartmentLogic) ChangeStaffDepartment(in *identityv1.Change
 		return nil, err
 	}
 	principal, err := l.svcCtx.AuthorizationManager.ChangeStaffDepartment(
-		ctx, operator.AccountID, in.GetTargetAccountId(), in.GetDepartmentId(), in.GetOperationId(), in.GetRequestId(),
+		ctx, operator, in.GetTargetAccountId(), in.GetDepartmentId(), in.GetOperationId(), in.GetRequestId(),
 	)
 	if err != nil {
 		logging.Error(ctx, authorization.ActionDepartmentChanged, err,

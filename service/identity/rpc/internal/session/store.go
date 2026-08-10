@@ -9,10 +9,11 @@ import (
 )
 
 var (
-	ErrInvalidRefreshToken = errors.New("invalid refresh token")
-	ErrSessionNotFound     = errors.New("refresh session not found")
-	ErrSessionExpired      = errors.New("refresh session expired")
-	ErrRefreshTokenReused  = errors.New("refresh token was already used")
+	ErrInvalidRefreshToken  = errors.New("invalid refresh token")
+	ErrSessionNotFound      = errors.New("refresh session not found")
+	ErrSessionExpired       = errors.New("refresh session expired")
+	ErrRefreshTokenReused   = errors.New("refresh token was already used")
+	ErrAuthorizationChanged = errors.New("authorization changed; login is required")
 )
 
 // Session 是一条保存在服务端的刷新会话。

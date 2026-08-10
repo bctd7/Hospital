@@ -32,7 +32,7 @@ func (l *PromoteToDepartmentDoctorLogic) PromoteToDepartmentDoctor(in *identityv
 		return nil, err
 	}
 	principal, err := l.svcCtx.AuthorizationManager.PromoteToDepartmentDoctor(
-		ctx, operator.AccountID, in.GetTargetAccountId(), in.GetDepartmentId(),
+		ctx, operator, in.GetTargetAccountId(), in.GetDepartmentId(),
 		in.GetOfflineVerified(), in.GetOperationId(), in.GetRequestId(),
 	)
 	if err != nil {

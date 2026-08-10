@@ -22,6 +22,12 @@ IdentityRPC:
     - identity-rpc:8080
   NonBlock: true
 
+AuthorizationRedis:
+  Addr: ${REDIS_HOST}:${REDIS_PORT}
+  Password: ${REDIS_PASSWORD}
+  DB: 0
+  Prefix: "identity:authorization-version:"
+
 Token:
   Issuer: hospital-identity
   Audience: hospital-services

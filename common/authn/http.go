@@ -7,7 +7,7 @@ import (
 
 type accessTokenContextKey struct{}
 
-func HTTPMiddleware(manager *TokenManager) func(http.HandlerFunc) http.HandlerFunc {
+func HTTPMiddleware(manager *TokenManager, validator PrincipalValidator) func(http.HandlerFunc) http.HandlerFunc {
 	return func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			raw, err := bearerToken(r.Header.Get("Authorization"))
@@ -17,6 +17,10 @@ func HTTPMiddleware(manager *TokenManager) func(http.HandlerFunc) http.HandlerFu
 			}
 			principal, err := manager.Verify(raw)
 			if err != nil {
+				http.Error(w, "authentication required", http.StatusUnauthorized)
+				return
+			}
+			if validator == nil || validator.ValidatePrincipal(r.Context(), principal) != nil {
 				http.Error(w, "authentication required", http.StatusUnauthorized)
 				return
 			}

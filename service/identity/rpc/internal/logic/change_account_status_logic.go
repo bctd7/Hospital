@@ -32,7 +32,7 @@ func (l *ChangeAccountStatusLogic) ChangeAccountStatus(in *identityv1.ChangeAcco
 		return nil, err
 	}
 	principal, err := l.svcCtx.AuthorizationManager.ChangeAccountStatus(
-		ctx, operator.AccountID, in.GetTargetAccountId(), in.GetStatus(), in.GetOperationId(), in.GetRequestId(),
+		ctx, operator, in.GetTargetAccountId(), in.GetStatus(), in.GetOperationId(), in.GetRequestId(),
 	)
 	if err != nil {
 		logging.Error(ctx, authorization.ActionAccountStatusChanged, err,

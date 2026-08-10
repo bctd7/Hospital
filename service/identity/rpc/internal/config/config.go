@@ -8,10 +8,11 @@ type Config struct {
 		DataSource string
 	}
 	SessionRedis struct {
-		Addr     string
-		Password string `json:",optional"`
-		DB       int    `json:",default=0"`
-		Prefix   string `json:",default=identity:refresh:"`
+		Addr                       string
+		Password                   string `json:",optional"`
+		DB                         int    `json:",default=0"`
+		Prefix                     string `json:",default=identity:refresh:"`
+		AuthorizationVersionPrefix string `json:",default=identity:authorization-version:"`
 	}
 	Token struct {
 		Issuer                 string `json:",default=hospital-identity"`

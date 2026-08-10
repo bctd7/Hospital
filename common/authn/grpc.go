@@ -20,7 +20,7 @@ const (
 	grpcHealthCheckMethod     = "/grpc.health.v1.Health/Check"
 )
 
-func UnaryServerInterceptor(manager *TokenManager, publicMethods ...string) grpc.UnaryServerInterceptor {
+func UnaryServerInterceptor(manager *TokenManager, validator PrincipalValidator, publicMethods ...string) grpc.UnaryServerInterceptor {
 	public := make(map[string]struct{}, len(publicMethods)+1)
 	public[grpcHealthCheckMethod] = struct{}{}
 	for _, method := range publicMethods {
@@ -43,6 +43,13 @@ func UnaryServerInterceptor(manager *TokenManager, publicMethods ...string) grpc
 		principal, err := manager.Verify(raw)
 		if err != nil {
 			logging.Error(ctx, "auth.token.rejected", err, logx.Field("rpc_method", info.FullMethod))
+			return nil, status.Error(codes.Unauthenticated, "authentication required")
+		}
+		if validator == nil {
+			return nil, status.Error(codes.Unauthenticated, "authentication required")
+		}
+		if err := validator.ValidatePrincipal(ctx, principal); err != nil {
+			logging.Error(ctx, "auth.authorization_version.rejected", err, logx.Field("rpc_method", info.FullMethod))
 			return nil, status.Error(codes.Unauthenticated, "authentication required")
 		}
 		return handler(ContextWithPrincipal(ctx, principal), request)

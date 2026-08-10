@@ -10,9 +10,15 @@ import (
 
 type Config struct {
 	rest.RestConf
-	Environment string `json:",default=local"`
-	IdentityRPC zrpc.RpcClientConf
-	Token       struct {
+	Environment        string `json:",default=local"`
+	IdentityRPC        zrpc.RpcClientConf
+	AuthorizationRedis struct {
+		Addr     string
+		Password string `json:",optional"`
+		DB       int    `json:",default=0"`
+		Prefix   string `json:",default=identity:authorization-version:"`
+	}
+	Token struct {
 		Issuer                string `json:",default=hospital-identity"`
 		Audience              string `json:",default=hospital-services"`
 		AccessPublicKeyBase64 string

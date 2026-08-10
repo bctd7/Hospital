@@ -27,6 +27,7 @@ SessionRedis:
   Password: ${REDIS_PASSWORD}
   DB: 0
   Prefix: "identity:refresh:"
+  AuthorizationVersionPrefix: "identity:authorization-version:"
 
 Token:
   Issuer: hospital-identity

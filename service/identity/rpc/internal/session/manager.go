@@ -21,6 +21,7 @@ type Manager struct {
 	store      Store
 	principals PrincipalStore
 	issuer     AccessTokenIssuer
+	versions   authn.AuthorizationVersionWriter
 	refreshTTL time.Duration
 	now        func() time.Time
 }
@@ -34,14 +35,23 @@ type TokenPair struct {
 }
 
 // NewManager 组装会话管理器；refreshTTL 控制一条登录会话的绝对生命周期。
-func NewManager(store Store, principals PrincipalStore, issuer AccessTokenIssuer, refreshTTL time.Duration) (*Manager, error) {
-	if store == nil || principals == nil || issuer == nil {
+func NewManager(
+	store Store,
+	principals PrincipalStore,
+	issuer AccessTokenIssuer,
+	versions authn.AuthorizationVersionWriter,
+	refreshTTL time.Duration,
+) (*Manager, error) {
+	if store == nil || principals == nil || issuer == nil || versions == nil {
 		return nil, errors.New("refresh session dependencies are required")
 	}
 	if refreshTTL <= 0 {
 		return nil, errors.New("refresh token ttl must be positive")
 	}
-	return &Manager{store: store, principals: principals, issuer: issuer, refreshTTL: refreshTTL, now: time.Now}, nil
+	return &Manager{
+		store: store, principals: principals, issuer: issuer, versions: versions,
+		refreshTTL: refreshTTL, now: time.Now,
+	}, nil
 }
 
 // Start 在微信或短信等登录方式已经确认账号身份后，首次签发 Access Token 和 Refresh Token。
@@ -65,6 +75,9 @@ func (m *Manager) Start(ctx context.Context, accountID string) (TokenPair, error
 	accessToken, accessExpiresAt, err := m.issuer.Issue(authPrincipal)
 	if err != nil {
 		return TokenPair{}, err
+	}
+	if err := m.versions.SetAuthorizationVersion(ctx, authPrincipal.AccountID, authPrincipal.AuthorizationVersion); err != nil {
+		return TokenPair{}, fmt.Errorf("publish authorization version: %w", err)
 	}
 	refreshExpiresAt := m.now().UTC().Add(m.refreshTTL)
 	if err := m.store.Create(ctx, Session{
@@ -108,6 +121,13 @@ func (m *Manager) Refresh(ctx context.Context, rawRefresh string) (TokenPair, er
 	if err != nil {
 		_ = m.store.Revoke(ctx, sessionID, current.TokenHash)
 		return TokenPair{}, err
+	}
+	if current.AuthorizationVersion != authPrincipal.AuthorizationVersion {
+		_ = m.store.Revoke(ctx, sessionID, current.TokenHash)
+		return TokenPair{}, ErrAuthorizationChanged
+	}
+	if err := m.versions.SetAuthorizationVersion(ctx, authPrincipal.AccountID, authPrincipal.AuthorizationVersion); err != nil {
+		return TokenPair{}, fmt.Errorf("publish authorization version: %w", err)
 	}
 
 	replacement, replacementHash, err := newRefreshToken(sessionID)

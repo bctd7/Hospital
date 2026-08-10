@@ -33,9 +33,16 @@ func TestMySQLAuthorizationChange(t *testing.T) {
 	seedIdentityTestData(t, store, ctx)
 	defer cleanupIdentityTestData(t, store, ctx)
 
-	manager := authorization.NewManager(store)
+	admin, err := store.GetAuthorizationContext(ctx, integrationAdminID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	manager, err := authorization.NewManager(store, integrationVersionWriter{})
+	if err != nil {
+		t.Fatal(err)
+	}
 	result, err := manager.ChangeStaffDepartment(
-		ctx, integrationAdminID, integrationDoctorID, integrationDepartmentB,
+		ctx, admin, integrationDoctorID, integrationDepartmentB,
 		integrationOperationID, "integration-request",
 	)
 	if err != nil {
@@ -46,7 +53,7 @@ func TestMySQLAuthorizationChange(t *testing.T) {
 	}
 
 	replayed, err := manager.ChangeStaffDepartment(
-		ctx, integrationAdminID, integrationDoctorID, integrationDepartmentB,
+		ctx, admin, integrationDoctorID, integrationDepartmentB,
 		integrationOperationID, "integration-request",
 	)
 	if err != nil {
@@ -111,9 +118,16 @@ func TestMySQLWeChatRegistrationPhoneAndDoctorPromotion(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	manager := authorization.NewManager(store)
+	admin, err := store.GetAuthorizationContext(ctx, adminID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	manager, err := authorization.NewManager(store, integrationVersionWriter{})
+	if err != nil {
+		t.Fatal(err)
+	}
 	principal, err := manager.PromoteToDepartmentDoctor(
-		ctx, adminID, patientID, departmentID, true, operationID, "integration-login-request",
+		ctx, admin, patientID, departmentID, true, operationID, "integration-login-request",
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -128,6 +142,12 @@ func TestMySQLWeChatRegistrationPhoneAndDoctorPromotion(t *testing.T) {
 	if lookup.Phone.VerificationStatus != "verified" || lookup.Phone.VerificationSource != "admin" {
 		t.Fatalf("phone was not admin verified: %#v", lookup.Phone)
 	}
+}
+
+type integrationVersionWriter struct{}
+
+func (integrationVersionWriter) SetAuthorizationVersion(context.Context, string, int64) error {
+	return nil
 }
 
 func seedIdentityTestData(t *testing.T, store *MySQLStore, ctx context.Context) {

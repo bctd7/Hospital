@@ -35,6 +35,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer ctx.Close()
 	handler.RegisterHandlers(server, ctx)
 
 	projectlog.Info(

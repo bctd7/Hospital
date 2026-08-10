@@ -32,7 +32,7 @@ func (l *AssignRoleLogic) AssignRole(in *identityv1.AssignRoleRequest) (*identit
 		return nil, err
 	}
 	principal, err := l.svcCtx.AuthorizationManager.AssignRole(
-		ctx, operator.AccountID, in.GetTargetAccountId(), in.GetRoleCode(), in.GetOperationId(), in.GetRequestId(),
+		ctx, operator, in.GetTargetAccountId(), in.GetRoleCode(), in.GetOperationId(), in.GetRequestId(),
 	)
 	if err != nil {
 		logging.Error(ctx, authorization.ActionRoleAssigned, err,

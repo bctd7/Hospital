@@ -11,6 +11,7 @@ import (
 	redis "github.com/redis/go-redis/v9"
 
 	"hospital/common/authn"
+	"hospital/common/authn/versionredis"
 	"hospital/service/identity/rpc/internal/account"
 	"hospital/service/identity/rpc/internal/authorization"
 	"hospital/service/identity/rpc/internal/config"
@@ -20,14 +21,15 @@ import (
 )
 
 type ServiceContext struct {
-	Config               config.Config
-	AuthorizationManager *authorization.Manager
-	AccountManager       *account.Manager
-	PhoneLoginManager    *account.PhoneLoginManager
-	SessionManager       *session.Manager
-	TokenManager         *authn.TokenManager
-	identityStore        *repository.MySQLStore
-	redisClient          *redis.Client
+	Config                        config.Config
+	AuthorizationManager          *authorization.Manager
+	AccountManager                *account.Manager
+	PhoneLoginManager             *account.PhoneLoginManager
+	SessionManager                *session.Manager
+	TokenManager                  *authn.TokenManager
+	AuthorizationVersionValidator *authn.AuthorizationVersionValidator
+	identityStore                 *repository.MySQLStore
+	redisClient                   *redis.Client
 }
 
 func NewServiceContext(c config.Config) (*ServiceContext, error) {
@@ -70,8 +72,21 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		store.Close()
 		return nil, err
 	}
+	authorizationVersions, err := versionredis.NewStore(redisClient, c.SessionRedis.AuthorizationVersionPrefix)
+	if err != nil {
+		redisClient.Close()
+		store.Close()
+		return nil, fmt.Errorf("create authorization version store: %w", err)
+	}
+	authorizationVersionValidator, err := authn.NewAuthorizationVersionValidator(authorizationVersions)
+	if err != nil {
+		redisClient.Close()
+		store.Close()
+		return nil, fmt.Errorf("create authorization version validator: %w", err)
+	}
 	sessionManager, err := session.NewManager(
-		sessionStore, store, tokenManager, time.Duration(c.Token.RefreshTTLSeconds)*time.Second,
+		sessionStore, store, tokenManager, authorizationVersions,
+		time.Duration(c.Token.RefreshTTLSeconds)*time.Second,
 	)
 	if err != nil {
 		redisClient.Close()
@@ -119,12 +134,19 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		store.Close()
 		return nil, fmt.Errorf("create phone login manager: %w", err)
 	}
+	authorizationManager, err := authorization.NewManager(store, authorizationVersions)
+	if err != nil {
+		redisClient.Close()
+		store.Close()
+		return nil, fmt.Errorf("create identity authorization manager: %w", err)
+	}
 	return &ServiceContext{
 		Config: c, identityStore: store, redisClient: redisClient, TokenManager: tokenManager,
-		AuthorizationManager: authorization.NewManager(store),
-		AccountManager:       accountManager,
-		PhoneLoginManager:    phoneLoginManager,
-		SessionManager:       sessionManager,
+		AuthorizationVersionValidator: authorizationVersionValidator,
+		AuthorizationManager:          authorizationManager,
+		AccountManager:                accountManager,
+		PhoneLoginManager:             phoneLoginManager,
+		SessionManager:                sessionManager,
 	}, nil
 }
 
