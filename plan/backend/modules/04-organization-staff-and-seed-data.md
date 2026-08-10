@@ -284,8 +284,11 @@ HMAC Key 和验证信息不得进入普通日志。
   -> 写审计和 Outbox
 ```
 
-已经签发的短期 Access Token 最迟在过期后失效；高风险环境如需要立即失效，应结合 Redis 授权版本
-或撤销记录校验。首期至少撤销所有 Refresh Session，禁止继续刷新旧权限。
+统一拦截器通过 Redis 授权版本校验使已经签发的旧 Access Token 在下一次请求时失效。普通角色撤销
+或调岗返回 `401` 后，客户端优先通过全局 `refreshOnce()` 无感取得权限收缩后的新 Token，并将原请求
+最多重试一次；账号禁用、Refresh Session 过期或显式撤销会导致刷新失败，此时客户端清理本地会话并
+回到登录流程。撤销医生身份是否同时撤销全部 Refresh Session 按安全策略决定；一旦撤销，就明确放弃
+无感刷新并要求重新登录。
 
 医生创建过的预约处理记录、检查记录和审计记录不能随身份撤销而删除。
 
@@ -341,8 +344,17 @@ HMAC Key 和验证信息不得进入普通日志。
 管理员按 permission 执行。公共接口需要限流和缓存，但不要求 `department_doctor` 或
 `super_admin` 身份。
 
-`app-api` 使用 Access Token 中的权限提前拒绝无权请求；Identity RPC 对高风险写操作再次查询最新
-账号和权限事实，不能仅相信客户端传入的操作者 ID。
+`app-api` 和 Identity RPC 的统一认证拦截器先完成 JWT 验签，再通过 Redis 授权版本校验器确认 Token
+中的 `authorization_version` 仍是当前版本。Logic 必须从 Context 取得已经验证的完整
+`authn.Principal`，不能相信客户端传入的操作者 ID；Manager 使用 `common/authz` 判断 permission，
+不再由每个业务模块分别查询操作者的角色和权限。Identity Repository 仍负责目标账号、组织和医生的
+最新业务事实及事务锁定。
+
+Redis 授权版本读取和校验不得放在 `service/identity/rpc/internal` 后再要求其他服务复制。公共接口、
+Validator、HTTP/gRPC 拦截器位于 `common/authn`，可复用 Redis Reader 位于
+`common/authn/versionredis`；每个服务仅在自身 `ServiceContext` 注册和注入这组公共组件。Identity 是
+授权版本唯一写入者，Appointment、Planning、Report、Navigation 等业务服务只能读取共享版本并使用
+Context 中的 Principal 完成本地业务授权。
 
 ## 7. 前端已确认的 HTTP 契约
 
@@ -744,14 +756,19 @@ Token。
 1. 增加新的 Identity 迁移，演进组织单元、账号展示资料和医生档案；
 2. 更新 permission 契约、角色初始化和授权测试；
 3. 更新 Identity Proto 并生成 RPC 骨架；
-4. 实现 Repository、事务、审计、Outbox 和授权版本更新；
-5. 更新 `app-api` 的 `.api` 契约并生成 HTTP 骨架；
-6. 实现本人昵称同步、公共科室和医生目录以及管理员组织、用户、医生和账号接口；
-7. 实现 local seed 工具与环境保护；
-8. 如联调需要，再实现严格受限的 local SMS Provider；
-9. 补充单元测试、MySQL/Redis 集成测试和 API 权限测试；
-10. 分别使用未登录访客、普通用户、医生和超级管理员验证公共目录；
-11. 使用超级管理员完成一次组织维护、医生开通、调岗、撤销和普通用户回退的联调回归。
+4. 在 `common/authn` 增加可注入的授权版本校验抽象和 HTTP/gRPC 统一拦截器，在
+   `common/authn/versionredis` 实现一份跨服务复用的 Redis Reader；各服务只完成配置与
+   `ServiceContext` 注入，不得复制校验代码；
+5. 重构 `authorization.Manager`：操作者使用已验证 Principal，保留目标账号业务查询和变更事务；
+6. 实现 Identity Repository、事务、审计、Outbox、授权版本唯一写入以及 Redis 未命中的
+   Identity/MySQL 回源，并补充旧 Token 拒绝、跨服务读取和缓存故障 fail-closed 测试；
+7. 更新 `app-api` 的 `.api` 契约并生成 HTTP 骨架；
+8. 实现本人昵称同步、公共科室和医生目录以及管理员组织、用户、医生和账号接口；
+9. 实现 local seed 工具与环境保护；
+10. 如联调需要，再实现严格受限的 local SMS Provider；
+11. 补充单元测试、MySQL/Redis 集成测试和 API 权限测试；
+12. 分别使用未登录访客、普通用户、医生和超级管理员验证公共目录；
+13. 使用超级管理员完成一次组织维护、医生开通、调岗、撤销和普通用户回退的联调回归。
 
 前端页面与调用契约已经确定；本阶段按第 7 节一次性落地 `.api`、Proto、RPC、数据库迁移、错误码和
 mock 数据。后端不得仅实现路径占位或返回旧授权上下文后要求前端临时兼容。
