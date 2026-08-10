@@ -73,6 +73,8 @@ PUT /api/v1/auth/me/display-profile
 - 401 时调用全局共享的 `refreshOnce()`；
 - 同一时刻只允许一个刷新请求；
 - 刷新成功后原请求最多重试一次；
+- Access Token 仅自然过期、Redis 版本缺失且 Refresh Session 版本仍与 MySQL 一致时允许无感刷新；角色、
+  当前科室或账号状态变化造成版本不一致时，Refresh 必须失败，前端清理会话并回到登录页；
 - 登录和刷新接口本身不触发递归刷新；
 - 不在日志、Toast 或埋点输出 Token、手机号、验证码或微信 code。
 
@@ -87,8 +89,9 @@ TokenPair
 appVariant = patient / staff
 ```
 
-Storage key 为 `hospital:session`。登录、恢复和刷新后重新校验 Principal 与可用应用版本；角色被
-撤销后不能继续选择工作人员端。退出先清理本地状态，再尽力撤销服务端 Refresh Session。
+Storage key 为 `hospital:session`。登录、恢复和刷新后重新校验 Principal 与可用应用版本；角色、当前
+科室或账号状态发生变化后不在已打开的会话中无感切换身份，而是由 Refresh 版本冲突清理会话并要求
+重新登录。退出先清理本地状态，再尽力撤销服务端 Refresh Session。
 
 ## 5. 角色与权限
 
@@ -106,6 +109,8 @@ Storage key 为 `hospital:session`。登录、恢复和刷新后重新校验 Pri
 - 同一手机号重复登录复用相同 `account_id`；
 - 并发 401 只发生一次 Token 刷新；
 - Refresh Token 轮换后不再使用旧值；
+- 未发生授权变化时 Access Token 过期可以无感刷新；发生授权变化时旧 Refresh Session 被拒绝并回到
+  登录流程；
 - 退出立即清除本地会话；
 - TypeScript、前端测试、小程序构建和后端测试通过；
 - 构建产物不包含服务端 Secret。

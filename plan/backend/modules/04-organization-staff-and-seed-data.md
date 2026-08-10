@@ -1,6 +1,7 @@
 # Identity 组织、科室、医生与用户管理
 
-> 文档状态：前后端契约已对齐，待后端实施
+> 文档状态：前后端契约和授权边界已对齐；组织领域模型、Store、Manager 已开始实现，统一授权版本
+> 拦截器和 Repository/Logic 接线待实施
 >
 > 目标：补齐 Identity Service 当前缺少的组织、医生与管理员用户管理能力，为预约、科室数据权限和
 > 超级管理员部门/用户页面提供稳定接口。
@@ -42,7 +43,7 @@
 - 一个医生只能属于一个当前科室；
 - 医生调岗时整体变更其当前科室；
 - 撤销医生身份，但保留其普通用户账号和历史业务记录；
-- 组织和医生变更的授权版本、审计记录和 Outbox 事件；
+- 组织变更的组织版本、审计记录和 Outbox 事件，以及医生/账号授权变更的个人授权版本；
 - 本地组织、科室和医生 mock 数据；
 - 患者预约端、医生端和管理操作所需的 HTTP 接口。
 
@@ -157,10 +158,12 @@ appointment_slot_reservations  预约对具体时段容量的占用
 - 账号昵称、医生公开资料、科室、医生身份或账号状态发生管理变更时递增；
 - 管理员账号列表和详情明确返回 `management_version`；
 - 账号、医生写请求携带当前 `management_version`，版本不一致返回 `409`；
-- 涉及角色、科室或账号状态的变更同时递增 `authorization_version`；
+- 涉及账号角色、医生当前科室归属或账号状态的变更同时递增该账号的 `authorization_version`；
 - 只修改头像、显示名称或擅长描述时不递增 `authorization_version`，避免无意义地刷新 Token。
 
-组织单元使用自己的 `version`，不能拿账号版本更新科室，也不能用时间字符串代替并发控制。
+组织单元使用自己的 `version`，不能拿账号版本更新科室，也不能用时间字符串代替并发控制。医院、院区、
+科室的创建、改名、移动、停用或恢复不会改变任何个人 Token Claims，因此不递增操作者或其他账号的
+`authorization_version`。
 
 ### 3.5 科室归属
 
@@ -223,7 +226,8 @@ DELETE 组织单元
   -> 检查是否存在有效工作人员任职
   -> 存在则拒绝并返回具体原因
   -> 不存在则 status = disabled
-  -> 写审计、Outbox 并提升受影响授权版本
+  -> organization unit version + 1
+  -> 写审计和 Outbox
 ```
 
 - 院区有有效直属科室时必须先处理科室；
@@ -280,15 +284,14 @@ HMAC Key 和验证信息不得进入普通日志。
   -> 移除 department_doctor 角色
   -> 没有其他工作人员身份时恢复为 patient 账号类型
   -> authorization_version + 1
-  -> 撤销 Refresh Session
   -> 写审计和 Outbox
 ```
 
-统一拦截器通过 Redis 授权版本校验使已经签发的旧 Access Token 在下一次请求时失效。普通角色撤销
-或调岗返回 `401` 后，客户端优先通过全局 `refreshOnce()` 无感取得权限收缩后的新 Token，并将原请求
-最多重试一次；账号禁用、Refresh Session 过期或显式撤销会导致刷新失败，此时客户端清理本地会话并
-回到登录流程。撤销医生身份是否同时撤销全部 Refresh Session 按安全策略决定；一旦撤销，就明确放弃
-无感刷新并要求重新登录。
+统一拦截器读取 Redis 授权版本投影并拒绝版本过时的 Access Token。客户端收到 `401` 后仍只尝试一次
+全局 `refreshOnce()`，但 Refresh 必须比较 Session 保存的授权版本与 MySQL 当前版本：普通 Access Token
+自然过期且版本未变时允许无感刷新；角色、医生身份、当前科室归属或账号状态已经变化时版本不一致，
+必须拒绝刷新、撤销当前 Session、清理客户端会话并重新登录。重新登录后再根据最新 Principal 进入患者端、
+医生端或管理员界面，不能在已打开的应用会话中无感切换身份。
 
 医生创建过的预约处理记录、检查记录和审计记录不能随身份撤销而删除。
 
@@ -333,16 +336,16 @@ HMAC Key 和验证信息不得进入普通日志。
 
 | 能力 | 授权规则 |
 |---|---|
-| 查看医院、有效院区、有效科室及科室内医生 | 所有人可访问公共只读接口，不要求医生或管理员权限 |
+| 查看医院、有效院区、有效科室及科室内医生 | 要求有效登录，不要求医生、管理员角色或额外 permission |
 | 新增、修改、停用和恢复院区、科室 | `identity.department.manage` |
 | 查询管理员用户列表和详情 | `identity.authorization.manage` 或 `identity.account.manage` |
 | 开通、调岗和撤销医生身份 | `identity.authorization.manage` |
 | 禁用和恢复普通账号 | `identity.account.manage`，不属于部门目录操作 |
 
-患者、医生、超级管理员以及未登录访客调用同一组公共只读目录接口，获得相同的医院、有效院区、
-有效科室和有效医生数据。公共查询不授予任何写权限；所有新增、修改、停用、恢复、调岗和撤销操作仍只允许超级
-管理员按 permission 执行。公共接口需要限流和缓存，但不要求 `department_doctor` 或
-`super_admin` 身份。
+患者、医生和超级管理员使用有效 Access Token 调用同一组共享只读目录接口，获得相同的医院、有效院区、
+有效科室和有效医生数据。目录读取属于所有登录账号的基础能力，不新增“所有人都有”的冗余 permission；
+公共查询不授予任何写权限。所有新增、修改、停用、恢复、调岗和撤销操作仍只允许超级管理员按 permission
+执行。共享目录需要限流和缓存，但不要求 `department_doctor` 或 `super_admin` 身份。
 
 `app-api` 和 Identity RPC 的统一认证拦截器先完成 JWT 验签，再通过 Redis 授权版本校验器确认 Token
 中的 `authorization_version` 仍是当前版本。Logic 必须从 Context 取得已经验证的完整
@@ -354,7 +357,8 @@ Redis 授权版本读取和校验不得放在 `service/identity/rpc/internal` �
 Validator、HTTP/gRPC 拦截器位于 `common/authn`，可复用 Redis Reader 位于
 `common/authn/versionredis`；每个服务仅在自身 `ServiceContext` 注册和注入这组公共组件。Identity 是
 授权版本唯一写入者，Appointment、Planning、Report、Navigation 等业务服务只能读取共享版本并使用
-Context 中的 Principal 完成本地业务授权。
+Context 中的 Principal 完成本地业务授权。Redis 版本缺失时普通拦截器直接返回 `401`，不通过 Identity
+RPC Loader 回源；随后由不依赖旧 Access Token 的 Refresh 或登录流程查询 MySQL 并回填版本。
 
 ## 7. 前端已确认的 HTTP 契约
 
@@ -631,8 +635,8 @@ POST /accounts/:accountId/enable
   `409 VERSION_CONFLICT` 并附最新版本；
 - `operation_id` 全局唯一；同一操作者对同一目标重放同一动作时返回原结果，用于其他目标或动作时返回
   `409 OPERATION_ID_REUSED`；
-- 所有写请求必须先校验最新权限、目标状态和版本，再在单个 Identity 事务中修改主数据、写审计和
-  Outbox；
+- 所有写请求先由统一拦截器校验 JWT 和 Redis 授权版本，再由 Manager 使用已验证 Principal 判断
+  permission；单个 Identity 事务只校验并锁定目标状态和版本，然后修改主数据、写审计和 Outbox；
 - 身份、科室或账号状态变化递增 `management_version` 和 `authorization_version`；仅编辑展示资料只
   递增 `management_version`；
 - `401` 表示会话无效，`403` 表示权限不足，`404` 表示目标不存在，`409` 表示状态或并发冲突，
@@ -658,16 +662,18 @@ Identity RPC 需要补充与 HTTP 对应的内部能力：
 - `DisableAccount`、`EnableAccount`；
 - 扩展现有 `PromoteToDepartmentDoctor`，补充工作人员资料和组织单元校验。
 
-每个写 RPC 必须在 Identity 数据库的本地事务中同时完成：
+每个写 RPC 进入事务前必须已经由统一拦截器校验 JWT 和授权版本，并由 Manager 使用 Context Principal
+判断当前操作所需 permission。Identity 数据库的本地事务中同时完成：
 
-1. 校验操作者最新权限；
-2. 校验目标账号和组织状态；
+1. 查询并锁定目标账号、医生或组织单元；
+2. 校验目标状态和乐观锁版本；
 3. 更新主数据；
-4. 所有账号/医生管理写入提升 `management_version`；只有角色、科室或账号状态变化才同时提升
+4. 所有账号/医生管理写入提升 `management_version`；只有角色、医生当前科室或账号状态变化才同时提升
    `authorization_version`；
 5. 写入 `identity_authorization_audit`；
 6. 写入 `identity_outbox_events`；
-7. 提交事务后处理 Refresh Session 撤销。
+7. 提交事务后更新 Redis 授权版本投影；已有 Refresh Session 在下次刷新时通过版本比较决定继续轮换或
+   强制重新登录，不要求每次授权变化都先枚举并删除账号的全部 Session。
 
 管理员用户详情属于敏感读取，需要记录操作者、目标账号、request ID 和结果；普通分页列表和公共
 目录记录访问日志与指标，但不为每一行分别写业务审计。
@@ -751,24 +757,29 @@ Token。
 
 ## 11. 实施顺序
 
-计划审核通过后，从最新 `main` 创建新的业务分支，按以下顺序实现：
+当前开发分支已经完成或开始：Identity 组织迁移、Proto/RPC 骨架，以及 `organization` 的 model、errors、
+Store 和 Manager；Repository、Logic、ServiceContext 接线尚未完成。由于这些运行时接线依赖统一授权边界，
+先暂停 CRUD 接线并按以下顺序完成公共权限基础，再继续组织实现：
 
-1. 增加新的 Identity 迁移，演进组织单元、账号展示资料和医生档案；
-2. 更新 permission 契约、角色初始化和授权测试；
-3. 更新 Identity Proto 并生成 RPC 骨架；
-4. 在 `common/authn` 增加可注入的授权版本校验抽象和 HTTP/gRPC 统一拦截器，在
-   `common/authn/versionredis` 实现一份跨服务复用的 Redis Reader；各服务只完成配置与
-   `ServiceContext` 注入，不得复制校验代码；
-5. 重构 `authorization.Manager`：操作者使用已验证 Principal，保留目标账号业务查询和变更事务；
-6. 实现 Identity Repository、事务、审计、Outbox、授权版本唯一写入以及 Redis 未命中的
-   Identity/MySQL 回源，并补充旧 Token 拒绝、跨服务读取和缓存故障 fail-closed 测试；
-7. 更新 `app-api` 的 `.api` 契约并生成 HTTP 骨架；
-8. 实现本人昵称同步、公共科室和医生目录以及管理员组织、用户、医生和账号接口；
+1. 在 `common/authn` 增加 `AuthorizationVersionReader`、Validator，并让公共 HTTP/gRPC 拦截器在 JWT
+   验签后执行版本比较；
+2. 在 `common/authn/versionredis` 实现统一 Redis Store；app-api 和业务服务只注入 Reader，Identity
+   注入 Reader 与 Writer；
+3. 修改登录和 Refresh：回填账号当前 Redis 版本；Refresh Session 版本与 MySQL 当前版本不一致时拒绝
+   轮换并要求重新登录；
+4. 重构 `authorization.Manager`：操作者使用已验证 Principal，保留目标账号业务查询和变更事务；授权
+   变更提交后更新 Redis，并补充 Outbox 投影补偿；
+5. 为 app-api、Identity 及后续业务服务补充授权 Redis 配置、`ServiceContext` 装配、旧 Token 拒绝、
+   Redis miss、缓存故障 fail-closed 和跨服务读取测试；
+6. 回到组织 CRUD，实现 MySQL Repository、事务、通用审计、Outbox 和 Logic/ServiceContext 接线；
+7. 更新 `app-api` 的 `.api` 契约并生成 HTTP 骨架，所有共享目录路由要求 Access Token 但不要求额外
+   permission；
+8. 实现本人昵称同步、共享科室和医生目录以及管理员组织、用户、医生和账号接口；
 9. 实现 local seed 工具与环境保护；
 10. 如联调需要，再实现严格受限的 local SMS Provider；
 11. 补充单元测试、MySQL/Redis 集成测试和 API 权限测试；
-12. 分别使用未登录访客、普通用户、医生和超级管理员验证公共目录；
-13. 使用超级管理员完成一次组织维护、医生开通、调岗、撤销和普通用户回退的联调回归。
+12. 分别使用普通用户、医生和超级管理员验证共享目录，并验证未登录请求返回 `401`；
+13. 使用超级管理员完成一次组织维护、医生开通、调岗、撤销、强制重新登录和普通用户回退的联调回归。
 
 前端页面与调用契约已经确定；本阶段按第 7 节一次性落地 `.api`、Proto、RPC、数据库迁移、错误码和
 mock 数据。后端不得仅实现路径占位或返回旧授权上下文后要求前端临时兼容。
@@ -776,8 +787,8 @@ mock 数据。后端不得仅实现路径占位或返回旧授权上下文后要
 ## 12. 验收标准
 
 - 可以建立“唯一医院—多个院区—院区直属科室”三层结构，子科室、第二个医院和非法层级被拒绝；
-- 未登录访客、普通用户、医生和超级管理员都可通过同一公共接口获取医院、有效院区、选中院区的
-  有效科室及选中科室的医生；
+- 普通用户、医生和超级管理员使用有效 Access Token 通过同一共享接口获取医院、有效院区、选中院区的
+  有效科室及选中科室的医生；未登录请求返回 `401`；
 - 部门或医生数据库数据发生变化后，接口结果随之变化，不依赖前端硬编码清单；
 - 超级管理员可以新增、修改、停用和恢复院区、科室，但不能通过小程序修改医院根节点；
 - 有有效科室的院区、有有效医生的科室不能直接停用；
@@ -792,8 +803,8 @@ mock 数据。后端不得仅实现路径占位或返回旧授权上下文后要
 - 禁用账号后所有身份不能登录，恢复账号不会自动恢复已撤销的医生身份；
 - 禁用账号在验证码校验成功后返回 `ACCOUNT_DISABLED` 且不签发 Token；验证码发送阶段不暴露状态；
 - 首版用户管理不能禁用、恢复或变更超级管理员身份；
-- 撤销医生后账号仍可作为普通用户使用，旧 Refresh Session 不能继续获得医生权限；
-- 普通用户和医生可以调用公共目录，但不能调用任何组织或医生管理接口；
+- 撤销医生后账号仍可作为普通用户重新登录，旧 Refresh Session 因授权版本不一致不能继续轮换；
+- 普通用户和医生可以调用要求登录的共享目录，但不能调用任何组织或医生管理接口；
 - 管理操作均写入审计与 Outbox，重复请求不会重复变更；
 - local seed 可重复执行且不会进入生产环境；
 - 全部接口不泄露完整手机号、验证码、Token 和密钥；
