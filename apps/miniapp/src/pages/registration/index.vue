@@ -2,12 +2,16 @@
 import { onShow } from "@dcloudio/uni-app";
 import { computed, ref } from "vue";
 
-import { STAFF_MANAGEMENT_USES_MOCK, staffManagementApi } from "@/api/staffManagement";
+import { staffManagementApi } from "@/api/staffManagement";
 import DepartmentDoctorPanel from "@/components/staff/DepartmentDoctorPanel.vue";
 import DepartmentEditorDialog from "@/components/staff/DepartmentEditorDialog.vue";
 import DepartmentSidebar from "@/components/staff/DepartmentSidebar.vue";
 import { sessionState } from "@/stores/session";
-import type { DepartmentSummary, DoctorSummary } from "@/types/staffManagement";
+import type {
+  CampusSummary,
+  DepartmentSummary,
+  DoctorSummary,
+} from "@/types/staffManagement";
 import { hasIdentityPermission } from "@/utils/appShell";
 import {
   invalidateDepartments,
@@ -18,6 +22,7 @@ import {
 import { createEmptyDepartment } from "@/utils/staffManagementView";
 
 let lastSelectedDepartmentId = "";
+let lastSelectedCampusId = "";
 const emptyDepartment = createEmptyDepartment();
 
 const isStaffApp = computed(() => sessionState.appVariant === "staff");
@@ -42,6 +47,10 @@ const canOpenUserManagement = computed(
 );
 
 const departments = ref<DepartmentSummary[]>([]);
+const hospitalId = ref("");
+const hospitalName = ref("");
+const campuses = ref<CampusSummary[]>([]);
+const selectedCampusId = ref("");
 const doctors = ref<DoctorSummary[]>([]);
 const selectedDepartmentId = ref("");
 const showDisabled = ref(false);
@@ -53,6 +62,7 @@ const navigationPending = ref(false);
 const mutationPending = ref(false);
 const editorVisible = ref(false);
 const editorMode = ref<"create" | "edit">("create");
+const editorTarget = ref<"campus" | "department">("department");
 const editorName = ref("");
 let doctorRequestGeneration = 0;
 
@@ -71,8 +81,33 @@ const visibleDepartments = computed(() =>
 onShow(() => {
   navigationPending.value = false;
   uni.setNavigationBarTitle({ title: isStaffApp.value ? "部门管理" : "挂号" });
-  void refreshDepartments(false);
+  void refreshOrganization(false);
 });
+
+async function refreshOrganization(force = false) {
+  if (departmentLoading.value) {
+    return;
+  }
+  departmentLoading.value = true;
+  departmentError.value = "";
+  try {
+    const context = await staffManagementApi.getOrganizationContext();
+    hospitalId.value = context.hospital.hospitalId;
+    hospitalName.value = context.hospital.name;
+    campuses.value = context.campuses;
+    const nextCampus =
+      context.campuses.find((campus) => campus.campusId === selectedCampusId.value) ??
+      context.campuses.find((campus) => campus.campusId === lastSelectedCampusId) ??
+      context.campuses[0];
+    selectedCampusId.value = nextCampus?.campusId ?? "";
+    lastSelectedCampusId = selectedCampusId.value;
+    departmentLoading.value = false;
+    await refreshDepartments(force);
+  } catch (error) {
+    departmentError.value = messageOf(error, "组织信息加载失败，请重试");
+    departmentLoading.value = false;
+  }
+}
 
 async function refreshDepartments(force = false) {
   if (departmentLoading.value) {
@@ -81,7 +116,17 @@ async function refreshDepartments(force = false) {
   departmentLoading.value = true;
   departmentError.value = "";
   try {
-    departments.value = await loadDepartments(canManageDepartments.value, force);
+    if (!selectedCampusId.value) {
+      departments.value = [];
+      selectedDepartmentId.value = "";
+      doctors.value = [];
+      return;
+    }
+    departments.value = await loadDepartments(
+      selectedCampusId.value,
+      canManageDepartments.value && showDisabled.value,
+      force,
+    );
     const choices = visibleDepartments.value;
     const principalDepartment = sessionState.principal?.department_id;
     const nextSelected =
@@ -100,6 +145,17 @@ async function refreshDepartments(force = false) {
   } finally {
     departmentLoading.value = false;
   }
+}
+
+function selectCampus(campus: CampusSummary) {
+  if (campus.campusId === selectedCampusId.value) {
+    return;
+  }
+  selectedCampusId.value = campus.campusId;
+  lastSelectedCampusId = campus.campusId;
+  selectedDepartmentId.value = "";
+  doctors.value = [];
+  void refreshDepartments(false);
 }
 
 async function refreshDoctors(departmentId: string, force = false) {
@@ -140,13 +196,26 @@ function toggleDepartmentView() {
   showDisabled.value = !showDisabled.value;
   selectedDepartmentId.value = "";
   doctors.value = [];
-  const next = visibleDepartments.value[0];
-  if (next) {
-    selectDepartment(next);
+  void refreshDepartments(true);
+}
+
+function openCreateCampus() {
+  if (!hospitalId.value) {
+    uni.showToast({ title: "医院信息尚未加载", icon: "none" });
+    return;
   }
+  editorTarget.value = "campus";
+  editorMode.value = "create";
+  editorName.value = "";
+  editorVisible.value = true;
 }
 
 function openCreateDepartment() {
+  if (!selectedCampusId.value) {
+    uni.showToast({ title: "请先新增并选择院区", icon: "none" });
+    return;
+  }
+  editorTarget.value = "department";
   editorMode.value = "create";
   editorName.value = "";
   editorVisible.value = true;
@@ -156,6 +225,7 @@ function openEditDepartment() {
   if (!selectedDepartment.value.departmentId) {
     return;
   }
+  editorTarget.value = "department";
   editorMode.value = "edit";
   editorName.value = selectedDepartment.value.name;
   editorVisible.value = true;
@@ -171,16 +241,29 @@ async function saveDepartment() {
   }
   mutationPending.value = true;
   try {
+    if (editorTarget.value === "campus") {
+      const created = await staffManagementApi.createCampus({
+        name,
+        hospitalId: hospitalId.value,
+      });
+      selectedCampusId.value = created.campusId;
+      lastSelectedCampusId = created.campusId;
+      editorVisible.value = false;
+      invalidateDepartments();
+      await refreshOrganization(true);
+      uni.showToast({ title: "院区已新增" });
+      return;
+    }
     if (editorMode.value === "create") {
       const created = await staffManagementApi.createDepartment({
         name,
-        parentId: selectedDepartment.value?.parentId,
+        parentId: selectedCampusId.value,
       });
       lastSelectedDepartmentId = created.departmentId;
     } else if (selectedDepartment.value.departmentId) {
       await staffManagementApi.updateDepartment(
         selectedDepartment.value.departmentId,
-        { name, parentId: selectedDepartment.value.parentId },
+        { name, parentId: selectedCampusId.value },
         selectedDepartment.value.version,
       );
       lastSelectedDepartmentId = selectedDepartment.value.departmentId;
@@ -276,9 +359,8 @@ function messageOf(error: unknown, fallback: string): string {
       <view>
         <view class="department-page__title-row">
           <text class="department-page__title">科室与医生</text>
-          <text v-if="STAFF_MANAGEMENT_USES_MOCK" class="mock-badge">Mock</text>
         </view>
-        <text class="department-page__subtitle">选择部门查看当前医生</text>
+        <text class="department-page__subtitle">选择院区和科室查看当前医生</text>
       </view>
       <button
         v-if="canOpenUserManagement"
@@ -291,16 +373,48 @@ function messageOf(error: unknown, fallback: string): string {
 
     <view v-if="departmentError" class="page-error">
       <text>{{ departmentError }}</text>
-      <button @tap="refreshDepartments(true)">重新加载</button>
+      <button @tap="refreshOrganization(true)">重新加载</button>
     </view>
 
-    <view v-else class="department-board">
+    <template v-else>
+      <view class="organization-bar">
+        <view class="organization-bar__hospital">
+          <text class="organization-bar__label">医院</text>
+          <text class="organization-bar__name">{{ hospitalName }}</text>
+        </view>
+        <scroll-view class="campus-list" scroll-x enable-flex>
+          <button
+            v-for="campus in campuses"
+            :key="campus.campusId"
+            class="campus-chip"
+            :class="{ 'campus-chip--active': campus.campusId === selectedCampusId }"
+            @tap="selectCampus(campus)"
+          >
+            {{ campus.name }}
+          </button>
+        </scroll-view>
+        <button
+          v-if="canManageDepartments"
+          class="add-campus-button"
+          @tap="openCreateCampus"
+        >
+          ＋ 院区
+        </button>
+      </view>
+
+      <view v-if="campuses.length === 0" class="campus-empty">
+        <text>当前还没有院区</text>
+        <text class="campus-empty__hint">新增院区后，才能在该院区下新增科室。</text>
+        <button v-if="canManageDepartments" @tap="openCreateCampus">新增第一个院区</button>
+      </view>
+
+      <view v-else class="department-board">
       <DepartmentSidebar
         :departments="visibleDepartments"
         :selected-id="selectedDepartmentId"
         :loading="departmentLoading"
         :show-disabled="showDisabled"
-        :can-manage="canManageDepartments"
+        :can-manage="canManageDepartments && Boolean(selectedCampusId)"
         @select="selectDepartment"
         @toggle-view="toggleDepartmentView"
         @create="openCreateDepartment"
@@ -317,11 +431,13 @@ function messageOf(error: unknown, fallback: string): string {
         @retry="retryDoctors"
         @open-doctor="openDoctor"
       />
-    </view>
+      </view>
+    </template>
 
     <DepartmentEditorDialog
       :visible="editorVisible"
       :mode="editorMode"
+      :unit-label="editorTarget === 'campus' ? '院区' : '科室'"
       :name="editorName"
       :pending="mutationPending"
       @update:name="editorName = $event"
@@ -370,14 +486,6 @@ button::after {
   font-size: 24rpx;
 }
 
-.mock-badge {
-  padding: 4rpx 10rpx;
-  color: #886600;
-  font-size: 20rpx;
-  background: #fff4c9;
-  border-radius: 10rpx;
-}
-
 .user-management-button {
   flex: 0 0 auto;
   margin: 0;
@@ -390,9 +498,103 @@ button::after {
   box-shadow: 0 10rpx 24rpx rgba(31, 124, 218, 0.2);
 }
 
+.organization-bar {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  margin-bottom: 20rpx;
+  padding: 18rpx 20rpx;
+  background: #ffffff;
+  border: 1rpx solid #e8edf4;
+  border-radius: 20rpx;
+}
+
+.organization-bar__hospital {
+  flex: 0 0 auto;
+  padding-right: 18rpx;
+  border-right: 1rpx solid #e8edf4;
+}
+
+.organization-bar__label,
+.organization-bar__name {
+  display: block;
+}
+
+.organization-bar__label {
+  color: #98a2b2;
+  font-size: 19rpx;
+}
+
+.organization-bar__name {
+  margin-top: 4rpx;
+  color: #344055;
+  font-size: 24rpx;
+  font-weight: 650;
+}
+
+.campus-list {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.campus-chip,
+.add-campus-button {
+  display: inline-block;
+  width: auto;
+  margin: 0 12rpx 0 0;
+  padding: 0 22rpx;
+  font-size: 23rpx;
+  line-height: 58rpx;
+  border-radius: 29rpx;
+}
+
+.campus-chip {
+  color: #687488;
+  background: #f2f5f8;
+}
+
+.campus-chip--active {
+  color: #ffffff;
+  background: #168bd8;
+}
+
+.add-campus-button {
+  flex: 0 0 auto;
+  color: #167ac3;
+  background: #eaf5ff;
+}
+
+.campus-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18rpx;
+  padding: 100rpx 30rpx;
+  color: #536078;
+  font-size: 28rpx;
+  background: #ffffff;
+  border-radius: 22rpx;
+}
+
+.campus-empty__hint {
+  color: #98a2b2;
+  font-size: 23rpx;
+}
+
+.campus-empty button {
+  margin: 10rpx 0 0;
+  padding: 0 30rpx;
+  color: #ffffff;
+  font-size: 24rpx;
+  line-height: 66rpx;
+  background: #168bd8;
+  border-radius: 33rpx;
+}
+
 .department-board {
   display: flex;
-  height: calc(100vh - 180rpx);
+  height: calc(100vh - 290rpx);
   min-height: 720rpx;
   overflow: hidden;
   background: #ffffff;

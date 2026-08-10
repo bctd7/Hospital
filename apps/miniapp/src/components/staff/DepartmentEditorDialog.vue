@@ -2,6 +2,7 @@
 const props = defineProps<{
   visible: boolean;
   mode: "create" | "edit";
+  unitLabel?: string;
   name: string;
   pending: boolean;
 }>();
@@ -21,12 +22,14 @@ function handleInput(event: Event) {
 <template>
   <view v-if="visible" class="dialog-mask" @tap="$emit('close')">
     <view class="editor-dialog" @tap.stop>
-      <text class="editor-dialog__title">{{ mode === "create" ? "新增部门" : "编辑部门" }}</text>
+      <text class="editor-dialog__title">
+        {{ mode === "create" ? `新增${unitLabel ?? "部门"}` : `编辑${unitLabel ?? "部门"}` }}
+      </text>
       <input
         :value="props.name"
         class="editor-dialog__input"
         maxlength="32"
-        placeholder="请输入部门名称"
+        :placeholder="`请输入${unitLabel ?? '部门'}名称`"
         focus
         @input="handleInput"
       />

@@ -1,20 +1,26 @@
-import { STAFF_DATA_SOURCE } from "@/config/environment";
 import type {
   AccountListQuery,
   AdminAccountDetail,
   AdminAccountSummary,
+  CampusDraft,
+  CampusSummary,
   DepartmentDraft,
   DepartmentSummary,
   DoctorProfileDraft,
   DoctorSummary,
+  OrganizationContext,
   PagedResult,
 } from "@/types/staffManagement";
 
 import { httpStaffManagementApi } from "./staffManagement.http";
-import { mockStaffManagementApi } from "./staffManagement.mock";
 
 export interface StaffManagementApi {
-  listDepartments(includeDisabled?: boolean): Promise<DepartmentSummary[]>;
+  getOrganizationContext(): Promise<OrganizationContext>;
+  createCampus(input: CampusDraft): Promise<CampusSummary>;
+  listDepartments(
+    campusId: string,
+    includeDisabled?: boolean,
+  ): Promise<DepartmentSummary[]>;
   listDoctors(departmentId: string): Promise<DoctorSummary[]>;
   createDepartment(input: DepartmentDraft): Promise<DepartmentSummary>;
   updateDepartment(
@@ -58,7 +64,4 @@ export interface StaffManagementApi {
   ): Promise<AdminAccountDetail>;
 }
 
-export const STAFF_MANAGEMENT_USES_MOCK = STAFF_DATA_SOURCE === "mock";
-export const staffManagementApi: StaffManagementApi = STAFF_MANAGEMENT_USES_MOCK
-  ? mockStaffManagementApi
-  : httpStaffManagementApi;
+export const staffManagementApi: StaffManagementApi = httpStaffManagementApi;

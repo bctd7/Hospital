@@ -2,7 +2,7 @@
 import { onLoad, onReachBottom, onShow } from "@dcloudio/uni-app";
 import { computed, ref } from "vue";
 
-import { STAFF_MANAGEMENT_USES_MOCK, staffManagementApi } from "@/api/staffManagement";
+import { staffManagementApi } from "@/api/staffManagement";
 import AdminUserListItem from "@/components/admin/AdminUserListItem.vue";
 import { sessionState } from "@/stores/session";
 import type { AccountIdentityType, AccountStatus, AdminAccountSummary } from "@/types/staffManagement";
@@ -148,11 +148,6 @@ function messageOf(value: unknown, fallback: string): string {
 
 <template>
   <view class="users-page">
-    <view v-if="STAFF_MANAGEMENT_USES_MOCK" class="mock-notice">
-      <text>当前为演示数据</text>
-      <text>支持手机号或昵称搜索</text>
-    </view>
-
     <view class="search-bar">
       <text class="search-icon">⌕</text>
       <input
@@ -197,7 +192,6 @@ function messageOf(value: unknown, fallback: string): string {
 <style scoped>
 button::after { display:none; }
 .users-page { min-height:100vh; padding:24rpx; box-sizing:border-box; background:#f3f6fa; }
-.mock-notice { display:flex; justify-content:space-between; margin-bottom:18rpx; padding:16rpx 20rpx; color:#836700; font-size:21rpx; background:#fff6d6; border-radius:14rpx; }
 .search-bar { display:flex; align-items:center; padding:10rpx 12rpx 10rpx 22rpx; background:#fff; border:1rpx solid #e5ebf2; border-radius:22rpx; box-shadow:0 8rpx 24rpx rgba(42,66,96,.05); }
 .search-icon { color:#94a0b1; font-size:34rpx; }
 .search-input { flex:1; height:66rpx; margin:0 12rpx; color:#263248; font-size:24rpx; }

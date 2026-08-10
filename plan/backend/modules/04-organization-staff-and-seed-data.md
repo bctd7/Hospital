@@ -10,8 +10,9 @@
 > [超级管理员用户管理](../../frontend/pages/05-admin-user-management.md)及其 API 文档。
 
 当前已完成的组织阶段包括：组织表与审计/Outbox 迁移、Repository、Manager、公共目录 RPC、管理员
-组织 CRUD RPC、app-api HTTP 入口、稳定错误映射以及 MySQL 集成测试。小程序现有科室列表适配器会先
-取得院区上下文，再按院区并行加载科室。严格受限的 local SMS Provider 也已实现，生产环境误选
+组织 CRUD RPC、app-api HTTP 入口、稳定错误映射以及 MySQL 集成测试。小程序已移除运行时 Mock，
+先读取医院与有效院区，由用户显式选择当前院区后再加载或创建直属科室；超级管理员可以新增院区，
+但院区编辑、停用和恢复入口仍待前端补齐。严格受限的 local SMS Provider 也已实现，生产环境误选
 `local` 时服务会拒绝启动。本文涉及医生资料、账号管理和本地 seed 的其余内容仍是后续工作，不能因
 组织 CRUD 完成而视为整份计划全部验收。
 

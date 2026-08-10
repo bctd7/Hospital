@@ -16,15 +16,16 @@ function current<T>(entry?: CacheEntry<T>): T | undefined {
 }
 
 export async function loadDepartments(
+  campusId: string,
   includeDisabled = false,
   force = false,
 ): Promise<DepartmentSummary[]> {
-  const key = includeDisabled ? "all" : "active";
+  const key = `${campusId}:${includeDisabled ? "all" : "active"}`;
   const cached = force ? undefined : current(departmentCache.get(key));
   if (cached) {
     return cached.map((item) => ({ ...item }));
   }
-  const result = await staffManagementApi.listDepartments(includeDisabled);
+  const result = await staffManagementApi.listDepartments(campusId, includeDisabled);
   departmentCache.set(key, { value: result, expiresAt: Date.now() + CACHE_TTL_MS });
   return result.map((item) => ({ ...item }));
 }

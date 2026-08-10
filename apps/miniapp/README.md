@@ -47,28 +47,10 @@ API 默认地址为 `http://127.0.0.1:8888`。需要覆盖时，在 `apps/miniap
 
 ```text
 VITE_API_BASE_URL=http://电脑的局域网地址:8888
-VITE_STAFF_DATA_SOURCE=mock
 ```
 
-`VITE_STAFF_DATA_SOURCE=mock` 在开发服务中生效。部门和用户演示数据全部隔离在
-`src/api/staffManagement.mock.ts`，页面只调用 `StaffManagementApi`，不直接引用静态数据。
-后端接口完成后把本地配置改为 `http` 即可联调，普通生产构建无条件使用 HTTP。
-
-后端尚未完成、需要从 `apps/miniapp` 直接导入微信开发者工具查看演示数据时，先执行：
-
-```powershell
-npm run build:mp-weixin:mock
-```
-
-该命令显式生成 Mock 预览包到 `dist/build/mp-weixin`。发布前必须改用
-`npm run build:mp-weixin`；普通生产构建会剔除演示账号数据。
-
-后端联调完成后的 Mock 清理清单：
-
-1. 对照 `plan/frontend/api/` 完成真实接口回归；
-2. 删除 `staffManagement.mock.ts` 及对应 Mock 测试；
-3. 移除 `staffManagement.ts` 中的 Mock 选择和页面中的 Mock 提示；
-4. 删除 `VITE_STAFF_DATA_SOURCE` 配置，只保留 HTTP 实现。
+科室、医生和用户管理统一调用 HTTP 接口，不提供运行时 Mock 数据源。后端尚未实现的接口会明确
+显示请求失败，不能使用演示数据代替真实响应。
 
 微信开发者工具模拟器可以访问本机 `127.0.0.1`；真机中的 `127.0.0.1` 指向手机自身，必须改为手机可访问的局域网或 HTTPS 地址。API Base URL 是公开的前端配置，不得在这里放 AppSecret。
 
@@ -131,12 +113,11 @@ apps/miniapp/dist/build/mp-weixin
 VITE_API_TRANSPORT=cloudbase
 VITE_CLOUDBASE_ENV_ID=替换为云开发环境ID
 VITE_ANYSERVICE_NAME=hospitalapi
-VITE_STAFF_DATA_SOURCE=mock
 ```
 
 `VITE_CLOUDBASE_ENV_ID` 必须与创建 AnyService 服务的 CloudBase 环境一致。此模式通过 `wx.cloud.callContainer` 请求，无需填写 `VITE_API_BASE_URL`，也无需把 ECS IP 配置为微信 request 合法域名。更换服务器且保持环境 ID 与服务标识不变时，只需在 AnyService 控制台修改源站 IP。
 
-当前阶段的体验版使用“真实短信登录与会话 + mock 科室、医生和用户管理数据”。等目录与管理 API 实现并部署后，把 `VITE_STAFF_DATA_SOURCE` 改为 `http`，重新构建和上传即可切换到真实业务数据。
+体验版与本地预览使用同一套真实 HTTP API，不再内置科室、医生或用户演示数据。
 
 ## 依赖安全说明
 

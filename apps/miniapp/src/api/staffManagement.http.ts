@@ -1,15 +1,17 @@
-import { request } from "@/api/client";
+import { ApiError, request } from "@/api/client";
 import type { StaffManagementApi } from "@/api/staffManagement";
 import type {
   AccountListQuery,
   AdminAccountAction,
   AdminAccountDetail,
   AdminAccountSummary,
+  CampusSummary,
   DepartmentDraft,
   DepartmentSummary,
   DoctorProfileDraft,
   DoctorSummary,
   PagedResult,
+  OrganizationContext,
 } from "@/types/staffManagement";
 
 interface DepartmentResponse {
@@ -24,8 +26,20 @@ interface DepartmentResponse {
 }
 
 interface OrganizationContextResponse {
+  hospital: {
+    hospital_id: string;
+    code: string;
+    name: string;
+    version: number;
+  };
   campuses: Array<{
     campus_id: string;
+    hospital_id: string;
+    code: string;
+    name: string;
+    department_count: number;
+    status: "active" | "disabled";
+    version: number;
   }>;
 }
 
@@ -67,7 +81,53 @@ interface PagedResponse<T> {
 }
 
 function operationId(): string {
-  return `miniapp-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (character) => {
+    const random = Math.floor(Math.random() * 16);
+    const value = character === "x" ? random : (random & 0x3) | 0x8;
+    return value.toString(16);
+  });
+}
+
+function organizationContextFromResponse(
+  value: OrganizationContextResponse,
+): OrganizationContext {
+  return {
+    hospital: {
+      hospitalId: value.hospital.hospital_id,
+      code: value.hospital.code,
+      name: value.hospital.name,
+      version: value.hospital.version,
+    },
+    campuses: value.campuses.map((campus) => ({
+      campusId: campus.campus_id,
+      hospitalId: campus.hospital_id,
+      code: campus.code,
+      name: campus.name,
+      departmentCount: campus.department_count,
+      status: campus.status,
+      version: campus.version,
+    })),
+  };
+}
+
+function campusFromResponse(value: {
+  unit_id: string;
+  parent_id: string;
+  code: string;
+  name: string;
+  child_count?: number;
+  status: "active" | "disabled";
+  version: number;
+}): CampusSummary {
+  return {
+    campusId: value.unit_id,
+    hospitalId: value.parent_id,
+    code: value.code,
+    name: value.name,
+    departmentCount: value.child_count ?? 0,
+    status: value.status,
+    version: value.version,
+  };
 }
 
 function queryPath(path: string, values: Record<string, unknown>): string {
@@ -131,26 +191,52 @@ function accountDetailFromResponse(value: AccountResponse): AdminAccountDetail {
 }
 
 export const httpStaffManagementApi: StaffManagementApi = {
-  async listDepartments(includeDisabled = false) {
-    const context = await request<OrganizationContextResponse>({
+  async getOrganizationContext() {
+    const response = await request<OrganizationContextResponse>({
       path: "/api/v1/directory/organization-context",
     });
-    const responses = await Promise.all(
-      context.campuses.map((campus) =>
-        request<{ items: DepartmentResponse[] }>({
-          path: includeDisabled
-            ? `${queryPath("/api/v1/admin/identity/organization-units", {
-                unit_type: "department",
-                parent_id: campus.campus_id,
-              })}&status=all`
-            : queryPath("/api/v1/directory/departments", {
-                campus_id: campus.campus_id,
-              }),
-          authenticated: includeDisabled,
-        }),
-      ),
-    );
-    return responses.flatMap((response) => response.items.map(departmentFromResponse));
+    return organizationContextFromResponse(response);
+  },
+
+  async createCampus(input) {
+    const response = await request<{
+      unit_id: string;
+      parent_id: string;
+      code: string;
+      name: string;
+      child_count?: number;
+      status: "active" | "disabled";
+      version: number;
+    }>({
+      path: "/api/v1/admin/identity/organization-units",
+      method: "POST",
+      authenticated: true,
+      data: {
+        unit_type: "campus",
+        parent_id: input.hospitalId,
+        name: input.name,
+        operation_id: operationId(),
+      },
+    });
+    return campusFromResponse(response);
+  },
+
+  async listDepartments(campusId, includeDisabled = false) {
+    if (!campusId) {
+      throw new ApiError("请先选择院区", 400);
+    }
+    const response = await request<{ items: DepartmentResponse[] }>({
+      path: includeDisabled
+        ? `${queryPath("/api/v1/admin/identity/organization-units", {
+            unit_type: "department",
+            parent_id: campusId,
+          })}&status=all`
+        : queryPath("/api/v1/directory/departments", {
+            campus_id: campusId,
+          }),
+      authenticated: includeDisabled,
+    });
+    return response.items.map(departmentFromResponse);
   },
 
   async listDoctors(departmentId) {
@@ -161,6 +247,9 @@ export const httpStaffManagementApi: StaffManagementApi = {
   },
 
   async createDepartment(input) {
+    if (!input.parentId) {
+      throw new ApiError("请先选择院区", 400);
+    }
     const response = await request<DepartmentResponse>({
       path: "/api/v1/admin/identity/organization-units",
       method: "POST",

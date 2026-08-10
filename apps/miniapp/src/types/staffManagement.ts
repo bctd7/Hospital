@@ -20,6 +20,28 @@ export interface DepartmentSummary {
   version: number;
 }
 
+export interface HospitalSummary {
+  hospitalId: string;
+  code: string;
+  name: string;
+  version: number;
+}
+
+export interface CampusSummary {
+  campusId: string;
+  hospitalId: string;
+  code: string;
+  name: string;
+  departmentCount: number;
+  status: DepartmentStatus;
+  version: number;
+}
+
+export interface OrganizationContext {
+  hospital: HospitalSummary;
+  campuses: CampusSummary[];
+}
+
 export interface DoctorSummary {
   doctorId: string;
   displayName: string;
@@ -72,6 +94,11 @@ export interface AccountListQuery {
 export interface DepartmentDraft {
   name: string;
   parentId?: string;
+}
+
+export interface CampusDraft {
+  name: string;
+  hospitalId: string;
 }
 
 export interface DoctorProfileDraft {

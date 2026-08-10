@@ -2,7 +2,7 @@
 import { onLoad } from "@dcloudio/uni-app";
 import { computed, ref } from "vue";
 
-import { STAFF_MANAGEMENT_USES_MOCK, staffManagementApi } from "@/api/staffManagement";
+import { staffManagementApi } from "@/api/staffManagement";
 import DoctorProfileDialog from "@/components/admin/DoctorProfileDialog.vue";
 import { sessionState } from "@/stores/session";
 import type {
@@ -60,9 +60,19 @@ async function loadDetail() {
   loading.value = true;
   error.value = "";
   try {
+    const departmentsPromise = staffManagementApi
+      .getOrganizationContext()
+      .then((context) =>
+        Promise.all(
+          context.campuses.map((campus) =>
+            staffManagementApi.listDepartments(campus.campusId, false),
+          ),
+        ),
+      )
+      .then((items) => items.flat());
     const [account, departmentList] = await Promise.all([
       staffManagementApi.getAccount(accountId.value),
-      staffManagementApi.listDepartments(false),
+      departmentsPromise,
     ]);
     detail.value = account;
     departments.value = departmentList.filter((item) => item.status === "active");
@@ -215,7 +225,6 @@ function messageOf(value: unknown, fallback: string): string {
 
 <template>
   <view class="detail-page">
-    <view v-if="STAFF_MANAGEMENT_USES_MOCK" class="mock-badge">Mock 演示数据</view>
     <view v-if="loading" class="page-state">加载中...</view>
     <view v-else-if="error" class="page-state page-state--error">
       <text>{{ error }}</text><button @tap="loadDetail">重新加载</button>
@@ -266,7 +275,6 @@ function messageOf(value: unknown, fallback: string): string {
 <style scoped>
 button::after { display:none; }
 .detail-page { min-height:100vh; padding:24rpx; box-sizing:border-box; background:#f3f6fa; }
-.mock-badge { width:max-content; margin:0 auto 16rpx; padding:7rpx 15rpx; color:#806400; font-size:20rpx; background:#fff3c5; border-radius:12rpx; }
 .profile-card { display:flex; flex-direction:column; align-items:center; padding:38rpx 30rpx 32rpx; background:linear-gradient(145deg,#168edc,#386fdf); border-radius:24rpx; box-shadow:0 14rpx 34rpx rgba(28,112,205,.2); }
 .profile-avatar { display:flex; align-items:center; justify-content:center; width:104rpx; height:104rpx; color:#247ec4; font-size:40rpx; font-weight:700; background:#fff; border-radius:50%; }
 .profile-name { margin-top:18rpx; color:#fff; font-size:34rpx; font-weight:700; }
