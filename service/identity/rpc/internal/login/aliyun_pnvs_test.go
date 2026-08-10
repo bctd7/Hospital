@@ -77,6 +77,35 @@ func TestAlibabaPNVSPreservesOnlyProviderErrorCode(t *testing.T) {
 	}
 }
 
+func TestAlibabaPNVSRecognizesDocumentedRateLimitCodes(t *testing.T) {
+	for _, code := range []string{
+		"FREQUENCY_FAIL",
+		"biz.FREQUENCY",
+		"BUSINESS_LIMIT_CONTROL",
+		"isv.BUSINESS_LIMIT_CONTROL",
+	} {
+		if !isPNVSRateLimitCode(code) {
+			t.Fatalf("expected %q to be recognized as a rate limit", code)
+		}
+	}
+	if isPNVSRateLimitCode("isv.INVALID_PARAMETERS") {
+		t.Fatal("invalid parameters must not be reported as rate limiting")
+	}
+}
+
+func TestAlibabaPNVSMapsSDKRateLimitError(t *testing.T) {
+	client := &fakeAlibabaPNVSClient{sendError: dara.NewSDKError(map[string]any{
+		"code":    "biz.FREQUENCY",
+		"message": "frequency check failed",
+	})}
+	provider := newAlibabaPNVS(client, AlibabaPNVSConfig{})
+
+	err := provider.SendLoginCode(context.Background(), "+8613800138000")
+	if !errors.Is(err, ErrRateLimited) {
+		t.Fatalf("expected rate-limited error, got %v", err)
+	}
+}
+
 func (c *fakeAlibabaPNVSClient) CheckSmsVerifyCodeWithContext(_ context.Context, _ *dypns.CheckSmsVerifyCodeRequest, _ *dara.RuntimeOptions) (*dypns.CheckSmsVerifyCodeResponse, error) {
 	return &dypns.CheckSmsVerifyCodeResponse{Body: &dypns.CheckSmsVerifyCodeResponseBody{
 		Code: dara.String("OK"), Success: dara.Bool(true),
