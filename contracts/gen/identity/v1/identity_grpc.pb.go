@@ -31,6 +31,14 @@ const (
 	IdentityService_ChangeAccountStatus_FullMethodName       = "/hospital.identity.v1.IdentityService/ChangeAccountStatus"
 	IdentityService_RefreshAccessToken_FullMethodName        = "/hospital.identity.v1.IdentityService/RefreshAccessToken"
 	IdentityService_RevokeRefreshToken_FullMethodName        = "/hospital.identity.v1.IdentityService/RevokeRefreshToken"
+	IdentityService_GetOrganizationContext_FullMethodName    = "/hospital.identity.v1.IdentityService/GetOrganizationContext"
+	IdentityService_ListDepartments_FullMethodName           = "/hospital.identity.v1.IdentityService/ListDepartments"
+	IdentityService_ListOrganizationUnits_FullMethodName     = "/hospital.identity.v1.IdentityService/ListOrganizationUnits"
+	IdentityService_GetOrganizationUnit_FullMethodName       = "/hospital.identity.v1.IdentityService/GetOrganizationUnit"
+	IdentityService_CreateOrganizationUnit_FullMethodName    = "/hospital.identity.v1.IdentityService/CreateOrganizationUnit"
+	IdentityService_UpdateOrganizationUnit_FullMethodName    = "/hospital.identity.v1.IdentityService/UpdateOrganizationUnit"
+	IdentityService_DisableOrganizationUnit_FullMethodName   = "/hospital.identity.v1.IdentityService/DisableOrganizationUnit"
+	IdentityService_EnableOrganizationUnit_FullMethodName    = "/hospital.identity.v1.IdentityService/EnableOrganizationUnit"
 )
 
 // IdentityServiceClient is the client API for IdentityService service.
@@ -49,6 +57,17 @@ type IdentityServiceClient interface {
 	ChangeAccountStatus(ctx context.Context, in *ChangeAccountStatusRequest, opts ...grpc.CallOption) (*AuthorizationContext, error)
 	RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*TokenPair, error)
 	RevokeRefreshToken(ctx context.Context, in *RevokeRefreshTokenRequest, opts ...grpc.CallOption) (*RevokeRefreshTokenResponse, error)
+	// Public organization directory. HTTP gateways may expose these methods
+	// without an access token, but must still apply request rate limits.
+	GetOrganizationContext(ctx context.Context, in *GetOrganizationContextRequest, opts ...grpc.CallOption) (*OrganizationContext, error)
+	ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...grpc.CallOption) (*ListDepartmentsResponse, error)
+	// Administrator organization management.
+	ListOrganizationUnits(ctx context.Context, in *ListOrganizationUnitsRequest, opts ...grpc.CallOption) (*ListOrganizationUnitsResponse, error)
+	GetOrganizationUnit(ctx context.Context, in *GetOrganizationUnitRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
+	CreateOrganizationUnit(ctx context.Context, in *CreateOrganizationUnitRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
+	UpdateOrganizationUnit(ctx context.Context, in *UpdateOrganizationUnitRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
+	DisableOrganizationUnit(ctx context.Context, in *ChangeOrganizationUnitStatusRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
+	EnableOrganizationUnit(ctx context.Context, in *ChangeOrganizationUnitStatusRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
 }
 
 type identityServiceClient struct {
@@ -179,6 +198,86 @@ func (c *identityServiceClient) RevokeRefreshToken(ctx context.Context, in *Revo
 	return out, nil
 }
 
+func (c *identityServiceClient) GetOrganizationContext(ctx context.Context, in *GetOrganizationContextRequest, opts ...grpc.CallOption) (*OrganizationContext, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(OrganizationContext)
+	err := c.cc.Invoke(ctx, IdentityService_GetOrganizationContext_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...grpc.CallOption) (*ListDepartmentsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDepartmentsResponse)
+	err := c.cc.Invoke(ctx, IdentityService_ListDepartments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) ListOrganizationUnits(ctx context.Context, in *ListOrganizationUnitsRequest, opts ...grpc.CallOption) (*ListOrganizationUnitsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListOrganizationUnitsResponse)
+	err := c.cc.Invoke(ctx, IdentityService_ListOrganizationUnits_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) GetOrganizationUnit(ctx context.Context, in *GetOrganizationUnitRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminOrganizationUnit)
+	err := c.cc.Invoke(ctx, IdentityService_GetOrganizationUnit_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) CreateOrganizationUnit(ctx context.Context, in *CreateOrganizationUnitRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminOrganizationUnit)
+	err := c.cc.Invoke(ctx, IdentityService_CreateOrganizationUnit_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) UpdateOrganizationUnit(ctx context.Context, in *UpdateOrganizationUnitRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminOrganizationUnit)
+	err := c.cc.Invoke(ctx, IdentityService_UpdateOrganizationUnit_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) DisableOrganizationUnit(ctx context.Context, in *ChangeOrganizationUnitStatusRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminOrganizationUnit)
+	err := c.cc.Invoke(ctx, IdentityService_DisableOrganizationUnit_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) EnableOrganizationUnit(ctx context.Context, in *ChangeOrganizationUnitStatusRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminOrganizationUnit)
+	err := c.cc.Invoke(ctx, IdentityService_EnableOrganizationUnit_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // IdentityServiceServer is the server API for IdentityService service.
 // All implementations must embed UnimplementedIdentityServiceServer
 // for forward compatibility.
@@ -195,6 +294,17 @@ type IdentityServiceServer interface {
 	ChangeAccountStatus(context.Context, *ChangeAccountStatusRequest) (*AuthorizationContext, error)
 	RefreshAccessToken(context.Context, *RefreshAccessTokenRequest) (*TokenPair, error)
 	RevokeRefreshToken(context.Context, *RevokeRefreshTokenRequest) (*RevokeRefreshTokenResponse, error)
+	// Public organization directory. HTTP gateways may expose these methods
+	// without an access token, but must still apply request rate limits.
+	GetOrganizationContext(context.Context, *GetOrganizationContextRequest) (*OrganizationContext, error)
+	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
+	// Administrator organization management.
+	ListOrganizationUnits(context.Context, *ListOrganizationUnitsRequest) (*ListOrganizationUnitsResponse, error)
+	GetOrganizationUnit(context.Context, *GetOrganizationUnitRequest) (*AdminOrganizationUnit, error)
+	CreateOrganizationUnit(context.Context, *CreateOrganizationUnitRequest) (*AdminOrganizationUnit, error)
+	UpdateOrganizationUnit(context.Context, *UpdateOrganizationUnitRequest) (*AdminOrganizationUnit, error)
+	DisableOrganizationUnit(context.Context, *ChangeOrganizationUnitStatusRequest) (*AdminOrganizationUnit, error)
+	EnableOrganizationUnit(context.Context, *ChangeOrganizationUnitStatusRequest) (*AdminOrganizationUnit, error)
 	mustEmbedUnimplementedIdentityServiceServer()
 }
 
@@ -240,6 +350,30 @@ func (UnimplementedIdentityServiceServer) RefreshAccessToken(context.Context, *R
 }
 func (UnimplementedIdentityServiceServer) RevokeRefreshToken(context.Context, *RevokeRefreshTokenRequest) (*RevokeRefreshTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RevokeRefreshToken not implemented")
+}
+func (UnimplementedIdentityServiceServer) GetOrganizationContext(context.Context, *GetOrganizationContextRequest) (*OrganizationContext, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOrganizationContext not implemented")
+}
+func (UnimplementedIdentityServiceServer) ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDepartments not implemented")
+}
+func (UnimplementedIdentityServiceServer) ListOrganizationUnits(context.Context, *ListOrganizationUnitsRequest) (*ListOrganizationUnitsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListOrganizationUnits not implemented")
+}
+func (UnimplementedIdentityServiceServer) GetOrganizationUnit(context.Context, *GetOrganizationUnitRequest) (*AdminOrganizationUnit, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOrganizationUnit not implemented")
+}
+func (UnimplementedIdentityServiceServer) CreateOrganizationUnit(context.Context, *CreateOrganizationUnitRequest) (*AdminOrganizationUnit, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateOrganizationUnit not implemented")
+}
+func (UnimplementedIdentityServiceServer) UpdateOrganizationUnit(context.Context, *UpdateOrganizationUnitRequest) (*AdminOrganizationUnit, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateOrganizationUnit not implemented")
+}
+func (UnimplementedIdentityServiceServer) DisableOrganizationUnit(context.Context, *ChangeOrganizationUnitStatusRequest) (*AdminOrganizationUnit, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DisableOrganizationUnit not implemented")
+}
+func (UnimplementedIdentityServiceServer) EnableOrganizationUnit(context.Context, *ChangeOrganizationUnitStatusRequest) (*AdminOrganizationUnit, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EnableOrganizationUnit not implemented")
 }
 func (UnimplementedIdentityServiceServer) mustEmbedUnimplementedIdentityServiceServer() {}
 func (UnimplementedIdentityServiceServer) testEmbeddedByValue()                         {}
@@ -478,6 +612,150 @@ func _IdentityService_RevokeRefreshToken_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _IdentityService_GetOrganizationContext_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOrganizationContextRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).GetOrganizationContext(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_GetOrganizationContext_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).GetOrganizationContext(ctx, req.(*GetOrganizationContextRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_ListDepartments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDepartmentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).ListDepartments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_ListDepartments_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).ListDepartments(ctx, req.(*ListDepartmentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_ListOrganizationUnits_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListOrganizationUnitsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).ListOrganizationUnits(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_ListOrganizationUnits_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).ListOrganizationUnits(ctx, req.(*ListOrganizationUnitsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_GetOrganizationUnit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOrganizationUnitRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).GetOrganizationUnit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_GetOrganizationUnit_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).GetOrganizationUnit(ctx, req.(*GetOrganizationUnitRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_CreateOrganizationUnit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateOrganizationUnitRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).CreateOrganizationUnit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_CreateOrganizationUnit_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).CreateOrganizationUnit(ctx, req.(*CreateOrganizationUnitRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_UpdateOrganizationUnit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateOrganizationUnitRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).UpdateOrganizationUnit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_UpdateOrganizationUnit_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).UpdateOrganizationUnit(ctx, req.(*UpdateOrganizationUnitRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_DisableOrganizationUnit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChangeOrganizationUnitStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).DisableOrganizationUnit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_DisableOrganizationUnit_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).DisableOrganizationUnit(ctx, req.(*ChangeOrganizationUnitStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_EnableOrganizationUnit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChangeOrganizationUnitStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).EnableOrganizationUnit(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_EnableOrganizationUnit_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).EnableOrganizationUnit(ctx, req.(*ChangeOrganizationUnitStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // IdentityService_ServiceDesc is the grpc.ServiceDesc for IdentityService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -532,6 +810,38 @@ var IdentityService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RevokeRefreshToken",
 			Handler:    _IdentityService_RevokeRefreshToken_Handler,
+		},
+		{
+			MethodName: "GetOrganizationContext",
+			Handler:    _IdentityService_GetOrganizationContext_Handler,
+		},
+		{
+			MethodName: "ListDepartments",
+			Handler:    _IdentityService_ListDepartments_Handler,
+		},
+		{
+			MethodName: "ListOrganizationUnits",
+			Handler:    _IdentityService_ListOrganizationUnits_Handler,
+		},
+		{
+			MethodName: "GetOrganizationUnit",
+			Handler:    _IdentityService_GetOrganizationUnit_Handler,
+		},
+		{
+			MethodName: "CreateOrganizationUnit",
+			Handler:    _IdentityService_CreateOrganizationUnit_Handler,
+		},
+		{
+			MethodName: "UpdateOrganizationUnit",
+			Handler:    _IdentityService_UpdateOrganizationUnit_Handler,
+		},
+		{
+			MethodName: "DisableOrganizationUnit",
+			Handler:    _IdentityService_DisableOrganizationUnit_Handler,
+		},
+		{
+			MethodName: "EnableOrganizationUnit",
+			Handler:    _IdentityService_EnableOrganizationUnit_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

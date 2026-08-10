@@ -107,8 +107,60 @@ Access Token 包含：`account_id`、`account_type`、角色、部门、permissi
 - Refresh Token 每次使用都会轮换，Redis 保存 Refresh Session；
 - 并发刷新由前端合并为一次；
 - 退出撤销 Refresh Session，前端立即删除本地 Token；
-- 角色、部门或账号状态变化提升授权版本；新权限在重新登录或刷新后进入新 Token；
-- 高风险禁用和撤权需要结合短 Access Token 有效期，不能假设旧 JWT 立即消失。
+- 角色、部门或账号状态变化提升授权版本；统一拦截器发现旧 Access Token 的版本不一致时返回 `401`，
+  客户端通过全局 `refreshOnce()` 无感轮换 Token，并使用最新 Principal 将原请求最多重试一次；
+- 只有 Refresh Session 已过期、被撤销，或者账号已被禁用导致刷新失败时，客户端才清理本地会话并
+  回到登录流程；
+- `common/authn` 提供可注入的授权版本校验接口，HTTP Middleware 和 gRPC Interceptor 在 JWT 本地验签后，
+  统一比较 Token 中的 `authorization_version` 与服务端当前版本；
+- 授权版本的 Identity 实现优先读取 Redis，Redis 未命中时回源 Identity/MySQL 并回填；角色、部门或账号
+  状态变更在 MySQL 事务中递增版本，提交后更新 Redis，并通过 Outbox 事件补偿失败或遗漏的缓存更新；
+- 版本不一致时统一拒绝旧 Access Token，不允许每个业务 Manager 再分别查询操作者的角色和权限；
+- Redis 校验器不可用且无法回源时，受保护写接口采用 fail-closed，不能因为缓存故障放行高风险操作；
+- `common/authn` 只定义 Principal、Token、上下文传递、拦截器和版本校验抽象，不依赖 Identity Repository，
+  也不承载账号、角色、组织等领域业务；
+- 业务 Manager 接收拦截器已经验证的 `authn.Principal`，使用 `common/authz` 判断当前操作所需 permission，
+  Repository 只查询和修改本业务资源；
+- `authorization.Manager` 可以据此移除对“操作者最新权限”的重复查询，但仍负责目标账号前后状态、
+  角色变更、幂等、审计、Outbox 和授权版本递增。
+
+### 6.1 多服务复用边界
+
+统一拦截器是“所有服务注册同一份公共实现”，不是每个服务各写一套权限查询。代码边界固定为：
+
+```text
+common/authn
+  principal.go                 Principal 与 Context 传递
+  token.go                     JWT 签发与本地验签
+  authorization_version.go     VersionReader/Validator 抽象与版本比较
+  http.go                      统一 HTTP Middleware
+  grpc.go                      统一 gRPC Interceptor
+
+common/authn/versionredis
+  store.go                     可被所有服务复用的 Redis VersionReader
+
+service/identity
+  authorization.Manager       角色、科室、账号状态变更与版本递增
+  session.Manager             Refresh Session 与新 Token 签发
+  repository                  Identity MySQL 事实与事务实现
+```
+
+`common/authn` 不导入 `service/identity/rpc/internal`；反过来由各服务的 `ServiceContext` 创建同一个
+`versionredis.Store` 和 `AuthorizationVersionValidator`，再注入公共 HTTP/gRPC 拦截器。Appointment、
+Planning、Report、Navigation 等服务只增加配置和依赖装配，不复制 Redis 查询、版本比较或错误映射代码。
+
+授权版本遵守“Identity 单写、其他服务只读”：
+
+- Identity 在登录、刷新、角色变更、调岗和账号状态变更后维护 Redis 当前版本；
+- 其他服务只通过公共 `VersionReader` 读取同一 Redis 命名空间，不得自行修改授权版本；
+- Redis 未命中时通过可注入 Loader 回源 Identity/MySQL 并回填，公共包不直接依赖 Identity RPC；
+- Identity/MySQL 是授权事实源，Redis 是跨服务共享的快速版本投影；
+- MySQL 事务提交后更新 Redis，Outbox 消费者负责补偿失败或遗漏的投影更新；
+- 每个可直接接收受保护请求的服务都注册公共拦截器，不能只依赖前端隐藏菜单或上游服务口头保证。
+
+请求阶段统一为：本地 JWT 验签 → 公共 VersionValidator 读取 Redis/必要时回源 → Principal 写入 Context
+→ 业务 Manager 使用 `common/authz` 判断 permission。Identity 业务 Manager 不再查询操作者权限，但仍查询
+并锁定目标账号、组织或医生的最新业务事实。
 
 ## 7. 数据与安全边界
 

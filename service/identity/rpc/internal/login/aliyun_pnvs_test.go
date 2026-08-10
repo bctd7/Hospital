@@ -44,14 +44,37 @@ func TestAlibabaPNVSRequiresPassVerificationResult(t *testing.T) {
 
 type fakeAlibabaPNVSClient struct {
 	sendRequest  *dypns.SendSmsVerifyCodeRequest
+	sendError    error
 	verifyResult string
 }
 
 func (c *fakeAlibabaPNVSClient) SendSmsVerifyCodeWithContext(_ context.Context, request *dypns.SendSmsVerifyCodeRequest, _ *dara.RuntimeOptions) (*dypns.SendSmsVerifyCodeResponse, error) {
 	c.sendRequest = request
+	if c.sendError != nil {
+		return nil, c.sendError
+	}
 	return &dypns.SendSmsVerifyCodeResponse{Body: &dypns.SendSmsVerifyCodeResponseBody{
 		Code: dara.String("OK"), Success: dara.Bool(true),
 	}}, nil
+}
+
+func TestAlibabaPNVSPreservesOnlyProviderErrorCode(t *testing.T) {
+	client := &fakeAlibabaPNVSClient{sendError: dara.NewSDKError(map[string]any{
+		"code":    "InvalidAccessKeyId.NotFound",
+		"message": "sensitive provider detail",
+	})}
+	provider := newAlibabaPNVS(client, AlibabaPNVSConfig{})
+
+	err := provider.SendLoginCode(context.Background(), "+8613800138000")
+	if !errors.Is(err, ErrProviderUnavailable) {
+		t.Fatalf("expected unavailable provider, got %v", err)
+	}
+	if !strings.Contains(err.Error(), "InvalidAccessKeyId.NotFound") {
+		t.Fatalf("provider code was not preserved: %v", err)
+	}
+	if strings.Contains(err.Error(), "sensitive provider detail") {
+		t.Fatalf("provider detail must not enter logs: %v", err)
+	}
 }
 
 func (c *fakeAlibabaPNVSClient) CheckSmsVerifyCodeWithContext(_ context.Context, _ *dypns.CheckSmsVerifyCodeRequest, _ *dara.RuntimeOptions) (*dypns.CheckSmsVerifyCodeResponse, error) {

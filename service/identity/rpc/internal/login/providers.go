@@ -2,7 +2,11 @@ package login
 
 import (
 	"context"
+	"crypto/subtle"
 	"errors"
+	"fmt"
+	"strings"
+	"unicode"
 )
 
 var (
@@ -27,6 +31,35 @@ func (UnconfiguredPhoneVerificationProvider) SendLoginCode(context.Context, stri
 
 func (UnconfiguredPhoneVerificationProvider) VerifyLoginCode(context.Context, string, string) error {
 	return ErrProviderNotConfigured
+}
+
+// LocalPhoneVerificationProvider avoids external SMS calls while retaining a
+// real credential check. Environment restrictions are enforced by Identity
+// service startup before this provider is constructed.
+type LocalPhoneVerificationProvider struct {
+	code string
+}
+
+func NewLocalPhoneVerificationProvider(code string) (*LocalPhoneVerificationProvider, error) {
+	code = strings.TrimSpace(code)
+	if len(code) < 4 || len(code) > 12 || strings.IndexFunc(code, func(value rune) bool {
+		return !unicode.IsDigit(value)
+	}) >= 0 {
+		return nil, fmt.Errorf("local SMS code must contain 4 to 12 digits")
+	}
+	return &LocalPhoneVerificationProvider{code: code}, nil
+}
+
+func (*LocalPhoneVerificationProvider) SendLoginCode(context.Context, string) error {
+	return nil
+}
+
+func (p *LocalPhoneVerificationProvider) VerifyLoginCode(_ context.Context, _ string, code string) error {
+	code = strings.TrimSpace(code)
+	if subtle.ConstantTimeCompare([]byte(code), []byte(p.code)) != 1 {
+		return ErrInvalidCredential
+	}
+	return nil
 }
 
 // WeChatSession is the server-side identity returned after exchanging the

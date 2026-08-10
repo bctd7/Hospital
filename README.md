@@ -118,3 +118,46 @@ powershell -ExecutionPolicy Bypass -File scripts/check.ps1
 - `.env`、微信 AppSecret、Token 密钥和生产凭据不得提交到仓库。
 
 详细方案见 [总体技术规划](./plan/00-overall-technical-plan.md)。
+
+## Identity 服务请求链路
+
+Identity 服务的一次完整请求按以下链路执行：
+
+```text
+前端
+  -> HTTP / gRPC 请求
+  -> API 服务
+  -> Identity gRPC 服务
+  -> gRPC 鉴权拦截器（验证 Token，将 Principal 放入 context）
+  -> Server（接收 gRPC 请求并调用对应 Logic）
+  -> Logic（取请求参数和 Principal，调用 Manager，转换响应和错误）
+  -> Manager（权限校验、参数校验、业务规则和事务编排）
+  -> Store（定义数据访问能力）
+  -> mysqlstore（执行具体 SQL）
+  -> MySQL
+```
+
+以“管理员查询组织单元详情”为例：
+
+1. 前端传入 `unit_id`。
+2. 请求到达 `IdentityService.GetOrganizationUnit`。
+3. 鉴权拦截器验证 Token，并把当前用户 `Principal` 放入 `context`。
+4. Server 创建 `GetOrganizationUnitLogic` 并将请求交给它。
+5. Logic 从 `context` 中取出 `Principal`，调用 `OrganizationManager.GetManagedUnit`。
+6. Manager 检查用户是否拥有组织管理权限，然后调用 `Store.GetUnit`。
+7. mysqlstore 执行 SQL 查询 MySQL。
+8. 查询结果逐层返回，Logic 将 `organization.Unit` 转换为 protobuf `OrganizationUnit`。
+9. gRPC 响应返回 API 服务，最终返回前端。
+
+各层职责与 Java 常见分层的对照：
+
+| 项目分层 | Java 类比 | 主要职责 |
+|---|---|---|
+| Interceptor | Filter / Interceptor | 统一鉴权，将登录用户写入上下文 |
+| Server | Controller 入口 | 接收 gRPC 请求并转交给 Logic |
+| Logic | Controller / Service 适配层 | 拆解请求、获取用户、调用 Manager、组装响应 |
+| Manager | Service | 实现权限检查和核心业务规则 |
+| Store 接口 | Mapper 接口 | 定义业务所需的数据访问能力 |
+| mysqlstore | Mapper 实现 | 编写并执行具体 SQL |
+
+简单记忆：**Server 接请求，Logic 接线翻译，Manager 处理业务，Store 操作数据库，Interceptor 统一把守入口。**

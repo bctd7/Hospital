@@ -1,4 +1,4 @@
-package repository
+package mysqlstore
 
 import (
 	"context"
@@ -24,7 +24,7 @@ func TestMySQLAuthorizationChange(t *testing.T) {
 		t.Skip("IDENTITY_TEST_MYSQL_DSN is not set")
 	}
 
-	store, err := NewMySQLStore(dataSource)
+	store, err := New(dataSource)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,7 +72,7 @@ func TestMySQLWeChatRegistrationPhoneAndDoctorPromotion(t *testing.T) {
 	if dataSource == "" {
 		t.Skip("IDENTITY_TEST_MYSQL_DSN is not set")
 	}
-	store, err := NewMySQLStore(dataSource)
+	store, err := New(dataSource)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -83,7 +83,9 @@ func TestMySQLWeChatRegistrationPhoneAndDoctorPromotion(t *testing.T) {
 		departmentID = "10000000-0000-0000-0000-000000000102"
 		operationID  = "10000000-0000-0000-0000-000000000103"
 	)
-	if _, err := store.db.ExecContext(ctx, "INSERT INTO identity_departments (id, code, name) VALUES (?, 'login-test', 'Login Test')", departmentID); err != nil {
+	if _, err := store.db.ExecContext(ctx, `
+INSERT INTO identity_organization_units (id, unit_type, code, name)
+VALUES (?, 'department', 'login-test', 'Login Test')`, departmentID); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := store.db.ExecContext(ctx, "INSERT INTO identity_accounts (id, account_type, status) VALUES (?, 'staff', 'active')", adminID); err != nil {
@@ -101,7 +103,7 @@ func TestMySQLWeChatRegistrationPhoneAndDoctorPromotion(t *testing.T) {
 		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_account_phones WHERE account_id = ?", patientID)
 		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_external_identities WHERE account_id = ?", patientID)
 		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_accounts WHERE id IN (?, ?)", adminID, patientID)
-		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_departments WHERE id = ?", departmentID)
+		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_organization_units WHERE id = ?", departmentID)
 	}()
 
 	patientID, err = store.FindOrCreateWeChatAccount(ctx, "wx-app", "openid-integration")
@@ -150,14 +152,14 @@ func (integrationVersionWriter) SetAuthorizationVersion(context.Context, string,
 	return nil
 }
 
-func seedIdentityTestData(t *testing.T, store *MySQLStore, ctx context.Context) {
+func seedIdentityTestData(t *testing.T, store *Store, ctx context.Context) {
 	t.Helper()
 	statements := []struct {
 		query string
 		args  []any
 	}{
-		{"INSERT INTO identity_departments (id, code, name) VALUES (?, 'integration-a', 'Integration A')", []any{integrationDepartmentA}},
-		{"INSERT INTO identity_departments (id, code, name) VALUES (?, 'integration-b', 'Integration B')", []any{integrationDepartmentB}},
+		{"INSERT INTO identity_organization_units (id, unit_type, code, name) VALUES (?, 'department', 'integration-a', 'Integration A')", []any{integrationDepartmentA}},
+		{"INSERT INTO identity_organization_units (id, unit_type, code, name) VALUES (?, 'department', 'integration-b', 'Integration B')", []any{integrationDepartmentB}},
 		{"INSERT INTO identity_accounts (id, account_type, status) VALUES (?, 'staff', 'active')", []any{integrationAdminID}},
 		{"INSERT INTO identity_accounts (id, account_type, status) VALUES (?, 'staff', 'active')", []any{integrationDoctorID}},
 		{"INSERT INTO identity_staff_profiles (account_id, department_id) VALUES (?, ?)", []any{integrationAdminID, integrationDepartmentA}},
@@ -180,7 +182,7 @@ func seedIdentityTestData(t *testing.T, store *MySQLStore, ctx context.Context) 
 	}
 }
 
-func cleanupIdentityTestData(t *testing.T, store *MySQLStore, ctx context.Context) {
+func cleanupIdentityTestData(t *testing.T, store *Store, ctx context.Context) {
 	t.Helper()
 	statements := []struct {
 		query string
@@ -191,7 +193,7 @@ func cleanupIdentityTestData(t *testing.T, store *MySQLStore, ctx context.Contex
 		{"DELETE FROM identity_account_roles WHERE account_id IN (?, ?)", []any{integrationAdminID, integrationDoctorID}},
 		{"DELETE FROM identity_staff_profiles WHERE account_id IN (?, ?)", []any{integrationAdminID, integrationDoctorID}},
 		{"DELETE FROM identity_accounts WHERE id IN (?, ?)", []any{integrationAdminID, integrationDoctorID}},
-		{"DELETE FROM identity_departments WHERE id IN (?, ?)", []any{integrationDepartmentA, integrationDepartmentB}},
+		{"DELETE FROM identity_organization_units WHERE id IN (?, ?)", []any{integrationDepartmentA, integrationDepartmentB}},
 	}
 	for _, statement := range statements {
 		if _, err := store.db.ExecContext(ctx, statement.query, statement.args...); err != nil {
@@ -200,7 +202,7 @@ func cleanupIdentityTestData(t *testing.T, store *MySQLStore, ctx context.Contex
 	}
 }
 
-func assertCount(t *testing.T, store *MySQLStore, ctx context.Context, table, column, value string, want int) {
+func assertCount(t *testing.T, store *Store, ctx context.Context, table, column, value string, want int) {
 	t.Helper()
 	query := "SELECT COUNT(*) FROM " + table + " WHERE " + column + " = ?" // table and column are test constants
 	var got int

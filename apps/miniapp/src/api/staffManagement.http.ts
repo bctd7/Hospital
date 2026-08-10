@@ -14,12 +14,19 @@ import type {
 
 interface DepartmentResponse {
   department_id: string;
+  campus_id?: string;
   parent_id?: string;
   code: string;
   name: string;
   doctor_count?: number;
   status: "active" | "disabled";
   version: number;
+}
+
+interface OrganizationContextResponse {
+  campuses: Array<{
+    campus_id: string;
+  }>;
 }
 
 interface DoctorResponse {
@@ -74,7 +81,7 @@ function queryPath(path: string, values: Record<string, unknown>): string {
 function departmentFromResponse(value: DepartmentResponse): DepartmentSummary {
   return {
     departmentId: value.department_id,
-    parentId: value.parent_id,
+    parentId: value.parent_id ?? value.campus_id,
     code: value.code,
     name: value.name,
     doctorCount: value.doctor_count ?? 0,
@@ -125,18 +132,25 @@ function accountDetailFromResponse(value: AccountResponse): AdminAccountDetail {
 
 export const httpStaffManagementApi: StaffManagementApi = {
   async listDepartments(includeDisabled = false) {
-    if (includeDisabled) {
-      const response = await request<{ items: DepartmentResponse[] }>({
-        path: "/api/v1/admin/identity/organization-units?unit_type=department&status=all",
-        authenticated: true,
-      });
-      return response.items.map(departmentFromResponse);
-    }
-
-    const response = await request<{ items: DepartmentResponse[] }>({
-      path: "/api/v1/directory/departments",
+    const context = await request<OrganizationContextResponse>({
+      path: "/api/v1/directory/organization-context",
     });
-    return response.items.map(departmentFromResponse);
+    const responses = await Promise.all(
+      context.campuses.map((campus) =>
+        request<{ items: DepartmentResponse[] }>({
+          path: includeDisabled
+            ? `${queryPath("/api/v1/admin/identity/organization-units", {
+                unit_type: "department",
+                parent_id: campus.campus_id,
+              })}&status=all`
+            : queryPath("/api/v1/directory/departments", {
+                campus_id: campus.campus_id,
+              }),
+          authenticated: includeDisabled,
+        }),
+      ),
+    );
+    return responses.flatMap((response) => response.items.map(departmentFromResponse));
   },
 
   async listDoctors(departmentId) {

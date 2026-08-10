@@ -1,6 +1,7 @@
 Name: hospital.identity.v1.rpc
 ListenOn: 0.0.0.0:8080
 Mode: dev
+Environment: "${APP_ENV}"
 Log:
   ServiceName: identity-rpc
   Mode: console
@@ -38,6 +39,9 @@ WeChat:
   AppSecret: ${WECHAT_MINIAPP_APP_SECRET}
   Code2SessionURL: ${WECHAT_CODE2SESSION_URL}
 PhoneLogin:
+  # disabled | aliyun | local. local is rejected outside APP_ENV=local/test.
+  Provider: "${SMS_PROVIDER}"
+  LocalCode: "${LOCAL_SMS_CODE}"
   # 完成 PNVS 控制台配置并注入下列环境变量后改为 true。
   Enabled: ${ALIYUN_PNVS_ENABLED}
   AccessKeyID: ${ALIBABA_CLOUD_ACCESS_KEY_ID}

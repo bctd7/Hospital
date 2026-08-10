@@ -17,6 +17,19 @@ service IdentityService {
   rpc ChangeAccountStatus(ChangeAccountStatusRequest) returns (AuthorizationContext);
   rpc RefreshAccessToken(RefreshAccessTokenRequest) returns (TokenPair);
   rpc RevokeRefreshToken(RevokeRefreshTokenRequest) returns (RevokeRefreshTokenResponse);
+
+  // Public organization directory. HTTP gateways may expose these methods
+  // without an access token, but must still apply request rate limits.
+  rpc GetOrganizationContext(GetOrganizationContextRequest) returns (OrganizationContext);
+  rpc ListDepartments(ListDepartmentsRequest) returns (ListDepartmentsResponse);
+
+  // Administrator organization management.
+  rpc ListOrganizationUnits(ListOrganizationUnitsRequest) returns (ListOrganizationUnitsResponse);
+  rpc GetOrganizationUnit(GetOrganizationUnitRequest) returns (AdminOrganizationUnit);
+  rpc CreateOrganizationUnit(CreateOrganizationUnitRequest) returns (AdminOrganizationUnit);
+  rpc UpdateOrganizationUnit(UpdateOrganizationUnitRequest) returns (AdminOrganizationUnit);
+  rpc DisableOrganizationUnit(ChangeOrganizationUnitStatusRequest) returns (AdminOrganizationUnit);
+  rpc EnableOrganizationUnit(ChangeOrganizationUnitStatusRequest) returns (AdminOrganizationUnit);
 }
 
 message SendPhoneLoginCodeRequest {
@@ -124,4 +137,103 @@ message TokenPair {
   string refresh_token = 2;
   int64 access_expires_in_seconds = 3;
   int64 refresh_expires_in_seconds = 4;
+}
+
+
+message HospitalSummary {
+  string hospital_id = 1;
+  string code = 2;
+  string name = 3;
+  int64 version = 4;
+}
+
+message CampusSummary {
+  string campus_id = 1;
+  string hospital_id = 2;
+  string code = 3;
+  string name = 4;
+  int64 department_count = 5;
+  string status = 6;
+  int64 version = 7;
+}
+
+message DepartmentSummary {
+  string department_id = 1;
+  string campus_id = 2;
+  string campus_name = 3;
+  string code = 4;
+  string name = 5;
+  int64 doctor_count = 6;
+  string status = 7;
+  int64 version = 8;
+}
+
+message AdminOrganizationUnit {
+  string unit_id = 1;
+  string parent_id = 2;
+  string unit_type = 3;
+  string code = 4;
+  string name = 5;
+  string status = 6;
+  int64 child_count = 7;
+  int64 doctor_count = 8;
+  int64 version = 9;
+}
+
+message GetOrganizationContextRequest {
+  string request_id = 1;
+}
+
+message OrganizationContext {
+  HospitalSummary hospital = 1;
+  repeated CampusSummary campuses = 2;
+}
+
+message ListDepartmentsRequest {
+  string campus_id = 1;
+  string request_id = 2;
+}
+
+message ListDepartmentsResponse {
+  repeated DepartmentSummary items = 1;
+}
+
+message ListOrganizationUnitsRequest {
+  string unit_type = 1;
+  string parent_id = 2;
+  string status = 3;
+  string request_id = 4;
+}
+
+message ListOrganizationUnitsResponse {
+  repeated AdminOrganizationUnit items = 1;
+}
+
+message GetOrganizationUnitRequest {
+  string unit_id = 1;
+  string request_id = 2;
+}
+
+message CreateOrganizationUnitRequest {
+  string unit_type = 1;
+  string parent_id = 2;
+  string name = 3;
+  string operation_id = 4;
+  string request_id = 5;
+}
+
+message UpdateOrganizationUnitRequest {
+  string unit_id = 1;
+  optional string name = 2;
+  optional string parent_id = 3;
+  int64 version = 4;
+  string operation_id = 5;
+  string request_id = 6;
+}
+
+message ChangeOrganizationUnitStatusRequest {
+  string unit_id = 1;
+  int64 version = 2;
+  string operation_id = 3;
+  string request_id = 4;
 }
