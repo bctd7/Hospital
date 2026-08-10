@@ -1,7 +1,7 @@
 # Identity 身份与访问控制模块
 
-> 状态：手机号认证、JWT、Refresh Session 和首版角色授权已实现；请求阶段 Redis 授权版本校验、
-> 权限变化后强制重新登录和管理页面待实现
+> 状态：手机号认证、JWT、Refresh Session、首版角色授权、请求阶段 Redis 授权版本校验和权限变化后
+> 强制重新登录已实现；Outbox 授权版本投影补偿和管理页面待实现
 
 ## 1. 模块职责
 
@@ -184,19 +184,23 @@ Manager 使用 `common/authz` 判断 permission。Identity 业务 Manager 不再
 当前已经实现：
 
 - Access Token Claims 已包含角色、permissions、当前科室和 `authorization_version`；
-- app-api HTTP Middleware 与 Identity gRPC Interceptor 已完成 JWT 本地验签和 Principal Context 注入；
+- `common/authn` 已提供 `AuthorizationVersionReader`、Validator 和 HTTP/gRPC 统一校验，
+  `common/authn/versionredis` 已实现统一账号级 Key：`identity:authorization-version:{account_id}`；
+- app-api HTTP Middleware 与 Identity gRPC Interceptor 已完成 JWT 本地验签、Redis 版本校验和 Principal
+  Context 注入，两个服务的 `ServiceContext` 已分别装配 Reader 与 Identity Writer；
 - Refresh Session 已保存创建或轮换时的 `authorization_version`；
-- Refresh 时已重新查询 MySQL 最新 Principal，前端已有并发合并的 `refreshOnce()` 和最多一次请求重试。
+- 登录和正常刷新会回填 Redis 当前版本；Refresh 会重新查询 MySQL 最新 Principal，Session 版本不一致时
+  拒绝轮换并撤销会话；前端已有并发合并的 `refreshOnce()`、最多一次请求重试和失败后清理会话；
+- `authorization.Manager` 已改为接收拦截器验证过的 Principal，不再重复查询操作者权限；目标账号查询、
+  幂等、审计、Outbox、授权版本递增和提交后的 Redis 投影更新仍保留。
 
 当前仍待实现：
 
-- `common/authn` 的 `AuthorizationVersionReader`、Validator 及 HTTP/gRPC 拦截器接入；
-- `common/authn/versionredis` 的统一账号级 Key：`identity:authorization-version:{account_id}`；
-- 各服务的授权版本 Redis 配置与 `ServiceContext` Reader 注入，以及 Identity 的 Writer 注入；
-- 登录和正常刷新回填 Redis 当前版本，授权变更提交后更新版本投影并提供 Outbox 补偿消费者；
-- Refresh Session 版本与 MySQL 当前版本不一致时拒绝刷新；
-- `authorization.Manager` 改为接收已验证 Principal，移除操作者权限重复查询，同时保留目标账号状态、
-  幂等、审计、Outbox 和授权版本递增。
+- Outbox 消费者补偿授权变更后失败或遗漏的 Redis 版本投影更新；
+- Appointment、Planning、Report、Navigation 等服务创建并直接接收受保护请求时，复用相同 Reader 和
+  gRPC Interceptor 装配；
+- 使用真实 MySQL、Redis 和 app-api/Identity 进程完成权限变更、旧 Token `401`、刷新拒绝和重新登录的
+  端到端回归。
 
 ## 7. 数据与安全边界
 
