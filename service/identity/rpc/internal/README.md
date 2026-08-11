@@ -16,17 +16,17 @@ server/identity_service_server.go
 
 不要从 `_test.go` 或 SQL 反向猜业务规则。先读 Manager，再用测试和 SQL 验证边界。
 
-## 与 Java 分层的对应
+## 分层职责
 
-| Go 目录 | 职责 | Java 类比 |
-|---|---|---|
-| `server/` | 接收 gRPC 并创建 Logic | Controller 入口 |
-| `logic/` | DTO/领域命令转换、Principal 和错误映射 | Application Adapter |
-| `account/`、`identityadmin/`、`organization/`、`session/` | 领域规则和事务编排 | Service |
-| 各领域 `store.go` | 数据访问接口 | Mapper/Repository 接口 |
-| `repository/mysqlstore/` | MySQL Store、事务和 SQL | Mapper/Repository 实现 |
-| `repository/redis_session_store.go` | Refresh Session | Redis Repository |
-| `svc/service_context.go` | 创建和注入依赖 | Spring Configuration |
+| Go 目录 | 职责 |
+|---|---|
+| `server/` | 接收 gRPC 请求并创建 Logic |
+| `logic/` | 协议对象转换、取得 Principal 和错误映射 |
+| `account/`、`identityadmin/`、`organization/`、`session/` | 领域规则和事务编排 |
+| 各领域 `store.go` | 定义领域需要的持久化能力 |
+| `repository/mysqlstore/` | MySQL Store、事务和 SQL 实现 |
+| `repository/redis_session_store.go` | Refresh Session 的 Redis 实现 |
+| `svc/service_context.go` | 创建并注入运行依赖 |
 
 ## 包职责
 

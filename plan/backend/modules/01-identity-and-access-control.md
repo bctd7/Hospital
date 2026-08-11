@@ -1,7 +1,7 @@
 # Identity 身份与访问控制模块
 
 > 状态：手机号认证、JWT、Refresh Session、首版角色授权、Redis 授权版本校验、权限变化后强制重新登录，
-> 以及管理员账号/医生管理页面已经实现；Outbox 授权版本投影消费者仍待后续基础设施阶段完成。
+> 以及管理员账号/医生管理页面已经实现；Redis 授权版本投影的自动补偿任务仍待后续基础设施阶段完成。
 
 ## 1. 模块职责
 
@@ -127,9 +127,9 @@ Access Token 包含：`account_id`、`account_type`、角色、部门、permissi
   判断 permission，只在事务中查询并锁定目标账号或本业务资源；
 - `common/authn` 只定义 Principal、Token、上下文传递、拦截器和版本校验抽象，不依赖 Identity Repository，
   也不承载账号、角色、组织等领域业务；
-- 角色、当前科室或账号状态变更在 MySQL 事务中递增授权版本，提交后由 Identity 更新 Redis；Outbox
-  消费者补偿失败或遗漏的投影更新。MySQL 与 Redis 不是同一事务，因此这是最终一致投影，不承诺数据库
-  提交后的绝对下一次请求必然已经看到新版本。
+- 角色、当前科室或账号状态变更在 MySQL 事务中递增授权版本并写入 Outbox，提交后由 Identity 立即更新
+  Redis；自动补偿任务以后重试失败或遗漏的投影更新。MySQL 与 Redis 不是同一事务，因此这是最终一致
+  投影，不能承诺数据库提交后的绝对下一次请求必然已经看到新版本。
 
 ### 6.1 多服务复用边界
 
@@ -172,7 +172,7 @@ Identity。其他服务只配置公钥，不能签发 Hospital Access Token。
 - Redis 未命中不由普通拦截器回源；拦截器返回 `401`，再由不依赖旧 Access Token 的 Refresh 或登录流程
   查询 MySQL 并回填；
 - Identity/MySQL 是授权事实源，Redis 是跨服务共享的快速版本投影；
-- MySQL 事务提交后更新 Redis，Outbox 消费者负责补偿失败或遗漏的投影更新；
+- MySQL 事务提交后立即更新 Redis；Outbox 中保存的新版本事实供自动补偿任务重试失败或遗漏的更新；
 - 每个可直接接收受保护请求的服务都注册公共拦截器，不能只依赖前端隐藏菜单或上游服务口头保证。
 
 请求阶段统一为：本地 JWT 验签 → 公共 VersionValidator 读取 Redis → Principal 写入 Context → 业务
@@ -198,7 +198,8 @@ Manager 使用 `common/authz` 判断 permission。Identity 业务 Manager 不再
 
 当前仍待实现：
 
-- Outbox 消费者补偿授权变更后失败或遗漏的 Redis 版本投影更新；
+- 实现授权版本投影自动补偿链路：Outbox 发布器把未发布事件可靠发送到 Kafka，投影消费者再将目标账号的
+  新版本单调、幂等地写入 Redis；失败时重试，旧事件不得覆盖更新版本；
 - Appointment、Planning、Report、Navigation 等服务创建并直接接收受保护请求时，复用相同 Reader 和
   gRPC Interceptor 装配；
 - Appointment、Planning、Report、Navigation 等新服务建立时的跨服务授权版本端到端回归。

@@ -50,7 +50,7 @@ Miniapp
 - Handler：解析 HTTP 或接收 RPC，不实现业务规则；
 - Logic：把协议对象转换为领域命令，取得当前 Principal；
 - Manager：权限、状态机、层级、幂等、乐观锁和事务边界；
-- Store：持久化接口，相当于 Java 项目中的 Mapper/Repository 抽象；
+- Store：定义领域需要的持久化能力，使 Manager 不依赖具体数据库实现；
 - `mysqlstore`：Store 的 MySQL 实现和具体 SQL；
 - Interceptor：在进入需要认证的 RPC Logic 前校验 JWT 与授权版本，并把 Principal 写入 Context。
 
