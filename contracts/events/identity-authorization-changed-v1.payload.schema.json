@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hospital.local/contracts/events/identity-authorization-changed-v1.payload.schema.json",
+  "title": "Identity Authorization Changed V1 Payload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "operation_id",
+    "action",
+    "authorization_version"
+  ],
+  "properties": {
+    "operation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authorization_version": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}
