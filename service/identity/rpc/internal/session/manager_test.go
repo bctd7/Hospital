@@ -14,7 +14,7 @@ func TestManagerStartsAndRotatesRefreshSession(t *testing.T) {
 	ctx := context.Background()
 	store := &memorySessionStore{}
 	principals := &fakePrincipalStore{principal: activeTestPrincipal(1)}
-	versions := &fakeVersionWriter{}
+	versions := &fakeVersionAdvancer{}
 	manager, err := NewManager(store, principals, fakeAccessIssuer{}, versions, 30*24*time.Hour)
 	if err != nil {
 		t.Fatal(err)
@@ -64,7 +64,7 @@ func TestManagerRejectsRefreshAfterAuthorizationChange(t *testing.T) {
 	ctx := context.Background()
 	store := &memorySessionStore{}
 	principals := &fakePrincipalStore{principal: activeTestPrincipal(1)}
-	versions := &fakeVersionWriter{}
+	versions := &fakeVersionAdvancer{}
 	manager, err := NewManager(store, principals, fakeAccessIssuer{}, versions, time.Hour)
 	if err != nil {
 		t.Fatal(err)
@@ -92,7 +92,7 @@ func TestManagerDoesNotCreateSessionWhenVersionProjectionFails(t *testing.T) {
 	principals := &fakePrincipalStore{principal: activeTestPrincipal(1)}
 	manager, err := NewManager(
 		store, principals, fakeAccessIssuer{},
-		&fakeVersionWriter{err: errors.New("redis unavailable")}, time.Hour,
+		&fakeVersionAdvancer{err: errors.New("redis unavailable")}, time.Hour,
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -110,7 +110,7 @@ func TestManagerRejectsInactiveAccountDuringRefresh(t *testing.T) {
 	ctx := context.Background()
 	store := &memorySessionStore{}
 	principals := &fakePrincipalStore{principal: activeTestPrincipal(1)}
-	manager, err := NewManager(store, principals, fakeAccessIssuer{}, &fakeVersionWriter{}, time.Hour)
+	manager, err := NewManager(store, principals, fakeAccessIssuer{}, &fakeVersionAdvancer{}, time.Hour)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +134,7 @@ func TestManagerRevokesRefreshSession(t *testing.T) {
 	ctx := context.Background()
 	store := &memorySessionStore{}
 	principals := &fakePrincipalStore{principal: activeTestPrincipal(1)}
-	manager, err := NewManager(store, principals, fakeAccessIssuer{}, &fakeVersionWriter{}, time.Hour)
+	manager, err := NewManager(store, principals, fakeAccessIssuer{}, &fakeVersionAdvancer{}, time.Hour)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -205,18 +205,18 @@ func (fakeAccessIssuer) Issue(principal authn.Principal) (string, time.Time, err
 	return fmt.Sprintf("access-v%d", principal.AuthorizationVersion), time.Now().Add(15 * time.Minute), nil
 }
 
-type fakeVersionWriter struct {
+type fakeVersionAdvancer struct {
 	accountID string
 	version   int64
 	calls     int
 	err       error
 }
 
-func (w *fakeVersionWriter) SetAuthorizationVersion(_ context.Context, accountID string, version int64) error {
+func (w *fakeVersionAdvancer) AdvanceAuthorizationVersion(_ context.Context, accountID string, version int64) (bool, error) {
 	w.accountID = accountID
 	w.version = version
 	w.calls++
-	return w.err
+	return w.err == nil, w.err
 }
 
 func activeTestPrincipal(version int64) authn.Principal {

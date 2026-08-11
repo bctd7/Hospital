@@ -8,9 +8,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
-
 	"hospital/service/identity/rpc/internal/identityadmin"
+	"hospital/service/identity/rpc/internal/outbox"
+
+	"github.com/google/uuid"
 )
 
 var _ identityadmin.TxStore = (*mysqlIdentityAdminTxStore)(nil)
@@ -198,6 +199,11 @@ func (s *mysqlIdentityAdminTxStore) RecordIdentityAdminChange(ctx context.Contex
 	if err != nil {
 		return fmt.Errorf("marshal identity admin after state: %w", err)
 	}
+	event, authorizationChanged, err := outbox.BuildIdentityAuthorizationChanged(change)
+	if err != nil {
+		return fmt.Errorf("build authorization change event: %w", err)
+	}
+
 	_, err = s.tx.ExecContext(ctx, `
 INSERT INTO identity_authorization_audit
     (id, operation_id, operator_account_id, target_account_id, action, before_data, after_data, request_id)
@@ -210,25 +216,21 @@ VALUES (?, ?, ?, ?, ?, ?, ?, NULLIF(?, ''))`,
 		}
 		return fmt.Errorf("insert identity admin audit: %w", err)
 	}
-	payload, err := json.Marshal(map[string]any{
-		"operation_id":          change.OperationID,
-		"operator_account_id":   change.OperatorAccountID,
-		"target_account_id":     change.TargetAccountID,
-		"action":                change.Action,
-		"management_version":    change.After.ManagementVersion,
-		"authorization_version": change.After.AuthorizationVersion,
-		"before_department_id":  change.Before.DepartmentID,
-		"after_department_id":   change.After.DepartmentID,
-	})
-	if err != nil {
-		return fmt.Errorf("marshal identity admin event: %w", err)
-	}
-	if _, err := s.tx.ExecContext(ctx, `
+
+	if authorizationChanged {
+		if _, err := s.tx.ExecContext(ctx, `
 INSERT INTO identity_outbox_events
     (event_id, aggregate_id, event_type, schema_version, payload, occurred_at)
-VALUES (?, ?, ?, 1, ?, ?)`, uuid.NewString(), change.TargetAccountID,
-		change.Action, payload, time.Now().UTC()); err != nil {
-		return fmt.Errorf("insert identity admin outbox: %w", err)
+VALUES (?, ?, ?, ?, ?, ?)`,
+			uuid.NewString(),
+			event.AggregateID,
+			event.EventType,
+			event.SchemaVersion,
+			event.Payload,
+			time.Now().UTC(),
+		); err != nil {
+			return fmt.Errorf("insert identity admin outbox: %w", err)
+		}
 	}
 	return nil
 }

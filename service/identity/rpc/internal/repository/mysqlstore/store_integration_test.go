@@ -66,7 +66,7 @@ VALUES (?, 'department', 'login-test', 'Login Test')`, departmentID); err != nil
 	if err != nil {
 		t.Fatal(err)
 	}
-	manager, err := identityadmin.NewManager(store, integrationVersionWriter{}, []byte("integration-phone-lookup-key-32x"))
+	manager, err := identityadmin.NewManager(store, []byte("integration-phone-lookup-key-32x"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,12 +92,6 @@ VALUES (?, 'department', 'login-test', 'Login Test')`, departmentID); err != nil
 	if lookup.Phone.VerificationStatus != "verified" || lookup.Phone.VerificationSource != "admin" {
 		t.Fatalf("phone was not admin verified: %#v", lookup.Phone)
 	}
-}
-
-type integrationVersionWriter struct{}
-
-func (integrationVersionWriter) SetAuthorizationVersion(context.Context, string, int64) error {
-	return nil
 }
 
 func assertCount(t *testing.T, store *Store, ctx context.Context, table, column, value string, want int) {

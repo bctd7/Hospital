@@ -13,12 +13,17 @@ import (
 
 	"hospital/common/authn"
 	"hospital/common/authn/versionredis"
+	contractevents "hospital/contracts/events"
 	"hospital/service/identity/rpc/internal/account"
 	"hospital/service/identity/rpc/internal/authorization"
+	"hospital/service/identity/rpc/internal/authorizationprojection"
 	"hospital/service/identity/rpc/internal/config"
 	"hospital/service/identity/rpc/internal/identityadmin"
 	"hospital/service/identity/rpc/internal/login"
+	"hospital/service/identity/rpc/internal/messaging/kafkaconsumer"
+	"hospital/service/identity/rpc/internal/messaging/kafkaproducer"
 	"hospital/service/identity/rpc/internal/organization"
+	"hospital/service/identity/rpc/internal/outbox"
 	"hospital/service/identity/rpc/internal/repository"
 	"hospital/service/identity/rpc/internal/repository/mysqlstore"
 	"hospital/service/identity/rpc/internal/session"
@@ -34,6 +39,10 @@ type ServiceContext struct {
 	AuthorizationVersionValidator *authn.AuthorizationVersionValidator
 	identityStore                 *mysqlstore.Store
 	redisClient                   *redis.Client
+	kafkaProducer                 *kafkaproducer.Producer
+	OutboxPublisher               *outbox.Publisher
+	AuthorizationVersionConsumer  *kafkaconsumer.Consumer
+	AuthorizationVersionProjector *authorizationprojection.Projector
 	OrganizationManager           *organization.Manager
 	IdentityAdminManager          *identityadmin.Manager
 }
@@ -138,14 +147,75 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		store.Close()
 		return nil, fmt.Errorf("create identity authorization manager: %w", err)
 	}
-	identityAdminManager, err := identityadmin.NewManager(store, authorizationVersions, phoneLookupKey)
+	identityAdminManager, err := identityadmin.NewManager(store, phoneLookupKey)
 	if err != nil {
 		redisClient.Close()
 		store.Close()
 		return nil, fmt.Errorf("create identity admin manager: %w", err)
 	}
+
+	var kafkaProducer *kafkaproducer.Producer
+	var kafkaConsumer *kafkaconsumer.Consumer
+	var outboxPublisher *outbox.Publisher
+	var authorizationVersionProjector *authorizationprojection.Projector
+	if c.Kafka.Enabled {
+		kafkaCtx, kafkaCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		kafkaProducer, err = kafkaproducer.New(
+			kafkaCtx,
+			splitCommaSeparated(c.Kafka.Brokers),
+			c.Kafka.ClientID,
+		)
+		kafkaCancel()
+		if err != nil {
+			redisClient.Close()
+			store.Close()
+			return nil, fmt.Errorf("create identity kafka producer: %w", err)
+		}
+
+		outboxPublisher, err = outbox.NewPublisher(
+			store,
+			kafkaProducer,
+			c.Kafka.AuthorizationChangedTopic,
+			contractevents.EventTypeIdentityAuthorizationChangedV1,
+			c.Kafka.ClientID,
+			c.Kafka.BatchSize,
+		)
+		if err != nil {
+			kafkaProducer.Close()
+			redisClient.Close()
+			store.Close()
+			return nil, fmt.Errorf("create identity outbox publisher: %w", err)
+		}
+
+		authorizationVersionProjector, err = authorizationprojection.NewProjector(authorizationVersions)
+		if err != nil {
+			kafkaProducer.Close()
+			redisClient.Close()
+			store.Close()
+			return nil, fmt.Errorf("create authorization version projector: %w", err)
+		}
+
+		consumerCtx, consumerCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		kafkaConsumer, err = kafkaconsumer.New(
+			consumerCtx,
+			splitCommaSeparated(c.Kafka.Brokers),
+			c.Kafka.ClientID,
+			c.Kafka.AuthorizationChangedTopic,
+			c.Kafka.AuthorizationVersionConsumerGroup,
+		)
+		consumerCancel()
+		if err != nil {
+			kafkaProducer.Close()
+			redisClient.Close()
+			store.Close()
+			return nil, fmt.Errorf("create identity kafka consumer: %w", err)
+		}
+	}
+
 	return &ServiceContext{
-		Config: c, identityStore: store, redisClient: redisClient, TokenManager: tokenManager,
+		Config: c, identityStore: store, redisClient: redisClient,
+		kafkaProducer:                 kafkaProducer,
+		TokenManager:                  tokenManager,
 		AuthorizationVersionValidator: authorizationVersionValidator,
 		AuthorizationManager:          authorizationManager,
 		AccountManager:                accountManager,
@@ -153,6 +223,9 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		SessionManager:                sessionManager,
 		OrganizationManager:           organizationManager,
 		IdentityAdminManager:          identityAdminManager,
+		OutboxPublisher:               outboxPublisher,
+		AuthorizationVersionConsumer:  kafkaConsumer,
+		AuthorizationVersionProjector: authorizationVersionProjector,
 	}, nil
 }
 
@@ -206,6 +279,23 @@ func decodePublicKey(value string) (ed25519.PublicKey, error) {
 	return ed25519.PublicKey(decoded), err
 }
 
+func splitCommaSeparated(value string) []string {
+	parts := strings.Split(value, ",")
+	values := make([]string, 0, len(parts))
+	for _, part := range parts {
+		if trimmed := strings.TrimSpace(part); trimmed != "" {
+			values = append(values, trimmed)
+		}
+	}
+	return values
+}
+
 func (s *ServiceContext) Close() error {
+	if s.AuthorizationVersionConsumer != nil {
+		s.AuthorizationVersionConsumer.Close()
+	}
+	if s.kafkaProducer != nil {
+		s.kafkaProducer.Close()
+	}
 	return errors.Join(s.identityStore.Close(), s.redisClient.Close())
 }

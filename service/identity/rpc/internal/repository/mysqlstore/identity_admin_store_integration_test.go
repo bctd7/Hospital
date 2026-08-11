@@ -4,10 +4,12 @@ import (
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
+	"encoding/json"
 	"os"
 	"testing"
 
 	"hospital/common/authn"
+	contractevents "hospital/contracts/events"
 	"hospital/service/identity/rpc/internal/identityadmin"
 )
 
@@ -47,8 +49,7 @@ func TestMySQLIdentityAdminLifecycle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	versions := &identityAdminTestVersionPublisher{}
-	manager, err := identityadmin.NewManager(store, versions, phoneKey)
+	manager, err := identityadmin.NewManager(store, phoneKey)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -149,27 +150,18 @@ func TestMySQLIdentityAdminLifecycle(t *testing.T) {
 		t.Fatalf("revoked doctor remained in the current department filter: %#v", departmentAccounts)
 	}
 
-	versionPublishes := versions.calls
 	replayed, _, err := manager.RevokeDoctor(ctx, admin, identityAdminTestPatientID,
 		7, identityAdminTestRevokeOp, "identity-admin-integration")
 	if err != nil {
 		t.Fatal(err)
 	}
-	if replayed.ManagementVersion != 8 || versions.calls != versionPublishes+1 {
-		t.Fatalf("idempotent replay changed state or failed to repair the version publication: account=%#v calls=%d", replayed, versions.calls)
+	if replayed.ManagementVersion != 8 {
+		t.Fatalf("idempotent replay changed state: account=%#v", replayed)
 	}
 
 	assertCount(t, store, ctx, "identity_authorization_audit", "target_account_id", identityAdminTestPatientID, 6)
-	assertCount(t, store, ctx, "identity_outbox_events", "aggregate_id", identityAdminTestPatientID, 6)
-}
-
-type identityAdminTestVersionPublisher struct {
-	calls int
-}
-
-func (p *identityAdminTestVersionPublisher) SetAuthorizationVersion(context.Context, string, int64) error {
-	p.calls++
-	return nil
+	assertCount(t, store, ctx, "identity_outbox_events", "aggregate_id", identityAdminTestPatientID, 5)
+	assertIdentityAuthorizationOutboxEvents(t, store, ctx)
 }
 
 func assertIdentityAdminAccount(t *testing.T, account identityadmin.Account, identityType, status, departmentID string, managementVersion, authorizationVersion int64) {
@@ -177,6 +169,54 @@ func assertIdentityAdminAccount(t *testing.T, account identityadmin.Account, ide
 	if account.IdentityType() != identityType || account.AccountStatus != status || account.DepartmentID != departmentID ||
 		account.ManagementVersion != managementVersion || account.AuthorizationVersion != authorizationVersion {
 		t.Fatalf("unexpected managed account: %#v", account)
+	}
+}
+
+func assertIdentityAuthorizationOutboxEvents(t *testing.T, store *Store, ctx context.Context) {
+	t.Helper()
+	wantVersions := map[string]int64{
+		identityAdminTestPromoteOp:  2,
+		identityAdminTestTransferOp: 3,
+		identityAdminTestDisableOp:  4,
+		identityAdminTestEnableOp:   5,
+		identityAdminTestRevokeOp:   6,
+	}
+	rows, err := store.db.QueryContext(ctx, `
+SELECT event_type, schema_version, payload
+FROM identity_outbox_events
+WHERE aggregate_id = ?`, identityAdminTestPatientID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+
+	got := make(map[string]int64, len(wantVersions))
+	for rows.Next() {
+		var eventType string
+		var schemaVersion int
+		var payloadData []byte
+		if err := rows.Scan(&eventType, &schemaVersion, &payloadData); err != nil {
+			t.Fatal(err)
+		}
+		if eventType != contractevents.EventTypeIdentityAuthorizationChangedV1 || schemaVersion != 1 {
+			t.Fatalf("unexpected identity authorization event contract: type=%q schema_version=%d", eventType, schemaVersion)
+		}
+		var payload contractevents.IdentityAuthorizationChangedV1Payload
+		if err := json.Unmarshal(payloadData, &payload); err != nil {
+			t.Fatalf("decode identity authorization event payload: %v", err)
+		}
+		got[payload.OperationID] = payload.AuthorizationVersion
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != len(wantVersions) {
+		t.Fatalf("unexpected identity authorization event count: got=%v want=%v", got, wantVersions)
+	}
+	for operationID, wantVersion := range wantVersions {
+		if got[operationID] != wantVersion {
+			t.Fatalf("unexpected authorization version for operation %s: got=%d want=%d", operationID, got[operationID], wantVersion)
+		}
 	}
 }
 

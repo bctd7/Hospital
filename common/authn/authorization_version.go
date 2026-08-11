@@ -15,10 +15,6 @@ type AuthorizationVersionReader interface {
 	CurrentAuthorizationVersion(ctx context.Context, accountID string) (int64, error)
 }
 
-type AuthorizationVersionWriter interface {
-	SetAuthorizationVersion(ctx context.Context, accountID string, version int64) error
-}
-
 type PrincipalValidator interface {
 	ValidatePrincipal(ctx context.Context, principal Principal) error
 }
@@ -49,4 +45,12 @@ func (v *AuthorizationVersionValidator) ValidatePrincipal(ctx context.Context, p
 		return ErrAuthorizationVersionStale
 	}
 	return nil
+}
+
+type AuthorizationVersionAdvancer interface {
+	AdvanceAuthorizationVersion(
+		ctx context.Context,
+		accountID string,
+		version int64,
+	) (updated bool, err error)
 }

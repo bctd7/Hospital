@@ -21,7 +21,7 @@ type Manager struct {
 	store      Store
 	principals PrincipalStore
 	issuer     AccessTokenIssuer
-	versions   authn.AuthorizationVersionWriter
+	versions   authn.AuthorizationVersionAdvancer
 	refreshTTL time.Duration
 	now        func() time.Time
 }
@@ -39,7 +39,7 @@ func NewManager(
 	store Store,
 	principals PrincipalStore,
 	issuer AccessTokenIssuer,
-	versions authn.AuthorizationVersionWriter,
+	versions authn.AuthorizationVersionAdvancer,
 	refreshTTL time.Duration,
 ) (*Manager, error) {
 	if store == nil || principals == nil || issuer == nil || versions == nil {
@@ -76,8 +76,8 @@ func (m *Manager) Start(ctx context.Context, accountID string) (TokenPair, error
 	if err != nil {
 		return TokenPair{}, err
 	}
-	if err := m.versions.SetAuthorizationVersion(ctx, authPrincipal.AccountID, authPrincipal.AuthorizationVersion); err != nil {
-		return TokenPair{}, fmt.Errorf("publish authorization version: %w", err)
+	if _, err := m.versions.AdvanceAuthorizationVersion(ctx, authPrincipal.AccountID, authPrincipal.AuthorizationVersion); err != nil {
+		return TokenPair{}, fmt.Errorf("advance authorization version: %w", err)
 	}
 	refreshExpiresAt := m.now().UTC().Add(m.refreshTTL)
 	if err := m.store.Create(ctx, Session{
@@ -126,8 +126,8 @@ func (m *Manager) Refresh(ctx context.Context, rawRefresh string) (TokenPair, er
 		_ = m.store.Revoke(ctx, sessionID, current.TokenHash)
 		return TokenPair{}, ErrAuthorizationChanged
 	}
-	if err := m.versions.SetAuthorizationVersion(ctx, authPrincipal.AccountID, authPrincipal.AuthorizationVersion); err != nil {
-		return TokenPair{}, fmt.Errorf("publish authorization version: %w", err)
+	if _, err := m.versions.AdvanceAuthorizationVersion(ctx, authPrincipal.AccountID, authPrincipal.AuthorizationVersion); err != nil {
+		return TokenPair{}, fmt.Errorf("advance authorization version: %w", err)
 	}
 
 	replacement, replacementHash, err := newRefreshToken(sessionID)

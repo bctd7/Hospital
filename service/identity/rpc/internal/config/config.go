@@ -15,6 +15,14 @@ type Config struct {
 		Prefix                     string `json:",default=identity:refresh:"`
 		AuthorizationVersionPrefix string `json:",default=identity:authorization-version:"`
 	}
+	Kafka struct {
+		Enabled                           bool   `json:",default=false"`
+		Brokers                           string `json:",optional"`
+		ClientID                          string `json:",default=identity-rpc"`
+		AuthorizationChangedTopic         string `json:",default=identity.authorization.changed.v1"`
+		AuthorizationVersionConsumerGroup string `json:",default=identity-authorization-version-projection-v1"`
+		BatchSize                         int    `json:",default=100"`
+	}
 	Token struct {
 		Issuer                 string `json:",default=hospital-identity"`
 		Audience               string `json:",default=hospital-services"`

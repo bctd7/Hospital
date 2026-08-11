@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	redis "github.com/redis/go-redis/v9"
 )
@@ -14,7 +13,13 @@ const DefaultPrefix = "identity:authorization-version:"
 
 type Client interface {
 	Get(ctx context.Context, key string) *redis.StringCmd
-	Set(ctx context.Context, key string, value any, expiration time.Duration) *redis.StatusCmd
+
+	Eval(
+		ctx context.Context,
+		script string,
+		keys []string,
+		args ...any,
+	) *redis.Cmd
 }
 
 type Store struct {
@@ -48,18 +53,53 @@ func (s *Store) CurrentAuthorizationVersion(ctx context.Context, accountID strin
 	return version, nil
 }
 
-func (s *Store) SetAuthorizationVersion(ctx context.Context, accountID string, version int64) error {
+// authorizationVersionAdvancerScript 只允许权限版本向前推进。
+const authorizationVersionAdvancerScript = `
+local current = redis.call("GET", KEYS[1])
+
+if current and tonumber(current) >= tonumber(ARGV[1]) then
+	return 0
+end
+
+redis.call("SET", KEYS[1], ARGV[1])
+return 1
+`
+
+func (s *Store) AdvanceAuthorizationVersion(
+	ctx context.Context,
+	accountID string,
+	version int64,
+) (bool, error) {
 	accountID = strings.TrimSpace(accountID)
 	if accountID == "" {
-		return errors.New("authorization version account id is required")
+		return false, errors.New("authorization version account id is required")
 	}
 	if version <= 0 {
-		return errors.New("authorization version must be positive")
+		return false, errors.New("authorization version must be positive")
 	}
-	if err := s.client.Set(ctx, s.key(accountID), version, 0).Err(); err != nil {
-		return fmt.Errorf("write authorization version: %w", err)
+	result, err := s.client.Eval(
+		ctx,
+		authorizationVersionAdvancerScript,
+		[]string{s.key(accountID)},
+		version,
+	).Int64()
+	if err != nil {
+		return false, fmt.Errorf(
+			"advance authorization version: %w",
+			err,
+		)
 	}
-	return nil
+	switch result {
+	case 0:
+		return false, nil
+	case 1:
+		return true, nil
+	default:
+		return false, fmt.Errorf(
+			"unexpected advance authorization version result: %d",
+			result,
+		)
+	}
 }
 
 func (s *Store) key(accountID string) string {

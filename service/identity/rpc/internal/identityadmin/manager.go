@@ -11,21 +11,16 @@ import (
 
 const maxRequestIDBytes = 64
 
-type AuthorizationVersionPublisher interface {
-	SetAuthorizationVersion(ctx context.Context, accountID string, version int64) error
-}
-
 type Manager struct {
 	store    Store
-	versions AuthorizationVersionPublisher
 	phoneKey []byte
 }
 
-func NewManager(store Store, versions AuthorizationVersionPublisher, phoneKey []byte) (*Manager, error) {
-	if store == nil || versions == nil || len(phoneKey) < 32 {
+func NewManager(store Store, phoneKey []byte) (*Manager, error) {
+	if store == nil || len(phoneKey) < 32 {
 		return nil, errors.New("identity admin manager dependencies are required")
 	}
-	return &Manager{store: store, versions: versions, phoneKey: append([]byte(nil), phoneKey...)}, nil
+	return &Manager{store: store, phoneKey: append([]byte(nil), phoneKey...)}, nil
 }
 
 func (m *Manager) mutate(
@@ -59,8 +54,6 @@ func (m *Manager) mutate(
 	}
 
 	var result Account
-	var beforeVersion int64
-	var replayed bool
 	err = m.store.WithinIdentityAdminTransaction(ctx, func(tx TxStore) error {
 		operation, exists, err := tx.FindIdentityAdminOperation(ctx, operationID)
 		if err != nil {
@@ -71,7 +64,6 @@ func (m *Manager) mutate(
 				return fmt.Errorf("%w: operation_id was already used for a different change", ErrConflict)
 			}
 			result, err = tx.GetIdentityAdminAccountForUpdate(ctx, accountID)
-			replayed = true
 			return err
 		}
 
@@ -85,7 +77,6 @@ func (m *Manager) mutate(
 		if before.ManagementVersion != expectedVersion {
 			return ErrVersionConflict
 		}
-		beforeVersion = before.AuthorizationVersion
 		if err := mutation(tx, before); err != nil {
 			return err
 		}
@@ -106,21 +97,5 @@ func (m *Manager) mutate(
 	if err != nil {
 		return Account{}, nil, err
 	}
-	if (!replayed && result.AuthorizationVersion != beforeVersion) ||
-		(replayed && actionChangesAuthorization(action)) {
-		if err := m.versions.SetAuthorizationVersion(ctx, result.ID, result.AuthorizationVersion); err != nil {
-			return Account{}, nil, fmt.Errorf("publish authorization version: %w", err)
-		}
-	}
 	return result, availableActions(operator, result), nil
-}
-
-func actionChangesAuthorization(action string) bool {
-	switch action {
-	case ActionPromoteDoctor, ActionChangeDoctorDepartment, ActionRevokeDoctor,
-		ActionDisableAccount, ActionEnableAccount:
-		return true
-	default:
-		return false
-	}
 }
