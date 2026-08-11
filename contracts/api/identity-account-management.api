@@ -136,6 +136,7 @@ type (
     prefix: /api/v1
     group: identityprofile
     middleware: AccessToken
+    authType: BearerAuth
 )
 service app-api {
     @handler getAccountDisplayProfile
@@ -158,6 +159,7 @@ service app-api {
     prefix: /api/v1
     group: identityadmin
     middleware: AccessToken
+    authType: BearerAuth
 )
 service app-api {
     @handler listAdminAccounts

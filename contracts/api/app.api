@@ -9,6 +9,7 @@ info (
 	desc:    "医院微信小程序后端 API"
 	author:  "Hospital"
 	version: "v1"
+	securityDefinitionsFromJson: `{"BearerAuth":{"type":"apiKey","name":"Authorization","in":"header","description":"Use: Bearer <access_token>"}}`
 )
 
 type HealthResponse {
