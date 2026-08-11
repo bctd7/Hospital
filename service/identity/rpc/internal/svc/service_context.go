@@ -16,6 +16,7 @@ import (
 	"hospital/service/identity/rpc/internal/account"
 	"hospital/service/identity/rpc/internal/authorization"
 	"hospital/service/identity/rpc/internal/config"
+	"hospital/service/identity/rpc/internal/identityadmin"
 	"hospital/service/identity/rpc/internal/login"
 	"hospital/service/identity/rpc/internal/organization"
 	"hospital/service/identity/rpc/internal/repository"
@@ -34,6 +35,7 @@ type ServiceContext struct {
 	identityStore                 *mysqlstore.Store
 	redisClient                   *redis.Client
 	OrganizationManager           *organization.Manager
+	IdentityAdminManager          *identityadmin.Manager
 }
 
 func NewServiceContext(c config.Config) (*ServiceContext, error) {
@@ -140,6 +142,12 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		store.Close()
 		return nil, fmt.Errorf("create identity authorization manager: %w", err)
 	}
+	identityAdminManager, err := identityadmin.NewManager(store, authorizationVersions, phoneLookupKey)
+	if err != nil {
+		redisClient.Close()
+		store.Close()
+		return nil, fmt.Errorf("create identity admin manager: %w", err)
+	}
 	return &ServiceContext{
 		Config: c, identityStore: store, redisClient: redisClient, TokenManager: tokenManager,
 		AuthorizationVersionValidator: authorizationVersionValidator,
@@ -148,6 +156,7 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		PhoneLoginManager:             phoneLoginManager,
 		SessionManager:                sessionManager,
 		OrganizationManager:           organizationManager,
+		IdentityAdminManager:          identityAdminManager,
 	}, nil
 }
 

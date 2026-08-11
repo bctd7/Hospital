@@ -83,6 +83,16 @@ func (s *IdentityServiceServer) RevokeRefreshToken(ctx context.Context, in *iden
 	return l.RevokeRefreshToken(in)
 }
 
+func (s *IdentityServiceServer) GetAccountDisplayProfile(ctx context.Context, in *identityv1.GetAccountDisplayProfileRequest) (*identityv1.AccountDisplayProfile, error) {
+	l := logic.NewGetAccountDisplayProfileLogic(ctx, s.svcCtx)
+	return l.GetAccountDisplayProfile(in)
+}
+
+func (s *IdentityServiceServer) UpdateAccountDisplayProfile(ctx context.Context, in *identityv1.UpdateAccountDisplayProfileRequest) (*identityv1.AccountDisplayProfile, error) {
+	l := logic.NewUpdateAccountDisplayProfileLogic(ctx, s.svcCtx)
+	return l.UpdateAccountDisplayProfile(in)
+}
+
 // Public organization directory. HTTP gateways may expose these methods
 func (s *IdentityServiceServer) GetOrganizationContext(ctx context.Context, in *identityv1.GetOrganizationContextRequest) (*identityv1.OrganizationContext, error) {
 	l := logic.NewGetOrganizationContextLogic(ctx, s.svcCtx)
@@ -92,6 +102,11 @@ func (s *IdentityServiceServer) GetOrganizationContext(ctx context.Context, in *
 func (s *IdentityServiceServer) ListDepartments(ctx context.Context, in *identityv1.ListDepartmentsRequest) (*identityv1.ListDepartmentsResponse, error) {
 	l := logic.NewListDepartmentsLogic(ctx, s.svcCtx)
 	return l.ListDepartments(in)
+}
+
+func (s *IdentityServiceServer) ListDoctorsByDepartment(ctx context.Context, in *identityv1.ListDoctorsByDepartmentRequest) (*identityv1.ListDoctorsByDepartmentResponse, error) {
+	l := logic.NewListDoctorsByDepartmentLogic(ctx, s.svcCtx)
+	return l.ListDoctorsByDepartment(in)
 }
 
 // Administrator organization management.
@@ -123,4 +138,49 @@ func (s *IdentityServiceServer) DisableOrganizationUnit(ctx context.Context, in 
 func (s *IdentityServiceServer) EnableOrganizationUnit(ctx context.Context, in *identityv1.ChangeOrganizationUnitStatusRequest) (*identityv1.AdminOrganizationUnit, error) {
 	l := logic.NewEnableOrganizationUnitLogic(ctx, s.svcCtx)
 	return l.EnableOrganizationUnit(in)
+}
+
+func (s *IdentityServiceServer) ListAdminAccounts(ctx context.Context, in *identityv1.ListAdminAccountsRequest) (*identityv1.ListAdminAccountsResponse, error) {
+	l := logic.NewListAdminAccountsLogic(ctx, s.svcCtx)
+	return l.ListAdminAccounts(in)
+}
+
+func (s *IdentityServiceServer) GetAdminAccount(ctx context.Context, in *identityv1.GetAdminAccountRequest) (*identityv1.AdminAccountDetail, error) {
+	l := logic.NewGetAdminAccountLogic(ctx, s.svcCtx)
+	return l.GetAdminAccount(in)
+}
+
+func (s *IdentityServiceServer) SearchAdminAccountByPhone(ctx context.Context, in *identityv1.SearchAdminAccountByPhoneRequest) (*identityv1.SearchAdminAccountByPhoneResponse, error) {
+	l := logic.NewSearchAdminAccountByPhoneLogic(ctx, s.svcCtx)
+	return l.SearchAdminAccountByPhone(in)
+}
+
+func (s *IdentityServiceServer) PromoteManagedDoctor(ctx context.Context, in *identityv1.PromoteManagedDoctorRequest) (*identityv1.AdminAccountDetail, error) {
+	l := logic.NewPromoteManagedDoctorLogic(ctx, s.svcCtx)
+	return l.PromoteManagedDoctor(in)
+}
+
+func (s *IdentityServiceServer) UpdateManagedDoctor(ctx context.Context, in *identityv1.UpdateManagedDoctorRequest) (*identityv1.AdminAccountDetail, error) {
+	l := logic.NewUpdateManagedDoctorLogic(ctx, s.svcCtx)
+	return l.UpdateManagedDoctor(in)
+}
+
+func (s *IdentityServiceServer) ChangeManagedDoctorDepartment(ctx context.Context, in *identityv1.ChangeManagedDoctorDepartmentRequest) (*identityv1.AdminAccountDetail, error) {
+	l := logic.NewChangeManagedDoctorDepartmentLogic(ctx, s.svcCtx)
+	return l.ChangeManagedDoctorDepartment(in)
+}
+
+func (s *IdentityServiceServer) RevokeManagedDoctor(ctx context.Context, in *identityv1.ManagedAccountMutationRequest) (*identityv1.AdminAccountDetail, error) {
+	l := logic.NewRevokeManagedDoctorLogic(ctx, s.svcCtx)
+	return l.RevokeManagedDoctor(in)
+}
+
+func (s *IdentityServiceServer) DisableManagedAccount(ctx context.Context, in *identityv1.ManagedAccountMutationRequest) (*identityv1.AdminAccountDetail, error) {
+	l := logic.NewDisableManagedAccountLogic(ctx, s.svcCtx)
+	return l.DisableManagedAccount(in)
+}
+
+func (s *IdentityServiceServer) EnableManagedAccount(ctx context.Context, in *identityv1.ManagedAccountMutationRequest) (*identityv1.AdminAccountDetail, error) {
+	l := logic.NewEnableManagedAccountLogic(ctx, s.svcCtx)
+	return l.EnableManagedAccount(in)
 }

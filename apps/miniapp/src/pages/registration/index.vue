@@ -50,6 +50,8 @@ const departments = ref<DepartmentSummary[]>([]);
 const hospitalId = ref("");
 const hospitalName = ref("");
 const campuses = ref<CampusSummary[]>([]);
+const managedCampuses = ref<CampusSummary[]>([]);
+const selectedManagedCampus = ref<CampusSummary>();
 const selectedCampusId = ref("");
 const doctors = ref<DoctorSummary[]>([]);
 const selectedDepartmentId = ref("");
@@ -95,6 +97,9 @@ async function refreshOrganization(force = false) {
     hospitalId.value = context.hospital.hospitalId;
     hospitalName.value = context.hospital.name;
     campuses.value = context.campuses;
+    managedCampuses.value = canManageDepartments.value
+      ? await staffManagementApi.listCampuses(context.hospital.hospitalId, true)
+      : context.campuses;
     const nextCampus =
       context.campuses.find((campus) => campus.campusId === selectedCampusId.value) ??
       context.campuses.find((campus) => campus.campusId === lastSelectedCampusId) ??
@@ -206,8 +211,74 @@ function openCreateCampus() {
   }
   editorTarget.value = "campus";
   editorMode.value = "create";
+  selectedManagedCampus.value = undefined;
   editorName.value = "";
   editorVisible.value = true;
+}
+
+function openCampusManagement() {
+  if (!managedCampuses.value.length) {
+    uni.showToast({ title: "暂无可管理院区", icon: "none" });
+    return;
+  }
+  uni.showActionSheet({
+    title: "选择院区",
+    itemList: managedCampuses.value.map((campus) =>
+      `${campus.name}${campus.status === "disabled" ? "（已停用）" : ""}`,
+    ),
+    success: (result) => {
+      const campus = managedCampuses.value[result.tapIndex];
+      if (campus) openCampusActions(campus);
+    },
+  });
+}
+
+function openCampusActions(campus: CampusSummary) {
+  selectedManagedCampus.value = campus;
+  uni.showActionSheet({
+    title: campus.name,
+    itemList: ["编辑名称", campus.status === "active" ? "停用院区" : "恢复院区"],
+    success: (result) => {
+      if (result.tapIndex === 0) {
+        editorTarget.value = "campus";
+        editorMode.value = "edit";
+        editorName.value = campus.name;
+        editorVisible.value = true;
+      } else if (result.tapIndex === 1) {
+        changeCampusStatus(campus, campus.status !== "active");
+      }
+    },
+  });
+}
+
+function changeCampusStatus(campus: CampusSummary, enabled: boolean) {
+  if (mutationPending.value) return;
+  uni.showModal({
+    title: enabled ? "恢复院区" : "停用院区",
+    content: enabled
+      ? `恢复“${campus.name}”后可继续维护其科室。`
+      : `“${campus.name}”存在有效科室时不能停用，请先处理所属科室。`,
+    confirmText: enabled ? "确认恢复" : "确认停用",
+    confirmColor: enabled ? "#1497e3" : "#d9485f",
+    success: async (result) => {
+      if (!result.confirm) return;
+      mutationPending.value = true;
+      try {
+        await staffManagementApi.setCampusEnabled(
+          campus.campusId,
+          enabled,
+          campus.version,
+        );
+        invalidateDepartments();
+        await refreshOrganization(true);
+        uni.showToast({ title: enabled ? "院区已恢复" : "院区已停用" });
+      } catch (error) {
+        uni.showToast({ title: messageOf(error, "操作失败"), icon: "none" });
+      } finally {
+        mutationPending.value = false;
+      }
+    },
+  });
 }
 
 function openCreateDepartment() {
@@ -242,16 +313,24 @@ async function saveDepartment() {
   mutationPending.value = true;
   try {
     if (editorTarget.value === "campus") {
-      const created = await staffManagementApi.createCampus({
-        name,
-        hospitalId: hospitalId.value,
-      });
-      selectedCampusId.value = created.campusId;
-      lastSelectedCampusId = created.campusId;
+      if (editorMode.value === "create") {
+        const created = await staffManagementApi.createCampus({
+          name,
+          hospitalId: hospitalId.value,
+        });
+        selectedCampusId.value = created.campusId;
+        lastSelectedCampusId = created.campusId;
+      } else if (selectedManagedCampus.value) {
+        await staffManagementApi.updateCampus(
+          selectedManagedCampus.value.campusId,
+          { name, hospitalId: hospitalId.value },
+          selectedManagedCampus.value.version,
+        );
+      }
       editorVisible.value = false;
       invalidateDepartments();
       await refreshOrganization(true);
-      uni.showToast({ title: "院区已新增" });
+      uni.showToast({ title: editorMode.value === "create" ? "院区已新增" : "院区已更新" });
       return;
     }
     if (editorMode.value === "create") {
@@ -400,6 +479,13 @@ function messageOf(error: unknown, fallback: string): string {
         >
           ＋ 院区
         </button>
+        <button
+          v-if="canManageDepartments && managedCampuses.length"
+          class="manage-campus-button"
+          @tap="openCampusManagement"
+        >
+          管理
+        </button>
       </view>
 
       <view v-if="campuses.length === 0" class="campus-empty">
@@ -539,7 +625,8 @@ button::after {
 }
 
 .campus-chip,
-.add-campus-button {
+.add-campus-button,
+.manage-campus-button {
   display: inline-block;
   width: auto;
   margin: 0 12rpx 0 0;
@@ -563,6 +650,12 @@ button::after {
   flex: 0 0 auto;
   color: #167ac3;
   background: #eaf5ff;
+}
+
+.manage-campus-button {
+  flex: 0 0 auto;
+  color: #59687d;
+  background: #eef1f5;
 }
 
 .campus-empty {

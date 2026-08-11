@@ -17,6 +17,17 @@ import { httpStaffManagementApi } from "./staffManagement.http";
 export interface StaffManagementApi {
   getOrganizationContext(): Promise<OrganizationContext>;
   createCampus(input: CampusDraft): Promise<CampusSummary>;
+  listCampuses(hospitalId: string, includeDisabled?: boolean): Promise<CampusSummary[]>;
+  updateCampus(
+    campusId: string,
+    input: CampusDraft,
+    version: number,
+  ): Promise<CampusSummary>;
+  setCampusEnabled(
+    campusId: string,
+    enabled: boolean,
+    version: number,
+  ): Promise<CampusSummary>;
   listDepartments(
     campusId: string,
     includeDisabled?: boolean,

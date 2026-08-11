@@ -73,6 +73,7 @@ export interface AdminAccountDetail extends AdminAccountSummary {
   availableActions: AdminAccountAction[];
   createdAt: string;
   updatedAt: string;
+  staffStatus?: "active" | "revoked";
 }
 
 export interface PagedResult<T> {

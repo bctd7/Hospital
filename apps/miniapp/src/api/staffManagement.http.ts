@@ -71,6 +71,7 @@ interface AccountResponse {
   available_actions?: AdminAccountAction[];
   created_at?: string;
   updated_at?: string;
+  staff_status?: "active" | "revoked";
 }
 
 interface PagedResponse<T> {
@@ -187,6 +188,7 @@ function accountDetailFromResponse(value: AccountResponse): AdminAccountDetail {
     availableActions: value.available_actions ?? [],
     createdAt: value.created_at ?? "",
     updatedAt: value.updated_at ?? "",
+    staffStatus: value.staff_status,
   };
 }
 
@@ -217,6 +219,76 @@ export const httpStaffManagementApi: StaffManagementApi = {
         name: input.name,
         operation_id: operationId(),
       },
+    });
+    return campusFromResponse(response);
+  },
+
+  async listCampuses(hospitalId, includeDisabled = false) {
+    if (!hospitalId) {
+      throw new ApiError("医院信息尚未加载", 400);
+    }
+    if (!includeDisabled) {
+      return (await this.getOrganizationContext()).campuses;
+    }
+    const response = await request<{
+      items: Array<{
+        unit_id: string;
+        parent_id: string;
+        code: string;
+        name: string;
+        child_count?: number;
+        status: "active" | "disabled";
+        version: number;
+      }>;
+    }>({
+      path: queryPath("/api/v1/admin/identity/organization-units", {
+        unit_type: "campus",
+        parent_id: hospitalId,
+        status: "all",
+      }),
+      authenticated: true,
+    });
+    return response.items.map(campusFromResponse);
+  },
+
+  async updateCampus(campusId, input, version) {
+    const response = await request<{
+      unit_id: string;
+      parent_id: string;
+      code: string;
+      name: string;
+      child_count?: number;
+      status: "active" | "disabled";
+      version: number;
+    }>({
+      path: `/api/v1/admin/identity/organization-units/${encodeURIComponent(campusId)}`,
+      method: "PUT",
+      authenticated: true,
+      data: {
+        name: input.name,
+        version,
+        operation_id: operationId(),
+      },
+    });
+    return campusFromResponse(response);
+  },
+
+  async setCampusEnabled(campusId, enabled, version) {
+    const response = await request<{
+      unit_id: string;
+      parent_id: string;
+      code: string;
+      name: string;
+      child_count?: number;
+      status: "active" | "disabled";
+      version: number;
+    }>({
+      path: enabled
+        ? `/api/v1/admin/identity/organization-units/${encodeURIComponent(campusId)}/enable`
+        : `/api/v1/admin/identity/organization-units/${encodeURIComponent(campusId)}`,
+      method: enabled ? "POST" : "DELETE",
+      authenticated: true,
+      data: { version, operation_id: operationId() },
     });
     return campusFromResponse(response);
   },

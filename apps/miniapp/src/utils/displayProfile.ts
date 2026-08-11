@@ -1,4 +1,5 @@
 import type { DisplayProfile, DisplayProfileInput } from "@/types/profile";
+import { request } from "@/api/client";
 
 const DISPLAY_PROFILE_STORAGE_KEY = "hospital:display-profile";
 
@@ -43,4 +44,35 @@ export function saveDisplayProfile(input: DisplayProfileInput): DisplayProfile {
   }
 
   return { ...runtimeProfile };
+}
+
+interface DisplayProfileResponse {
+  nickname?: string;
+  management_version: number;
+}
+
+export async function loadDisplayProfileFromServer(): Promise<DisplayProfile> {
+  const response = await request<DisplayProfileResponse>({
+    path: "/api/v1/auth/me/display-profile",
+    authenticated: true,
+  });
+  const local = getDisplayProfile();
+  return saveDisplayProfile({
+    avatarUrl: local.avatarUrl,
+    nickname: response.nickname || local.nickname,
+  });
+}
+
+export async function saveDisplayProfileToServer(input: DisplayProfileInput): Promise<DisplayProfile> {
+  const local = saveDisplayProfile(input);
+  const response = await request<DisplayProfileResponse>({
+    path: "/api/v1/auth/me/display-profile",
+    method: "PUT",
+    authenticated: true,
+    data: { nickname: local.nickname === DEFAULT_DISPLAY_PROFILE.nickname ? "" : local.nickname },
+  });
+  return saveDisplayProfile({
+    avatarUrl: local.avatarUrl,
+    nickname: response.nickname || DEFAULT_DISPLAY_PROFILE.nickname,
+  });
 }

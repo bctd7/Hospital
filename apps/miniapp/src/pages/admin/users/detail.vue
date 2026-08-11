@@ -246,6 +246,7 @@ function messageOf(value: unknown, fallback: string): string {
         <view class="info-row"><text>昵称</text><text>{{ detail.nickname || "未设置" }}</text></view>
         <view class="info-row"><text>所属部门</text><text>{{ detail.departmentName || "无" }}</text></view>
         <view v-if="detail.identityType === 'doctor'" class="info-row"><text>工号</text><text>{{ detail.staffNo || "未设置" }}</text></view>
+        <view v-if="detail.staffStatus === 'revoked'" class="info-row"><text>医生档案</text><text>已撤销，可重新开通</text></view>
         <view v-if="detail.identityType === 'doctor'" class="info-row info-row--multiline"><text>医生简介</text><text>{{ detail.description || "未设置" }}</text></view>
       </view>
 

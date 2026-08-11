@@ -4,7 +4,12 @@ import { computed, ref } from "vue";
 
 import ProfileAvatar from "@/components/profile/ProfileAvatar.vue";
 import { logout, sessionState } from "@/stores/session";
-import { getDisplayProfile, saveDisplayProfile } from "@/utils/displayProfile";
+import {
+  getDisplayProfile,
+  loadDisplayProfileFromServer,
+  saveDisplayProfile,
+  saveDisplayProfileToServer,
+} from "@/utils/displayProfile";
 import {
   getSelfPatientPreferences,
   saveSelfPatientPreferences,
@@ -47,6 +52,14 @@ onShow(() => {
   avatarUrl.value = profile.avatarUrl;
   nickname.value = profile.nickname;
   phoneMasked.value = preferences.phoneMasked;
+  if (sessionState.status === "authenticated") {
+    void loadDisplayProfileFromServer()
+      .then((serverProfile) => {
+        avatarUrl.value = serverProfile.avatarUrl;
+        nickname.value = serverProfile.nickname;
+      })
+      .catch(() => undefined);
+  }
 });
 
 function chooseAvatar(event: ChooseAvatarEvent) {
@@ -68,13 +81,25 @@ function beginNicknameEdit() {
   editingNickname.value = true;
 }
 
-function finishNicknameEdit() {
-  const profile = saveDisplayProfile({
+async function finishNicknameEdit() {
+  const input = {
     avatarUrl: avatarUrl.value,
     nickname: nickname.value,
-  });
-  nickname.value = profile.nickname;
+  };
+  const local = saveDisplayProfile(input);
+  nickname.value = local.nickname;
   editingNickname.value = false;
+  if (sessionState.status !== "authenticated") return;
+  try {
+    const profile = await saveDisplayProfileToServer(input);
+    nickname.value = profile.nickname;
+    uni.showToast({ title: "用户名已更新", icon: "success" });
+  } catch (error) {
+    uni.showToast({
+      title: error instanceof Error ? error.message : "用户名同步失败",
+      icon: "none",
+    });
+  }
 }
 
 async function logoutCurrentSession() {

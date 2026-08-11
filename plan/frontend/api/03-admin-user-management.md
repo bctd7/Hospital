@@ -1,6 +1,6 @@
 # 超级管理员用户接口
 
-> 状态：待补充后端契约并联调
+> 状态：后端契约、Identity RPC、app-api 与小程序管理员页面已完成联调
 
 ## 1. 调用边界
 
@@ -8,14 +8,14 @@
 `/api/v1/admin/identity`。所有请求要求 Hospital Access Token，`app-api` 和 Identity Service
 分别完成 permission 校验；隐藏前端入口不能替代后端鉴权。
 
-当前已经存在：
+当前接口包括：
 
 ```http
 POST /api/v1/admin/identity/accounts/search-by-phone
 POST /api/v1/admin/identity/doctors/promote
 ```
 
-用户分页、详情、调岗、撤销医生身份和账号禁用/恢复仍是待新增契约。
+用户分页、详情、调岗、撤销医生身份和账号禁用/恢复均已按下文契约落地。
 
 ## 2. 用户查询
 

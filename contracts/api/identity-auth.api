@@ -40,22 +40,6 @@ type (
 		VerificationStatus string `json:"verification_status"`
 		VerificationSource string `json:"verification_source"`
 	}
-
-	SearchAccountByPhoneRequest {
-		Phone string `json:"phone"`
-	}
-
-	SearchAccountByPhoneResponse {
-		Identity CurrentIdentityResponse `json:"identity"`
-		Phone    PhoneBindingResponse    `json:"phone"`
-	}
-
-	PromoteDoctorRequest {
-		AccountID       string `json:"account_id"`
-		DepartmentID    string `json:"department_id"`
-		OfflineVerified bool   `json:"offline_verified"`
-		OperationID     string `json:"operation_id"`
-	}
 )
 
 @server (
@@ -84,17 +68,4 @@ service app-api {
 
 	@handler setMyPhone
 	put /auth/me/phone (SetPhoneRequest) returns (PhoneBindingResponse)
-}
-
-@server (
-	prefix:     /api/v1
-	group:      identityadmin
-	middleware: AccessToken
-)
-service app-api {
-	@handler searchAccountByPhone
-	post /admin/identity/accounts/search-by-phone (SearchAccountByPhoneRequest) returns (SearchAccountByPhoneResponse)
-
-	@handler promoteDoctor
-	post /admin/identity/doctors/promote (PromoteDoctorRequest) returns (CurrentIdentityResponse)
 }

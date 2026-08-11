@@ -3,6 +3,50 @@
 
 package types
 
+type AccountDisplayProfileResponse struct {
+	Nickname          *string `json:"nickname,optional"`
+	ManagementVersion int64   `json:"management_version"`
+}
+
+type AdminAccountDetailResponse struct {
+	AccountID               string   `json:"account_id"`
+	Nickname                *string  `json:"nickname,optional"`
+	DisplayName             *string  `json:"display_name,optional"`
+	AvatarURL               *string  `json:"avatar_url,optional"`
+	MaskedPhone             *string  `json:"masked_phone,optional"`
+	AccountStatus           string   `json:"account_status"`
+	IdentityType            string   `json:"identity_type"`
+	DepartmentID            *string  `json:"department_id,optional"`
+	DepartmentName          *string  `json:"department_name,optional"`
+	ManagementVersion       int64    `json:"management_version"`
+	PhoneVerificationStatus *string  `json:"phone_verification_status,optional"`
+	StaffNo                 *string  `json:"staff_no,optional"`
+	Description             *string  `json:"description,optional"`
+	Roles                   []string `json:"roles"`
+	AuthorizationVersion    int64    `json:"authorization_version"`
+	AvailableActions        []string `json:"available_actions"`
+	CreatedAt               string   `json:"created_at"`
+	UpdatedAt               string   `json:"updated_at"`
+	StaffStatus             *string  `json:"staff_status,optional"`
+}
+
+type AdminAccountPathRequest struct {
+	AccountID string `path:"accountId"`
+}
+
+type AdminAccountSummaryResponse struct {
+	AccountID         string  `json:"account_id"`
+	Nickname          *string `json:"nickname,optional"`
+	DisplayName       *string `json:"display_name,optional"`
+	AvatarURL         *string `json:"avatar_url,optional"`
+	MaskedPhone       *string `json:"masked_phone,optional"`
+	AccountStatus     string  `json:"account_status"`
+	IdentityType      string  `json:"identity_type"`
+	DepartmentID      *string `json:"department_id,optional"`
+	DepartmentName    *string `json:"department_name,optional"`
+	ManagementVersion int64   `json:"management_version"`
+}
+
 type AdminOrganizationUnitResponse struct {
 	UnitID      string `json:"unit_id"`
 	ParentID    string `json:"parent_id,optional"`
@@ -15,6 +59,15 @@ type AdminOrganizationUnitResponse struct {
 	Version     int64  `json:"version"`
 }
 
+type AdminSearchAccountByPhoneRequest struct {
+	Phone string `json:"phone"`
+}
+
+type AdminSearchAccountByPhoneResponse struct {
+	Identity AdminAccountSummaryResponse `json:"identity"`
+	Phone    PhoneBindingResponse        `json:"phone"`
+}
+
 type CampusSummaryResponse struct {
 	CampusID        string `json:"campus_id"`
 	HospitalID      string `json:"hospital_id"`
@@ -23,6 +76,13 @@ type CampusSummaryResponse struct {
 	DepartmentCount int64  `json:"department_count"`
 	Status          string `json:"status"`
 	Version         int64  `json:"version"`
+}
+
+type ChangeManagedDoctorDepartmentRequest struct {
+	AccountID         string `path:"accountId"`
+	DepartmentID      string `json:"department_id"`
+	ManagementVersion int64  `json:"management_version"`
+	OperationID       string `json:"operation_id"`
 }
 
 type ChangeOrganizationUnitStatusRequest struct {
@@ -59,6 +119,21 @@ type DepartmentSummaryResponse struct {
 	Version      int64  `json:"version"`
 }
 
+type DirectoryDoctorPathRequest struct {
+	DepartmentID string `path:"departmentId"`
+	Page         int64  `form:"page,default=1"`
+	PageSize     int64  `form:"page_size,default=20"`
+}
+
+type DoctorSummaryResponse struct {
+	DoctorID     string  `json:"doctor_id"`
+	DisplayName  string  `json:"display_name"`
+	DepartmentID string  `json:"department_id"`
+	AvatarURL    *string `json:"avatar_url,optional"`
+	Description  *string `json:"description,optional"`
+	Version      int64   `json:"version"`
+}
+
 type HealthResponse struct {
 	Status  string `json:"status"`
 	Service string `json:"service"`
@@ -72,12 +147,35 @@ type HospitalSummaryResponse struct {
 	Version    int64  `json:"version"`
 }
 
+type ListAdminAccountsRequest struct {
+	Page         int64  `form:"page,default=1"`
+	PageSize     int64  `form:"page_size,default=20"`
+	Nickname     string `form:"nickname,optional"`
+	IdentityType string `form:"identity_type,optional"`
+	Status       string `form:"status,optional"`
+	DepartmentID string `form:"department_id,optional"`
+}
+
+type ListAdminAccountsResponse struct {
+	Items    []AdminAccountSummaryResponse `json:"items"`
+	Page     int64                         `json:"page"`
+	PageSize int64                         `json:"page_size"`
+	Total    int64                         `json:"total"`
+}
+
 type ListDepartmentsRequest struct {
 	CampusID string `form:"campus_id"`
 }
 
 type ListDepartmentsResponse struct {
 	Items []DepartmentSummaryResponse `json:"items"`
+}
+
+type ListDoctorsResponse struct {
+	Items    []DoctorSummaryResponse `json:"items"`
+	Page     int64                   `json:"page"`
+	PageSize int64                   `json:"page_size"`
+	Total    int64                   `json:"total"`
 }
 
 type ListOrganizationUnitsRequest struct {
@@ -88,6 +186,12 @@ type ListOrganizationUnitsRequest struct {
 
 type ListOrganizationUnitsResponse struct {
 	Items []AdminOrganizationUnitResponse `json:"items"`
+}
+
+type ManagedAccountMutationRequest struct {
+	AccountID         string `path:"accountId"`
+	ManagementVersion int64  `json:"management_version"`
+	OperationID       string `json:"operation_id"`
 }
 
 type OrganizationContextResponse struct {
@@ -110,11 +214,16 @@ type PhoneLoginRequest struct {
 	VerificationCode string `json:"verification_code"`
 }
 
-type PromoteDoctorRequest struct {
-	AccountID       string `json:"account_id"`
-	DepartmentID    string `json:"department_id"`
-	OfflineVerified bool   `json:"offline_verified"`
-	OperationID     string `json:"operation_id"`
+type PromoteManagedDoctorRequest struct {
+	AccountID         string  `json:"account_id"`
+	DepartmentID      string  `json:"department_id"`
+	DisplayName       string  `json:"display_name"`
+	StaffNo           *string `json:"staff_no,optional"`
+	AvatarURL         *string `json:"avatar_url,optional"`
+	Description       *string `json:"description,optional"`
+	ManagementVersion int64   `json:"management_version"`
+	OfflineVerified   bool    `json:"offline_verified"`
+	OperationID       string  `json:"operation_id"`
 }
 
 type RefreshTokenRequest struct {
@@ -123,15 +232,6 @@ type RefreshTokenRequest struct {
 
 type RevokeTokenResponse struct {
 	Revoked bool `json:"revoked"`
-}
-
-type SearchAccountByPhoneRequest struct {
-	Phone string `json:"phone"`
-}
-
-type SearchAccountByPhoneResponse struct {
-	Identity CurrentIdentityResponse `json:"identity"`
-	Phone    PhoneBindingResponse    `json:"phone"`
 }
 
 type SendPhoneLoginCodeRequest struct {
@@ -152,6 +252,20 @@ type TokenResponse struct {
 	RefreshToken            string `json:"refresh_token"`
 	AccessExpiresInSeconds  int64  `json:"access_expires_in_seconds"`
 	RefreshExpiresInSeconds int64  `json:"refresh_expires_in_seconds"`
+}
+
+type UpdateAccountDisplayProfileRequest struct {
+	Nickname string `json:"nickname"`
+}
+
+type UpdateManagedDoctorRequest struct {
+	AccountID         string  `path:"accountId"`
+	DisplayName       *string `json:"display_name,optional"`
+	StaffNo           *string `json:"staff_no,optional"`
+	AvatarURL         *string `json:"avatar_url,optional"`
+	Description       *string `json:"description,optional"`
+	ManagementVersion int64   `json:"management_version"`
+	OperationID       string  `json:"operation_id"`
 }
 
 type UpdateOrganizationUnitRequest struct {

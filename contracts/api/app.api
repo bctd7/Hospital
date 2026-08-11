@@ -1,6 +1,7 @@
 syntax = "v1"
 
 import "identity-auth.api"
+import "identity-account-management.api"
 import "identity-organization.api"
 
 info (

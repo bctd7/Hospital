@@ -47,6 +47,7 @@ func main() {
 		identityv1.IdentityService_RevokeRefreshToken_FullMethodName,
 		identityv1.IdentityService_GetOrganizationContext_FullMethodName,
 		identityv1.IdentityService_ListDepartments_FullMethodName,
+		identityv1.IdentityService_ListDoctorsByDepartment_FullMethodName,
 	))
 	defer s.Stop()
 

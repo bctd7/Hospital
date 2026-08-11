@@ -19,26 +19,38 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	IdentityService_SendPhoneLoginCode_FullMethodName        = "/hospital.identity.v1.IdentityService/SendPhoneLoginCode"
-	IdentityService_PhoneLogin_FullMethodName                = "/hospital.identity.v1.IdentityService/PhoneLogin"
-	IdentityService_WeChatLogin_FullMethodName               = "/hospital.identity.v1.IdentityService/WeChatLogin"
-	IdentityService_SetMyPhone_FullMethodName                = "/hospital.identity.v1.IdentityService/SetMyPhone"
-	IdentityService_FindAccountByPhone_FullMethodName        = "/hospital.identity.v1.IdentityService/FindAccountByPhone"
-	IdentityService_PromoteToDepartmentDoctor_FullMethodName = "/hospital.identity.v1.IdentityService/PromoteToDepartmentDoctor"
-	IdentityService_GetAuthorizationContext_FullMethodName   = "/hospital.identity.v1.IdentityService/GetAuthorizationContext"
-	IdentityService_AssignRole_FullMethodName                = "/hospital.identity.v1.IdentityService/AssignRole"
-	IdentityService_ChangeStaffDepartment_FullMethodName     = "/hospital.identity.v1.IdentityService/ChangeStaffDepartment"
-	IdentityService_ChangeAccountStatus_FullMethodName       = "/hospital.identity.v1.IdentityService/ChangeAccountStatus"
-	IdentityService_RefreshAccessToken_FullMethodName        = "/hospital.identity.v1.IdentityService/RefreshAccessToken"
-	IdentityService_RevokeRefreshToken_FullMethodName        = "/hospital.identity.v1.IdentityService/RevokeRefreshToken"
-	IdentityService_GetOrganizationContext_FullMethodName    = "/hospital.identity.v1.IdentityService/GetOrganizationContext"
-	IdentityService_ListDepartments_FullMethodName           = "/hospital.identity.v1.IdentityService/ListDepartments"
-	IdentityService_ListOrganizationUnits_FullMethodName     = "/hospital.identity.v1.IdentityService/ListOrganizationUnits"
-	IdentityService_GetOrganizationUnit_FullMethodName       = "/hospital.identity.v1.IdentityService/GetOrganizationUnit"
-	IdentityService_CreateOrganizationUnit_FullMethodName    = "/hospital.identity.v1.IdentityService/CreateOrganizationUnit"
-	IdentityService_UpdateOrganizationUnit_FullMethodName    = "/hospital.identity.v1.IdentityService/UpdateOrganizationUnit"
-	IdentityService_DisableOrganizationUnit_FullMethodName   = "/hospital.identity.v1.IdentityService/DisableOrganizationUnit"
-	IdentityService_EnableOrganizationUnit_FullMethodName    = "/hospital.identity.v1.IdentityService/EnableOrganizationUnit"
+	IdentityService_SendPhoneLoginCode_FullMethodName            = "/hospital.identity.v1.IdentityService/SendPhoneLoginCode"
+	IdentityService_PhoneLogin_FullMethodName                    = "/hospital.identity.v1.IdentityService/PhoneLogin"
+	IdentityService_WeChatLogin_FullMethodName                   = "/hospital.identity.v1.IdentityService/WeChatLogin"
+	IdentityService_SetMyPhone_FullMethodName                    = "/hospital.identity.v1.IdentityService/SetMyPhone"
+	IdentityService_FindAccountByPhone_FullMethodName            = "/hospital.identity.v1.IdentityService/FindAccountByPhone"
+	IdentityService_PromoteToDepartmentDoctor_FullMethodName     = "/hospital.identity.v1.IdentityService/PromoteToDepartmentDoctor"
+	IdentityService_GetAuthorizationContext_FullMethodName       = "/hospital.identity.v1.IdentityService/GetAuthorizationContext"
+	IdentityService_AssignRole_FullMethodName                    = "/hospital.identity.v1.IdentityService/AssignRole"
+	IdentityService_ChangeStaffDepartment_FullMethodName         = "/hospital.identity.v1.IdentityService/ChangeStaffDepartment"
+	IdentityService_ChangeAccountStatus_FullMethodName           = "/hospital.identity.v1.IdentityService/ChangeAccountStatus"
+	IdentityService_RefreshAccessToken_FullMethodName            = "/hospital.identity.v1.IdentityService/RefreshAccessToken"
+	IdentityService_RevokeRefreshToken_FullMethodName            = "/hospital.identity.v1.IdentityService/RevokeRefreshToken"
+	IdentityService_GetAccountDisplayProfile_FullMethodName      = "/hospital.identity.v1.IdentityService/GetAccountDisplayProfile"
+	IdentityService_UpdateAccountDisplayProfile_FullMethodName   = "/hospital.identity.v1.IdentityService/UpdateAccountDisplayProfile"
+	IdentityService_GetOrganizationContext_FullMethodName        = "/hospital.identity.v1.IdentityService/GetOrganizationContext"
+	IdentityService_ListDepartments_FullMethodName               = "/hospital.identity.v1.IdentityService/ListDepartments"
+	IdentityService_ListDoctorsByDepartment_FullMethodName       = "/hospital.identity.v1.IdentityService/ListDoctorsByDepartment"
+	IdentityService_ListOrganizationUnits_FullMethodName         = "/hospital.identity.v1.IdentityService/ListOrganizationUnits"
+	IdentityService_GetOrganizationUnit_FullMethodName           = "/hospital.identity.v1.IdentityService/GetOrganizationUnit"
+	IdentityService_CreateOrganizationUnit_FullMethodName        = "/hospital.identity.v1.IdentityService/CreateOrganizationUnit"
+	IdentityService_UpdateOrganizationUnit_FullMethodName        = "/hospital.identity.v1.IdentityService/UpdateOrganizationUnit"
+	IdentityService_DisableOrganizationUnit_FullMethodName       = "/hospital.identity.v1.IdentityService/DisableOrganizationUnit"
+	IdentityService_EnableOrganizationUnit_FullMethodName        = "/hospital.identity.v1.IdentityService/EnableOrganizationUnit"
+	IdentityService_ListAdminAccounts_FullMethodName             = "/hospital.identity.v1.IdentityService/ListAdminAccounts"
+	IdentityService_GetAdminAccount_FullMethodName               = "/hospital.identity.v1.IdentityService/GetAdminAccount"
+	IdentityService_SearchAdminAccountByPhone_FullMethodName     = "/hospital.identity.v1.IdentityService/SearchAdminAccountByPhone"
+	IdentityService_PromoteManagedDoctor_FullMethodName          = "/hospital.identity.v1.IdentityService/PromoteManagedDoctor"
+	IdentityService_UpdateManagedDoctor_FullMethodName           = "/hospital.identity.v1.IdentityService/UpdateManagedDoctor"
+	IdentityService_ChangeManagedDoctorDepartment_FullMethodName = "/hospital.identity.v1.IdentityService/ChangeManagedDoctorDepartment"
+	IdentityService_RevokeManagedDoctor_FullMethodName           = "/hospital.identity.v1.IdentityService/RevokeManagedDoctor"
+	IdentityService_DisableManagedAccount_FullMethodName         = "/hospital.identity.v1.IdentityService/DisableManagedAccount"
+	IdentityService_EnableManagedAccount_FullMethodName          = "/hospital.identity.v1.IdentityService/EnableManagedAccount"
 )
 
 // IdentityServiceClient is the client API for IdentityService service.
@@ -57,10 +69,13 @@ type IdentityServiceClient interface {
 	ChangeAccountStatus(ctx context.Context, in *ChangeAccountStatusRequest, opts ...grpc.CallOption) (*AuthorizationContext, error)
 	RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*TokenPair, error)
 	RevokeRefreshToken(ctx context.Context, in *RevokeRefreshTokenRequest, opts ...grpc.CallOption) (*RevokeRefreshTokenResponse, error)
+	GetAccountDisplayProfile(ctx context.Context, in *GetAccountDisplayProfileRequest, opts ...grpc.CallOption) (*AccountDisplayProfile, error)
+	UpdateAccountDisplayProfile(ctx context.Context, in *UpdateAccountDisplayProfileRequest, opts ...grpc.CallOption) (*AccountDisplayProfile, error)
 	// Public organization directory. HTTP gateways may expose these methods
 	// without an access token, but must still apply request rate limits.
 	GetOrganizationContext(ctx context.Context, in *GetOrganizationContextRequest, opts ...grpc.CallOption) (*OrganizationContext, error)
 	ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...grpc.CallOption) (*ListDepartmentsResponse, error)
+	ListDoctorsByDepartment(ctx context.Context, in *ListDoctorsByDepartmentRequest, opts ...grpc.CallOption) (*ListDoctorsByDepartmentResponse, error)
 	// Administrator organization management.
 	ListOrganizationUnits(ctx context.Context, in *ListOrganizationUnitsRequest, opts ...grpc.CallOption) (*ListOrganizationUnitsResponse, error)
 	GetOrganizationUnit(ctx context.Context, in *GetOrganizationUnitRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
@@ -68,6 +83,16 @@ type IdentityServiceClient interface {
 	UpdateOrganizationUnit(ctx context.Context, in *UpdateOrganizationUnitRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
 	DisableOrganizationUnit(ctx context.Context, in *ChangeOrganizationUnitStatusRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
 	EnableOrganizationUnit(ctx context.Context, in *ChangeOrganizationUnitStatusRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
+	// Administrator account and doctor management.
+	ListAdminAccounts(ctx context.Context, in *ListAdminAccountsRequest, opts ...grpc.CallOption) (*ListAdminAccountsResponse, error)
+	GetAdminAccount(ctx context.Context, in *GetAdminAccountRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error)
+	SearchAdminAccountByPhone(ctx context.Context, in *SearchAdminAccountByPhoneRequest, opts ...grpc.CallOption) (*SearchAdminAccountByPhoneResponse, error)
+	PromoteManagedDoctor(ctx context.Context, in *PromoteManagedDoctorRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error)
+	UpdateManagedDoctor(ctx context.Context, in *UpdateManagedDoctorRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error)
+	ChangeManagedDoctorDepartment(ctx context.Context, in *ChangeManagedDoctorDepartmentRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error)
+	RevokeManagedDoctor(ctx context.Context, in *ManagedAccountMutationRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error)
+	DisableManagedAccount(ctx context.Context, in *ManagedAccountMutationRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error)
+	EnableManagedAccount(ctx context.Context, in *ManagedAccountMutationRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error)
 }
 
 type identityServiceClient struct {
@@ -198,6 +223,26 @@ func (c *identityServiceClient) RevokeRefreshToken(ctx context.Context, in *Revo
 	return out, nil
 }
 
+func (c *identityServiceClient) GetAccountDisplayProfile(ctx context.Context, in *GetAccountDisplayProfileRequest, opts ...grpc.CallOption) (*AccountDisplayProfile, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AccountDisplayProfile)
+	err := c.cc.Invoke(ctx, IdentityService_GetAccountDisplayProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) UpdateAccountDisplayProfile(ctx context.Context, in *UpdateAccountDisplayProfileRequest, opts ...grpc.CallOption) (*AccountDisplayProfile, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AccountDisplayProfile)
+	err := c.cc.Invoke(ctx, IdentityService_UpdateAccountDisplayProfile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *identityServiceClient) GetOrganizationContext(ctx context.Context, in *GetOrganizationContextRequest, opts ...grpc.CallOption) (*OrganizationContext, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(OrganizationContext)
@@ -212,6 +257,16 @@ func (c *identityServiceClient) ListDepartments(ctx context.Context, in *ListDep
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ListDepartmentsResponse)
 	err := c.cc.Invoke(ctx, IdentityService_ListDepartments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) ListDoctorsByDepartment(ctx context.Context, in *ListDoctorsByDepartmentRequest, opts ...grpc.CallOption) (*ListDoctorsByDepartmentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListDoctorsByDepartmentResponse)
+	err := c.cc.Invoke(ctx, IdentityService_ListDoctorsByDepartment_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -278,6 +333,96 @@ func (c *identityServiceClient) EnableOrganizationUnit(ctx context.Context, in *
 	return out, nil
 }
 
+func (c *identityServiceClient) ListAdminAccounts(ctx context.Context, in *ListAdminAccountsRequest, opts ...grpc.CallOption) (*ListAdminAccountsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListAdminAccountsResponse)
+	err := c.cc.Invoke(ctx, IdentityService_ListAdminAccounts_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) GetAdminAccount(ctx context.Context, in *GetAdminAccountRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminAccountDetail)
+	err := c.cc.Invoke(ctx, IdentityService_GetAdminAccount_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) SearchAdminAccountByPhone(ctx context.Context, in *SearchAdminAccountByPhoneRequest, opts ...grpc.CallOption) (*SearchAdminAccountByPhoneResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SearchAdminAccountByPhoneResponse)
+	err := c.cc.Invoke(ctx, IdentityService_SearchAdminAccountByPhone_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) PromoteManagedDoctor(ctx context.Context, in *PromoteManagedDoctorRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminAccountDetail)
+	err := c.cc.Invoke(ctx, IdentityService_PromoteManagedDoctor_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) UpdateManagedDoctor(ctx context.Context, in *UpdateManagedDoctorRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminAccountDetail)
+	err := c.cc.Invoke(ctx, IdentityService_UpdateManagedDoctor_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) ChangeManagedDoctorDepartment(ctx context.Context, in *ChangeManagedDoctorDepartmentRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminAccountDetail)
+	err := c.cc.Invoke(ctx, IdentityService_ChangeManagedDoctorDepartment_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) RevokeManagedDoctor(ctx context.Context, in *ManagedAccountMutationRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminAccountDetail)
+	err := c.cc.Invoke(ctx, IdentityService_RevokeManagedDoctor_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) DisableManagedAccount(ctx context.Context, in *ManagedAccountMutationRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminAccountDetail)
+	err := c.cc.Invoke(ctx, IdentityService_DisableManagedAccount_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *identityServiceClient) EnableManagedAccount(ctx context.Context, in *ManagedAccountMutationRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminAccountDetail)
+	err := c.cc.Invoke(ctx, IdentityService_EnableManagedAccount_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // IdentityServiceServer is the server API for IdentityService service.
 // All implementations must embed UnimplementedIdentityServiceServer
 // for forward compatibility.
@@ -294,10 +439,13 @@ type IdentityServiceServer interface {
 	ChangeAccountStatus(context.Context, *ChangeAccountStatusRequest) (*AuthorizationContext, error)
 	RefreshAccessToken(context.Context, *RefreshAccessTokenRequest) (*TokenPair, error)
 	RevokeRefreshToken(context.Context, *RevokeRefreshTokenRequest) (*RevokeRefreshTokenResponse, error)
+	GetAccountDisplayProfile(context.Context, *GetAccountDisplayProfileRequest) (*AccountDisplayProfile, error)
+	UpdateAccountDisplayProfile(context.Context, *UpdateAccountDisplayProfileRequest) (*AccountDisplayProfile, error)
 	// Public organization directory. HTTP gateways may expose these methods
 	// without an access token, but must still apply request rate limits.
 	GetOrganizationContext(context.Context, *GetOrganizationContextRequest) (*OrganizationContext, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
+	ListDoctorsByDepartment(context.Context, *ListDoctorsByDepartmentRequest) (*ListDoctorsByDepartmentResponse, error)
 	// Administrator organization management.
 	ListOrganizationUnits(context.Context, *ListOrganizationUnitsRequest) (*ListOrganizationUnitsResponse, error)
 	GetOrganizationUnit(context.Context, *GetOrganizationUnitRequest) (*AdminOrganizationUnit, error)
@@ -305,6 +453,16 @@ type IdentityServiceServer interface {
 	UpdateOrganizationUnit(context.Context, *UpdateOrganizationUnitRequest) (*AdminOrganizationUnit, error)
 	DisableOrganizationUnit(context.Context, *ChangeOrganizationUnitStatusRequest) (*AdminOrganizationUnit, error)
 	EnableOrganizationUnit(context.Context, *ChangeOrganizationUnitStatusRequest) (*AdminOrganizationUnit, error)
+	// Administrator account and doctor management.
+	ListAdminAccounts(context.Context, *ListAdminAccountsRequest) (*ListAdminAccountsResponse, error)
+	GetAdminAccount(context.Context, *GetAdminAccountRequest) (*AdminAccountDetail, error)
+	SearchAdminAccountByPhone(context.Context, *SearchAdminAccountByPhoneRequest) (*SearchAdminAccountByPhoneResponse, error)
+	PromoteManagedDoctor(context.Context, *PromoteManagedDoctorRequest) (*AdminAccountDetail, error)
+	UpdateManagedDoctor(context.Context, *UpdateManagedDoctorRequest) (*AdminAccountDetail, error)
+	ChangeManagedDoctorDepartment(context.Context, *ChangeManagedDoctorDepartmentRequest) (*AdminAccountDetail, error)
+	RevokeManagedDoctor(context.Context, *ManagedAccountMutationRequest) (*AdminAccountDetail, error)
+	DisableManagedAccount(context.Context, *ManagedAccountMutationRequest) (*AdminAccountDetail, error)
+	EnableManagedAccount(context.Context, *ManagedAccountMutationRequest) (*AdminAccountDetail, error)
 	mustEmbedUnimplementedIdentityServiceServer()
 }
 
@@ -351,11 +509,20 @@ func (UnimplementedIdentityServiceServer) RefreshAccessToken(context.Context, *R
 func (UnimplementedIdentityServiceServer) RevokeRefreshToken(context.Context, *RevokeRefreshTokenRequest) (*RevokeRefreshTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RevokeRefreshToken not implemented")
 }
+func (UnimplementedIdentityServiceServer) GetAccountDisplayProfile(context.Context, *GetAccountDisplayProfileRequest) (*AccountDisplayProfile, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAccountDisplayProfile not implemented")
+}
+func (UnimplementedIdentityServiceServer) UpdateAccountDisplayProfile(context.Context, *UpdateAccountDisplayProfileRequest) (*AccountDisplayProfile, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateAccountDisplayProfile not implemented")
+}
 func (UnimplementedIdentityServiceServer) GetOrganizationContext(context.Context, *GetOrganizationContextRequest) (*OrganizationContext, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOrganizationContext not implemented")
 }
 func (UnimplementedIdentityServiceServer) ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListDepartments not implemented")
+}
+func (UnimplementedIdentityServiceServer) ListDoctorsByDepartment(context.Context, *ListDoctorsByDepartmentRequest) (*ListDoctorsByDepartmentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListDoctorsByDepartment not implemented")
 }
 func (UnimplementedIdentityServiceServer) ListOrganizationUnits(context.Context, *ListOrganizationUnitsRequest) (*ListOrganizationUnitsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListOrganizationUnits not implemented")
@@ -374,6 +541,33 @@ func (UnimplementedIdentityServiceServer) DisableOrganizationUnit(context.Contex
 }
 func (UnimplementedIdentityServiceServer) EnableOrganizationUnit(context.Context, *ChangeOrganizationUnitStatusRequest) (*AdminOrganizationUnit, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EnableOrganizationUnit not implemented")
+}
+func (UnimplementedIdentityServiceServer) ListAdminAccounts(context.Context, *ListAdminAccountsRequest) (*ListAdminAccountsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListAdminAccounts not implemented")
+}
+func (UnimplementedIdentityServiceServer) GetAdminAccount(context.Context, *GetAdminAccountRequest) (*AdminAccountDetail, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAdminAccount not implemented")
+}
+func (UnimplementedIdentityServiceServer) SearchAdminAccountByPhone(context.Context, *SearchAdminAccountByPhoneRequest) (*SearchAdminAccountByPhoneResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchAdminAccountByPhone not implemented")
+}
+func (UnimplementedIdentityServiceServer) PromoteManagedDoctor(context.Context, *PromoteManagedDoctorRequest) (*AdminAccountDetail, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PromoteManagedDoctor not implemented")
+}
+func (UnimplementedIdentityServiceServer) UpdateManagedDoctor(context.Context, *UpdateManagedDoctorRequest) (*AdminAccountDetail, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateManagedDoctor not implemented")
+}
+func (UnimplementedIdentityServiceServer) ChangeManagedDoctorDepartment(context.Context, *ChangeManagedDoctorDepartmentRequest) (*AdminAccountDetail, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChangeManagedDoctorDepartment not implemented")
+}
+func (UnimplementedIdentityServiceServer) RevokeManagedDoctor(context.Context, *ManagedAccountMutationRequest) (*AdminAccountDetail, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevokeManagedDoctor not implemented")
+}
+func (UnimplementedIdentityServiceServer) DisableManagedAccount(context.Context, *ManagedAccountMutationRequest) (*AdminAccountDetail, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DisableManagedAccount not implemented")
+}
+func (UnimplementedIdentityServiceServer) EnableManagedAccount(context.Context, *ManagedAccountMutationRequest) (*AdminAccountDetail, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EnableManagedAccount not implemented")
 }
 func (UnimplementedIdentityServiceServer) mustEmbedUnimplementedIdentityServiceServer() {}
 func (UnimplementedIdentityServiceServer) testEmbeddedByValue()                         {}
@@ -612,6 +806,42 @@ func _IdentityService_RevokeRefreshToken_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _IdentityService_GetAccountDisplayProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAccountDisplayProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).GetAccountDisplayProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_GetAccountDisplayProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).GetAccountDisplayProfile(ctx, req.(*GetAccountDisplayProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_UpdateAccountDisplayProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateAccountDisplayProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).UpdateAccountDisplayProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_UpdateAccountDisplayProfile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).UpdateAccountDisplayProfile(ctx, req.(*UpdateAccountDisplayProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _IdentityService_GetOrganizationContext_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetOrganizationContextRequest)
 	if err := dec(in); err != nil {
@@ -644,6 +874,24 @@ func _IdentityService_ListDepartments_Handler(srv interface{}, ctx context.Conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(IdentityServiceServer).ListDepartments(ctx, req.(*ListDepartmentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_ListDoctorsByDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListDoctorsByDepartmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).ListDoctorsByDepartment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_ListDoctorsByDepartment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).ListDoctorsByDepartment(ctx, req.(*ListDoctorsByDepartmentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -756,6 +1004,168 @@ func _IdentityService_EnableOrganizationUnit_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _IdentityService_ListAdminAccounts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListAdminAccountsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).ListAdminAccounts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_ListAdminAccounts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).ListAdminAccounts(ctx, req.(*ListAdminAccountsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_GetAdminAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAdminAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).GetAdminAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_GetAdminAccount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).GetAdminAccount(ctx, req.(*GetAdminAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_SearchAdminAccountByPhone_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchAdminAccountByPhoneRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).SearchAdminAccountByPhone(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_SearchAdminAccountByPhone_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).SearchAdminAccountByPhone(ctx, req.(*SearchAdminAccountByPhoneRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_PromoteManagedDoctor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PromoteManagedDoctorRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).PromoteManagedDoctor(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_PromoteManagedDoctor_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).PromoteManagedDoctor(ctx, req.(*PromoteManagedDoctorRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_UpdateManagedDoctor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateManagedDoctorRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).UpdateManagedDoctor(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_UpdateManagedDoctor_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).UpdateManagedDoctor(ctx, req.(*UpdateManagedDoctorRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_ChangeManagedDoctorDepartment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChangeManagedDoctorDepartmentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).ChangeManagedDoctorDepartment(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_ChangeManagedDoctorDepartment_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).ChangeManagedDoctorDepartment(ctx, req.(*ChangeManagedDoctorDepartmentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_RevokeManagedDoctor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ManagedAccountMutationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).RevokeManagedDoctor(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_RevokeManagedDoctor_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).RevokeManagedDoctor(ctx, req.(*ManagedAccountMutationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_DisableManagedAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ManagedAccountMutationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).DisableManagedAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_DisableManagedAccount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).DisableManagedAccount(ctx, req.(*ManagedAccountMutationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IdentityService_EnableManagedAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ManagedAccountMutationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IdentityServiceServer).EnableManagedAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IdentityService_EnableManagedAccount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IdentityServiceServer).EnableManagedAccount(ctx, req.(*ManagedAccountMutationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // IdentityService_ServiceDesc is the grpc.ServiceDesc for IdentityService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -812,12 +1222,24 @@ var IdentityService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _IdentityService_RevokeRefreshToken_Handler,
 		},
 		{
+			MethodName: "GetAccountDisplayProfile",
+			Handler:    _IdentityService_GetAccountDisplayProfile_Handler,
+		},
+		{
+			MethodName: "UpdateAccountDisplayProfile",
+			Handler:    _IdentityService_UpdateAccountDisplayProfile_Handler,
+		},
+		{
 			MethodName: "GetOrganizationContext",
 			Handler:    _IdentityService_GetOrganizationContext_Handler,
 		},
 		{
 			MethodName: "ListDepartments",
 			Handler:    _IdentityService_ListDepartments_Handler,
+		},
+		{
+			MethodName: "ListDoctorsByDepartment",
+			Handler:    _IdentityService_ListDoctorsByDepartment_Handler,
 		},
 		{
 			MethodName: "ListOrganizationUnits",
@@ -842,6 +1264,42 @@ var IdentityService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "EnableOrganizationUnit",
 			Handler:    _IdentityService_EnableOrganizationUnit_Handler,
+		},
+		{
+			MethodName: "ListAdminAccounts",
+			Handler:    _IdentityService_ListAdminAccounts_Handler,
+		},
+		{
+			MethodName: "GetAdminAccount",
+			Handler:    _IdentityService_GetAdminAccount_Handler,
+		},
+		{
+			MethodName: "SearchAdminAccountByPhone",
+			Handler:    _IdentityService_SearchAdminAccountByPhone_Handler,
+		},
+		{
+			MethodName: "PromoteManagedDoctor",
+			Handler:    _IdentityService_PromoteManagedDoctor_Handler,
+		},
+		{
+			MethodName: "UpdateManagedDoctor",
+			Handler:    _IdentityService_UpdateManagedDoctor_Handler,
+		},
+		{
+			MethodName: "ChangeManagedDoctorDepartment",
+			Handler:    _IdentityService_ChangeManagedDoctorDepartment_Handler,
+		},
+		{
+			MethodName: "RevokeManagedDoctor",
+			Handler:    _IdentityService_RevokeManagedDoctor_Handler,
+		},
+		{
+			MethodName: "DisableManagedAccount",
+			Handler:    _IdentityService_DisableManagedAccount_Handler,
+		},
+		{
+			MethodName: "EnableManagedAccount",
+			Handler:    _IdentityService_EnableManagedAccount_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

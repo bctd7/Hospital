@@ -1,5 +1,5 @@
 // Code scaffolded by goctl. Safe to edit.
-// goctl 1.10.1
+// goctl 1.10.2
 
 package identityadmin
 
@@ -12,16 +12,16 @@ import (
 	"hospital/service/app/api/internal/types"
 )
 
-func PromoteDoctorHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func RevokeManagedDoctorHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.PromoteDoctorRequest
+		var req types.ManagedAccountMutationRequest
 		if err := httpx.Parse(r, &req); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
 
-		l := identityadmin.NewPromoteDoctorLogic(r.Context(), svcCtx)
-		resp, err := l.PromoteDoctor(&req)
+		l := identityadmin.NewRevokeManagedDoctorLogic(r.Context(), svcCtx)
+		resp, err := l.RevokeManagedDoctor(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

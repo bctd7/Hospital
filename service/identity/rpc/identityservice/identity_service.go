@@ -14,38 +14,54 @@ import (
 )
 
 type (
-	AccountLookup                       = identityv1.AccountLookup
-	AdminOrganizationUnit               = identityv1.AdminOrganizationUnit
-	AssignRoleRequest                   = identityv1.AssignRoleRequest
-	AuthorizationContext                = identityv1.AuthorizationContext
-	CampusSummary                       = identityv1.CampusSummary
-	ChangeAccountStatusRequest          = identityv1.ChangeAccountStatusRequest
-	ChangeOrganizationUnitStatusRequest = identityv1.ChangeOrganizationUnitStatusRequest
-	ChangeStaffDepartmentRequest        = identityv1.ChangeStaffDepartmentRequest
-	CreateOrganizationUnitRequest       = identityv1.CreateOrganizationUnitRequest
-	DepartmentSummary                   = identityv1.DepartmentSummary
-	FindAccountByPhoneRequest           = identityv1.FindAccountByPhoneRequest
-	GetAuthorizationContextRequest      = identityv1.GetAuthorizationContextRequest
-	GetOrganizationContextRequest       = identityv1.GetOrganizationContextRequest
-	GetOrganizationUnitRequest          = identityv1.GetOrganizationUnitRequest
-	HospitalSummary                     = identityv1.HospitalSummary
-	ListDepartmentsRequest              = identityv1.ListDepartmentsRequest
-	ListDepartmentsResponse             = identityv1.ListDepartmentsResponse
-	ListOrganizationUnitsRequest        = identityv1.ListOrganizationUnitsRequest
-	ListOrganizationUnitsResponse       = identityv1.ListOrganizationUnitsResponse
-	OrganizationContext                 = identityv1.OrganizationContext
-	PhoneBinding                        = identityv1.PhoneBinding
-	PhoneLoginRequest                   = identityv1.PhoneLoginRequest
-	PromoteToDepartmentDoctorRequest    = identityv1.PromoteToDepartmentDoctorRequest
-	RefreshAccessTokenRequest           = identityv1.RefreshAccessTokenRequest
-	RevokeRefreshTokenRequest           = identityv1.RevokeRefreshTokenRequest
-	RevokeRefreshTokenResponse          = identityv1.RevokeRefreshTokenResponse
-	SendPhoneLoginCodeRequest           = identityv1.SendPhoneLoginCodeRequest
-	SendPhoneLoginCodeResponse          = identityv1.SendPhoneLoginCodeResponse
-	SetMyPhoneRequest                   = identityv1.SetMyPhoneRequest
-	TokenPair                           = identityv1.TokenPair
-	UpdateOrganizationUnitRequest       = identityv1.UpdateOrganizationUnitRequest
-	WeChatLoginRequest                  = identityv1.WeChatLoginRequest
+	AccountLookup                        = identityv1.AccountLookup
+	AccountDisplayProfile                = identityv1.AccountDisplayProfile
+	AdminAccountDetail                   = identityv1.AdminAccountDetail
+	AdminAccountSummary                  = identityv1.AdminAccountSummary
+	AdminOrganizationUnit                = identityv1.AdminOrganizationUnit
+	AssignRoleRequest                    = identityv1.AssignRoleRequest
+	AuthorizationContext                 = identityv1.AuthorizationContext
+	CampusSummary                        = identityv1.CampusSummary
+	ChangeAccountStatusRequest           = identityv1.ChangeAccountStatusRequest
+	ChangeOrganizationUnitStatusRequest  = identityv1.ChangeOrganizationUnitStatusRequest
+	ChangeStaffDepartmentRequest         = identityv1.ChangeStaffDepartmentRequest
+	ChangeManagedDoctorDepartmentRequest = identityv1.ChangeManagedDoctorDepartmentRequest
+	CreateOrganizationUnitRequest        = identityv1.CreateOrganizationUnitRequest
+	DepartmentSummary                    = identityv1.DepartmentSummary
+	FindAccountByPhoneRequest            = identityv1.FindAccountByPhoneRequest
+	GetAuthorizationContextRequest       = identityv1.GetAuthorizationContextRequest
+	GetAccountDisplayProfileRequest      = identityv1.GetAccountDisplayProfileRequest
+	GetAdminAccountRequest               = identityv1.GetAdminAccountRequest
+	GetOrganizationContextRequest        = identityv1.GetOrganizationContextRequest
+	GetOrganizationUnitRequest           = identityv1.GetOrganizationUnitRequest
+	HospitalSummary                      = identityv1.HospitalSummary
+	ListDepartmentsRequest               = identityv1.ListDepartmentsRequest
+	ListDepartmentsResponse              = identityv1.ListDepartmentsResponse
+	ListDoctorsByDepartmentRequest       = identityv1.ListDoctorsByDepartmentRequest
+	ListDoctorsByDepartmentResponse      = identityv1.ListDoctorsByDepartmentResponse
+	ListAdminAccountsRequest             = identityv1.ListAdminAccountsRequest
+	ListAdminAccountsResponse            = identityv1.ListAdminAccountsResponse
+	ListOrganizationUnitsRequest         = identityv1.ListOrganizationUnitsRequest
+	ListOrganizationUnitsResponse        = identityv1.ListOrganizationUnitsResponse
+	OrganizationContext                  = identityv1.OrganizationContext
+	PhoneBinding                         = identityv1.PhoneBinding
+	PhoneLoginRequest                    = identityv1.PhoneLoginRequest
+	PromoteToDepartmentDoctorRequest     = identityv1.PromoteToDepartmentDoctorRequest
+	PromoteManagedDoctorRequest          = identityv1.PromoteManagedDoctorRequest
+	RefreshAccessTokenRequest            = identityv1.RefreshAccessTokenRequest
+	RevokeRefreshTokenRequest            = identityv1.RevokeRefreshTokenRequest
+	RevokeRefreshTokenResponse           = identityv1.RevokeRefreshTokenResponse
+	SendPhoneLoginCodeRequest            = identityv1.SendPhoneLoginCodeRequest
+	SendPhoneLoginCodeResponse           = identityv1.SendPhoneLoginCodeResponse
+	SetMyPhoneRequest                    = identityv1.SetMyPhoneRequest
+	SearchAdminAccountByPhoneRequest     = identityv1.SearchAdminAccountByPhoneRequest
+	SearchAdminAccountByPhoneResponse    = identityv1.SearchAdminAccountByPhoneResponse
+	ManagedAccountMutationRequest        = identityv1.ManagedAccountMutationRequest
+	TokenPair                            = identityv1.TokenPair
+	UpdateOrganizationUnitRequest        = identityv1.UpdateOrganizationUnitRequest
+	UpdateAccountDisplayProfileRequest   = identityv1.UpdateAccountDisplayProfileRequest
+	UpdateManagedDoctorRequest           = identityv1.UpdateManagedDoctorRequest
+	WeChatLoginRequest                   = identityv1.WeChatLoginRequest
 
 	IdentityService interface {
 		SendPhoneLoginCode(ctx context.Context, in *SendPhoneLoginCodeRequest, opts ...grpc.CallOption) (*SendPhoneLoginCodeResponse, error)
@@ -60,9 +76,12 @@ type (
 		ChangeAccountStatus(ctx context.Context, in *ChangeAccountStatusRequest, opts ...grpc.CallOption) (*AuthorizationContext, error)
 		RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*TokenPair, error)
 		RevokeRefreshToken(ctx context.Context, in *RevokeRefreshTokenRequest, opts ...grpc.CallOption) (*RevokeRefreshTokenResponse, error)
+		GetAccountDisplayProfile(ctx context.Context, in *GetAccountDisplayProfileRequest, opts ...grpc.CallOption) (*AccountDisplayProfile, error)
+		UpdateAccountDisplayProfile(ctx context.Context, in *UpdateAccountDisplayProfileRequest, opts ...grpc.CallOption) (*AccountDisplayProfile, error)
 		// Public organization directory. HTTP gateways may expose these methods
 		GetOrganizationContext(ctx context.Context, in *GetOrganizationContextRequest, opts ...grpc.CallOption) (*OrganizationContext, error)
 		ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...grpc.CallOption) (*ListDepartmentsResponse, error)
+		ListDoctorsByDepartment(ctx context.Context, in *ListDoctorsByDepartmentRequest, opts ...grpc.CallOption) (*ListDoctorsByDepartmentResponse, error)
 		// Administrator organization management.
 		ListOrganizationUnits(ctx context.Context, in *ListOrganizationUnitsRequest, opts ...grpc.CallOption) (*ListOrganizationUnitsResponse, error)
 		GetOrganizationUnit(ctx context.Context, in *GetOrganizationUnitRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
@@ -70,6 +89,15 @@ type (
 		UpdateOrganizationUnit(ctx context.Context, in *UpdateOrganizationUnitRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
 		DisableOrganizationUnit(ctx context.Context, in *ChangeOrganizationUnitStatusRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
 		EnableOrganizationUnit(ctx context.Context, in *ChangeOrganizationUnitStatusRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
+		ListAdminAccounts(ctx context.Context, in *ListAdminAccountsRequest, opts ...grpc.CallOption) (*ListAdminAccountsResponse, error)
+		GetAdminAccount(ctx context.Context, in *GetAdminAccountRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error)
+		SearchAdminAccountByPhone(ctx context.Context, in *SearchAdminAccountByPhoneRequest, opts ...grpc.CallOption) (*SearchAdminAccountByPhoneResponse, error)
+		PromoteManagedDoctor(ctx context.Context, in *PromoteManagedDoctorRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error)
+		UpdateManagedDoctor(ctx context.Context, in *UpdateManagedDoctorRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error)
+		ChangeManagedDoctorDepartment(ctx context.Context, in *ChangeManagedDoctorDepartmentRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error)
+		RevokeManagedDoctor(ctx context.Context, in *ManagedAccountMutationRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error)
+		DisableManagedAccount(ctx context.Context, in *ManagedAccountMutationRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error)
+		EnableManagedAccount(ctx context.Context, in *ManagedAccountMutationRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error)
 	}
 
 	defaultIdentityService struct {
@@ -143,6 +171,16 @@ func (m *defaultIdentityService) RevokeRefreshToken(ctx context.Context, in *Rev
 	return client.RevokeRefreshToken(ctx, in, opts...)
 }
 
+func (m *defaultIdentityService) GetAccountDisplayProfile(ctx context.Context, in *GetAccountDisplayProfileRequest, opts ...grpc.CallOption) (*AccountDisplayProfile, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.GetAccountDisplayProfile(ctx, in, opts...)
+}
+
+func (m *defaultIdentityService) UpdateAccountDisplayProfile(ctx context.Context, in *UpdateAccountDisplayProfileRequest, opts ...grpc.CallOption) (*AccountDisplayProfile, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.UpdateAccountDisplayProfile(ctx, in, opts...)
+}
+
 // Public organization directory. HTTP gateways may expose these methods
 func (m *defaultIdentityService) GetOrganizationContext(ctx context.Context, in *GetOrganizationContextRequest, opts ...grpc.CallOption) (*OrganizationContext, error) {
 	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
@@ -152,6 +190,11 @@ func (m *defaultIdentityService) GetOrganizationContext(ctx context.Context, in 
 func (m *defaultIdentityService) ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...grpc.CallOption) (*ListDepartmentsResponse, error) {
 	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
 	return client.ListDepartments(ctx, in, opts...)
+}
+
+func (m *defaultIdentityService) ListDoctorsByDepartment(ctx context.Context, in *ListDoctorsByDepartmentRequest, opts ...grpc.CallOption) (*ListDoctorsByDepartmentResponse, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.ListDoctorsByDepartment(ctx, in, opts...)
 }
 
 // Administrator organization management.
@@ -183,4 +226,49 @@ func (m *defaultIdentityService) DisableOrganizationUnit(ctx context.Context, in
 func (m *defaultIdentityService) EnableOrganizationUnit(ctx context.Context, in *ChangeOrganizationUnitStatusRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error) {
 	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
 	return client.EnableOrganizationUnit(ctx, in, opts...)
+}
+
+func (m *defaultIdentityService) ListAdminAccounts(ctx context.Context, in *ListAdminAccountsRequest, opts ...grpc.CallOption) (*ListAdminAccountsResponse, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.ListAdminAccounts(ctx, in, opts...)
+}
+
+func (m *defaultIdentityService) GetAdminAccount(ctx context.Context, in *GetAdminAccountRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.GetAdminAccount(ctx, in, opts...)
+}
+
+func (m *defaultIdentityService) SearchAdminAccountByPhone(ctx context.Context, in *SearchAdminAccountByPhoneRequest, opts ...grpc.CallOption) (*SearchAdminAccountByPhoneResponse, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.SearchAdminAccountByPhone(ctx, in, opts...)
+}
+
+func (m *defaultIdentityService) PromoteManagedDoctor(ctx context.Context, in *PromoteManagedDoctorRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.PromoteManagedDoctor(ctx, in, opts...)
+}
+
+func (m *defaultIdentityService) UpdateManagedDoctor(ctx context.Context, in *UpdateManagedDoctorRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.UpdateManagedDoctor(ctx, in, opts...)
+}
+
+func (m *defaultIdentityService) ChangeManagedDoctorDepartment(ctx context.Context, in *ChangeManagedDoctorDepartmentRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.ChangeManagedDoctorDepartment(ctx, in, opts...)
+}
+
+func (m *defaultIdentityService) RevokeManagedDoctor(ctx context.Context, in *ManagedAccountMutationRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.RevokeManagedDoctor(ctx, in, opts...)
+}
+
+func (m *defaultIdentityService) DisableManagedAccount(ctx context.Context, in *ManagedAccountMutationRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.DisableManagedAccount(ctx, in, opts...)
+}
+
+func (m *defaultIdentityService) EnableManagedAccount(ctx context.Context, in *ManagedAccountMutationRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error) {
+	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
+	return client.EnableManagedAccount(ctx, in, opts...)
 }

@@ -151,7 +151,8 @@ JOIN identity_roles r
   ON r.id = ar.role_id
  AND r.code = 'department_doctor'
  AND r.status = 'active'
-WHERE sp.department_id = ?`, departmentID).Scan(&count)
+WHERE sp.department_id = ?
+  AND sp.staff_status = 'active'`, departmentID).Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("count active department doctors: %w", err)
 	}

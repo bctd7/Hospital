@@ -8,6 +8,7 @@ import (
 
 	auth "hospital/service/app/api/internal/handler/auth"
 	identityadmin "hospital/service/app/api/internal/handler/identityadmin"
+	identityprofile "hospital/service/app/api/internal/handler/identityprofile"
 	organizationadmin "hospital/service/app/api/internal/handler/organizationadmin"
 	organizationdirectory "hospital/service/app/api/internal/handler/organizationdirectory"
 	system "hospital/service/app/api/internal/handler/system"
@@ -78,14 +79,68 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Middleware{serverCtx.AccessToken},
 			[]rest.Route{
 				{
+					Method:  http.MethodGet,
+					Path:    "/admin/identity/accounts",
+					Handler: identityadmin.ListAdminAccountsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/admin/identity/accounts/:accountId",
+					Handler: identityadmin.GetAdminAccountHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/identity/accounts/:accountId/disable",
+					Handler: identityadmin.DisableManagedAccountHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/identity/accounts/:accountId/enable",
+					Handler: identityadmin.EnableManagedAccountHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodPost,
 					Path:    "/admin/identity/accounts/search-by-phone",
-					Handler: identityadmin.SearchAccountByPhoneHandler(serverCtx),
+					Handler: identityadmin.SearchAdminAccountByPhoneHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/admin/identity/doctors/:accountId",
+					Handler: identityadmin.UpdateManagedDoctorHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodDelete,
+					Path:    "/admin/identity/doctors/:accountId",
+					Handler: identityadmin.RevokeManagedDoctorHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/admin/identity/doctors/:accountId/department",
+					Handler: identityadmin.ChangeManagedDoctorDepartmentHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPost,
 					Path:    "/admin/identity/doctors/promote",
-					Handler: identityadmin.PromoteDoctorHandler(serverCtx),
+					Handler: identityadmin.PromoteManagedDoctorHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AccessToken},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/auth/me/display-profile",
+					Handler: identityprofile.GetAccountDisplayProfileHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/auth/me/display-profile",
+					Handler: identityprofile.UpdateAccountDisplayProfileHandler(serverCtx),
 				},
 			}...,
 		),
@@ -128,6 +183,17 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 			}...,
 		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/directory/departments/:departmentId/doctors",
+				Handler: organizationdirectory.ListDoctorsHandler(serverCtx),
+			},
+		},
 		rest.WithPrefix("/api/v1"),
 	)
 
