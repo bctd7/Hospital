@@ -55,6 +55,9 @@ describe("app shell identity resolution", () => {
     expect(setTabBarItem).toHaveBeenCalledWith(
       expect.objectContaining({ index: 0, text: "工作台" }),
     );
+    expect(setTabBarItem).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 1, text: "部门管理" }),
+    );
   });
 
   it("restores patient tab labels when switching back", () => {

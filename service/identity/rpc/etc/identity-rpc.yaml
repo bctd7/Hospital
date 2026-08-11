@@ -1,6 +1,7 @@
-Name: hospital.identity.v1.rpc
+Name: identity-rpc
 ListenOn: 0.0.0.0:8080
 Mode: dev
+Environment: "${APP_ENV}"
 Log:
   ServiceName: identity-rpc
   Mode: console
@@ -16,6 +17,7 @@ Middlewares:
       - /hospital.identity.v1.IdentityService/WeChatLogin
       - /hospital.identity.v1.IdentityService/SetMyPhone
       - /hospital.identity.v1.IdentityService/FindAccountByPhone
+      - /hospital.identity.v1.IdentityService/SearchAdminAccountByPhone
       - /hospital.identity.v1.IdentityService/RefreshAccessToken
       - /hospital.identity.v1.IdentityService/RevokeRefreshToken
 MySQL:
@@ -25,6 +27,7 @@ SessionRedis:
   Password: ${REDIS_PASSWORD}
   DB: 0
   Prefix: "identity:refresh:"
+  AuthorizationVersionPrefix: "identity:authorization-version:"
 Token:
   Issuer: hospital-identity
   Audience: hospital-services
@@ -37,6 +40,9 @@ WeChat:
   AppSecret: ${WECHAT_MINIAPP_APP_SECRET}
   Code2SessionURL: ${WECHAT_CODE2SESSION_URL}
 PhoneLogin:
+  # disabled | aliyun | local. local is rejected outside APP_ENV=local/test.
+  Provider: "${SMS_PROVIDER}"
+  LocalCode: "${LOCAL_SMS_CODE}"
   # 完成 PNVS 控制台配置并注入下列环境变量后改为 true。
   Enabled: ${ALIYUN_PNVS_ENABLED}
   AccessKeyID: ${ALIBABA_CLOUD_ACCESS_KEY_ID}

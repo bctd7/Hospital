@@ -10,13 +10,37 @@ service IdentityService {
   rpc WeChatLogin(WeChatLoginRequest) returns (TokenPair);
   rpc SetMyPhone(SetMyPhoneRequest) returns (PhoneBinding);
   rpc FindAccountByPhone(FindAccountByPhoneRequest) returns (AccountLookup);
-  rpc PromoteToDepartmentDoctor(PromoteToDepartmentDoctorRequest) returns (AuthorizationContext);
   rpc GetAuthorizationContext(GetAuthorizationContextRequest) returns (AuthorizationContext);
-  rpc AssignRole(AssignRoleRequest) returns (AuthorizationContext);
-  rpc ChangeStaffDepartment(ChangeStaffDepartmentRequest) returns (AuthorizationContext);
-  rpc ChangeAccountStatus(ChangeAccountStatusRequest) returns (AuthorizationContext);
   rpc RefreshAccessToken(RefreshAccessTokenRequest) returns (TokenPair);
   rpc RevokeRefreshToken(RevokeRefreshTokenRequest) returns (RevokeRefreshTokenResponse);
+
+  rpc GetAccountDisplayProfile(GetAccountDisplayProfileRequest) returns (AccountDisplayProfile);
+  rpc UpdateAccountDisplayProfile(UpdateAccountDisplayProfileRequest) returns (AccountDisplayProfile);
+
+  // Public organization directory. HTTP gateways may expose these methods
+  // without an access token, but must still apply request rate limits.
+  rpc GetOrganizationContext(GetOrganizationContextRequest) returns (OrganizationContext);
+  rpc ListDepartments(ListDepartmentsRequest) returns (ListDepartmentsResponse);
+  rpc ListDoctorsByDepartment(ListDoctorsByDepartmentRequest) returns (ListDoctorsByDepartmentResponse);
+
+  // Administrator organization management.
+  rpc ListOrganizationUnits(ListOrganizationUnitsRequest) returns (ListOrganizationUnitsResponse);
+  rpc GetOrganizationUnit(GetOrganizationUnitRequest) returns (AdminOrganizationUnit);
+  rpc CreateOrganizationUnit(CreateOrganizationUnitRequest) returns (AdminOrganizationUnit);
+  rpc UpdateOrganizationUnit(UpdateOrganizationUnitRequest) returns (AdminOrganizationUnit);
+  rpc DisableOrganizationUnit(ChangeOrganizationUnitStatusRequest) returns (AdminOrganizationUnit);
+  rpc EnableOrganizationUnit(ChangeOrganizationUnitStatusRequest) returns (AdminOrganizationUnit);
+
+  // Administrator account and doctor management.
+  rpc ListAdminAccounts(ListAdminAccountsRequest) returns (ListAdminAccountsResponse);
+  rpc GetAdminAccount(GetAdminAccountRequest) returns (AdminAccountDetail);
+  rpc SearchAdminAccountByPhone(SearchAdminAccountByPhoneRequest) returns (SearchAdminAccountByPhoneResponse);
+  rpc PromoteDoctor(PromoteDoctorRequest) returns (AdminAccountDetail);
+  rpc UpdateDoctor(UpdateDoctorRequest) returns (AdminAccountDetail);
+  rpc ChangeDoctorDepartment(ChangeDoctorDepartmentRequest) returns (AdminAccountDetail);
+  rpc RevokeDoctor(AccountMutationRequest) returns (AdminAccountDetail);
+  rpc DisableAccount(AccountMutationRequest) returns (AdminAccountDetail);
+  rpc EnableAccount(AccountMutationRequest) returns (AdminAccountDetail);
 }
 
 message SendPhoneLoginCodeRequest {
@@ -61,38 +85,9 @@ message AccountLookup {
   PhoneBinding phone = 2;
 }
 
-message PromoteToDepartmentDoctorRequest {
-  string target_account_id = 1;
-  string department_id = 2;
-  bool offline_verified = 3;
-  string operation_id = 4;
-  string request_id = 5;
-}
-
 message GetAuthorizationContextRequest {
   string account_id = 1;
   string request_id = 2;
-}
-
-message AssignRoleRequest {
-  string target_account_id = 1;
-  string role_code = 2;
-  string operation_id = 3;
-  string request_id = 4;
-}
-
-message ChangeStaffDepartmentRequest {
-  string target_account_id = 1;
-  string department_id = 2;
-  string operation_id = 3;
-  string request_id = 4;
-}
-
-message ChangeAccountStatusRequest {
-  string target_account_id = 1;
-  string status = 2;
-  string operation_id = 3;
-  string request_id = 4;
 }
 
 message AuthorizationContext {
@@ -119,9 +114,243 @@ message RevokeRefreshTokenResponse {
   bool revoked = 1;
 }
 
+message GetAccountDisplayProfileRequest {
+  string request_id = 1;
+}
+
+message UpdateAccountDisplayProfileRequest {
+  string nickname = 1;
+  string request_id = 2;
+}
+
+message AccountDisplayProfile {
+  optional string nickname = 1;
+  int64 management_version = 2;
+}
+
 message TokenPair {
   string access_token = 1;
   string refresh_token = 2;
   int64 access_expires_in_seconds = 3;
   int64 refresh_expires_in_seconds = 4;
+}
+
+
+message HospitalSummary {
+  string hospital_id = 1;
+  string code = 2;
+  string name = 3;
+  int64 version = 4;
+}
+
+message CampusSummary {
+  string campus_id = 1;
+  string hospital_id = 2;
+  string code = 3;
+  string name = 4;
+  int64 department_count = 5;
+  string status = 6;
+  int64 version = 7;
+}
+
+message DepartmentSummary {
+  string department_id = 1;
+  string campus_id = 2;
+  string campus_name = 3;
+  string code = 4;
+  string name = 5;
+  int64 doctor_count = 6;
+  string status = 7;
+  int64 version = 8;
+}
+
+message AdminOrganizationUnit {
+  string unit_id = 1;
+  string parent_id = 2;
+  string unit_type = 3;
+  string code = 4;
+  string name = 5;
+  string status = 6;
+  int64 child_count = 7;
+  int64 doctor_count = 8;
+  int64 version = 9;
+}
+
+message GetOrganizationContextRequest {
+  string request_id = 1;
+}
+
+message OrganizationContext {
+  HospitalSummary hospital = 1;
+  repeated CampusSummary campuses = 2;
+}
+
+message ListDepartmentsRequest {
+  string campus_id = 1;
+  string request_id = 2;
+}
+
+message ListDepartmentsResponse {
+  repeated DepartmentSummary items = 1;
+}
+
+message DoctorSummary {
+  // A doctor is an Identity account with an active doctor role/profile.
+  string account_id = 1;
+  string display_name = 2;
+  string department_id = 3;
+  optional string avatar_url = 4;
+  optional string description = 5;
+  int64 version = 6;
+}
+
+message ListDoctorsByDepartmentRequest {
+  string department_id = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  string request_id = 4;
+}
+
+message ListDoctorsByDepartmentResponse {
+  repeated DoctorSummary items = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  int64 total = 4;
+}
+
+message ListOrganizationUnitsRequest {
+  string unit_type = 1;
+  string parent_id = 2;
+  string status = 3;
+  string request_id = 4;
+}
+
+message ListOrganizationUnitsResponse {
+  repeated AdminOrganizationUnit items = 1;
+}
+
+message GetOrganizationUnitRequest {
+  string unit_id = 1;
+  string request_id = 2;
+}
+
+message CreateOrganizationUnitRequest {
+  string unit_type = 1;
+  string parent_id = 2;
+  string name = 3;
+  string operation_id = 4;
+  string request_id = 5;
+}
+
+message UpdateOrganizationUnitRequest {
+  string unit_id = 1;
+  optional string name = 2;
+  optional string parent_id = 3;
+  int64 version = 4;
+  string operation_id = 5;
+  string request_id = 6;
+}
+
+message ChangeOrganizationUnitStatusRequest {
+  string unit_id = 1;
+  int64 version = 2;
+  string operation_id = 3;
+  string request_id = 4;
+}
+
+message AdminAccountSummary {
+  string account_id = 1;
+  optional string nickname = 2;
+  optional string display_name = 3;
+  optional string avatar_url = 4;
+  optional string masked_phone = 5;
+  string account_status = 6;
+  string identity_type = 7;
+  optional string department_id = 8;
+  optional string department_name = 9;
+  int64 management_version = 10;
+}
+
+message AdminAccountDetail {
+  AdminAccountSummary summary = 1;
+  optional string phone_verification_status = 2;
+  optional string staff_no = 3;
+  optional string description = 4;
+  repeated string roles = 5;
+  int64 authorization_version = 6;
+  repeated string available_actions = 7;
+  string created_at = 8;
+  string updated_at = 9;
+  optional string staff_status = 10;
+}
+
+message ListAdminAccountsRequest {
+  int64 page = 1;
+  int64 page_size = 2;
+  string nickname = 3;
+  string identity_type = 4;
+  string status = 5;
+  string department_id = 6;
+  string request_id = 7;
+}
+
+message ListAdminAccountsResponse {
+  repeated AdminAccountSummary items = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  int64 total = 4;
+}
+
+message GetAdminAccountRequest {
+  string account_id = 1;
+  string request_id = 2;
+}
+
+message SearchAdminAccountByPhoneRequest {
+  string phone = 1;
+  string request_id = 2;
+}
+
+message SearchAdminAccountByPhoneResponse {
+  AdminAccountSummary identity = 1;
+  PhoneBinding phone = 2;
+}
+
+message PromoteDoctorRequest {
+  string account_id = 1;
+  string department_id = 2;
+  string display_name = 3;
+  optional string staff_no = 4;
+  optional string avatar_url = 5;
+  optional string description = 6;
+  int64 management_version = 7;
+  bool offline_verified = 8;
+  string operation_id = 9;
+  string request_id = 10;
+}
+
+message UpdateDoctorRequest {
+  string account_id = 1;
+  optional string display_name = 2;
+  optional string staff_no = 3;
+  optional string avatar_url = 4;
+  optional string description = 5;
+  int64 management_version = 6;
+  string operation_id = 7;
+  string request_id = 8;
+}
+
+message ChangeDoctorDepartmentRequest {
+  string account_id = 1;
+  string department_id = 2;
+  int64 management_version = 3;
+  string operation_id = 4;
+  string request_id = 5;
+}
+
+message AccountMutationRequest {
+  string account_id = 1;
+  int64 management_version = 2;
+  string operation_id = 3;
+  string request_id = 4;
 }

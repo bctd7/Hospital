@@ -1,4 +1,4 @@
-# Identity Service
+# Identity 身份服务
 
 Identity Service 是账号、登录会话、角色权限、医院组织和医生档案的数据拥有者。首期 Identity 开发已经结束，
 后续业务服务通过 Access Token、Identity RPC 和授权事件使用这些能力，不得直接访问 Identity 数据表。

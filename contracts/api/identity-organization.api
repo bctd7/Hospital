@@ -1,0 +1,129 @@
+syntax = "v1"
+
+type (
+	HospitalSummaryResponse {
+		HospitalID string `json:"hospital_id"`
+		Code       string `json:"code"`
+		Name       string `json:"name"`
+		Version    int64  `json:"version"`
+	}
+
+	CampusSummaryResponse {
+		CampusID        string `json:"campus_id"`
+		HospitalID      string `json:"hospital_id"`
+		Code            string `json:"code"`
+		Name            string `json:"name"`
+		DepartmentCount int64  `json:"department_count"`
+		Status          string `json:"status"`
+		Version         int64  `json:"version"`
+	}
+
+	OrganizationContextResponse {
+		Hospital HospitalSummaryResponse `json:"hospital"`
+		Campuses []CampusSummaryResponse `json:"campuses"`
+	}
+
+	ListDepartmentsRequest {
+		CampusID string `form:"campus_id"`
+	}
+
+	DepartmentSummaryResponse {
+		DepartmentID string `json:"department_id"`
+		CampusID     string `json:"campus_id"`
+		CampusName   string `json:"campus_name"`
+		Code         string `json:"code"`
+		Name         string `json:"name"`
+		DoctorCount  int64  `json:"doctor_count"`
+		Status       string `json:"status"`
+		Version      int64  `json:"version"`
+	}
+
+	ListDepartmentsResponse {
+		Items []DepartmentSummaryResponse `json:"items"`
+	}
+
+	ListOrganizationUnitsRequest {
+		UnitType string `form:"unit_type"`
+		ParentID string `form:"parent_id"`
+		Status   string `form:"status,optional"`
+	}
+
+	OrganizationUnitPathRequest {
+		UnitID string `path:"unitId"`
+	}
+
+	AdminOrganizationUnitResponse {
+		UnitID      string `json:"unit_id"`
+		ParentID    string `json:"parent_id,optional"`
+		UnitType    string `json:"unit_type"`
+		Code        string `json:"code"`
+		Name        string `json:"name"`
+		Status      string `json:"status"`
+		ChildCount  int64  `json:"child_count"`
+		DoctorCount int64  `json:"doctor_count"`
+		Version     int64  `json:"version"`
+	}
+
+	ListOrganizationUnitsResponse {
+		Items []AdminOrganizationUnitResponse `json:"items"`
+	}
+
+	CreateOrganizationUnitRequest {
+		UnitType   string `json:"unit_type"`
+		ParentID   string `json:"parent_id"`
+		Name       string `json:"name"`
+		OperationID string `json:"operation_id"`
+	}
+
+	UpdateOrganizationUnitRequest {
+		UnitID      string  `path:"unitId"`
+		Name        *string `json:"name,optional"`
+		ParentID    *string `json:"parent_id,optional"`
+		Version     int64   `json:"version"`
+		OperationID string  `json:"operation_id"`
+	}
+
+	ChangeOrganizationUnitStatusRequest {
+		UnitID      string `path:"unitId"`
+		Version     int64  `json:"version"`
+		OperationID string `json:"operation_id"`
+	}
+)
+
+@server (
+	prefix: /api/v1
+	group:  organizationdirectory
+)
+service app-api {
+	@handler getOrganizationContext
+	get /directory/organization-context returns (OrganizationContextResponse)
+
+	@handler listDepartments
+	get /directory/departments (ListDepartmentsRequest) returns (ListDepartmentsResponse)
+}
+
+@server (
+	prefix:     /api/v1
+	group:      organizationadmin
+	middleware: AccessToken
+	authType:   BearerAuth
+)
+service app-api {
+	@handler listOrganizationUnits
+	get /admin/identity/organization-units (ListOrganizationUnitsRequest) returns (ListOrganizationUnitsResponse)
+
+	@handler getOrganizationUnit
+	get /admin/identity/organization-units/:unitId (OrganizationUnitPathRequest) returns (AdminOrganizationUnitResponse)
+
+	@handler createOrganizationUnit
+	post /admin/identity/organization-units (CreateOrganizationUnitRequest) returns (AdminOrganizationUnitResponse)
+
+	@handler updateOrganizationUnit
+	put /admin/identity/organization-units/:unitId (UpdateOrganizationUnitRequest) returns (AdminOrganizationUnitResponse)
+
+	@handler disableOrganizationUnit
+	post /admin/identity/organization-units/:unitId/disable (ChangeOrganizationUnitStatusRequest) returns (AdminOrganizationUnitResponse)
+
+	@handler enableOrganizationUnit
+	post /admin/identity/organization-units/:unitId/enable (ChangeOrganizationUnitStatusRequest) returns (AdminOrganizationUnitResponse)
+}

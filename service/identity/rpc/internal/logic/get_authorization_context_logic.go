@@ -30,7 +30,7 @@ func (l *GetAuthorizationContextLogic) GetAuthorizationContext(in *identityv1.Ge
 	if err != nil {
 		return nil, err
 	}
-	principal, err := l.svcCtx.AuthorizationManager.GetAuthorizationContext(ctx, operator.AccountID, in.GetAccountId())
+	principal, err := l.svcCtx.AuthorizationManager.GetAuthorizationContext(ctx, operator, in.GetAccountId())
 	if err != nil {
 		logging.Error(ctx, "identity.authorization.context.read", err,
 			logx.Field("operator_account_id", operator.AccountID),

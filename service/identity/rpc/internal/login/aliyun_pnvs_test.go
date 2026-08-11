@@ -44,14 +44,66 @@ func TestAlibabaPNVSRequiresPassVerificationResult(t *testing.T) {
 
 type fakeAlibabaPNVSClient struct {
 	sendRequest  *dypns.SendSmsVerifyCodeRequest
+	sendError    error
 	verifyResult string
 }
 
 func (c *fakeAlibabaPNVSClient) SendSmsVerifyCodeWithContext(_ context.Context, request *dypns.SendSmsVerifyCodeRequest, _ *dara.RuntimeOptions) (*dypns.SendSmsVerifyCodeResponse, error) {
 	c.sendRequest = request
+	if c.sendError != nil {
+		return nil, c.sendError
+	}
 	return &dypns.SendSmsVerifyCodeResponse{Body: &dypns.SendSmsVerifyCodeResponseBody{
 		Code: dara.String("OK"), Success: dara.Bool(true),
 	}}, nil
+}
+
+func TestAlibabaPNVSPreservesOnlyProviderErrorCode(t *testing.T) {
+	client := &fakeAlibabaPNVSClient{sendError: dara.NewSDKError(map[string]any{
+		"code":    "InvalidAccessKeyId.NotFound",
+		"message": "sensitive provider detail",
+	})}
+	provider := newAlibabaPNVS(client, AlibabaPNVSConfig{})
+
+	err := provider.SendLoginCode(context.Background(), "+8613800138000")
+	if !errors.Is(err, ErrProviderUnavailable) {
+		t.Fatalf("expected unavailable provider, got %v", err)
+	}
+	if !strings.Contains(err.Error(), "InvalidAccessKeyId.NotFound") {
+		t.Fatalf("provider code was not preserved: %v", err)
+	}
+	if strings.Contains(err.Error(), "sensitive provider detail") {
+		t.Fatalf("provider detail must not enter logs: %v", err)
+	}
+}
+
+func TestAlibabaPNVSRecognizesDocumentedRateLimitCodes(t *testing.T) {
+	for _, code := range []string{
+		"FREQUENCY_FAIL",
+		"biz.FREQUENCY",
+		"BUSINESS_LIMIT_CONTROL",
+		"isv.BUSINESS_LIMIT_CONTROL",
+	} {
+		if !isPNVSRateLimitCode(code) {
+			t.Fatalf("expected %q to be recognized as a rate limit", code)
+		}
+	}
+	if isPNVSRateLimitCode("isv.INVALID_PARAMETERS") {
+		t.Fatal("invalid parameters must not be reported as rate limiting")
+	}
+}
+
+func TestAlibabaPNVSMapsSDKRateLimitError(t *testing.T) {
+	client := &fakeAlibabaPNVSClient{sendError: dara.NewSDKError(map[string]any{
+		"code":    "biz.FREQUENCY",
+		"message": "frequency check failed",
+	})}
+	provider := newAlibabaPNVS(client, AlibabaPNVSConfig{})
+
+	err := provider.SendLoginCode(context.Background(), "+8613800138000")
+	if !errors.Is(err, ErrRateLimited) {
+		t.Fatalf("expected rate-limited error, got %v", err)
+	}
 }
 
 func (c *fakeAlibabaPNVSClient) CheckSmsVerifyCodeWithContext(_ context.Context, _ *dypns.CheckSmsVerifyCodeRequest, _ *dara.RuntimeOptions) (*dypns.CheckSmsVerifyCodeResponse, error) {

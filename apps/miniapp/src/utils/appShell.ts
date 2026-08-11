@@ -7,14 +7,13 @@ const DEPARTMENT_DOCTOR_ROLE = "department_doctor";
 const SUPER_ADMIN_ROLE = "super_admin";
 
 /**
- * 工作人员业务尚未实现，当前复用四个 Tab 页面并显示对应占位内容。
- * 后续继续按权限扩展工作人员视图，不拆分医生版和超管版。
+ * 医生和超管复用工作人员页面，通过权限控制可见操作，不复制页面实现。
  */
 export const STAFF_APP_ENABLED = true;
 
 const TAB_LABELS: Record<AppVariant, string[]> = {
   patient: ["首页", "挂号", "消息", "我的"],
-  staff: ["工作台", "业务管理", "消息", "我的"],
+  staff: ["工作台", "部门管理", "消息", "我的"],
 };
 
 let appliedVariant: AppVariant | null = null;
@@ -55,7 +54,7 @@ export function normalizeAppVariant(
 
 /** 前端只控制可见性；最终权限必须由后端按 Token 中的 permission 校验。 */
 export function hasIdentityPermission(
-  principal: CurrentIdentityResponse | null,
+  principal: { permissions: readonly string[] } | null,
   permission: string,
 ): boolean {
   return principal?.permissions.includes(permission) ?? false;

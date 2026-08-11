@@ -4,14 +4,16 @@ import "github.com/zeromicro/go-zero/zrpc"
 
 type Config struct {
 	zrpc.RpcServerConf
-	MySQL struct {
+	Environment string `json:",default=local"`
+	MySQL       struct {
 		DataSource string
 	}
 	SessionRedis struct {
-		Addr     string
-		Password string `json:",optional"`
-		DB       int    `json:",default=0"`
-		Prefix   string `json:",default=identity:refresh:"`
+		Addr                       string
+		Password                   string `json:",optional"`
+		DB                         int    `json:",default=0"`
+		Prefix                     string `json:",default=identity:refresh:"`
+		AuthorizationVersionPrefix string `json:",default=identity:authorization-version:"`
 	}
 	Token struct {
 		Issuer                 string `json:",default=hospital-identity"`
@@ -27,6 +29,10 @@ type Config struct {
 		Code2SessionURL string `json:",default=https://api.weixin.qq.com/sns/jscode2session"`
 	}
 	PhoneLogin struct {
+		Provider  string `json:",optional"`
+		LocalCode string `json:",optional"`
+		// Enabled is retained for compatibility. When Provider is empty,
+		// Enabled=true selects aliyun and false selects disabled.
 		Enabled         bool   `json:",default=false"`
 		AccessKeyID     string `json:",optional"`
 		AccessKeySecret string `json:",optional"`

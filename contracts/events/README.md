@@ -1,4 +1,4 @@
-# Event Contracts
+# 事件契约
 
 Kafka 事件采用统一信封，业务载荷放在 `payload` 中。当前只定义通用信封，不提前创建没有真实消费者的 Topic。
 

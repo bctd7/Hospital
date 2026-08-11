@@ -6,7 +6,11 @@ import { sendPhoneLoginCode } from "@/api/auth";
 import ProfileAvatar from "@/components/profile/ProfileAvatar.vue";
 import { initializeFromPhone, sessionState } from "@/stores/session";
 import { openAppVariant } from "@/utils/appShell";
-import { getDisplayProfile, saveDisplayProfile } from "@/utils/displayProfile";
+import {
+  getDisplayProfile,
+  saveDisplayProfile,
+  saveDisplayProfileToServer,
+} from "@/utils/displayProfile";
 import { saveSelfPatientPreferences } from "@/utils/selfPatientPreferences";
 
 interface ChooseAvatarEvent {
@@ -123,6 +127,15 @@ async function enterMiniapp() {
   saveSelfPatientPreferences({
     phoneMasked: `${phone.value.slice(0, 3)}****${phone.value.slice(7)}`,
   });
+
+  try {
+    await saveDisplayProfileToServer({
+      avatarUrl: avatarUrl.value,
+      nickname: nickname.value,
+    });
+  } catch {
+    // 登录已经成功，昵称同步失败不阻止进入；用户可在本人资料页再次保存。
+  }
 
   openAppVariant(sessionState.appVariant, () => {
     entering.value = false;

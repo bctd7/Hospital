@@ -1,12 +1,15 @@
 syntax = "v1"
 
 import "identity-auth.api"
+import "identity-account-management.api"
+import "identity-organization.api"
 
 info (
 	title:   "Hospital App API"
 	desc:    "医院微信小程序后端 API"
 	author:  "Hospital"
 	version: "v1"
+	securityDefinitionsFromJson: `{"BearerAuth":{"type":"apiKey","name":"Authorization","in":"header","description":"Use: Bearer <access_token>"}}`
 )
 
 type HealthResponse {

@@ -39,11 +39,15 @@ func main() {
 	})
 	s.AddUnaryInterceptors(authn.UnaryServerInterceptor(
 		ctx.TokenManager,
+		ctx.AuthorizationVersionValidator,
 		identityv1.IdentityService_SendPhoneLoginCode_FullMethodName,
 		identityv1.IdentityService_PhoneLogin_FullMethodName,
 		identityv1.IdentityService_WeChatLogin_FullMethodName,
 		identityv1.IdentityService_RefreshAccessToken_FullMethodName,
 		identityv1.IdentityService_RevokeRefreshToken_FullMethodName,
+		identityv1.IdentityService_GetOrganizationContext_FullMethodName,
+		identityv1.IdentityService_ListDepartments_FullMethodName,
+		identityv1.IdentityService_ListDoctorsByDepartment_FullMethodName,
 	))
 	defer s.Stop()
 

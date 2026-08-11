@@ -3,6 +3,7 @@ package login
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -111,13 +112,19 @@ func (p *AlibabaPNVS) SendLoginCode(ctx context.Context, phoneNumber string) err
 	}
 	response, err := p.client.SendSmsVerifyCodeWithContext(ctx, request, &dara.RuntimeOptions{})
 	if err != nil {
-		return fmt.Errorf("%w: send PNVS verification code", ErrProviderUnavailable)
+		if isPNVSRateLimitCode(pnvsErrorCode(err)) {
+			return ErrRateLimited
+		}
+		return pnvsUnavailable("send verification code", err)
 	}
 	if response == nil || response.Body == nil || dara.StringValue(response.Body.Code) != "OK" || !dara.BoolValue(response.Body.Success) {
 		if response != nil && response.Body != nil && isPNVSRateLimitCode(dara.StringValue(response.Body.Code)) {
 			return ErrRateLimited
 		}
-		return ErrProviderUnavailable
+		if response != nil && response.Body != nil {
+			return pnvsUnavailableCode("send verification code", dara.StringValue(response.Body.Code))
+		}
+		return pnvsUnavailable("send verification code", nil)
 	}
 	return nil
 }
@@ -133,10 +140,13 @@ func (p *AlibabaPNVS) VerifyLoginCode(ctx context.Context, phoneNumber, code str
 	}
 	response, err := p.client.CheckSmsVerifyCodeWithContext(ctx, request, &dara.RuntimeOptions{})
 	if err != nil {
-		return fmt.Errorf("%w: check PNVS verification code", ErrProviderUnavailable)
+		return pnvsUnavailable("check verification code", err)
 	}
 	if response == nil || response.Body == nil || dara.StringValue(response.Body.Code) != "OK" || !dara.BoolValue(response.Body.Success) {
-		return ErrProviderUnavailable
+		if response != nil && response.Body != nil {
+			return pnvsUnavailableCode("check verification code", dara.StringValue(response.Body.Code))
+		}
+		return pnvsUnavailable("check verification code", nil)
 	}
 	if response.Body.Model == nil || dara.StringValue(response.Body.Model.VerifyResult) != "PASS" {
 		return ErrInvalidCredential
@@ -149,5 +159,35 @@ func mainlandDigits(normalized string) string {
 }
 
 func isPNVSRateLimitCode(code string) bool {
-	return code == "FREQUENCY_FAIL" || code == "BUSINESS_LIMIT_CONTROL"
+	normalized := strings.ToUpper(strings.TrimSpace(code))
+	return normalized == "FREQUENCY_FAIL" ||
+		normalized == "BIZ.FREQUENCY" ||
+		normalized == "BUSINESS_LIMIT_CONTROL" ||
+		normalized == "ISV.BUSINESS_LIMIT_CONTROL"
+}
+
+// pnvsUnavailable preserves only the provider's machine-readable error code.
+// The client still receives a generic Unavailable response, while server logs
+// remain useful without recording phone numbers, credentials, or response data.
+func pnvsUnavailable(operation string, cause error) error {
+	if code := pnvsErrorCode(cause); code != "" {
+		return pnvsUnavailableCode(operation, code)
+	}
+	return fmt.Errorf("%w: PNVS %s failed", ErrProviderUnavailable, operation)
+}
+
+func pnvsErrorCode(cause error) string {
+	var providerError dara.BaseError
+	if errors.As(cause, &providerError) {
+		return strings.TrimSpace(dara.StringValue(providerError.GetCode()))
+	}
+	return ""
+}
+
+func pnvsUnavailableCode(operation, code string) error {
+	code = strings.TrimSpace(code)
+	if code == "" {
+		return pnvsUnavailable(operation, nil)
+	}
+	return fmt.Errorf("%w: PNVS %s failed (code=%s)", ErrProviderUnavailable, operation, code)
 }

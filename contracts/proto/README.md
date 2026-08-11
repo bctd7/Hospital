@@ -1,4 +1,4 @@
-# RPC Contracts
+# RPC 契约
 
 本目录保存内部同步调用的 Protobuf 契约。当前已实现
 `identity/v1/identity.proto`，由 App API 调用 Identity RPC。

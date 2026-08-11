@@ -2,10 +2,12 @@
 import { onLaunch, onShow } from "@dcloudio/uni-app";
 import { watch } from "vue";
 
+import { initializeCloudBase } from "@/platform/cloudbase";
 import { restoreSession, sessionState } from "@/stores/session";
 import { applyAppVariantNavigation } from "@/utils/appShell";
 
 onLaunch(() => {
+  initializeCloudBase();
   restoreSession();
   applyAppVariantNavigation(sessionState.appVariant);
 });

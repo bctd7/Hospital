@@ -6,32 +6,44 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	redis "github.com/redis/go-redis/v9"
 
 	"hospital/common/authn"
+	"hospital/common/authn/versionredis"
 	"hospital/service/identity/rpc/internal/account"
 	"hospital/service/identity/rpc/internal/authorization"
 	"hospital/service/identity/rpc/internal/config"
+	"hospital/service/identity/rpc/internal/identityadmin"
 	"hospital/service/identity/rpc/internal/login"
+	"hospital/service/identity/rpc/internal/organization"
 	"hospital/service/identity/rpc/internal/repository"
+	"hospital/service/identity/rpc/internal/repository/mysqlstore"
 	"hospital/service/identity/rpc/internal/session"
 )
 
 type ServiceContext struct {
-	Config               config.Config
-	AuthorizationManager *authorization.Manager
-	AccountManager       *account.Manager
-	PhoneLoginManager    *account.PhoneLoginManager
-	SessionManager       *session.Manager
-	TokenManager         *authn.TokenManager
-	identityStore        *repository.MySQLStore
-	redisClient          *redis.Client
+	Config                        config.Config
+	AuthorizationManager          *authorization.Manager
+	AccountManager                *account.Manager
+	PhoneLoginManager             *account.PhoneLoginManager
+	SessionManager                *session.Manager
+	TokenManager                  *authn.TokenManager
+	AuthorizationVersionValidator *authn.AuthorizationVersionValidator
+	identityStore                 *mysqlstore.Store
+	redisClient                   *redis.Client
+	OrganizationManager           *organization.Manager
+	IdentityAdminManager          *identityadmin.Manager
 }
 
 func NewServiceContext(c config.Config) (*ServiceContext, error) {
-	store, err := repository.NewMySQLStore(c.MySQL.DataSource)
+	phoneProvider, err := phoneVerificationProvider(c)
+	if err != nil {
+		return nil, err
+	}
+	store, err := mysqlstore.New(c.MySQL.DataSource)
 	if err != nil {
 		return nil, err
 	}
@@ -70,8 +82,21 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		store.Close()
 		return nil, err
 	}
+	authorizationVersions, err := versionredis.NewStore(redisClient, c.SessionRedis.AuthorizationVersionPrefix)
+	if err != nil {
+		redisClient.Close()
+		store.Close()
+		return nil, fmt.Errorf("create authorization version store: %w", err)
+	}
+	authorizationVersionValidator, err := authn.NewAuthorizationVersionValidator(authorizationVersions)
+	if err != nil {
+		redisClient.Close()
+		store.Close()
+		return nil, fmt.Errorf("create authorization version validator: %w", err)
+	}
 	sessionManager, err := session.NewManager(
-		sessionStore, store, tokenManager, time.Duration(c.Token.RefreshTTLSeconds)*time.Second,
+		sessionStore, store, tokenManager, authorizationVersions,
+		time.Duration(c.Token.RefreshTTLSeconds)*time.Second,
 	)
 	if err != nil {
 		redisClient.Close()
@@ -96,21 +121,9 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		store.Close()
 		return nil, fmt.Errorf("create identity account manager: %w", err)
 	}
-	var phoneProvider login.PhoneVerificationProvider = login.UnconfiguredPhoneVerificationProvider{}
-	if c.PhoneLogin.Enabled {
-		phoneProvider, err = login.NewAlibabaPNVS(login.AlibabaPNVSConfig{
-			AccessKeyID: c.PhoneLogin.AccessKeyID, AccessKeySecret: c.PhoneLogin.AccessKeySecret,
-			RegionID: c.PhoneLogin.RegionID, Endpoint: c.PhoneLogin.Endpoint,
-			SignName: c.PhoneLogin.SignName, TemplateCode: c.PhoneLogin.TemplateCode,
-			SchemeName: c.PhoneLogin.SchemeName, ValidSeconds: c.PhoneLogin.ValidSeconds,
-			IntervalSeconds: c.PhoneLogin.IntervalSeconds, CodeLength: c.PhoneLogin.CodeLength,
-		})
-		if err != nil {
-			redisClient.Close()
-			store.Close()
-			return nil, fmt.Errorf("create phone login provider: %w", err)
-		}
-	}
+
+	organizationManager := organization.NewManager(store)
+
 	phoneLoginManager, err := account.NewPhoneLoginManager(
 		store, phoneProvider, sessionManager, phoneLookupKey, c.PhoneLogin.IntervalSeconds,
 	)
@@ -119,13 +132,68 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		store.Close()
 		return nil, fmt.Errorf("create phone login manager: %w", err)
 	}
+	authorizationManager, err := authorization.NewManager(store)
+	if err != nil {
+		redisClient.Close()
+		store.Close()
+		return nil, fmt.Errorf("create identity authorization manager: %w", err)
+	}
+	identityAdminManager, err := identityadmin.NewManager(store, authorizationVersions, phoneLookupKey)
+	if err != nil {
+		redisClient.Close()
+		store.Close()
+		return nil, fmt.Errorf("create identity admin manager: %w", err)
+	}
 	return &ServiceContext{
 		Config: c, identityStore: store, redisClient: redisClient, TokenManager: tokenManager,
-		AuthorizationManager: authorization.NewManager(store),
-		AccountManager:       accountManager,
-		PhoneLoginManager:    phoneLoginManager,
-		SessionManager:       sessionManager,
+		AuthorizationVersionValidator: authorizationVersionValidator,
+		AuthorizationManager:          authorizationManager,
+		AccountManager:                accountManager,
+		PhoneLoginManager:             phoneLoginManager,
+		SessionManager:                sessionManager,
+		OrganizationManager:           organizationManager,
+		IdentityAdminManager:          identityAdminManager,
 	}, nil
+}
+
+func phoneVerificationProvider(c config.Config) (login.PhoneVerificationProvider, error) {
+	provider := strings.ToLower(strings.TrimSpace(c.PhoneLogin.Provider))
+	if provider == "" {
+		if c.PhoneLogin.Enabled {
+			provider = "aliyun"
+		} else {
+			provider = "disabled"
+		}
+	}
+
+	switch provider {
+	case "disabled":
+		return login.UnconfiguredPhoneVerificationProvider{}, nil
+	case "aliyun":
+		value, err := login.NewAlibabaPNVS(login.AlibabaPNVSConfig{
+			AccessKeyID: c.PhoneLogin.AccessKeyID, AccessKeySecret: c.PhoneLogin.AccessKeySecret,
+			RegionID: c.PhoneLogin.RegionID, Endpoint: c.PhoneLogin.Endpoint,
+			SignName: c.PhoneLogin.SignName, TemplateCode: c.PhoneLogin.TemplateCode,
+			SchemeName: c.PhoneLogin.SchemeName, ValidSeconds: c.PhoneLogin.ValidSeconds,
+			IntervalSeconds: c.PhoneLogin.IntervalSeconds, CodeLength: c.PhoneLogin.CodeLength,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("create aliyun phone login provider: %w", err)
+		}
+		return value, nil
+	case "local":
+		environment := strings.ToLower(strings.TrimSpace(c.Environment))
+		if environment != "local" && environment != "test" {
+			return nil, fmt.Errorf("local SMS provider is restricted to local/test; current environment is %q", c.Environment)
+		}
+		value, err := login.NewLocalPhoneVerificationProvider(c.PhoneLogin.LocalCode)
+		if err != nil {
+			return nil, fmt.Errorf("create local phone login provider: %w", err)
+		}
+		return value, nil
+	default:
+		return nil, fmt.Errorf("unsupported phone login provider %q", provider)
+	}
 }
 
 func decodePrivateKey(value string) (ed25519.PrivateKey, error) {

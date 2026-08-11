@@ -13,8 +13,8 @@ type AccessTokenMiddleware struct {
 	handle func(http.HandlerFunc) http.HandlerFunc
 }
 
-func NewAccessTokenMiddleware(manager *authn.TokenManager) *AccessTokenMiddleware {
-	return &AccessTokenMiddleware{handle: authn.HTTPMiddleware(manager)}
+func NewAccessTokenMiddleware(manager *authn.TokenManager, validator authn.PrincipalValidator) *AccessTokenMiddleware {
+	return &AccessTokenMiddleware{handle: authn.HTTPMiddleware(manager, validator)}
 }
 
 func (m *AccessTokenMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
