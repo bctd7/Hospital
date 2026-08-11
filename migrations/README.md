@@ -1,28 +1,41 @@
-# Database Migrations
+# 数据库迁移
 
-数据库结构必须由迁移文件管理，不能只依赖 ORM 或 goctl 自动建表。
-
-迁移按业务数据归属创建目录：
+本目录是数据库结构变更的版本事实来源。README 只说明当前迁移工具和执行方式；业务数据设计写在对应模块
+Plan，表字段以 SQL 为准。
 
 ```text
 migrations/
-└── <domain>/
-    ├── 000001_init.up.sql
-    └── 000001_init.down.sql
+└── <service>/
+    ├── 000001_name.up.sql
+    └── 000001_name.down.sql
 ```
 
-当前已经建立：
+当前只有 Identity 拥有独立数据库迁移，版本为 `000001` 至 `000005`。
 
-- `identity/000001_identity_authorization`：账号授权事实、审计和 Outbox；
-- `identity/000002_identity_login`：微信外部身份绑定和用户自报手机号。
+## 执行器
 
-正式迁移工具仍需在 Goose、Atlas 或 golang-migrate 中确定一个；本地全新 MySQL 卷会通过 Compose 初始化脚本按编号执行迁移。
+迁移工具位于 `tools/db-migrate`，使用仓库锁定的 `golang-migrate`。Compose 只创建数据库和服务账号，
+不会替代版本化迁移。
 
-约束：
+```powershell
+.\scripts\migrate.ps1 -Service identity -Direction up
+.\scripts\migrate.ps1 -Service identity -Direction version
+```
 
-- 迁移文件进入版本控制；
-- 正式环境迁移前备份；
-- 破坏性变更采用分阶段兼容方案；
-- 每张表有明确的数据拥有者；
-- 时间默认以 UTC 保存；
-- 索引由真实查询驱动。
+本地首次初始化使用：
+
+```powershell
+.\scripts\db-bootstrap-local.ps1
+```
+
+## 约束
+
+- 已在共享环境执行的迁移不得改写；
+- 修复结构必须新增版本；
+- 业务迁移使用服务账号，不使用 MySQL root；
+- 迁移同时提供经过验证的 `up` 和 `down`；
+- 破坏性变化使用扩展、迁移数据、切换读取、删除旧结构的分阶段方案；
+- 生产迁移前备份，迁移失败时不得启动不兼容服务；
+- 新服务拥有独立迁移目录、数据库账号和 CI 空库验证。
+
+Identity 当前表说明见 [identity/README.md](./identity/README.md)。

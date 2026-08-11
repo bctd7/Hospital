@@ -1,120 +1,124 @@
 # Hospital
 
-Hospital 是面向微信小程序的医院检查业务平台。项目采用 Monorepo 管理客户端、Go 后端、接口契约、数据库迁移、基础设施和工程文档；后端以 go-zero 为基础，首期使用 MySQL、Redis，并按业务需要接入 Kafka。
+Hospital 是面向医院检查预约、院内流程规划和组织管理的微信小程序项目。后端使用 Go 与 go-zero，客户端使用
+uni-app、Vue 3 和 TypeScript。
 
-当前项目处于工程基线阶段：已建立 API 服务骨架、健康检查契约和本地基础设施配置，业务流程、数据模型、微信登录和小程序页面尚待实现。
+## 当前阶段
 
-## 系统组成
+Identity 与组织管理已经完成首期闭环：
+
+- 阿里云 PNVS 手机验证码登录、Access/Refresh Token 和授权版本校验；
+- 医院、院区、科室公共目录及管理员组织 CRUD；
+- 账号列表、详情、手机号精确搜索、停用与恢复；
+- 医生开通、资料编辑、调岗和撤销；
+- `operation_id` 幂等、乐观锁、授权审计和 Outbox；
+- 小程序真实 HTTP 接入，运行时 Mock 已移除；
+- HTTP → App API → Identity RPC → Manager → Repository → MySQL 全链路测试。
+
+下一阶段进入预约检查服务设计与最小业务闭环，参见
+[预约检查服务计划](./plan/backend/modules/05-appointment-and-examination-booking.md)。
+
+## 架构与目录
 
 ```text
 微信小程序
-    -> HTTPS API（service/app/api）
-        -> Handler：解析请求和输出响应
-        -> Logic：业务用例、规则和权限校验
-        -> Model：MySQL 数据访问
-        -> Redis：缓存、限流和幂等
-        -> Kafka：异步事件（按需接入）
+  -> app-api :8888               对外 HTTP、Token 中间件和页面聚合
+  -> identity-rpc :8080          认证、账号、权限、组织和医生领域
+  -> MySQL / Redis               业务事实与会话/授权版本
 ```
 
-首期以一个可部署的 API 服务完成核心业务闭环。只有在业务边界、数据所有权、独立发布或扩缩容需求明确后，才拆分 RPC 服务或异步 Consumer。
+| 目录 | 职责 |
+|---|---|
+| `apps/miniapp/` | 微信小程序页面、组件、服务层和 HTTP Client |
+| `contracts/api/` | go-zero HTTP 契约源文件 |
+| `contracts/proto/` | 内部 gRPC 契约源文件 |
+| `contracts/events/` | Outbox/Kafka 事件契约 |
+| `service/app/api/` | 面向客户端的 App API |
+| `service/identity/rpc/` | Identity RPC 与领域实现 |
+| `migrations/identity/` | Identity 数据库迁移 |
+| `common/` | 认证、授权和可观测性等跨服务基础能力 |
+| `docs/api/` | 生成后的 Swagger/OpenAPI 文档及预览说明 |
+| `plan/` | 当前有效的业务、架构和交付计划 |
 
-## 目录与开发位置
+服务内部的细节分别见 [Identity README](./service/identity/README.md)、
+[契约 README](./contracts/README.md) 和 [规划索引](./plan/README.md)。
 
-| 目录 | 职责 | 主要开发内容 |
-|---|---|---|
-| `apps/miniapp/` | 微信小程序客户端 | 页面、组件、API Client、状态管理和前端类型 |
-| `contracts/api/` | 对外 HTTP 契约 | 在 `.api` 中定义路由、请求和响应，再用 goctl 生成代码 |
-| `service/app/api/internal/logic/` | 后端业务层 | 业务规则、用例编排、权限判断和事务边界 |
-| `service/app/api/internal/handler/` | HTTP 适配层 | 保持轻量；生成后通常只做必要的协议适配 |
-| `service/app/api/internal/svc/` | 依赖装配 | 初始化并注入数据库、Redis、Kafka、RPC Client 等共享依赖 |
-| `service/app/api/internal/config/` | 服务配置 | 声明 YAML 和环境变量对应的配置结构 |
-| `service/app/api/internal/types/` | API 类型 | 由 `.api` 契约生成，不直接维护 |
-| `service/app/api/internal/model/` | 数据访问层（待建立） | 数据表确定后放置 goctl 生成或手写的 Model 与查询代码 |
-| `migrations/` | 数据库版本 | 按业务域维护可执行、可回滚的 SQL 迁移 |
-| `common/` | 跨服务技术能力 | 稳定复用的认证、错误码、中间件、可观测性和事件基础设施 |
-| `contracts/proto/` | 内部 RPC 契约 | 服务拆分后维护 Protobuf 定义 |
-| `contracts/events/` | 事件契约 | Kafka 事件 Schema、版本和兼容性约定 |
-| `deploy/` | 环境与部署 | Compose、镜像、代理和可观测性配置 |
-| `tests/` | 跨模块测试 | 契约测试、API 测试和基础设施集成测试 |
-| `plan/` | 架构文档 | 技术规划、业务边界、数据设计和实施路线 |
+## 本地启动
 
-## 开发流程
-
-一个后端功能按以下顺序交付：
-
-1. 在 `plan/` 明确业务流程、角色、数据归属和验收标准。
-2. 在 `contracts/api/app.api` 修改 HTTP 契约，并执行契约校验。
-3. 使用 goctl 更新服务骨架；生成的路由和类型文件不手工修改。
-4. 在 `internal/logic/` 实现业务，在 `internal/svc/` 装配依赖，在 Model 中实现数据访问。
-5. 在 `migrations/` 增加数据库迁移，并为 Logic、API 和数据链路补充测试。
-6. 在 `apps/miniapp/` 实现页面和 API 调用，完成端到端联调。
-7. 通过构建、测试、契约校验和 Compose 配置校验后提交。
-
-go-zero API 的主要调用链如下：
-
-```text
-app.go -> routes.go -> handler -> logic -> model / infrastructure
-```
-
-## 本地运行
-
-准备本地配置：
+准备 `.env` 并启动基础设施：
 
 ```powershell
 Copy-Item .env.example .env
-```
-
-启动 MySQL 和 Redis：
-
-```powershell
 docker compose `
   --env-file .env `
   -f deploy/compose/docker-compose.yml `
   up -d mysql redis
 ```
 
-需要验证异步事件链路时启动 Kafka：
+首次使用或迁移升级：
 
 ```powershell
-docker compose `
-  --env-file .env `
-  -f deploy/compose/docker-compose.yml `
-  --profile messaging `
-  up -d kafka
+.\scripts\db-bootstrap-local.ps1
+.\scripts\migrate.ps1 -Service identity -Direction up
 ```
 
-校验契约并构建：
+统一启动后端：
+
+```powershell
+.\scripts\start-backend.ps1 -Restart
+```
+
+该脚本按 UTF-8 加载 `.env`，构建并启动 `identity-rpc` 与 `app-api`。健康检查：
+
+```text
+GET http://127.0.0.1:8888/api/v1/health
+```
+
+小程序开发：
+
+```powershell
+Set-Location apps/miniapp
+npm install
+npm run dev:mp-weixin
+```
+
+## 接口文档
+
+HTTP 契约入口是 `contracts/api/app.api`，Swagger 快照位于
+[`docs/api/openapi.json`](./docs/api/openapi.json)。生成、预览和 Bearer Token 调试方式见
+[HTTP 接口文档](./docs/api/README.md)。
 
 ```powershell
 goctl api validate -api contracts/api/app.api
-go mod tidy
-go build ./...
-go test ./...
+goctl api swagger --api contracts/api/app.api --dir docs/api --filename openapi
 ```
 
-启动 API 服务：
+`.api` 是接口事实来源，Swagger 是生成物；不要直接修改 `openapi.json`。
+
+## 后端新增功能
+
+1. 在 `plan/` 明确业务边界、权限、状态机、数据归属和验收标准；
+2. 先修改 HTTP/Proto/事件契约，再生成代码；
+3. Handler 只做协议适配，Logic 负责用例编排，Manager 负责领域规则；
+4. Store/Repository 负责数据库访问，事务由 Manager 定义边界；
+5. 写操作统一考虑幂等、乐观锁、审计、Outbox 和权限版本；
+6. 补齐单元、数据库集成和 HTTP 全链路测试；
+7. 更新 Swagger 与相关 README，运行全量检查后提交。
+
+详细规则见 [后端开发指南](./plan/backend/README.md)。
+
+## 验证
 
 ```powershell
-go run ./service/app/api `
-  -f service/app/api/etc/app-api.yaml
+.\scripts\check.ps1
 ```
 
-健康检查地址：`GET http://localhost:8888/api/v1/health`。
+该脚本校验 API 契约、事件 Schema、Compose、Go 测试与 Vet、小程序测试、类型检查和微信小程序构建。
 
-也可以执行基础校验脚本：
+## 安全约束
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts/check-foundation.ps1
-```
-
-## 工程约束
-
-- `.api`、`.proto` 和事件 Schema 是契约源文件，契约变更后再生成代码。
-- Handler 不承载复杂业务；主要业务代码放在 Logic。
-- 数据库、Redis、Kafka 和 RPC Client 统一通过 `ServiceContext` 注入。
-- 每项业务数据只有一个明确拥有者，禁止跨服务直接读写其他服务的数据表。
-- Redis 只保存可过期或可重建的数据，不作为业务事实库。
-- 新增基础组件时同步设计超时、错误处理、测试、监控和降级策略。
-- `.env`、微信 AppSecret、Token 密钥和生产凭据不得提交到仓库。
-
-详细方案见 [总体技术规划](./plan/00-overall-technical-plan.md)。
+- `.env`、AccessKey、AppSecret、Token 密钥和生产凭据不得提交；
+- 完整手机号、验证码、Access/Refresh Token 不得进入日志、Swagger 示例或测试快照；
+- 小程序只调用 App API，禁止直接访问 RPC 或业务数据库；
+- 生产环境禁止使用本地固定验证码 Provider；
+- 跨服务不得直接读写其他服务的数据表。

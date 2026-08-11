@@ -1,17 +1,18 @@
-# Tests
+# Cross-service Tests
 
-测试目录用于跨包、跨服务的集成测试和契约测试。服务内部单元测试仍与对应 Go 文件放在一起。
+当前 Go 单元测试和数据库/Redis 集成测试与对应包放在一起，小程序测试位于 `apps/miniapp/tests/`。
+本目录暂不保存重复测试套件，只为未来真正跨多个独立服务的契约或端到端测试预留入口。
 
-```text
-tests/
-├── contract/       # API、Proto、事件兼容性
-└── integration/    # MySQL、Redis、Kafka 真实链路
-```
+## 当前测试位置
 
-工程基线至少验证：
+| 类型 | 位置 |
+|---|---|
+| Go 单元测试 | 与被测包同目录的 `*_test.go` |
+| Identity MySQL 集成测试 | `service/identity/rpc/internal/repository/mysqlstore/*_integration_test.go` |
+| Redis Session 集成测试 | `service/identity/rpc/internal/repository/redis_session_store_integration_test.go` |
+| HTTP Logic/错误映射 | `service/app/api/internal/**/**/*_test.go` |
+| 小程序单元测试 | `apps/miniapp/tests/` |
+| 全量工程检查 | `scripts/check.ps1` |
 
-- `.api` 可以通过 goctl 校验；
-- Health Logic 返回预期结构；
-- 未知路由和非法参数返回一致错误；
-- Docker Compose 配置可解析；
-- 后续数据库迁移能在空库执行。
+只有需要同时启动多个独立服务、且无法归属某个服务包的测试才进入本目录。不要把服务内部测试为了“看起来
+整齐”搬离包目录。

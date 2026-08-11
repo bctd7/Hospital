@@ -1,7 +1,7 @@
 # Identity 身份与访问控制模块
 
-> 状态：手机号认证、JWT、Refresh Session、首版角色授权、请求阶段 Redis 授权版本校验和权限变化后
-> 强制重新登录已实现；Outbox 授权版本投影补偿和管理页面待实现
+> 状态：手机号认证、JWT、Refresh Session、首版角色授权、Redis 授权版本校验、权限变化后强制重新登录，
+> 以及管理员账号/医生管理页面已经实现；Outbox 授权版本投影消费者仍待后续基础设施阶段完成。
 
 ## 1. 模块职责
 
@@ -37,9 +37,8 @@ Identity 不远程裁决每一条预约、方案或报告。业务服务本地�
 禁用账号必须返回稳定 `ACCOUNT_DISABLED` 错误且不能签发 Token。禁止特定号码收码属于独立短信风控，
 不由普通账号禁用状态隐式承担。
 
-账号可以拥有用户自行确认的可选昵称，用于界面展示和管理员备选搜索。昵称允许重名，不参与登录、
-不作为实名依据，也不能替代 `account_id`。当前小程序昵称仍是本机数据，服务端同步和检索属于
-[组织、科室、医生与用户管理方案](./04-organization-staff-and-seed-data.md)的待实现内容。
+账号可以拥有用户自行确认的可选昵称，用于界面展示和管理员候选查询。昵称允许重名，不参与登录、
+不作为实名依据，也不能替代 `account_id`。昵称已经由 Identity 保存，小程序本地 Storage 只作为界面缓存。
 
 微信登录接口和 `identity_external_identities` 作为兼容能力保留。OpenID 不能证明手机号、真实
 姓名、患者身份或医生资格；微信 code、OpenID、`session_key` 不写业务日志。
@@ -63,7 +62,7 @@ super_admin 按完整手机号精确查找，或按昵称查询候选账号
 相关接口：
 
 - `POST /api/v1/admin/identity/accounts/search-by-phone`；
-- `POST /api/v1/admin/identity/doctors/promote`。
+- `POST /api/v1/admin/identity/accounts/:accountId/promote-doctor`。
 
 完整手机号只用于请求时计算指纹，不记录日志、不提供模糊手机号搜索或账号枚举。昵称查询允许重名，
 只负责返回分页候选。开通医生、调岗、撤销身份、禁用和恢复账号都在用户详情按 `account_id` 执行，
@@ -148,7 +147,9 @@ common/authn/versionredis
   store.go                     可复用 Redis Store，实现 Reader 与 Writer 能力
 
 service/identity
-  authorization.Manager       角色、科室、账号状态变更与版本递增
+  authorization.Manager       只读取授权上下文
+  identityadmin.Manager       账号、医生、角色和账号状态管理
+  organization.Manager        组织管理与公共目录
   session.Manager             Refresh Session 版本比较与新 Token 签发
   repository                  Identity MySQL 事实与事务实现
 ```
@@ -191,16 +192,16 @@ Manager 使用 `common/authz` 判断 permission。Identity 业务 Manager 不再
 - Refresh Session 已保存创建或轮换时的 `authorization_version`；
 - 登录和正常刷新会回填 Redis 当前版本；Refresh 会重新查询 MySQL 最新 Principal，Session 版本不一致时
   拒绝轮换并撤销会话；前端已有并发合并的 `refreshOnce()`、最多一次请求重试和失败后清理会话；
-- `authorization.Manager` 已改为接收拦截器验证过的 Principal，不再重复查询操作者权限；目标账号查询、
-  幂等、审计、Outbox、授权版本递增和提交后的 Redis 投影更新仍保留。
+- `AuthorizationManager` 已收缩为授权上下文读取；管理员账号和医生写操作统一进入
+  `IdentityAdminManager`，组织写操作统一进入 `OrganizationManager`；Manager 接收拦截器验证过的
+  Principal，不重复查询操作者权限。
 
 当前仍待实现：
 
 - Outbox 消费者补偿授权变更后失败或遗漏的 Redis 版本投影更新；
 - Appointment、Planning、Report、Navigation 等服务创建并直接接收受保护请求时，复用相同 Reader 和
   gRPC Interceptor 装配；
-- 使用真实 MySQL、Redis 和 app-api/Identity 进程完成权限变更、旧 Token `401`、刷新拒绝和重新登录的
-  端到端回归。
+- Appointment、Planning、Report、Navigation 等新服务建立时的跨服务授权版本端到端回归。
 
 ## 7. 数据与安全边界
 
@@ -216,11 +217,8 @@ Manager 使用 `common/authz` 判断 permission。Identity 业务 Manager 不再
 - 权限管理操作记录操作者、目标账号、operation ID、结果和时间；
 - 生产环境不存在按账号 ID 直接领取 Token 的开发后门。
 
-## 8. 当前未实现
+## 8. 后续能力
 
-- 工作人员业务页面和超级管理员身份录入页面；
-- 医院、院区、科室以及工作人员管理，具体方案见
-  [Identity 组织、科室、医生与用户管理](./04-organization-staff-and-seed-data.md)；
 - 医生资质线上审批；
 - 手机号换绑、号码回收争议和账号合并；
 - 医院统一身份系统同步；

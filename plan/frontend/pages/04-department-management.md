@@ -1,6 +1,6 @@
 # 医院院区目录、科室医生目录与组织管理
 
-> 状态：医院/院区扩展待前端实现，后端接口待联调
+> 状态：首期真实 HTTP 全链路已实现并联调；医院根节点保持只读
 >
 > 适用身份：患者、`department_doctor`、`super_admin`
 
@@ -15,8 +15,9 @@
 - 医院根节点只展示，不提供修改或切换；
 - 首期科室必须直属院区，不展示或创建子科室。
 
-所有数据来自[医院、院区、科室与医生目录接口](../api/02-department-directory-and-management.md)。开发期
-Mock 必须保持相同层级并隔离在可删除 API 适配层。
+所有数据来自后端组织与医生目录。前端消费策略见
+[组织目录消费方案](../api/02-department-directory-and-management.md)，准确路径和字段以
+[`contracts/api`](../../../contracts/api/) 与生成的 OpenAPI 为准；运行时不保留 Mock 数据源。
 
 ## 2. 手机页面布局
 

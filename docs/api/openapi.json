@@ -1,0 +1,2354 @@
+{
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "https"
+  ],
+  "swagger": "2.0",
+  "info": {
+    "title": "Hospital App API",
+    "version": "v1"
+  },
+  "basePath": "/",
+  "paths": {
+    "/api/v1/admin/identity/accounts": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listAdminAccounts",
+        "operationId": "identityadminListAdminAccounts",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "nickname",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "identity_type",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "status",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "department_id",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "account_id",
+                      "account_status",
+                      "identity_type",
+                      "management_version"
+                    ],
+                    "properties": {
+                      "account_id": {
+                        "type": "string"
+                      },
+                      "account_status": {
+                        "type": "string"
+                      },
+                      "avatar_url": {
+                        "type": "string"
+                      },
+                      "department_id": {
+                        "type": "string"
+                      },
+                      "department_name": {
+                        "type": "string"
+                      },
+                      "display_name": {
+                        "type": "string"
+                      },
+                      "identity_type": {
+                        "type": "string"
+                      },
+                      "management_version": {
+                        "type": "integer"
+                      },
+                      "masked_phone": {
+                        "type": "string"
+                      },
+                      "nickname": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "integer"
+                },
+                "page_size": {
+                  "type": "integer"
+                },
+                "total": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/identity/accounts/search-by-phone": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "searchAdminAccountByPhone",
+        "operationId": "identityadminSearchAdminAccountByPhone",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "phone"
+              ],
+              "properties": {
+                "phone": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "identity": {
+                  "type": "object",
+                  "required": [
+                    "account_id",
+                    "account_status",
+                    "identity_type",
+                    "management_version"
+                  ],
+                  "properties": {
+                    "account_id": {
+                      "type": "string"
+                    },
+                    "account_status": {
+                      "type": "string"
+                    },
+                    "avatar_url": {
+                      "type": "string"
+                    },
+                    "department_id": {
+                      "type": "string"
+                    },
+                    "department_name": {
+                      "type": "string"
+                    },
+                    "display_name": {
+                      "type": "string"
+                    },
+                    "identity_type": {
+                      "type": "string"
+                    },
+                    "management_version": {
+                      "type": "integer"
+                    },
+                    "masked_phone": {
+                      "type": "string"
+                    },
+                    "nickname": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "phone": {
+                  "type": "object",
+                  "required": [
+                    "phone_masked",
+                    "verification_status",
+                    "verification_source"
+                  ],
+                  "properties": {
+                    "phone_masked": {
+                      "type": "string"
+                    },
+                    "verification_source": {
+                      "type": "string"
+                    },
+                    "verification_status": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/identity/accounts/{accountId}": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "getAdminAccount",
+        "operationId": "identityadminGetAdminAccount",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "accountId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account_id": {
+                  "type": "string"
+                },
+                "account_status": {
+                  "type": "string"
+                },
+                "authorization_version": {
+                  "type": "integer"
+                },
+                "available_actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "avatar_url": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "department_name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "identity_type": {
+                  "type": "string"
+                },
+                "management_version": {
+                  "type": "integer"
+                },
+                "masked_phone": {
+                  "type": "string"
+                },
+                "nickname": {
+                  "type": "string"
+                },
+                "phone_verification_status": {
+                  "type": "string"
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "staff_no": {
+                  "type": "string"
+                },
+                "staff_status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/identity/accounts/{accountId}/disable": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "disableAccount",
+        "operationId": "identityadminDisableAccount",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "accountId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "management_version",
+                "operation_id"
+              ],
+              "properties": {
+                "management_version": {
+                  "type": "integer"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account_id": {
+                  "type": "string"
+                },
+                "account_status": {
+                  "type": "string"
+                },
+                "authorization_version": {
+                  "type": "integer"
+                },
+                "available_actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "avatar_url": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "department_name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "identity_type": {
+                  "type": "string"
+                },
+                "management_version": {
+                  "type": "integer"
+                },
+                "masked_phone": {
+                  "type": "string"
+                },
+                "nickname": {
+                  "type": "string"
+                },
+                "phone_verification_status": {
+                  "type": "string"
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "staff_no": {
+                  "type": "string"
+                },
+                "staff_status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/identity/accounts/{accountId}/enable": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "enableAccount",
+        "operationId": "identityadminEnableAccount",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "accountId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "management_version",
+                "operation_id"
+              ],
+              "properties": {
+                "management_version": {
+                  "type": "integer"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account_id": {
+                  "type": "string"
+                },
+                "account_status": {
+                  "type": "string"
+                },
+                "authorization_version": {
+                  "type": "integer"
+                },
+                "available_actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "avatar_url": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "department_name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "identity_type": {
+                  "type": "string"
+                },
+                "management_version": {
+                  "type": "integer"
+                },
+                "masked_phone": {
+                  "type": "string"
+                },
+                "nickname": {
+                  "type": "string"
+                },
+                "phone_verification_status": {
+                  "type": "string"
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "staff_no": {
+                  "type": "string"
+                },
+                "staff_status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/identity/accounts/{accountId}/promote-doctor": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "promoteDoctor",
+        "operationId": "identityadminPromoteDoctor",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "accountId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "department_id",
+                "display_name",
+                "management_version",
+                "offline_verified",
+                "operation_id"
+              ],
+              "properties": {
+                "avatar_url": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "management_version": {
+                  "type": "integer"
+                },
+                "offline_verified": {
+                  "type": "boolean"
+                },
+                "operation_id": {
+                  "type": "string"
+                },
+                "staff_no": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account_id": {
+                  "type": "string"
+                },
+                "account_status": {
+                  "type": "string"
+                },
+                "authorization_version": {
+                  "type": "integer"
+                },
+                "available_actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "avatar_url": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "department_name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "identity_type": {
+                  "type": "string"
+                },
+                "management_version": {
+                  "type": "integer"
+                },
+                "masked_phone": {
+                  "type": "string"
+                },
+                "nickname": {
+                  "type": "string"
+                },
+                "phone_verification_status": {
+                  "type": "string"
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "staff_no": {
+                  "type": "string"
+                },
+                "staff_status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/identity/doctors/{accountId}": {
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "updateDoctor",
+        "operationId": "identityadminUpdateDoctor",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "accountId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "management_version",
+                "operation_id"
+              ],
+              "properties": {
+                "avatar_url": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "management_version": {
+                  "type": "integer"
+                },
+                "operation_id": {
+                  "type": "string"
+                },
+                "staff_no": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account_id": {
+                  "type": "string"
+                },
+                "account_status": {
+                  "type": "string"
+                },
+                "authorization_version": {
+                  "type": "integer"
+                },
+                "available_actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "avatar_url": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "department_name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "identity_type": {
+                  "type": "string"
+                },
+                "management_version": {
+                  "type": "integer"
+                },
+                "masked_phone": {
+                  "type": "string"
+                },
+                "nickname": {
+                  "type": "string"
+                },
+                "phone_verification_status": {
+                  "type": "string"
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "staff_no": {
+                  "type": "string"
+                },
+                "staff_status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/identity/doctors/{accountId}/department": {
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "changeDoctorDepartment",
+        "operationId": "identityadminChangeDoctorDepartment",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "accountId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "department_id",
+                "management_version",
+                "operation_id"
+              ],
+              "properties": {
+                "department_id": {
+                  "type": "string"
+                },
+                "management_version": {
+                  "type": "integer"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account_id": {
+                  "type": "string"
+                },
+                "account_status": {
+                  "type": "string"
+                },
+                "authorization_version": {
+                  "type": "integer"
+                },
+                "available_actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "avatar_url": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "department_name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "identity_type": {
+                  "type": "string"
+                },
+                "management_version": {
+                  "type": "integer"
+                },
+                "masked_phone": {
+                  "type": "string"
+                },
+                "nickname": {
+                  "type": "string"
+                },
+                "phone_verification_status": {
+                  "type": "string"
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "staff_no": {
+                  "type": "string"
+                },
+                "staff_status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/identity/doctors/{accountId}/revoke": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "revokeDoctor",
+        "operationId": "identityadminRevokeDoctor",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "accountId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "management_version",
+                "operation_id"
+              ],
+              "properties": {
+                "management_version": {
+                  "type": "integer"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account_id": {
+                  "type": "string"
+                },
+                "account_status": {
+                  "type": "string"
+                },
+                "authorization_version": {
+                  "type": "integer"
+                },
+                "available_actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "avatar_url": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "department_name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                },
+                "identity_type": {
+                  "type": "string"
+                },
+                "management_version": {
+                  "type": "integer"
+                },
+                "masked_phone": {
+                  "type": "string"
+                },
+                "nickname": {
+                  "type": "string"
+                },
+                "phone_verification_status": {
+                  "type": "string"
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "staff_no": {
+                  "type": "string"
+                },
+                "staff_status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/identity/organization-units": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listOrganizationUnits",
+        "operationId": "organizationadminListOrganizationUnits",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "unit_type",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "parent_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "status",
+            "in": "query",
+            "allowEmptyValue": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "unit_id",
+                      "unit_type",
+                      "code",
+                      "name",
+                      "status",
+                      "child_count",
+                      "doctor_count",
+                      "version"
+                    ],
+                    "properties": {
+                      "child_count": {
+                        "type": "integer"
+                      },
+                      "code": {
+                        "type": "string"
+                      },
+                      "doctor_count": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "parent_id": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "unit_id": {
+                        "type": "string"
+                      },
+                      "unit_type": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "createOrganizationUnit",
+        "operationId": "organizationadminCreateOrganizationUnit",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "unit_type",
+                "parent_id",
+                "name",
+                "operation_id"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "operation_id": {
+                  "type": "string"
+                },
+                "parent_id": {
+                  "type": "string"
+                },
+                "unit_type": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "child_count": {
+                  "type": "integer"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "doctor_count": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "parent_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "unit_id": {
+                  "type": "string"
+                },
+                "unit_type": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/identity/organization-units/{unitId}": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "getOrganizationUnit",
+        "operationId": "organizationadminGetOrganizationUnit",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "unitId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "child_count": {
+                  "type": "integer"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "doctor_count": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "parent_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "unit_id": {
+                  "type": "string"
+                },
+                "unit_type": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "updateOrganizationUnit",
+        "operationId": "organizationadminUpdateOrganizationUnit",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "unitId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "version",
+                "operation_id"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "operation_id": {
+                  "type": "string"
+                },
+                "parent_id": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "child_count": {
+                  "type": "integer"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "doctor_count": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "parent_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "unit_id": {
+                  "type": "string"
+                },
+                "unit_type": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/identity/organization-units/{unitId}/disable": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "disableOrganizationUnit",
+        "operationId": "organizationadminDisableOrganizationUnit",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "unitId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "version",
+                "operation_id"
+              ],
+              "properties": {
+                "operation_id": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "child_count": {
+                  "type": "integer"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "doctor_count": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "parent_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "unit_id": {
+                  "type": "string"
+                },
+                "unit_type": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/identity/organization-units/{unitId}/enable": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "enableOrganizationUnit",
+        "operationId": "organizationadminEnableOrganizationUnit",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "unitId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "version",
+                "operation_id"
+              ],
+              "properties": {
+                "operation_id": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "child_count": {
+                  "type": "integer"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "doctor_count": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "parent_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "unit_id": {
+                  "type": "string"
+                },
+                "unit_type": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "currentIdentity",
+        "operationId": "authCurrentIdentity",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account_id": {
+                  "type": "string"
+                },
+                "account_type": {
+                  "type": "string"
+                },
+                "authorization_version": {
+                  "type": "integer"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "permissions": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me/display-profile": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "getAccountDisplayProfile",
+        "operationId": "identityprofileGetAccountDisplayProfile",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "management_version": {
+                  "type": "integer"
+                },
+                "nickname": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "updateAccountDisplayProfile",
+        "operationId": "identityprofileUpdateAccountDisplayProfile",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "nickname"
+              ],
+              "properties": {
+                "nickname": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "management_version": {
+                  "type": "integer"
+                },
+                "nickname": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me/phone": {
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "setMyPhone",
+        "operationId": "authSetMyPhone",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "phone"
+              ],
+              "properties": {
+                "phone": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "phone_masked": {
+                  "type": "string"
+                },
+                "verification_source": {
+                  "type": "string"
+                },
+                "verification_status": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/phone/code": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "sendPhoneLoginCode",
+        "operationId": "authSendPhoneLoginCode",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "phone"
+              ],
+              "properties": {
+                "phone": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "accepted": {
+                  "type": "boolean"
+                },
+                "retry_after_seconds": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/phone/login": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "phoneLogin",
+        "operationId": "authPhoneLogin",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "phone",
+                "verification_code"
+              ],
+              "properties": {
+                "phone": {
+                  "type": "string"
+                },
+                "verification_code": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "access_expires_in_seconds": {
+                  "type": "integer"
+                },
+                "access_token": {
+                  "type": "string"
+                },
+                "refresh_expires_in_seconds": {
+                  "type": "integer"
+                },
+                "refresh_token": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/token/refresh": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "refreshToken",
+        "operationId": "authRefreshToken",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "refresh_token"
+              ],
+              "properties": {
+                "refresh_token": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "access_expires_in_seconds": {
+                  "type": "integer"
+                },
+                "access_token": {
+                  "type": "string"
+                },
+                "refresh_expires_in_seconds": {
+                  "type": "integer"
+                },
+                "refresh_token": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/token/revoke": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "revokeToken",
+        "operationId": "authRevokeToken",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "refresh_token"
+              ],
+              "properties": {
+                "refresh_token": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "revoked": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/wechat/login": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "weChatLogin",
+        "operationId": "authWeChatLogin",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "login_code"
+              ],
+              "properties": {
+                "login_code": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "access_expires_in_seconds": {
+                  "type": "integer"
+                },
+                "access_token": {
+                  "type": "string"
+                },
+                "refresh_expires_in_seconds": {
+                  "type": "integer"
+                },
+                "refresh_token": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/directory/departments": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listDepartments",
+        "operationId": "organizationdirectoryListDepartments",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "campus_id",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "department_id",
+                      "campus_id",
+                      "campus_name",
+                      "code",
+                      "name",
+                      "doctor_count",
+                      "status",
+                      "version"
+                    ],
+                    "properties": {
+                      "campus_id": {
+                        "type": "string"
+                      },
+                      "campus_name": {
+                        "type": "string"
+                      },
+                      "code": {
+                        "type": "string"
+                      },
+                      "department_id": {
+                        "type": "string"
+                      },
+                      "doctor_count": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/directory/departments/{departmentId}/doctors": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listDoctors",
+        "operationId": "organizationdirectoryListDoctors",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "departmentId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "account_id",
+                      "display_name",
+                      "department_id",
+                      "version"
+                    ],
+                    "properties": {
+                      "account_id": {
+                        "type": "string"
+                      },
+                      "avatar_url": {
+                        "type": "string"
+                      },
+                      "department_id": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "display_name": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "integer"
+                },
+                "page_size": {
+                  "type": "integer"
+                },
+                "total": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/directory/organization-context": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "getOrganizationContext",
+        "operationId": "organizationdirectoryGetOrganizationContext",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "campuses": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "campus_id",
+                      "hospital_id",
+                      "code",
+                      "name",
+                      "department_count",
+                      "status",
+                      "version"
+                    ],
+                    "properties": {
+                      "campus_id": {
+                        "type": "string"
+                      },
+                      "code": {
+                        "type": "string"
+                      },
+                      "department_count": {
+                        "type": "integer"
+                      },
+                      "hospital_id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "hospital": {
+                  "type": "object",
+                  "required": [
+                    "hospital_id",
+                    "code",
+                    "name",
+                    "version"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "hospital_id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "health",
+        "operationId": "systemHealth",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "service": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "BearerAuth": {
+      "description": "Use: Bearer \u003caccess_token\u003e",
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "x-date": "2026-08-11 14:30:26",
+  "x-description": "This is a goctl generated swagger file.",
+  "x-github": "https://github.com/zeromicro/go-zero",
+  "x-go-zero-doc": "https://go-zero.dev/",
+  "x-goctl-version": "1.10.2"
+}

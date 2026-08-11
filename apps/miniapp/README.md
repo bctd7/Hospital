@@ -1,114 +1,109 @@
-# Mini App
+# 微信小程序
 
-这里用于放置微信小程序源码。当前使用测试 AppID，前端技术栈为 uni-app + Vue 3 + TypeScript + Vite。
+本目录是 Hospital 唯一客户端实现，技术栈为 uni-app、Vue 3、TypeScript 和 Vite。
 
-规划文档集中维护在 [`plan/miniapp/`](../../plan/miniapp/)，不在源码目录中混放需求和设计文档。
+README 只说明当前源码和运行方式。页面业务规则见 `plan/frontend/`，HTTP 字段见 `contracts/api/` 和
+`docs/api/openapi.json`。
 
 ## 当前实现
 
-- 首页、挂号、消息、我的四个独立一级页面；
-- 使用 `pages.json` 配置的原生 TabBar；
-- 启动时展示可跳过的微信头像和昵称填写页；
-- “我的”页面展示资料头部及就诊人管理、预约、关注、设置和消息管理入口；
-- 页面共享统一的应用外壳和空状态组件；
-- 已接入微信 code 登录、Hospital Token、当前身份、单任务刷新和退出会话；
-- 登录失败时以访客身份进入，不在前端接收、保存或展示 OpenID。
+- 首页、挂号、消息、我的四个 Tab；
+- 手机号 + 阿里云 PNVS 验证码登录；
+- Hospital Access/Refresh Token、单任务刷新和退出；
+- 患者/工作人员应用版本切换；
+- 医院院区上下文、科室和医生公共目录；
+- 超级管理员院区/科室管理；
+- 超级管理员账号查询、医生开通、资料编辑、调岗、撤销和账号启停；
+- 本人展示昵称同步；
+- 管理功能使用真实 HTTP，运行时 Mock 和 Mock 缓存已经删除。
 
-## 目录结构
+预约、消息、就诊人等尚未接入的业务只显示真实空状态，不伪造后端数据。
+
+## 源码结构
 
 ```text
-miniapp/
+apps/miniapp/
 ├── src/
-│   ├── api/          # 统一 HTTP Client
-│   ├── components/   # 可复用组件
-│   ├── pages/        # 页面
-│   ├── stores/       # 状态管理
-│   ├── styles/       # 主题变量和全局样式
-│   ├── types/        # 前端类型
-│   └── utils/        # 无业务状态的工具
+│   ├── api/management/   # Identity/Organization HTTP Adapter
+│   ├── api/              # 登录、会话和共享 HTTP Client
+│   ├── services/         # 页面可复用的业务数据编排
+│   ├── components/       # 可复用组件
+│   ├── pages/            # 页面
+│   ├── stores/           # 会话与应用状态
+│   ├── styles/           # 主题和全局样式
+│   ├── types/            # 前端业务类型
+│   └── utils/            # 无状态工具
+├── tests/
 ├── package.json
 └── vite.config.ts
 ```
 
-尚未接入的目录会在对应业务开始时创建，不使用空目录或无意义的占位依赖提前填充工程。
+页面不直接调用 `uni.request`。请求统一经过 API Client/Adapter，Token 刷新和错误转换只维护一份。
 
 ## 本地运行
 
-安装依赖：
-
 ```powershell
-cd apps/miniapp
+Set-Location apps/miniapp
 npm install
-```
-
-API 默认地址为 `http://127.0.0.1:8888`。需要覆盖时，在 `apps/miniapp/.env.local` 中配置：
-
-```text
-VITE_API_BASE_URL=http://电脑的局域网地址:8888
-```
-
-微信开发者工具模拟器可以访问本机 `127.0.0.1`；真机中的 `127.0.0.1` 指向手机自身，必须改为手机可访问的局域网或 HTTPS 地址。API Base URL 是公开的前端配置，不得在这里放 AppSecret。
-
-启动微信小程序开发构建：
-
-```powershell
 npm run dev:mp-weixin
 ```
 
-命令会持续监听源码变化，热更新模式下微信开发者工具需要导入：
+微信开发者工具导入：
 
 ```text
 apps/miniapp/dist/dev/mp-weixin
 ```
 
-如果使用 `npm run build:mp-weixin` 进行普通构建，也可以直接导入 `apps/miniapp`。根目录的 `project.config.json` 会把 `dist/build/mp-weixin` 识别为小程序根目录。首次导入前需要完成一次构建，确保其中已经生成 `app.json`。请勿把 `apps/miniapp` 的上一级目录或 `src` 目录直接作为小程序根目录。
-
-当前测试 AppID 同时配置在 `src/manifest.json` 和根目录 `project.config.json`。开发环境访问本地后端时，可以在微信开发者工具中暂时关闭合法域名校验；真机联调仍需要手机可访问的 HTTPS 地址或局域网地址。
-
-## 登录联调
-
-入口页点击“进入小程序”后的调用链：
-
-```text
-uni.login
-  -> POST /api/v1/auth/wechat/login
-  -> 保存 Hospital Access/Refresh Token
-  -> GET /api/v1/auth/me
-  -> 成功进入 authenticated，失败进入 guest
-```
-
-小程序只把一次性 `code` 作为 `login_code` 发给 App API。OpenID 和 `session_key` 由 Identity 服务向微信换取并留在后端；App API 返回的是 Hospital Token，不返回 OpenID。
-
-本地真实登录前需要启动 App API、Identity RPC、MySQL 和 Redis，并在后端环境中配置 `WECHAT_MINIAPP_APP_ID`、`WECHAT_MINIAPP_APP_SECRET` 和签名密钥。不要把这些后端密钥复制到 `apps/miniapp`。
-
-生产构建：
+普通构建：
 
 ```powershell
-npm run type-check
 npm run build:mp-weixin
 ```
 
-生产构建输出到：
+产物目录：
 
 ```text
 apps/miniapp/dist/build/mp-weixin
 ```
 
-## 依赖安全说明
+## API 地址
 
-当前依赖版本来自 DCloud 官方 Vue 3/Vite TypeScript 模板，并由 `package-lock.json` 锁定。初始化时 `npm audit` 报告的问题来自 DCloud 编译器及其 Babel、Vite、国际化、压缩和图片处理等传递依赖；`npm audit fix --force` 会把 DCloud 包替换为不兼容版本，因此不能直接执行。
+开发者工具模拟器可以访问 `127.0.0.1`；真机中的 `127.0.0.1` 指向手机自身，必须配置电脑局域网地址：
 
-在 DCloud 发布兼容修复前：
+```dotenv
+VITE_API_BASE_URL=http://192.168.x.x:8888
+```
 
-- 不使用本地开发服务编译来源不可信的源码、样式或图片；
-- 不把开发服务暴露到公网；
-- 更新 DCloud 编译器前同时执行类型检查、微信构建和开发者工具回归；
-- 生成的小程序产物不包含 Node.js 编译器本身，但仍需要持续跟踪工具链公告。
+前端环境文件只保存公开连接信息，不能放 AppSecret、阿里云 AccessKey、JWT 私钥或手机号 HMAC Key。
 
-小程序初始化后，应保证：
+## 登录联调
 
-- 微信临时 `code` 只发送给后端；
-- AppSecret 不进入小程序代码；
-- API Client 统一处理 Token、超时和错误码；
-- 不在本地长期保存不必要的敏感数据；
-- 请求只访问 HTTPS 合法域名。
+```text
+POST /api/v1/auth/phone/code
+  -> 用户收到验证码
+POST /api/v1/auth/phone/login
+  -> 保存 Hospital TokenPair
+GET /api/v1/auth/me
+  -> 恢复 Principal 和应用版本
+```
+
+微信登录接口保留兼容能力，但当前主入口使用手机号认证。接口字段和 Bearer 调试方式统一查看
+[`docs/api/README.md`](../../docs/api/README.md)。
+
+## 验证
+
+```powershell
+npm run test
+npm run type-check
+npm run build:mp-weixin
+```
+
+根目录 `scripts/check.ps1` 会运行上述检查。
+
+## 安全约束
+
+- 不记录手机号、验证码、Token 和微信临时 code；
+- 不在 Storage 保存不必要的医疗敏感数据；
+- 菜单隐藏不是权限校验，后端必须重新授权；
+- 不将开发服务暴露到公网；
+- 不执行可能破坏 DCloud 依赖兼容性的无评估强制升级。
