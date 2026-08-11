@@ -13,47 +13,15 @@ import (
 	contractauthz "hospital/contracts/authz"
 )
 
-const (
-	ActionRoleAssigned         = "identity.role.assigned"
-	ActionDepartmentChanged    = "identity.department.changed"
-	ActionAccountStatusChanged = "identity.account.status_changed"
-	ActionDoctorPromoted       = "identity.doctor.promoted"
-)
-
 type Manager struct {
-	store    Store
-	versions authn.AuthorizationVersionWriter
+	store Store
 }
 
-func (m *Manager) PromoteToDepartmentDoctor(
-	ctx context.Context,
-	operator authn.Principal,
-	targetID, departmentID string,
-	offlineVerified bool,
-	operationID, requestID string,
-) (authn.Principal, error) {
-	if !offlineVerified {
-		return authn.Principal{}, fmt.Errorf("%w: offline identity verification is required", ErrInvalid)
+func NewManager(store Store) (*Manager, error) {
+	if store == nil {
+		return nil, errors.New("authorization manager store is required")
 	}
-	if err := validateID(departmentID, "department_id"); err != nil {
-		return authn.Principal{}, err
-	}
-	return m.change(ctx, operator, targetID, operationID, requestID, ActionDoctorPromoted, func(tx TxStore, target authn.Principal) error {
-		if target.Status != authn.AccountStatusActive {
-			return fmt.Errorf("%w: only active accounts can be promoted", ErrInvalid)
-		}
-		if target.HasRole(authn.RoleSuperAdmin) {
-			return fmt.Errorf("%w: super administrator cannot be promoted to doctor", ErrForbidden)
-		}
-		return tx.PromoteToDepartmentDoctor(ctx, targetID, departmentID, true)
-	})
-}
-
-func NewManager(store Store, versions authn.AuthorizationVersionWriter) (*Manager, error) {
-	if store == nil || versions == nil {
-		return nil, errors.New("authorization manager dependencies are required")
-	}
-	return &Manager{store: store, versions: versions}, nil
+	return &Manager{store: store}, nil
 }
 
 func (m *Manager) GetAuthorizationContext(ctx context.Context, operator authn.Principal, accountID string) (authn.Principal, error) {
@@ -70,110 +38,6 @@ func (m *Manager) GetAuthorizationContext(ctx context.Context, operator authn.Pr
 		return m.store.GetAuthorizationContext(ctx, accountID)
 	}
 	return operator, nil
-}
-
-func (m *Manager) AssignRole(ctx context.Context, operator authn.Principal, targetID, roleCode, operationID, requestID string) (authn.Principal, error) {
-	if roleCode != authn.RoleSuperAdmin && roleCode != authn.RoleDepartmentDoctor {
-		return authn.Principal{}, fmt.Errorf("%w: unsupported role %q", ErrInvalid, roleCode)
-	}
-	return m.change(ctx, operator, targetID, operationID, requestID, ActionRoleAssigned, func(tx TxStore, target authn.Principal) error {
-		if target.AccountType != authn.AccountTypeStaff {
-			return fmt.Errorf("%w: roles can only be assigned to staff accounts", ErrInvalid)
-		}
-		return tx.SetRole(ctx, targetID, roleCode)
-	})
-}
-
-func (m *Manager) ChangeStaffDepartment(ctx context.Context, operator authn.Principal, targetID, departmentID, operationID, requestID string) (authn.Principal, error) {
-	if err := validateID(departmentID, "department_id"); err != nil {
-		return authn.Principal{}, err
-	}
-	return m.change(ctx, operator, targetID, operationID, requestID, ActionDepartmentChanged, func(tx TxStore, target authn.Principal) error {
-		if target.AccountType != authn.AccountTypeStaff {
-			return fmt.Errorf("%w: departments can only be assigned to staff accounts", ErrInvalid)
-		}
-		return tx.SetDepartment(ctx, targetID, departmentID)
-	})
-}
-
-func (m *Manager) ChangeAccountStatus(ctx context.Context, operator authn.Principal, targetID, status, operationID, requestID string) (authn.Principal, error) {
-	if status != authn.AccountStatusActive && status != authn.AccountStatusDisabled {
-		return authn.Principal{}, fmt.Errorf("%w: unsupported account status %q", ErrInvalid, status)
-	}
-	return m.change(ctx, operator, targetID, operationID, requestID, ActionAccountStatusChanged, func(tx TxStore, _ authn.Principal) error {
-		return tx.SetAccountStatus(ctx, targetID, status)
-	})
-}
-
-func (m *Manager) change(
-	ctx context.Context,
-	operator authn.Principal,
-	targetID, operationID, requestID, action string,
-	mutate func(TxStore, authn.Principal) error,
-) (authn.Principal, error) {
-	if err := validateID(operator.AccountID, "operator_account_id"); err != nil {
-		return authn.Principal{}, err
-	}
-	if err := validateID(targetID, "target_account_id"); err != nil {
-		return authn.Principal{}, err
-	}
-	if err := validateID(operationID, "operation_id"); err != nil {
-		return authn.Principal{}, err
-	}
-	if len(requestID) > 64 {
-		return authn.Principal{}, fmt.Errorf("%w: request_id exceeds 64 characters", ErrInvalid)
-	}
-	if operator.AccountID == targetID {
-		return authn.Principal{}, fmt.Errorf("%w: self authorization changes are not allowed", ErrForbidden)
-	}
-	if err := commonauthz.RequirePermission(operator, contractauthz.PermissionIdentityAuthorizationManage); err != nil {
-		return authn.Principal{}, fmt.Errorf("%w: %v", ErrForbidden, err)
-	}
-
-	var result authn.Principal
-	err := m.store.WithinTransaction(ctx, func(tx TxStore) error {
-		operation, exists, err := tx.FindOperation(ctx, operationID)
-		if err != nil {
-			return err
-		}
-		if exists {
-			if operation.OperatorAccountID != operator.AccountID || operation.TargetAccountID != targetID {
-				return fmt.Errorf("%w: operation_id was already used for a different change", ErrConflict)
-			}
-			result, err = tx.GetAuthorizationContext(ctx, targetID)
-			return err
-		}
-
-		before, err := tx.GetAuthorizationContext(ctx, targetID)
-		if err != nil {
-			return err
-		}
-		if err := mutate(tx, before); err != nil {
-			return err
-		}
-		after, err := tx.GetAuthorizationContext(ctx, targetID)
-		if err != nil {
-			return err
-		}
-		if err := tx.RecordChange(ctx, Change{
-			OperationID: operationID, OperatorAccountID: operator.AccountID, TargetAccountID: targetID,
-			Action: action, Before: before, After: after, RequestID: strings.TrimSpace(requestID),
-		}); err != nil {
-			return err
-		}
-		result = after
-		return nil
-	})
-	if err != nil {
-		if errors.Is(err, commonauthz.ErrPermissionDenied) || errors.Is(err, commonauthz.ErrUnauthenticated) {
-			return authn.Principal{}, fmt.Errorf("%w: %v", ErrForbidden, err)
-		}
-		return authn.Principal{}, err
-	}
-	if err := m.versions.SetAuthorizationVersion(ctx, result.AccountID, result.AuthorizationVersion); err != nil {
-		return authn.Principal{}, fmt.Errorf("publish authorization version: %w", err)
-	}
-	return result, nil
 }
 
 func validateID(value, field string) error {

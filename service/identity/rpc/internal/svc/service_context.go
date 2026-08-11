@@ -122,10 +122,6 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		return nil, fmt.Errorf("create identity account manager: %w", err)
 	}
 
-	//store, err = mysqlstore.New(c.MySQL.DataSource)
-	//if err != nil {
-	//	return nil, err
-	//}
 	organizationManager := organization.NewManager(store)
 
 	phoneLoginManager, err := account.NewPhoneLoginManager(
@@ -136,7 +132,7 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		store.Close()
 		return nil, fmt.Errorf("create phone login manager: %w", err)
 	}
-	authorizationManager, err := authorization.NewManager(store, authorizationVersions)
+	authorizationManager, err := authorization.NewManager(store)
 	if err != nil {
 		redisClient.Close()
 		store.Close()

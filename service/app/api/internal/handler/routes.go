@@ -91,12 +91,17 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					Method:  http.MethodPost,
 					Path:    "/admin/identity/accounts/:accountId/disable",
-					Handler: identityadmin.DisableManagedAccountHandler(serverCtx),
+					Handler: identityadmin.DisableAccountHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPost,
 					Path:    "/admin/identity/accounts/:accountId/enable",
-					Handler: identityadmin.EnableManagedAccountHandler(serverCtx),
+					Handler: identityadmin.EnableAccountHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/identity/accounts/:accountId/promote-doctor",
+					Handler: identityadmin.PromoteDoctorHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPost,
@@ -106,22 +111,17 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				{
 					Method:  http.MethodPut,
 					Path:    "/admin/identity/doctors/:accountId",
-					Handler: identityadmin.UpdateManagedDoctorHandler(serverCtx),
-				},
-				{
-					Method:  http.MethodDelete,
-					Path:    "/admin/identity/doctors/:accountId",
-					Handler: identityadmin.RevokeManagedDoctorHandler(serverCtx),
+					Handler: identityadmin.UpdateDoctorHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPut,
 					Path:    "/admin/identity/doctors/:accountId/department",
-					Handler: identityadmin.ChangeManagedDoctorDepartmentHandler(serverCtx),
+					Handler: identityadmin.ChangeDoctorDepartmentHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPost,
-					Path:    "/admin/identity/doctors/promote",
-					Handler: identityadmin.PromoteManagedDoctorHandler(serverCtx),
+					Path:    "/admin/identity/doctors/:accountId/revoke",
+					Handler: identityadmin.RevokeDoctorHandler(serverCtx),
 				},
 			}...,
 		),
@@ -172,8 +172,8 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: organizationadmin.UpdateOrganizationUnitHandler(serverCtx),
 				},
 				{
-					Method:  http.MethodDelete,
-					Path:    "/admin/identity/organization-units/:unitId",
+					Method:  http.MethodPost,
+					Path:    "/admin/identity/organization-units/:unitId/disable",
 					Handler: organizationadmin.DisableOrganizationUnitHandler(serverCtx),
 				},
 				{

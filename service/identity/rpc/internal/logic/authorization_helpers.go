@@ -48,8 +48,6 @@ func authorizationRPCError(err error) error {
 		return status.Error(codes.PermissionDenied, "permission denied")
 	case errors.Is(err, authorization.ErrNotFound):
 		return status.Error(codes.NotFound, "identity resource not found")
-	case errors.Is(err, authorization.ErrConflict):
-		return status.Error(codes.AlreadyExists, err.Error())
 	default:
 		return status.Error(codes.Internal, "identity authorization operation failed")
 	}

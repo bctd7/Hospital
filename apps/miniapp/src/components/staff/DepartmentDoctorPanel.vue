@@ -68,7 +68,7 @@ const hasDepartment = computed(() => departmentView.value.departmentId.length > 
       <template v-else>
         <view
           v-for="doctor in doctors"
-          :key="doctor.doctorId"
+          :key="doctor.accountId"
           class="doctor-item"
           :class="{ 'doctor-item--interactive': canOpenDoctor }"
           @tap="canOpenDoctor && $emit('open-doctor', doctor)"

@@ -43,7 +43,7 @@ export interface OrganizationContext {
 }
 
 export interface DoctorSummary {
-  doctorId: string;
+  accountId: string;
   displayName: string;
   departmentId: string;
   avatarUrl?: string;

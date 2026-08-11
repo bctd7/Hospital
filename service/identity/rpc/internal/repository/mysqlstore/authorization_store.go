@@ -3,7 +3,6 @@ package mysqlstore
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"sort"
 
@@ -14,32 +13,14 @@ import (
 var _ authorization.Store = (*Store)(nil)
 
 func (s *Store) GetAuthorizationContext(ctx context.Context, accountID string) (authn.Principal, error) {
-	return readAuthorizationContext(ctx, s.db, accountID, false)
-}
-
-func (s *Store) WithinTransaction(ctx context.Context, fn func(authorization.TxStore) error) error {
-	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
-	if err != nil {
-		return fmt.Errorf("begin identity transaction: %w", err)
-	}
-	store := &mysqlAuthorizationTxStore{tx: tx}
-	if err := fn(store); err != nil {
-		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
-			return errors.Join(err, fmt.Errorf("rollback identity transaction: %w", rollbackErr))
-		}
-		return err
-	}
-	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("commit identity transaction: %w", err)
-	}
-	return nil
+	return readAuthorizationContext(ctx, s.db, accountID)
 }
 
 type queryer interface {
 	QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
 }
 
-func readAuthorizationContext(ctx context.Context, db queryer, accountID string, forUpdate bool) (authn.Principal, error) {
+func readAuthorizationContext(ctx context.Context, db queryer, accountID string) (authn.Principal, error) {
 	query := `
 SELECT
     a.id,
@@ -56,9 +37,6 @@ LEFT JOIN identity_roles r ON r.id = ar.role_id AND r.status = 'active'
 LEFT JOIN identity_role_permissions rp ON rp.role_id = r.id
 LEFT JOIN identity_permissions p ON p.id = rp.permission_id AND p.status = 'active'
 WHERE a.id = ?`
-	if forUpdate {
-		query += " FOR UPDATE"
-	}
 	rows, err := db.QueryContext(ctx, query, accountID)
 	if err != nil {
 		return authn.Principal{}, fmt.Errorf("query identity authorization context: %w", err)

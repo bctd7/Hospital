@@ -67,15 +67,7 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		tokenManager,
 		authorizationVersionValidator,
 	)
-	for _, method := range []string{
-		identityv1.IdentityService_SendPhoneLoginCode_FullMethodName,
-		identityv1.IdentityService_PhoneLogin_FullMethodName,
-		identityv1.IdentityService_WeChatLogin_FullMethodName,
-		identityv1.IdentityService_SetMyPhone_FullMethodName,
-		identityv1.IdentityService_FindAccountByPhone_FullMethodName,
-		identityv1.IdentityService_RefreshAccessToken_FullMethodName,
-		identityv1.IdentityService_RevokeRefreshToken_FullMethodName,
-	} {
+	for _, method := range identityRPCMethodsWithSensitiveContent() {
 		zrpc.DontLogClientContentForMethod(method)
 	}
 	return &ServiceContext{
@@ -84,6 +76,19 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		AccessToken: accessToken.Handle,
 		redisClient: redisClient,
 	}, nil
+}
+
+func identityRPCMethodsWithSensitiveContent() []string {
+	return []string{
+		identityv1.IdentityService_SendPhoneLoginCode_FullMethodName,
+		identityv1.IdentityService_PhoneLogin_FullMethodName,
+		identityv1.IdentityService_WeChatLogin_FullMethodName,
+		identityv1.IdentityService_SetMyPhone_FullMethodName,
+		identityv1.IdentityService_FindAccountByPhone_FullMethodName,
+		identityv1.IdentityService_SearchAdminAccountByPhone_FullMethodName,
+		identityv1.IdentityService_RefreshAccessToken_FullMethodName,
+		identityv1.IdentityService_RevokeRefreshToken_FullMethodName,
+	}
 }
 
 func (s *ServiceContext) Close() error {

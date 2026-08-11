@@ -8,6 +8,12 @@ type AccountDisplayProfileResponse struct {
 	ManagementVersion int64   `json:"management_version"`
 }
 
+type AccountMutationRequest struct {
+	AccountID         string `path:"accountId"`
+	ManagementVersion int64  `json:"management_version"`
+	OperationID       string `json:"operation_id"`
+}
+
 type AdminAccountDetailResponse struct {
 	AccountID               string   `json:"account_id"`
 	Nickname                *string  `json:"nickname,optional"`
@@ -78,7 +84,7 @@ type CampusSummaryResponse struct {
 	Version         int64  `json:"version"`
 }
 
-type ChangeManagedDoctorDepartmentRequest struct {
+type ChangeDoctorDepartmentRequest struct {
 	AccountID         string `path:"accountId"`
 	DepartmentID      string `json:"department_id"`
 	ManagementVersion int64  `json:"management_version"`
@@ -126,7 +132,7 @@ type DirectoryDoctorPathRequest struct {
 }
 
 type DoctorSummaryResponse struct {
-	DoctorID     string  `json:"doctor_id"`
+	AccountID    string  `json:"account_id"`
 	DisplayName  string  `json:"display_name"`
 	DepartmentID string  `json:"department_id"`
 	AvatarURL    *string `json:"avatar_url,optional"`
@@ -188,12 +194,6 @@ type ListOrganizationUnitsResponse struct {
 	Items []AdminOrganizationUnitResponse `json:"items"`
 }
 
-type ManagedAccountMutationRequest struct {
-	AccountID         string `path:"accountId"`
-	ManagementVersion int64  `json:"management_version"`
-	OperationID       string `json:"operation_id"`
-}
-
 type OrganizationContextResponse struct {
 	Hospital HospitalSummaryResponse `json:"hospital"`
 	Campuses []CampusSummaryResponse `json:"campuses"`
@@ -214,8 +214,8 @@ type PhoneLoginRequest struct {
 	VerificationCode string `json:"verification_code"`
 }
 
-type PromoteManagedDoctorRequest struct {
-	AccountID         string  `json:"account_id"`
+type PromoteDoctorRequest struct {
+	AccountID         string  `path:"accountId"`
 	DepartmentID      string  `json:"department_id"`
 	DisplayName       string  `json:"display_name"`
 	StaffNo           *string `json:"staff_no,optional"`
@@ -258,7 +258,7 @@ type UpdateAccountDisplayProfileRequest struct {
 	Nickname string `json:"nickname"`
 }
 
-type UpdateManagedDoctorRequest struct {
+type UpdateDoctorRequest struct {
 	AccountID         string  `path:"accountId"`
 	DisplayName       *string `json:"display_name,optional"`
 	StaffNo           *string `json:"staff_no,optional"`

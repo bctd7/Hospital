@@ -8,16 +8,16 @@ import (
 	"hospital/service/identity/rpc/internal/svc"
 )
 
-type UpdateManagedDoctorLogic struct {
+type UpdateDoctorLogic struct {
 	ctx context.Context
 	svc *svc.ServiceContext
 }
 
-func NewUpdateManagedDoctorLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateManagedDoctorLogic {
-	return &UpdateManagedDoctorLogic{ctx: ctx, svc: svcCtx}
+func NewUpdateDoctorLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UpdateDoctorLogic {
+	return &UpdateDoctorLogic{ctx: ctx, svc: svcCtx}
 }
 
-func (l *UpdateManagedDoctorLogic) UpdateManagedDoctor(in *identityv1.UpdateManagedDoctorRequest) (*identityv1.AdminAccountDetail, error) {
+func (l *UpdateDoctorLogic) UpdateDoctor(in *identityv1.UpdateDoctorRequest) (*identityv1.AdminAccountDetail, error) {
 	ctx := authorizationRequestContext(l.ctx, in.GetRequestId())
 	operator, err := authorizationOperator(ctx)
 	if err != nil {

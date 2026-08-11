@@ -2,7 +2,9 @@
 import { onShow } from "@dcloudio/uni-app";
 import { computed, ref } from "vue";
 
-import { staffManagementApi } from "@/api/staffManagement";
+import {
+  organizationAdminApi,
+} from "@/api/staffManagement";
 import DepartmentDoctorPanel from "@/components/staff/DepartmentDoctorPanel.vue";
 import DepartmentEditorDialog from "@/components/staff/DepartmentEditorDialog.vue";
 import DepartmentSidebar from "@/components/staff/DepartmentSidebar.vue";
@@ -14,11 +16,15 @@ import type {
 } from "@/types/staffManagement";
 import { hasIdentityPermission } from "@/utils/appShell";
 import {
+  invalidateManagedCampuses,
+  invalidateOrganizationContext,
   invalidateDepartments,
   invalidateDoctors,
+  loadManagedCampuses,
+  loadOrganizationContext,
   loadDepartments,
   loadDoctors,
-} from "@/utils/staffManagementCache";
+} from "@/services/organization";
 import { createEmptyDepartment } from "@/utils/staffManagementView";
 
 let lastSelectedDepartmentId = "";
@@ -93,12 +99,12 @@ async function refreshOrganization(force = false) {
   departmentLoading.value = true;
   departmentError.value = "";
   try {
-    const context = await staffManagementApi.getOrganizationContext();
+    const context = await loadOrganizationContext(force);
     hospitalId.value = context.hospital.hospitalId;
     hospitalName.value = context.hospital.name;
     campuses.value = context.campuses;
     managedCampuses.value = canManageDepartments.value
-      ? await staffManagementApi.listCampuses(context.hospital.hospitalId, true)
+      ? await loadManagedCampuses(context.hospital.hospitalId, force)
       : context.campuses;
     const nextCampus =
       context.campuses.find((campus) => campus.campusId === selectedCampusId.value) ??
@@ -146,7 +152,7 @@ async function refreshDepartments(force = false) {
       doctors.value = [];
     }
   } catch (error) {
-    departmentError.value = messageOf(error, "部门加载失败，请重试");
+    departmentError.value = messageOf(error, "科室加载失败，请重试");
   } finally {
     departmentLoading.value = false;
   }
@@ -264,11 +270,13 @@ function changeCampusStatus(campus: CampusSummary, enabled: boolean) {
       if (!result.confirm) return;
       mutationPending.value = true;
       try {
-        await staffManagementApi.setCampusEnabled(
+        await organizationAdminApi.setCampusEnabled(
           campus.campusId,
           enabled,
           campus.version,
         );
+        invalidateOrganizationContext();
+        invalidateManagedCampuses(hospitalId.value);
         invalidateDepartments();
         await refreshOrganization(true);
         uni.showToast({ title: enabled ? "院区已恢复" : "院区已停用" });
@@ -306,7 +314,7 @@ async function saveDepartment() {
   const name = editorName.value.trim();
   if (!name || mutationPending.value) {
     if (!name) {
-      uni.showToast({ title: "请输入部门名称", icon: "none" });
+      uni.showToast({ title: "请输入科室名称", icon: "none" });
     }
     return;
   }
@@ -314,33 +322,35 @@ async function saveDepartment() {
   try {
     if (editorTarget.value === "campus") {
       if (editorMode.value === "create") {
-        const created = await staffManagementApi.createCampus({
+        const created = await organizationAdminApi.createCampus({
           name,
           hospitalId: hospitalId.value,
         });
         selectedCampusId.value = created.campusId;
         lastSelectedCampusId = created.campusId;
       } else if (selectedManagedCampus.value) {
-        await staffManagementApi.updateCampus(
+        await organizationAdminApi.updateCampus(
           selectedManagedCampus.value.campusId,
           { name, hospitalId: hospitalId.value },
           selectedManagedCampus.value.version,
         );
       }
       editorVisible.value = false;
+      invalidateOrganizationContext();
+      invalidateManagedCampuses(hospitalId.value);
       invalidateDepartments();
       await refreshOrganization(true);
       uni.showToast({ title: editorMode.value === "create" ? "院区已新增" : "院区已更新" });
       return;
     }
     if (editorMode.value === "create") {
-      const created = await staffManagementApi.createDepartment({
+      const created = await organizationAdminApi.createDepartment({
         name,
         parentId: selectedCampusId.value,
       });
       lastSelectedDepartmentId = created.departmentId;
     } else if (selectedDepartment.value.departmentId) {
-      await staffManagementApi.updateDepartment(
+      await organizationAdminApi.updateDepartment(
         selectedDepartment.value.departmentId,
         { name, parentId: selectedCampusId.value },
         selectedDepartment.value.version,
@@ -348,9 +358,10 @@ async function saveDepartment() {
       lastSelectedDepartmentId = selectedDepartment.value.departmentId;
     }
     editorVisible.value = false;
-    invalidateDepartments();
+    invalidateOrganizationContext();
+    invalidateDepartments(selectedCampusId.value);
     await refreshDepartments(true);
-    uni.showToast({ title: editorMode.value === "create" ? "部门已新增" : "部门已更新" });
+    uni.showToast({ title: editorMode.value === "create" ? "科室已新增" : "科室已更新" });
   } catch (error) {
     uni.showToast({ title: messageOf(error, "保存失败"), icon: "none" });
   } finally {
@@ -364,7 +375,7 @@ function changeDepartmentStatus(enabled: boolean) {
     return;
   }
   uni.showModal({
-    title: enabled ? "恢复部门" : "停用部门",
+    title: enabled ? "恢复科室" : "停用科室",
     content: enabled
       ? `恢复“${department.name}”后可重新关联医生和业务。`
       : `“${department.name}”将停止新增业务，历史数据不会删除。`,
@@ -376,16 +387,17 @@ function changeDepartmentStatus(enabled: boolean) {
       }
       mutationPending.value = true;
       try {
-        await staffManagementApi.setDepartmentEnabled(
+        await organizationAdminApi.setDepartmentEnabled(
           department.departmentId,
           enabled,
           department.version,
         );
-        invalidateDepartments();
+        invalidateOrganizationContext();
+        invalidateDepartments(selectedCampusId.value);
         invalidateDoctors(department.departmentId);
         selectedDepartmentId.value = "";
         await refreshDepartments(true);
-        uni.showToast({ title: enabled ? "部门已恢复" : "部门已停用" });
+        uni.showToast({ title: enabled ? "科室已恢复" : "科室已停用" });
       } catch (error) {
         uni.showToast({ title: messageOf(error, "操作失败"), icon: "none" });
       } finally {
@@ -415,7 +427,7 @@ function openDoctor(doctor: DoctorSummary) {
   }
   navigationPending.value = true;
   uni.navigateTo({
-    url: `/pages/admin/users/detail?account_id=${encodeURIComponent(doctor.doctorId)}`,
+    url: `/pages/admin/users/detail?account_id=${encodeURIComponent(doctor.accountId)}`,
     fail: () => {
       navigationPending.value = false;
       uni.showToast({ title: "用户详情打开失败", icon: "none" });

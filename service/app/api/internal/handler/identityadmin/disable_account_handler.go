@@ -12,16 +12,16 @@ import (
 	"hospital/service/app/api/internal/types"
 )
 
-func RevokeManagedDoctorHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func DisableAccountHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.ManagedAccountMutationRequest
+		var req types.AccountMutationRequest
 		if err := httpx.Parse(r, &req); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
 
-		l := identityadmin.NewRevokeManagedDoctorLogic(r.Context(), svcCtx)
-		resp, err := l.RevokeManagedDoctor(&req)
+		l := identityadmin.NewDisableAccountLogic(r.Context(), svcCtx)
+		resp, err := l.DisableAccount(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

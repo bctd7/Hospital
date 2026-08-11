@@ -2,7 +2,9 @@
 import { onLoad } from "@dcloudio/uni-app";
 import { computed, ref } from "vue";
 
-import { staffManagementApi } from "@/api/staffManagement";
+import {
+  identityAdminApi,
+} from "@/api/staffManagement";
 import DoctorProfileDialog from "@/components/admin/DoctorProfileDialog.vue";
 import { sessionState } from "@/stores/session";
 import type {
@@ -12,7 +14,12 @@ import type {
   DoctorProfileDraft,
 } from "@/types/staffManagement";
 import { hasIdentityPermission } from "@/utils/appShell";
-import { invalidateDepartments, invalidateDoctors } from "@/utils/staffManagementCache";
+import {
+  invalidateDepartments,
+  invalidateDoctors,
+  loadDepartments,
+  loadOrganizationContext,
+} from "@/services/organization";
 
 const identityLabels = { patient: "普通用户", doctor: "医生", super_admin: "超级管理员" } as const;
 const accountId = ref("");
@@ -60,18 +67,17 @@ async function loadDetail() {
   loading.value = true;
   error.value = "";
   try {
-    const departmentsPromise = staffManagementApi
-      .getOrganizationContext()
+    const departmentsPromise = loadOrganizationContext()
       .then((context) =>
         Promise.all(
           context.campuses.map((campus) =>
-            staffManagementApi.listDepartments(campus.campusId, false),
+            loadDepartments(campus.campusId),
           ),
         ),
       )
       .then((items) => items.flat());
     const [account, departmentList] = await Promise.all([
-      staffManagementApi.getAccount(accountId.value),
+      identityAdminApi.getAccount(accountId.value),
       departmentsPromise,
     ]);
     detail.value = account;
@@ -122,13 +128,13 @@ async function saveProfile(profile: DoctorProfileDraft) {
   try {
     const beforeDepartmentId = account.departmentId;
     const updated = profileDialogMode.value === "promote"
-      ? await staffManagementApi.promoteDoctor(
+      ? await identityAdminApi.promoteDoctor(
           account.accountId,
           selectedTargetDepartmentId.value,
           profile,
           account.managementVersion,
         )
-      : await staffManagementApi.updateDoctor(account.accountId, profile, account.managementVersion);
+      : await identityAdminApi.updateDoctor(account.accountId, profile, account.managementVersion);
     acceptMutation(updated, beforeDepartmentId);
     profileDialogVisible.value = false;
     uni.showToast({ title: profileDialogMode.value === "promote" ? "医生身份已开通" : "医生资料已更新" });
@@ -147,7 +153,7 @@ async function changeDepartment() {
   confirmAction(
     "确认调岗",
     `将 ${displayName.value} 调至“${target.name}”？`,
-    async () => staffManagementApi.changeDoctorDepartment(
+    async () => identityAdminApi.changeDoctorDepartment(
       account.accountId,
       target.departmentId,
       account.managementVersion,
@@ -162,7 +168,7 @@ function revokeDoctor() {
   confirmAction(
     "撤销医生身份",
     "撤销后该账号保留普通用户身份，历史业务数据不会删除。",
-    () => staffManagementApi.revokeDoctor(account.accountId, account.managementVersion),
+    () => identityAdminApi.revokeDoctor(account.accountId, account.managementVersion),
     "医生身份已撤销",
     true,
   );
@@ -176,7 +182,7 @@ function changeAccountEnabled(enabled: boolean) {
     enabled
       ? "启用后，该手机号可以重新登录并获取验证码。"
       : "禁用后，该手机号不能登录或获取验证码，历史数据仍会保留。",
-    () => staffManagementApi.setAccountEnabled(account.accountId, enabled, account.managementVersion),
+    () => identityAdminApi.setAccountEnabled(account.accountId, enabled, account.managementVersion),
     enabled ? "账号已启用" : "账号已禁用",
     !enabled,
   );

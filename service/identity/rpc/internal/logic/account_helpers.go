@@ -23,7 +23,7 @@ func accountRPCError(err error) error {
 		return status.Error(codes.ResourceExhausted, "verification requests are too frequent")
 	case errors.Is(err, account.ErrInvalidPhone), errors.Is(err, account.ErrInvalidExternalIdentity):
 		return status.Error(codes.InvalidArgument, err.Error())
-	case errors.Is(err, account.ErrPhoneInUse), errors.Is(err, authorization.ErrConflict):
+	case errors.Is(err, account.ErrPhoneInUse):
 		return status.Error(codes.AlreadyExists, err.Error())
 	case errors.Is(err, account.ErrVerifiedPhoneChange):
 		return status.Error(codes.FailedPrecondition, "verified login phone requires a dedicated change flow")

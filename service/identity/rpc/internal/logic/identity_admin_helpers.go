@@ -44,7 +44,7 @@ func accountDisplayProfileResponse(value identityadmin.DisplayProfile) *identity
 
 func doctorSummaryResponse(value identityadmin.DoctorSummary) *identityv1.DoctorSummary {
 	return &identityv1.DoctorSummary{
-		DoctorId: value.AccountID, DisplayName: value.DisplayName, DepartmentId: value.DepartmentID,
+		AccountId: value.AccountID, DisplayName: value.DisplayName, DepartmentId: value.DepartmentID,
 		AvatarUrl: optionalProtoString(value.AvatarURL), Description: optionalProtoString(value.Description),
 		Version: value.ManagementVersion,
 	}

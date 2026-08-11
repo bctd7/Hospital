@@ -10,11 +10,7 @@ service IdentityService {
   rpc WeChatLogin(WeChatLoginRequest) returns (TokenPair);
   rpc SetMyPhone(SetMyPhoneRequest) returns (PhoneBinding);
   rpc FindAccountByPhone(FindAccountByPhoneRequest) returns (AccountLookup);
-  rpc PromoteToDepartmentDoctor(PromoteToDepartmentDoctorRequest) returns (AuthorizationContext);
   rpc GetAuthorizationContext(GetAuthorizationContextRequest) returns (AuthorizationContext);
-  rpc AssignRole(AssignRoleRequest) returns (AuthorizationContext);
-  rpc ChangeStaffDepartment(ChangeStaffDepartmentRequest) returns (AuthorizationContext);
-  rpc ChangeAccountStatus(ChangeAccountStatusRequest) returns (AuthorizationContext);
   rpc RefreshAccessToken(RefreshAccessTokenRequest) returns (TokenPair);
   rpc RevokeRefreshToken(RevokeRefreshTokenRequest) returns (RevokeRefreshTokenResponse);
 
@@ -39,12 +35,12 @@ service IdentityService {
   rpc ListAdminAccounts(ListAdminAccountsRequest) returns (ListAdminAccountsResponse);
   rpc GetAdminAccount(GetAdminAccountRequest) returns (AdminAccountDetail);
   rpc SearchAdminAccountByPhone(SearchAdminAccountByPhoneRequest) returns (SearchAdminAccountByPhoneResponse);
-  rpc PromoteManagedDoctor(PromoteManagedDoctorRequest) returns (AdminAccountDetail);
-  rpc UpdateManagedDoctor(UpdateManagedDoctorRequest) returns (AdminAccountDetail);
-  rpc ChangeManagedDoctorDepartment(ChangeManagedDoctorDepartmentRequest) returns (AdminAccountDetail);
-  rpc RevokeManagedDoctor(ManagedAccountMutationRequest) returns (AdminAccountDetail);
-  rpc DisableManagedAccount(ManagedAccountMutationRequest) returns (AdminAccountDetail);
-  rpc EnableManagedAccount(ManagedAccountMutationRequest) returns (AdminAccountDetail);
+  rpc PromoteDoctor(PromoteDoctorRequest) returns (AdminAccountDetail);
+  rpc UpdateDoctor(UpdateDoctorRequest) returns (AdminAccountDetail);
+  rpc ChangeDoctorDepartment(ChangeDoctorDepartmentRequest) returns (AdminAccountDetail);
+  rpc RevokeDoctor(AccountMutationRequest) returns (AdminAccountDetail);
+  rpc DisableAccount(AccountMutationRequest) returns (AdminAccountDetail);
+  rpc EnableAccount(AccountMutationRequest) returns (AdminAccountDetail);
 }
 
 message SendPhoneLoginCodeRequest {
@@ -89,38 +85,9 @@ message AccountLookup {
   PhoneBinding phone = 2;
 }
 
-message PromoteToDepartmentDoctorRequest {
-  string target_account_id = 1;
-  string department_id = 2;
-  bool offline_verified = 3;
-  string operation_id = 4;
-  string request_id = 5;
-}
-
 message GetAuthorizationContextRequest {
   string account_id = 1;
   string request_id = 2;
-}
-
-message AssignRoleRequest {
-  string target_account_id = 1;
-  string role_code = 2;
-  string operation_id = 3;
-  string request_id = 4;
-}
-
-message ChangeStaffDepartmentRequest {
-  string target_account_id = 1;
-  string department_id = 2;
-  string operation_id = 3;
-  string request_id = 4;
-}
-
-message ChangeAccountStatusRequest {
-  string target_account_id = 1;
-  string status = 2;
-  string operation_id = 3;
-  string request_id = 4;
 }
 
 message AuthorizationContext {
@@ -228,7 +195,8 @@ message ListDepartmentsResponse {
 }
 
 message DoctorSummary {
-  string doctor_id = 1;
+  // A doctor is an Identity account with an active doctor role/profile.
+  string account_id = 1;
   string display_name = 2;
   string department_id = 3;
   optional string avatar_url = 4;
@@ -348,7 +316,7 @@ message SearchAdminAccountByPhoneResponse {
   PhoneBinding phone = 2;
 }
 
-message PromoteManagedDoctorRequest {
+message PromoteDoctorRequest {
   string account_id = 1;
   string department_id = 2;
   string display_name = 3;
@@ -361,7 +329,7 @@ message PromoteManagedDoctorRequest {
   string request_id = 10;
 }
 
-message UpdateManagedDoctorRequest {
+message UpdateDoctorRequest {
   string account_id = 1;
   optional string display_name = 2;
   optional string staff_no = 3;
@@ -372,7 +340,7 @@ message UpdateManagedDoctorRequest {
   string request_id = 8;
 }
 
-message ChangeManagedDoctorDepartmentRequest {
+message ChangeDoctorDepartmentRequest {
   string account_id = 1;
   string department_id = 2;
   int64 management_version = 3;
@@ -380,7 +348,7 @@ message ChangeManagedDoctorDepartmentRequest {
   string request_id = 5;
 }
 
-message ManagedAccountMutationRequest {
+message AccountMutationRequest {
   string account_id = 1;
   int64 management_version = 2;
   string operation_id = 3;

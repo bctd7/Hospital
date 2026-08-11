@@ -12,16 +12,16 @@ import (
 	"hospital/service/app/api/internal/types"
 )
 
-func EnableManagedAccountHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func ChangeDoctorDepartmentHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.ManagedAccountMutationRequest
+		var req types.ChangeDoctorDepartmentRequest
 		if err := httpx.Parse(r, &req); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
 
-		l := identityadmin.NewEnableManagedAccountLogic(r.Context(), svcCtx)
-		resp, err := l.EnableManagedAccount(&req)
+		l := identityadmin.NewChangeDoctorDepartmentLogic(r.Context(), svcCtx)
+		resp, err := l.ChangeDoctorDepartment(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

@@ -2,7 +2,7 @@
 import { onLoad, onReachBottom, onShow } from "@dcloudio/uni-app";
 import { computed, ref } from "vue";
 
-import { staffManagementApi } from "@/api/staffManagement";
+import { identityAdminApi } from "@/api/staffManagement";
 import AdminUserListItem from "@/components/admin/AdminUserListItem.vue";
 import { sessionState } from "@/stores/session";
 import type { AccountIdentityType, AccountStatus, AdminAccountSummary } from "@/types/staffManagement";
@@ -70,12 +70,12 @@ async function search(reset = true) {
   try {
     const trimmed = keyword.value.trim();
     if (trimmed && isFullPhone(trimmed)) {
-      const account = await staffManagementApi.searchAccountByPhone(normalizePhone(trimmed));
+      const account = await identityAdminApi.searchAccountByPhone(normalizePhone(trimmed));
       accounts.value = account ? [account] : [];
       total.value = accounts.value.length;
     } else {
       const filter = filters[activeFilter.value];
-      const result = await staffManagementApi.listAccounts({
+      const result = await identityAdminApi.listAccounts({
         page: 1,
         pageSize: PAGE_SIZE,
         nickname: trimmed || undefined,
@@ -101,7 +101,7 @@ async function loadMore() {
   try {
     const filter = filters[activeFilter.value];
     const nextPage = page.value + 1;
-    const result = await staffManagementApi.listAccounts({
+    const result = await identityAdminApi.listAccounts({
       page: nextPage,
       pageSize: PAGE_SIZE,
       nickname: trimmed || undefined,

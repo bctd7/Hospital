@@ -17,25 +17,22 @@ import (
 	"hospital/service/identity/rpc/internal/svc"
 )
 
-func TestAuthorizationFailureUsesFunctionalLogging(t *testing.T) {
+func TestAuthorizationContextReadFailureUsesFunctionalLogging(t *testing.T) {
 	var logs bytes.Buffer
 	restoreIdentityLogWriter(t, &logs)
 
-	store := deniedAuthorizationStore{}
+	manager, err := authorization.NewManager(deniedAuthorizationReadStore{})
+	if err != nil {
+		t.Fatal(err)
+	}
 	ctx := authn.ContextWithPrincipal(context.Background(), authn.Principal{
 		AccountID: "20000000-0000-0000-0000-000000000001",
 		Status:    authn.AccountStatusActive,
 	})
-	manager, err := authorization.NewManager(store, testAuthorizationVersionWriter{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	logic := NewAssignRoleLogic(ctx, &svc.ServiceContext{AuthorizationManager: manager})
-	_, err = logic.AssignRole(&identityv1.AssignRoleRequest{
-		TargetAccountId: "20000000-0000-0000-0000-000000000002",
-		RoleCode:        authn.RoleDepartmentDoctor,
-		OperationId:     "20000000-0000-0000-0000-000000000003",
-		RequestId:       "authorization-request-1",
+	logic := NewGetAuthorizationContextLogic(ctx, &svc.ServiceContext{AuthorizationManager: manager})
+	_, err = logic.GetAuthorizationContext(&identityv1.GetAuthorizationContextRequest{
+		AccountId: "20000000-0000-0000-0000-000000000002",
+		RequestId: "authorization-request-1",
 	})
 	if status.Code(err) != codes.PermissionDenied {
 		t.Fatalf("expected PermissionDenied, got %v", err)
@@ -44,7 +41,7 @@ func TestAuthorizationFailureUsesFunctionalLogging(t *testing.T) {
 	output := logs.String()
 	for _, expected := range []string{
 		`"level":"error"`,
-		`"event":"identity.role.assigned"`,
+		`"event":"identity.authorization.context.read"`,
 		`"request_id":"authorization-request-1"`,
 		`"operator_account_id":"20000000-0000-0000-0000-000000000001"`,
 		`"target_account_id":"20000000-0000-0000-0000-000000000002"`,
@@ -67,42 +64,8 @@ func restoreIdentityLogWriter(t *testing.T, destination io.Writer) {
 	})
 }
 
-type deniedAuthorizationStore struct{}
+type deniedAuthorizationReadStore struct{}
 
-type testAuthorizationVersionWriter struct{}
-
-func (testAuthorizationVersionWriter) SetAuthorizationVersion(context.Context, string, int64) error {
-	return nil
-}
-
-func (deniedAuthorizationStore) GetAuthorizationContext(_ context.Context, accountID string) (authn.Principal, error) {
-	return authn.Principal{AccountID: accountID, AccountType: authn.AccountTypeStaff, Status: authn.AccountStatusActive}, nil
-}
-
-func (s deniedAuthorizationStore) WithinTransaction(ctx context.Context, fn func(authorization.TxStore) error) error {
-	return fn(s)
-}
-
-func (deniedAuthorizationStore) FindOperation(context.Context, string) (authorization.Operation, bool, error) {
-	return authorization.Operation{}, false, nil
-}
-
-func (deniedAuthorizationStore) SetRole(context.Context, string, string) error {
-	panic("SetRole must not be called for a denied operator")
-}
-
-func (deniedAuthorizationStore) SetDepartment(context.Context, string, string) error {
-	panic("SetDepartment must not be called for a denied operator")
-}
-
-func (deniedAuthorizationStore) SetAccountStatus(context.Context, string, string) error {
-	panic("SetAccountStatus must not be called for a denied operator")
-}
-
-func (deniedAuthorizationStore) PromoteToDepartmentDoctor(context.Context, string, string, bool) error {
-	panic("PromoteToDepartmentDoctor must not be called for a denied operator")
-}
-
-func (deniedAuthorizationStore) RecordChange(context.Context, authorization.Change) error {
-	panic("RecordChange must not be called for a denied operator")
+func (deniedAuthorizationReadStore) GetAuthorizationContext(context.Context, string) (authn.Principal, error) {
+	panic("store must not be called when the operator lacks read permission")
 }

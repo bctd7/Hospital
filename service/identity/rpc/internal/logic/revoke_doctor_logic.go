@@ -7,16 +7,16 @@ import (
 	"hospital/service/identity/rpc/internal/svc"
 )
 
-type RevokeManagedDoctorLogic struct {
+type RevokeDoctorLogic struct {
 	ctx context.Context
 	svc *svc.ServiceContext
 }
 
-func NewRevokeManagedDoctorLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RevokeManagedDoctorLogic {
-	return &RevokeManagedDoctorLogic{ctx: ctx, svc: svcCtx}
+func NewRevokeDoctorLogic(ctx context.Context, svcCtx *svc.ServiceContext) *RevokeDoctorLogic {
+	return &RevokeDoctorLogic{ctx: ctx, svc: svcCtx}
 }
 
-func (l *RevokeManagedDoctorLogic) RevokeManagedDoctor(in *identityv1.ManagedAccountMutationRequest) (*identityv1.AdminAccountDetail, error) {
+func (l *RevokeDoctorLogic) RevokeDoctor(in *identityv1.AccountMutationRequest) (*identityv1.AdminAccountDetail, error) {
 	ctx := authorizationRequestContext(l.ctx, in.GetRequestId())
 	operator, err := authorizationOperator(ctx)
 	if err != nil {

@@ -3,7 +3,9 @@ Set-StrictMode -Version Latest
 function Import-ProjectEnvironment {
     param(
         [Parameter(Mandatory = $true)]
-        [string]$RepositoryRoot
+        [string]$RepositoryRoot,
+
+        [switch]$Override
     )
 
     $environmentFile = Join-Path $RepositoryRoot ".env"
@@ -28,7 +30,15 @@ function Import-ProjectEnvironment {
             throw "Invalid environment variable name in .env: $name"
         }
 
-        if ([string]::IsNullOrEmpty([Environment]::GetEnvironmentVariable($name, "Process"))) {
+        if ($value.Length -ge 2) {
+            $first = $value[0]
+            $last = $value[$value.Length - 1]
+            if (($first -eq '"' -and $last -eq '"') -or ($first -eq "'" -and $last -eq "'")) {
+                $value = $value.Substring(1, $value.Length - 2)
+            }
+        }
+
+        if ($Override -or [string]::IsNullOrEmpty([Environment]::GetEnvironmentVariable($name, "Process"))) {
             [Environment]::SetEnvironmentVariable($name, $value, "Process")
         }
     }

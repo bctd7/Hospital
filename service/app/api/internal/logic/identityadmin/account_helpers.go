@@ -45,8 +45,8 @@ func adminAccountsPageResponse(value *identityv1.ListAdminAccountsResponse) *typ
 	}
 }
 
-func managedAccountMutationRequest(value *types.ManagedAccountMutationRequest, requestID string) *identityv1.ManagedAccountMutationRequest {
-	return &identityv1.ManagedAccountMutationRequest{
+func accountMutationRequest(value *types.AccountMutationRequest, requestID string) *identityv1.AccountMutationRequest {
+	return &identityv1.AccountMutationRequest{
 		AccountId: value.AccountID, ManagementVersion: value.ManagementVersion,
 		OperationId: value.OperationID, RequestId: requestID,
 	}

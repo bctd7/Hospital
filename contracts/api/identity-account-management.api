@@ -17,7 +17,7 @@ type (
     }
 
     DoctorSummaryResponse {
-        DoctorID    string  `json:"doctor_id"`
+        AccountID   string  `json:"account_id"`
         DisplayName string  `json:"display_name"`
         DepartmentID string `json:"department_id"`
         AvatarURL   *string `json:"avatar_url,optional"`
@@ -96,8 +96,8 @@ type (
         Phone    PhoneBindingResponse         `json:"phone"`
     }
 
-    PromoteManagedDoctorRequest {
-        AccountID        string  `json:"account_id"`
+    PromoteDoctorRequest {
+        AccountID        string  `path:"accountId"`
         DepartmentID     string  `json:"department_id"`
         DisplayName      string  `json:"display_name"`
         StaffNo          *string `json:"staff_no,optional"`
@@ -108,7 +108,7 @@ type (
         OperationID      string  `json:"operation_id"`
     }
 
-    UpdateManagedDoctorRequest {
+    UpdateDoctorRequest {
         AccountID         string  `path:"accountId"`
         DisplayName       *string `json:"display_name,optional"`
         StaffNo           *string `json:"staff_no,optional"`
@@ -118,14 +118,14 @@ type (
         OperationID       string  `json:"operation_id"`
     }
 
-    ChangeManagedDoctorDepartmentRequest {
+    ChangeDoctorDepartmentRequest {
         AccountID         string `path:"accountId"`
         DepartmentID      string `json:"department_id"`
         ManagementVersion int64  `json:"management_version"`
         OperationID       string `json:"operation_id"`
     }
 
-    ManagedAccountMutationRequest {
+    AccountMutationRequest {
         AccountID         string `path:"accountId"`
         ManagementVersion int64  `json:"management_version"`
         OperationID       string `json:"operation_id"`
@@ -169,21 +169,21 @@ service app-api {
     @handler searchAdminAccountByPhone
     post /admin/identity/accounts/search-by-phone (AdminSearchAccountByPhoneRequest) returns (AdminSearchAccountByPhoneResponse)
 
-    @handler promoteManagedDoctor
-    post /admin/identity/doctors/promote (PromoteManagedDoctorRequest) returns (AdminAccountDetailResponse)
+    @handler promoteDoctor
+    post /admin/identity/accounts/:accountId/promote-doctor (PromoteDoctorRequest) returns (AdminAccountDetailResponse)
 
-    @handler updateManagedDoctor
-    put /admin/identity/doctors/:accountId (UpdateManagedDoctorRequest) returns (AdminAccountDetailResponse)
+    @handler updateDoctor
+    put /admin/identity/doctors/:accountId (UpdateDoctorRequest) returns (AdminAccountDetailResponse)
 
-    @handler changeManagedDoctorDepartment
-    put /admin/identity/doctors/:accountId/department (ChangeManagedDoctorDepartmentRequest) returns (AdminAccountDetailResponse)
+    @handler changeDoctorDepartment
+    put /admin/identity/doctors/:accountId/department (ChangeDoctorDepartmentRequest) returns (AdminAccountDetailResponse)
 
-    @handler revokeManagedDoctor
-    delete /admin/identity/doctors/:accountId (ManagedAccountMutationRequest) returns (AdminAccountDetailResponse)
+    @handler revokeDoctor
+    post /admin/identity/doctors/:accountId/revoke (AccountMutationRequest) returns (AdminAccountDetailResponse)
 
-    @handler disableManagedAccount
-    post /admin/identity/accounts/:accountId/disable (ManagedAccountMutationRequest) returns (AdminAccountDetailResponse)
+    @handler disableAccount
+    post /admin/identity/accounts/:accountId/disable (AccountMutationRequest) returns (AdminAccountDetailResponse)
 
-    @handler enableManagedAccount
-    post /admin/identity/accounts/:accountId/enable (ManagedAccountMutationRequest) returns (AdminAccountDetailResponse)
+    @handler enableAccount
+    post /admin/identity/accounts/:accountId/enable (AccountMutationRequest) returns (AdminAccountDetailResponse)
 }

@@ -70,7 +70,7 @@ func TestMySQLOrganizationStoreLifecycle(t *testing.T) {
 		t.Fatalf("organization create replay returned %#v, want %#v", replayed, created)
 	}
 
-	campus, err := manager.GetUnit(ctx, organizationTestCampusID)
+	campus, err := manager.GetManagedUnit(ctx, admin, organizationTestCampusID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,7 +128,7 @@ func TestMySQLOrganizationStoreLifecycle(t *testing.T) {
 
 	status := organization.StatusActive
 	campusID := organizationTestCampusID
-	units, err := manager.ListUnits(ctx, organization.ListFilter{
+	units, err := store.ListUnits(ctx, organization.ListFilter{
 		Type:     organization.UnitTypeDepartment,
 		ParentID: &campusID,
 		Status:   &status,

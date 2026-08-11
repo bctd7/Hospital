@@ -7,16 +7,16 @@ import (
 	"hospital/service/identity/rpc/internal/svc"
 )
 
-type EnableManagedAccountLogic struct {
+type EnableAccountLogic struct {
 	ctx context.Context
 	svc *svc.ServiceContext
 }
 
-func NewEnableManagedAccountLogic(ctx context.Context, svcCtx *svc.ServiceContext) *EnableManagedAccountLogic {
-	return &EnableManagedAccountLogic{ctx: ctx, svc: svcCtx}
+func NewEnableAccountLogic(ctx context.Context, svcCtx *svc.ServiceContext) *EnableAccountLogic {
+	return &EnableAccountLogic{ctx: ctx, svc: svcCtx}
 }
 
-func (l *EnableManagedAccountLogic) EnableManagedAccount(in *identityv1.ManagedAccountMutationRequest) (*identityv1.AdminAccountDetail, error) {
+func (l *EnableAccountLogic) EnableAccount(in *identityv1.AccountMutationRequest) (*identityv1.AdminAccountDetail, error) {
 	ctx := authorizationRequestContext(l.ctx, in.GetRequestId())
 	operator, err := authorizationOperator(ctx)
 	if err != nil {

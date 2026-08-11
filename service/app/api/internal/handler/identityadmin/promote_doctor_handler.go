@@ -12,16 +12,16 @@ import (
 	"hospital/service/app/api/internal/types"
 )
 
-func PromoteManagedDoctorHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func PromoteDoctorHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.PromoteManagedDoctorRequest
+		var req types.PromoteDoctorRequest
 		if err := httpx.Parse(r, &req); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
 
-		l := identityadmin.NewPromoteManagedDoctorLogic(r.Context(), svcCtx)
-		resp, err := l.PromoteManagedDoctor(&req)
+		l := identityadmin.NewPromoteDoctorLogic(r.Context(), svcCtx)
+		resp, err := l.PromoteDoctor(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

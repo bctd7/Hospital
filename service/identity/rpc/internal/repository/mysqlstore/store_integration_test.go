@@ -6,68 +6,10 @@ import (
 	"testing"
 
 	"hospital/common/authn"
-	contractauthz "hospital/contracts/authz"
-	"hospital/service/identity/rpc/internal/authorization"
+	"hospital/service/identity/rpc/internal/identityadmin"
 )
 
-const (
-	integrationAdminID     = "10000000-0000-0000-0000-000000000001"
-	integrationDoctorID    = "10000000-0000-0000-0000-000000000002"
-	integrationDepartmentA = "10000000-0000-0000-0000-000000000010"
-	integrationDepartmentB = "10000000-0000-0000-0000-000000000011"
-	integrationOperationID = "10000000-0000-0000-0000-000000000020"
-)
-
-func TestMySQLAuthorizationChange(t *testing.T) {
-	dataSource := os.Getenv("IDENTITY_TEST_MYSQL_DSN")
-	if dataSource == "" {
-		t.Skip("IDENTITY_TEST_MYSQL_DSN is not set")
-	}
-
-	store, err := New(dataSource)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer store.Close()
-	ctx := context.Background()
-	seedIdentityTestData(t, store, ctx)
-	defer cleanupIdentityTestData(t, store, ctx)
-
-	admin, err := store.GetAuthorizationContext(ctx, integrationAdminID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	manager, err := authorization.NewManager(store, integrationVersionWriter{})
-	if err != nil {
-		t.Fatal(err)
-	}
-	result, err := manager.ChangeStaffDepartment(
-		ctx, admin, integrationDoctorID, integrationDepartmentB,
-		integrationOperationID, "integration-request",
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if result.DepartmentID != integrationDepartmentB || result.AuthorizationVersion != 2 {
-		t.Fatalf("unexpected authorization context: %#v", result)
-	}
-
-	replayed, err := manager.ChangeStaffDepartment(
-		ctx, admin, integrationDoctorID, integrationDepartmentB,
-		integrationOperationID, "integration-request",
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if replayed.AuthorizationVersion != 2 {
-		t.Fatalf("idempotent replay changed authorization version to %d", replayed.AuthorizationVersion)
-	}
-
-	assertCount(t, store, ctx, "identity_authorization_audit", "operation_id", integrationOperationID, 1)
-	assertCount(t, store, ctx, "identity_outbox_events", "aggregate_id", integrationDoctorID, 1)
-}
-
-func TestMySQLWeChatRegistrationPhoneAndDoctorPromotion(t *testing.T) {
+func TestMySQLWeChatRegistrationPhoneAndIdentityAdminPromotion(t *testing.T) {
 	dataSource := os.Getenv("IDENTITY_TEST_MYSQL_DSN")
 	if dataSource == "" {
 		t.Skip("IDENTITY_TEST_MYSQL_DSN is not set")
@@ -124,18 +66,24 @@ VALUES (?, 'department', 'login-test', 'Login Test')`, departmentID); err != nil
 	if err != nil {
 		t.Fatal(err)
 	}
-	manager, err := authorization.NewManager(store, integrationVersionWriter{})
+	manager, err := identityadmin.NewManager(store, integrationVersionWriter{}, []byte("integration-phone-lookup-key-32x"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	principal, err := manager.PromoteToDepartmentDoctor(
-		ctx, admin, patientID, departmentID, true, operationID, "integration-login-request",
+	patient, _, err := manager.GetAccount(ctx, admin, patientID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	account, _, err := manager.PromoteDoctor(
+		ctx, admin, patientID, departmentID,
+		identityadmin.DoctorProfileInput{DisplayName: "集成测试医生"},
+		patient.ManagementVersion, true, operationID, "integration-login-request",
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if principal.AccountType != authn.AccountTypeStaff || !principal.HasRole(authn.RoleDepartmentDoctor) || principal.DepartmentID != departmentID {
-		t.Fatalf("unexpected promoted identity: %#v", principal)
+	if account.AccountType != authn.AccountTypeStaff || account.IdentityType() != identityadmin.IdentityTypeDoctor || account.DepartmentID != departmentID {
+		t.Fatalf("unexpected promoted identity: %#v", account)
 	}
 	lookup, err := store.FindAccountByPhone(ctx, fingerprint)
 	if err != nil {
@@ -150,56 +98,6 @@ type integrationVersionWriter struct{}
 
 func (integrationVersionWriter) SetAuthorizationVersion(context.Context, string, int64) error {
 	return nil
-}
-
-func seedIdentityTestData(t *testing.T, store *Store, ctx context.Context) {
-	t.Helper()
-	statements := []struct {
-		query string
-		args  []any
-	}{
-		{"INSERT INTO identity_organization_units (id, unit_type, code, name) VALUES (?, 'department', 'integration-a', 'Integration A')", []any{integrationDepartmentA}},
-		{"INSERT INTO identity_organization_units (id, unit_type, code, name) VALUES (?, 'department', 'integration-b', 'Integration B')", []any{integrationDepartmentB}},
-		{"INSERT INTO identity_accounts (id, account_type, status) VALUES (?, 'staff', 'active')", []any{integrationAdminID}},
-		{"INSERT INTO identity_accounts (id, account_type, status) VALUES (?, 'staff', 'active')", []any{integrationDoctorID}},
-		{"INSERT INTO identity_staff_profiles (account_id, department_id) VALUES (?, ?)", []any{integrationAdminID, integrationDepartmentA}},
-		{"INSERT INTO identity_staff_profiles (account_id, department_id) VALUES (?, ?)", []any{integrationDoctorID, integrationDepartmentA}},
-		{"INSERT INTO identity_account_roles (account_id, role_id) SELECT ?, id FROM identity_roles WHERE code = ?", []any{integrationAdminID, authn.RoleSuperAdmin}},
-		{"INSERT INTO identity_account_roles (account_id, role_id) SELECT ?, id FROM identity_roles WHERE code = ?", []any{integrationDoctorID, authn.RoleDepartmentDoctor}},
-	}
-	for _, statement := range statements {
-		if _, err := store.db.ExecContext(ctx, statement.query, statement.args...); err != nil {
-			t.Fatalf("seed identity integration data: %v", err)
-		}
-	}
-
-	admin, err := store.GetAuthorizationContext(ctx, integrationAdminID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !admin.HasPermission(contractauthz.PermissionIdentityAuthorizationManage) {
-		t.Fatal("seeded administrator is missing authorization management permission")
-	}
-}
-
-func cleanupIdentityTestData(t *testing.T, store *Store, ctx context.Context) {
-	t.Helper()
-	statements := []struct {
-		query string
-		args  []any
-	}{
-		{"DELETE FROM identity_outbox_events WHERE aggregate_id IN (?, ?)", []any{integrationAdminID, integrationDoctorID}},
-		{"DELETE FROM identity_authorization_audit WHERE target_account_id IN (?, ?)", []any{integrationAdminID, integrationDoctorID}},
-		{"DELETE FROM identity_account_roles WHERE account_id IN (?, ?)", []any{integrationAdminID, integrationDoctorID}},
-		{"DELETE FROM identity_staff_profiles WHERE account_id IN (?, ?)", []any{integrationAdminID, integrationDoctorID}},
-		{"DELETE FROM identity_accounts WHERE id IN (?, ?)", []any{integrationAdminID, integrationDoctorID}},
-		{"DELETE FROM identity_organization_units WHERE id IN (?, ?)", []any{integrationDepartmentA, integrationDepartmentB}},
-	}
-	for _, statement := range statements {
-		if _, err := store.db.ExecContext(ctx, statement.query, statement.args...); err != nil {
-			t.Errorf("cleanup identity integration data: %v", err)
-		}
-	}
 }
 
 func assertCount(t *testing.T, store *Store, ctx context.Context, table, column, value string, want int) {

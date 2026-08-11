@@ -9,20 +9,21 @@ import (
 	"hospital/service/app/api/internal/types"
 )
 
-type PromoteManagedDoctorLogic struct {
+type PromoteDoctorLogic struct {
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewPromoteManagedDoctorLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PromoteManagedDoctorLogic {
-	return &PromoteManagedDoctorLogic{ctx: ctx, svcCtx: svcCtx}
+func NewPromoteDoctorLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PromoteDoctorLogic {
+	return &PromoteDoctorLogic{ctx: ctx, svcCtx: svcCtx}
 }
-func (l *PromoteManagedDoctorLogic) PromoteManagedDoctor(req *types.PromoteManagedDoctorRequest) (*types.AdminAccountDetailResponse, error) {
+
+func (l *PromoteDoctorLogic) PromoteDoctor(req *types.PromoteDoctorRequest) (*types.AdminAccountDetailResponse, error) {
 	ctx, err := l.svcCtx.AuthenticatedRPCContext(l.ctx)
 	if err != nil {
 		return nil, err
 	}
-	value, err := l.svcCtx.Identity.PromoteManagedDoctor(ctx, &identityv1.PromoteManagedDoctorRequest{
+	value, err := l.svcCtx.Identity.PromoteDoctor(ctx, &identityv1.PromoteDoctorRequest{
 		AccountId: req.AccountID, DepartmentId: req.DepartmentID, DisplayName: req.DisplayName,
 		StaffNo: req.StaffNo, AvatarUrl: req.AvatarURL, Description: req.Description,
 		ManagementVersion: req.ManagementVersion, OfflineVerified: req.OfflineVerified,

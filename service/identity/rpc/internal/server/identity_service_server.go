@@ -48,29 +48,9 @@ func (s *IdentityServiceServer) FindAccountByPhone(ctx context.Context, in *iden
 	return l.FindAccountByPhone(in)
 }
 
-func (s *IdentityServiceServer) PromoteToDepartmentDoctor(ctx context.Context, in *identityv1.PromoteToDepartmentDoctorRequest) (*identityv1.AuthorizationContext, error) {
-	l := logic.NewPromoteToDepartmentDoctorLogic(ctx, s.svcCtx)
-	return l.PromoteToDepartmentDoctor(in)
-}
-
 func (s *IdentityServiceServer) GetAuthorizationContext(ctx context.Context, in *identityv1.GetAuthorizationContextRequest) (*identityv1.AuthorizationContext, error) {
 	l := logic.NewGetAuthorizationContextLogic(ctx, s.svcCtx)
 	return l.GetAuthorizationContext(in)
-}
-
-func (s *IdentityServiceServer) AssignRole(ctx context.Context, in *identityv1.AssignRoleRequest) (*identityv1.AuthorizationContext, error) {
-	l := logic.NewAssignRoleLogic(ctx, s.svcCtx)
-	return l.AssignRole(in)
-}
-
-func (s *IdentityServiceServer) ChangeStaffDepartment(ctx context.Context, in *identityv1.ChangeStaffDepartmentRequest) (*identityv1.AuthorizationContext, error) {
-	l := logic.NewChangeStaffDepartmentLogic(ctx, s.svcCtx)
-	return l.ChangeStaffDepartment(in)
-}
-
-func (s *IdentityServiceServer) ChangeAccountStatus(ctx context.Context, in *identityv1.ChangeAccountStatusRequest) (*identityv1.AuthorizationContext, error) {
-	l := logic.NewChangeAccountStatusLogic(ctx, s.svcCtx)
-	return l.ChangeAccountStatus(in)
 }
 
 func (s *IdentityServiceServer) RefreshAccessToken(ctx context.Context, in *identityv1.RefreshAccessTokenRequest) (*identityv1.TokenPair, error) {
@@ -155,32 +135,32 @@ func (s *IdentityServiceServer) SearchAdminAccountByPhone(ctx context.Context, i
 	return l.SearchAdminAccountByPhone(in)
 }
 
-func (s *IdentityServiceServer) PromoteManagedDoctor(ctx context.Context, in *identityv1.PromoteManagedDoctorRequest) (*identityv1.AdminAccountDetail, error) {
-	l := logic.NewPromoteManagedDoctorLogic(ctx, s.svcCtx)
-	return l.PromoteManagedDoctor(in)
+func (s *IdentityServiceServer) PromoteDoctor(ctx context.Context, in *identityv1.PromoteDoctorRequest) (*identityv1.AdminAccountDetail, error) {
+	l := logic.NewPromoteDoctorLogic(ctx, s.svcCtx)
+	return l.PromoteDoctor(in)
 }
 
-func (s *IdentityServiceServer) UpdateManagedDoctor(ctx context.Context, in *identityv1.UpdateManagedDoctorRequest) (*identityv1.AdminAccountDetail, error) {
-	l := logic.NewUpdateManagedDoctorLogic(ctx, s.svcCtx)
-	return l.UpdateManagedDoctor(in)
+func (s *IdentityServiceServer) UpdateDoctor(ctx context.Context, in *identityv1.UpdateDoctorRequest) (*identityv1.AdminAccountDetail, error) {
+	l := logic.NewUpdateDoctorLogic(ctx, s.svcCtx)
+	return l.UpdateDoctor(in)
 }
 
-func (s *IdentityServiceServer) ChangeManagedDoctorDepartment(ctx context.Context, in *identityv1.ChangeManagedDoctorDepartmentRequest) (*identityv1.AdminAccountDetail, error) {
-	l := logic.NewChangeManagedDoctorDepartmentLogic(ctx, s.svcCtx)
-	return l.ChangeManagedDoctorDepartment(in)
+func (s *IdentityServiceServer) ChangeDoctorDepartment(ctx context.Context, in *identityv1.ChangeDoctorDepartmentRequest) (*identityv1.AdminAccountDetail, error) {
+	l := logic.NewChangeDoctorDepartmentLogic(ctx, s.svcCtx)
+	return l.ChangeDoctorDepartment(in)
 }
 
-func (s *IdentityServiceServer) RevokeManagedDoctor(ctx context.Context, in *identityv1.ManagedAccountMutationRequest) (*identityv1.AdminAccountDetail, error) {
-	l := logic.NewRevokeManagedDoctorLogic(ctx, s.svcCtx)
-	return l.RevokeManagedDoctor(in)
+func (s *IdentityServiceServer) RevokeDoctor(ctx context.Context, in *identityv1.AccountMutationRequest) (*identityv1.AdminAccountDetail, error) {
+	l := logic.NewRevokeDoctorLogic(ctx, s.svcCtx)
+	return l.RevokeDoctor(in)
 }
 
-func (s *IdentityServiceServer) DisableManagedAccount(ctx context.Context, in *identityv1.ManagedAccountMutationRequest) (*identityv1.AdminAccountDetail, error) {
-	l := logic.NewDisableManagedAccountLogic(ctx, s.svcCtx)
-	return l.DisableManagedAccount(in)
+func (s *IdentityServiceServer) DisableAccount(ctx context.Context, in *identityv1.AccountMutationRequest) (*identityv1.AdminAccountDetail, error) {
+	l := logic.NewDisableAccountLogic(ctx, s.svcCtx)
+	return l.DisableAccount(in)
 }
 
-func (s *IdentityServiceServer) EnableManagedAccount(ctx context.Context, in *identityv1.ManagedAccountMutationRequest) (*identityv1.AdminAccountDetail, error) {
-	l := logic.NewEnableManagedAccountLogic(ctx, s.svcCtx)
-	return l.EnableManagedAccount(in)
+func (s *IdentityServiceServer) EnableAccount(ctx context.Context, in *identityv1.AccountMutationRequest) (*identityv1.AdminAccountDetail, error) {
+	l := logic.NewEnableAccountLogic(ctx, s.svcCtx)
+	return l.EnableAccount(in)
 }

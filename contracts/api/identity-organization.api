@@ -121,7 +121,7 @@ service app-api {
 	put /admin/identity/organization-units/:unitId (UpdateOrganizationUnitRequest) returns (AdminOrganizationUnitResponse)
 
 	@handler disableOrganizationUnit
-	delete /admin/identity/organization-units/:unitId (ChangeOrganizationUnitStatusRequest) returns (AdminOrganizationUnitResponse)
+	post /admin/identity/organization-units/:unitId/disable (ChangeOrganizationUnitStatusRequest) returns (AdminOrganizationUnitResponse)
 
 	@handler enableOrganizationUnit
 	post /admin/identity/organization-units/:unitId/enable (ChangeOrganizationUnitStatusRequest) returns (AdminOrganizationUnitResponse)
