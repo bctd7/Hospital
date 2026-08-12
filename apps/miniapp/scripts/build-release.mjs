@@ -4,35 +4,22 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const appRoot = dirname(dirname(fileURLToPath(import.meta.url)));
-const productionEnvPath = join(appRoot, ".env.production");
-
-function parseEnv(source) {
-  const values = {};
-  for (const rawLine of source.split(/\r?\n/)) {
-    const line = rawLine.trim();
-    if (!line || line.startsWith("#")) continue;
-    const separator = line.indexOf("=");
-    if (separator < 1) continue;
-    const key = line.slice(0, separator).trim();
-    let value = line.slice(separator + 1).trim();
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
-    }
-    values[key] = value;
-  }
-  return values;
-}
-
-const releaseEnv = parseEnv(readFileSync(productionEnvPath, "utf8"));
-if (releaseEnv.VITE_API_TRANSPORT !== "cloudbase") {
+const releaseConfigPath = join(appRoot, "release.config.json");
+const releaseConfig = JSON.parse(readFileSync(releaseConfigPath, "utf8"));
+if (releaseConfig.apiTransport !== "cloudbase") {
   throw new Error("release transport must be cloudbase");
 }
-for (const key of ["VITE_CLOUDBASE_ENV_ID", "VITE_ANYSERVICE_NAME"]) {
-  if (!releaseEnv[key]) throw new Error(`${key} is required for release builds`);
+for (const key of ["cloudBaseEnvId", "anyServiceName"]) {
+  if (typeof releaseConfig[key] !== "string" || !releaseConfig[key].trim()) {
+    throw new Error(`${key} is required for release builds`);
+  }
 }
+
+const releaseEnv = {
+  VITE_API_TRANSPORT: releaseConfig.apiTransport,
+  VITE_CLOUDBASE_ENV_ID: releaseConfig.cloudBaseEnvId.trim(),
+  VITE_ANYSERVICE_NAME: releaseConfig.anyServiceName.trim(),
+};
 
 const childEnv = { ...process.env };
 for (const key of Object.keys(childEnv)) {
@@ -67,8 +54,8 @@ const environmentOutput = readFileSync(
 );
 const clientOutput = readFileSync(join(outputRoot, "api", "client.js"), "utf8");
 for (const expected of [
-  releaseEnv.VITE_CLOUDBASE_ENV_ID,
-  releaseEnv.VITE_ANYSERVICE_NAME,
+  releaseConfig.cloudBaseEnvId.trim(),
+  releaseConfig.anyServiceName.trim(),
 ]) {
   if (!environmentOutput.includes(expected)) {
     throw new Error(`release output is missing CloudBase value: ${expected}`);

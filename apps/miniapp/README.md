@@ -74,7 +74,7 @@ npm run build:mp-weixin
 apps/miniapp/dist/build/mp-weixin
 ```
 
-正式构建固定读取 `.env.production` 并强制使用 CloudBase AnyService，不继承 `.env.local`、
+正式构建固定读取受 Git 管理的 `release.config.json` 并强制使用 CloudBase AnyService，不继承 `.env.local`、
 `.env.production.local` 或当前 Shell 中的 `VITE_*`。构建结束会检查产物；发现局域网 API 地址、
 缺失 CloudBase 环境或没有编译为 AnyService 调用时直接失败。不要绕过该脚本直接执行 `uni build`。
 
@@ -87,7 +87,8 @@ VITE_API_BASE_URL=http://192.168.x.x:8888
 ```
 
 前端环境文件只保存公开连接信息，不能放 AppSecret、阿里云 AccessKey、JWT 私钥或手机号 HMAC Key。
-本地真机调试只使用 `.env.local`；不要创建 `.env.production.local`。
+本地真机调试只使用 `.env.local`；不要创建 `.env.production.local`。CloudBase 环境或 AnyService 名称变化时，
+必须评审并修改 `release.config.json`，确保本地发包和 GitHub CI 使用相同配置。
 
 ## 登录联调
 
