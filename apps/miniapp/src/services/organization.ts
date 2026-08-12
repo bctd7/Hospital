@@ -69,6 +69,12 @@ const campusCache = new QueryCache<CampusSummary[]>();
 const departmentCache = new QueryCache<DepartmentSummary[]>();
 const doctorCache = new QueryCache<DoctorSummary[]>();
 
+export interface DepartmentOption {
+  department: DepartmentSummary;
+  campus: CampusSummary;
+  label: string;
+}
+
 const cloneContext = (value: OrganizationContext): OrganizationContext => ({
   hospital: { ...value.hospital },
   campuses: value.campuses.map((campus) => ({ ...campus })),
@@ -115,6 +121,29 @@ export function loadDepartments(
         : organizationDirectoryApi.listDepartments(campusId),
     cloneDepartments,
     force,
+  );
+}
+
+export async function loadDepartmentOptions(
+  force = false,
+): Promise<DepartmentOption[]> {
+  const context = await loadOrganizationContext(force);
+  const campuses = context.campuses.filter((campus) => campus.status === "active");
+  const departmentsByCampus = await Promise.all(
+    campuses.map(async (campus) => ({
+      campus,
+      departments: await loadDepartments(campus.campusId, false, force),
+    })),
+  );
+
+  return departmentsByCampus.flatMap(({ campus, departments }) =>
+    departments
+      .filter((department) => department.status === "active")
+      .map((department) => ({
+        department,
+        campus,
+        label: `${campus.name} / ${department.name}`,
+      })),
   );
 }
 

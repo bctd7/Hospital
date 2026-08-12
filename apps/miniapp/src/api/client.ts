@@ -18,6 +18,7 @@ interface RequestOptions<TData = unknown> {
 interface AuthAdapter {
   getAccessToken: () => string;
   refreshOnce: () => Promise<boolean>;
+  handleUnauthorized: (rejectedAccessToken: string) => Promise<void>;
 }
 
 interface ErrorPayload {
@@ -146,6 +147,10 @@ async function sendRequest<TResponse, TData>(
     } catch {
       // Refresh errors are converted to the original unauthorized response below.
     }
+  }
+
+  if (statusCode === 401 && authenticated && authAdapter) {
+    await authAdapter.handleUnauthorized(accessToken);
   }
 
   throw new ApiError(

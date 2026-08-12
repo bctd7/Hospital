@@ -30,7 +30,6 @@ apps/miniapp/
 │   ├── components/       # 可复用组件
 │   ├── pages/            # 页面
 │   ├── stores/           # 会话与应用状态
-│   ├── styles/           # 主题和全局样式
 │   ├── types/            # 前端业务类型
 │   └── utils/            # 无状态工具
 ├── tests/
@@ -39,6 +38,15 @@ apps/miniapp/
 ```
 
 页面不直接调用 `uni.request`。请求统一经过 API Client/Adapter，Token 刷新和错误转换只维护一份。
+
+### 分层约束
+
+- `api/client.ts` 只负责传输、Bearer Token、统一错误和单次刷新；
+- `api/management/` 按公共组织目录、组织管理、账号管理拆分契约与 HTTP Adapter，不再提供聚合全部能力的兼容接口；
+- `services/` 负责跨页面查询编排、短期缓存和失效，不包含页面跳转或弹窗；
+- `stores/` 保存会话等跨页面状态；授权变化后的清理、回登录页和并发保护集中在 Session Store；
+- `pages/` 组合用例和交互，组件通过 props/emit 复用，不根据名称反查业务主键；
+- 园区、科室和账号写操作始终使用稳定 ID。同名科室通过“园区 / 科室”展示区分，提交仍使用 `department_id`。
 
 ## 本地运行
 

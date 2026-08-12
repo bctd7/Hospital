@@ -19,6 +19,7 @@ import {
   availableAppVariants,
   initializeFromWechat,
   initializeFromPhone,
+  handleUnauthorized,
   logout,
   refreshOnce,
   restoreSession,
@@ -56,7 +57,9 @@ describe("session store", () => {
     vi.stubGlobal("uni", {
       getStorageSync: vi.fn((key: string) => storage.get(key)),
       removeStorageSync: vi.fn((key: string) => storage.delete(key)),
+      reLaunch: vi.fn((options) => options.complete?.()),
       setStorageSync: vi.fn((key: string, value: unknown) => storage.set(key, value)),
+      showToast: vi.fn(),
     });
     await logout();
     vi.clearAllMocks();
@@ -209,5 +212,70 @@ describe("session store", () => {
     completeRefresh?.(tokenResponse);
     await expect(Promise.all([first, second])).resolves.toEqual([true, true]);
     expect(authMocks.refreshToken).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears the rejected session and returns to entry when identity changes", async () => {
+    authMocks.phoneLogin.mockResolvedValue(tokenResponse);
+    authMocks.getCurrentIdentity.mockResolvedValue(doctorPrincipal);
+    await initializeFromPhone("13800138000", "123456");
+
+    await handleUnauthorized("access-token");
+
+    expect(sessionState.status).toBe("guest");
+    expect(sessionState.principal).toBeNull();
+    expect(storage.has("hospital:session")).toBe(false);
+    expect(uni.reLaunch).toHaveBeenCalledWith(
+      expect.objectContaining({ url: "/pages/entry/index" }),
+    );
+    expect(uni.showToast).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "身份已变更，请重新登录" }),
+    );
+  });
+
+  it("does not let a late unauthorized response clear a newer login", async () => {
+    authMocks.phoneLogin.mockResolvedValue(tokenResponse);
+    authMocks.getCurrentIdentity.mockResolvedValue(principal);
+    await initializeFromPhone("13800138000", "123456");
+
+    await handleUnauthorized("old-access-token");
+
+    expect(sessionState.status).toBe("authenticated");
+    expect(sessionState.principal).toEqual(principal);
+    expect(uni.reLaunch).not.toHaveBeenCalled();
+  });
+
+  it("shares one forced reauthentication across concurrent unauthorized responses", async () => {
+    authMocks.phoneLogin.mockResolvedValue(tokenResponse);
+    authMocks.getCurrentIdentity.mockResolvedValue(principal);
+    await initializeFromPhone("13800138000", "123456");
+
+    let finishReLaunch: (() => void) | undefined;
+    vi.mocked(uni.reLaunch).mockImplementation((options) => {
+      finishReLaunch = () => options.complete?.({ errMsg: "reLaunch:ok" });
+      return undefined as never;
+    });
+
+    const first = handleUnauthorized("access-token");
+    const second = handleUnauthorized("access-token");
+
+    expect(first).toBe(second);
+    expect(uni.reLaunch).toHaveBeenCalledTimes(1);
+    finishReLaunch?.();
+    await Promise.all([first, second]);
+    expect(uni.showToast).toHaveBeenCalledTimes(1);
+  });
+
+  it("allows phone login again after forced reauthentication", async () => {
+    authMocks.phoneLogin.mockResolvedValue(tokenResponse);
+    authMocks.getCurrentIdentity.mockResolvedValue(doctorPrincipal);
+    await initializeFromPhone("13800138000", "123456");
+    await handleUnauthorized("access-token");
+
+    authMocks.getCurrentIdentity.mockResolvedValue(principal);
+    await expect(initializeFromPhone("13800138000", "654321")).resolves.toBe(true);
+
+    expect(sessionState.status).toBe("authenticated");
+    expect(sessionState.principal).toEqual(principal);
+    expect(authMocks.phoneLogin).toHaveBeenLastCalledWith("13800138000", "654321");
   });
 });

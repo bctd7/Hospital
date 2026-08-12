@@ -349,110 +349,6 @@ func (x *PhoneBinding) GetVerificationSource() string {
 	return ""
 }
 
-type FindAccountByPhoneRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Phone         string                 `protobuf:"bytes,1,opt,name=phone,proto3" json:"phone,omitempty"`
-	RequestId     string                 `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *FindAccountByPhoneRequest) Reset() {
-	*x = FindAccountByPhoneRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *FindAccountByPhoneRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*FindAccountByPhoneRequest) ProtoMessage() {}
-
-func (x *FindAccountByPhoneRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use FindAccountByPhoneRequest.ProtoReflect.Descriptor instead.
-func (*FindAccountByPhoneRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *FindAccountByPhoneRequest) GetPhone() string {
-	if x != nil {
-		return x.Phone
-	}
-	return ""
-}
-
-func (x *FindAccountByPhoneRequest) GetRequestId() string {
-	if x != nil {
-		return x.RequestId
-	}
-	return ""
-}
-
-type AccountLookup struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Authorization *AuthorizationContext  `protobuf:"bytes,1,opt,name=authorization,proto3" json:"authorization,omitempty"`
-	Phone         *PhoneBinding          `protobuf:"bytes,2,opt,name=phone,proto3" json:"phone,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *AccountLookup) Reset() {
-	*x = AccountLookup{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *AccountLookup) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*AccountLookup) ProtoMessage() {}
-
-func (x *AccountLookup) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use AccountLookup.ProtoReflect.Descriptor instead.
-func (*AccountLookup) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *AccountLookup) GetAuthorization() *AuthorizationContext {
-	if x != nil {
-		return x.Authorization
-	}
-	return nil
-}
-
-func (x *AccountLookup) GetPhone() *PhoneBinding {
-	if x != nil {
-		return x.Phone
-	}
-	return nil
-}
-
 type GetAuthorizationContextRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	AccountId     string                 `protobuf:"bytes,1,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
@@ -463,7 +359,7 @@ type GetAuthorizationContextRequest struct {
 
 func (x *GetAuthorizationContextRequest) Reset() {
 	*x = GetAuthorizationContextRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[8]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -475,7 +371,7 @@ func (x *GetAuthorizationContextRequest) String() string {
 func (*GetAuthorizationContextRequest) ProtoMessage() {}
 
 func (x *GetAuthorizationContextRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[8]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -488,7 +384,7 @@ func (x *GetAuthorizationContextRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAuthorizationContextRequest.ProtoReflect.Descriptor instead.
 func (*GetAuthorizationContextRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{8}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetAuthorizationContextRequest) GetAccountId() string {
@@ -520,7 +416,7 @@ type AuthorizationContext struct {
 
 func (x *AuthorizationContext) Reset() {
 	*x = AuthorizationContext{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[9]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -532,7 +428,7 @@ func (x *AuthorizationContext) String() string {
 func (*AuthorizationContext) ProtoMessage() {}
 
 func (x *AuthorizationContext) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[9]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -545,7 +441,7 @@ func (x *AuthorizationContext) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthorizationContext.ProtoReflect.Descriptor instead.
 func (*AuthorizationContext) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{9}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *AuthorizationContext) GetAccountId() string {
@@ -607,7 +503,7 @@ type RefreshAccessTokenRequest struct {
 
 func (x *RefreshAccessTokenRequest) Reset() {
 	*x = RefreshAccessTokenRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[10]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -619,7 +515,7 @@ func (x *RefreshAccessTokenRequest) String() string {
 func (*RefreshAccessTokenRequest) ProtoMessage() {}
 
 func (x *RefreshAccessTokenRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[10]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -632,7 +528,7 @@ func (x *RefreshAccessTokenRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RefreshAccessTokenRequest.ProtoReflect.Descriptor instead.
 func (*RefreshAccessTokenRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{10}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *RefreshAccessTokenRequest) GetRefreshToken() string {
@@ -659,7 +555,7 @@ type RevokeRefreshTokenRequest struct {
 
 func (x *RevokeRefreshTokenRequest) Reset() {
 	*x = RevokeRefreshTokenRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[11]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -671,7 +567,7 @@ func (x *RevokeRefreshTokenRequest) String() string {
 func (*RevokeRefreshTokenRequest) ProtoMessage() {}
 
 func (x *RevokeRefreshTokenRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[11]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -684,7 +580,7 @@ func (x *RevokeRefreshTokenRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeRefreshTokenRequest.ProtoReflect.Descriptor instead.
 func (*RevokeRefreshTokenRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{11}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *RevokeRefreshTokenRequest) GetRefreshToken() string {
@@ -710,7 +606,7 @@ type RevokeRefreshTokenResponse struct {
 
 func (x *RevokeRefreshTokenResponse) Reset() {
 	*x = RevokeRefreshTokenResponse{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[12]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -722,7 +618,7 @@ func (x *RevokeRefreshTokenResponse) String() string {
 func (*RevokeRefreshTokenResponse) ProtoMessage() {}
 
 func (x *RevokeRefreshTokenResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[12]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -735,7 +631,7 @@ func (x *RevokeRefreshTokenResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeRefreshTokenResponse.ProtoReflect.Descriptor instead.
 func (*RevokeRefreshTokenResponse) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{12}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *RevokeRefreshTokenResponse) GetRevoked() bool {
@@ -754,7 +650,7 @@ type GetAccountDisplayProfileRequest struct {
 
 func (x *GetAccountDisplayProfileRequest) Reset() {
 	*x = GetAccountDisplayProfileRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[13]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -766,7 +662,7 @@ func (x *GetAccountDisplayProfileRequest) String() string {
 func (*GetAccountDisplayProfileRequest) ProtoMessage() {}
 
 func (x *GetAccountDisplayProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[13]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -779,7 +675,7 @@ func (x *GetAccountDisplayProfileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAccountDisplayProfileRequest.ProtoReflect.Descriptor instead.
 func (*GetAccountDisplayProfileRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{13}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *GetAccountDisplayProfileRequest) GetRequestId() string {
@@ -799,7 +695,7 @@ type UpdateAccountDisplayProfileRequest struct {
 
 func (x *UpdateAccountDisplayProfileRequest) Reset() {
 	*x = UpdateAccountDisplayProfileRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[14]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -811,7 +707,7 @@ func (x *UpdateAccountDisplayProfileRequest) String() string {
 func (*UpdateAccountDisplayProfileRequest) ProtoMessage() {}
 
 func (x *UpdateAccountDisplayProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[14]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -824,7 +720,7 @@ func (x *UpdateAccountDisplayProfileRequest) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use UpdateAccountDisplayProfileRequest.ProtoReflect.Descriptor instead.
 func (*UpdateAccountDisplayProfileRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{14}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *UpdateAccountDisplayProfileRequest) GetNickname() string {
@@ -851,7 +747,7 @@ type AccountDisplayProfile struct {
 
 func (x *AccountDisplayProfile) Reset() {
 	*x = AccountDisplayProfile{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[15]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -863,7 +759,7 @@ func (x *AccountDisplayProfile) String() string {
 func (*AccountDisplayProfile) ProtoMessage() {}
 
 func (x *AccountDisplayProfile) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[15]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -876,7 +772,7 @@ func (x *AccountDisplayProfile) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AccountDisplayProfile.ProtoReflect.Descriptor instead.
 func (*AccountDisplayProfile) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{15}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *AccountDisplayProfile) GetNickname() string {
@@ -905,7 +801,7 @@ type TokenPair struct {
 
 func (x *TokenPair) Reset() {
 	*x = TokenPair{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[16]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -917,7 +813,7 @@ func (x *TokenPair) String() string {
 func (*TokenPair) ProtoMessage() {}
 
 func (x *TokenPair) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[16]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -930,7 +826,7 @@ func (x *TokenPair) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TokenPair.ProtoReflect.Descriptor instead.
 func (*TokenPair) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{16}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *TokenPair) GetAccessToken() string {
@@ -973,7 +869,7 @@ type HospitalSummary struct {
 
 func (x *HospitalSummary) Reset() {
 	*x = HospitalSummary{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[17]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -985,7 +881,7 @@ func (x *HospitalSummary) String() string {
 func (*HospitalSummary) ProtoMessage() {}
 
 func (x *HospitalSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[17]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -998,7 +894,7 @@ func (x *HospitalSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HospitalSummary.ProtoReflect.Descriptor instead.
 func (*HospitalSummary) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{17}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *HospitalSummary) GetHospitalId() string {
@@ -1044,7 +940,7 @@ type CampusSummary struct {
 
 func (x *CampusSummary) Reset() {
 	*x = CampusSummary{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[18]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1056,7 +952,7 @@ func (x *CampusSummary) String() string {
 func (*CampusSummary) ProtoMessage() {}
 
 func (x *CampusSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[18]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1069,7 +965,7 @@ func (x *CampusSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CampusSummary.ProtoReflect.Descriptor instead.
 func (*CampusSummary) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{18}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *CampusSummary) GetCampusId() string {
@@ -1137,7 +1033,7 @@ type DepartmentSummary struct {
 
 func (x *DepartmentSummary) Reset() {
 	*x = DepartmentSummary{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[19]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1149,7 +1045,7 @@ func (x *DepartmentSummary) String() string {
 func (*DepartmentSummary) ProtoMessage() {}
 
 func (x *DepartmentSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[19]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1162,7 +1058,7 @@ func (x *DepartmentSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DepartmentSummary.ProtoReflect.Descriptor instead.
 func (*DepartmentSummary) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{19}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *DepartmentSummary) GetDepartmentId() string {
@@ -1238,7 +1134,7 @@ type AdminOrganizationUnit struct {
 
 func (x *AdminOrganizationUnit) Reset() {
 	*x = AdminOrganizationUnit{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[20]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1250,7 +1146,7 @@ func (x *AdminOrganizationUnit) String() string {
 func (*AdminOrganizationUnit) ProtoMessage() {}
 
 func (x *AdminOrganizationUnit) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[20]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1263,7 +1159,7 @@ func (x *AdminOrganizationUnit) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminOrganizationUnit.ProtoReflect.Descriptor instead.
 func (*AdminOrganizationUnit) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{20}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *AdminOrganizationUnit) GetUnitId() string {
@@ -1338,7 +1234,7 @@ type GetOrganizationContextRequest struct {
 
 func (x *GetOrganizationContextRequest) Reset() {
 	*x = GetOrganizationContextRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[21]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1350,7 +1246,7 @@ func (x *GetOrganizationContextRequest) String() string {
 func (*GetOrganizationContextRequest) ProtoMessage() {}
 
 func (x *GetOrganizationContextRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[21]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1363,7 +1259,7 @@ func (x *GetOrganizationContextRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetOrganizationContextRequest.ProtoReflect.Descriptor instead.
 func (*GetOrganizationContextRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{21}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *GetOrganizationContextRequest) GetRequestId() string {
@@ -1383,7 +1279,7 @@ type OrganizationContext struct {
 
 func (x *OrganizationContext) Reset() {
 	*x = OrganizationContext{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[22]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1395,7 +1291,7 @@ func (x *OrganizationContext) String() string {
 func (*OrganizationContext) ProtoMessage() {}
 
 func (x *OrganizationContext) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[22]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1408,7 +1304,7 @@ func (x *OrganizationContext) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OrganizationContext.ProtoReflect.Descriptor instead.
 func (*OrganizationContext) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{22}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *OrganizationContext) GetHospital() *HospitalSummary {
@@ -1435,7 +1331,7 @@ type ListDepartmentsRequest struct {
 
 func (x *ListDepartmentsRequest) Reset() {
 	*x = ListDepartmentsRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[23]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1447,7 +1343,7 @@ func (x *ListDepartmentsRequest) String() string {
 func (*ListDepartmentsRequest) ProtoMessage() {}
 
 func (x *ListDepartmentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[23]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1460,7 +1356,7 @@ func (x *ListDepartmentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDepartmentsRequest.ProtoReflect.Descriptor instead.
 func (*ListDepartmentsRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{23}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ListDepartmentsRequest) GetCampusId() string {
@@ -1486,7 +1382,7 @@ type ListDepartmentsResponse struct {
 
 func (x *ListDepartmentsResponse) Reset() {
 	*x = ListDepartmentsResponse{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[24]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1498,7 +1394,7 @@ func (x *ListDepartmentsResponse) String() string {
 func (*ListDepartmentsResponse) ProtoMessage() {}
 
 func (x *ListDepartmentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[24]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1511,7 +1407,7 @@ func (x *ListDepartmentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDepartmentsResponse.ProtoReflect.Descriptor instead.
 func (*ListDepartmentsResponse) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{24}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *ListDepartmentsResponse) GetItems() []*DepartmentSummary {
@@ -1536,7 +1432,7 @@ type DoctorSummary struct {
 
 func (x *DoctorSummary) Reset() {
 	*x = DoctorSummary{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[25]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1548,7 +1444,7 @@ func (x *DoctorSummary) String() string {
 func (*DoctorSummary) ProtoMessage() {}
 
 func (x *DoctorSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[25]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1561,7 +1457,7 @@ func (x *DoctorSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DoctorSummary.ProtoReflect.Descriptor instead.
 func (*DoctorSummary) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{25}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *DoctorSummary) GetAccountId() string {
@@ -1618,7 +1514,7 @@ type ListDoctorsByDepartmentRequest struct {
 
 func (x *ListDoctorsByDepartmentRequest) Reset() {
 	*x = ListDoctorsByDepartmentRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[26]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1630,7 +1526,7 @@ func (x *ListDoctorsByDepartmentRequest) String() string {
 func (*ListDoctorsByDepartmentRequest) ProtoMessage() {}
 
 func (x *ListDoctorsByDepartmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[26]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1643,7 +1539,7 @@ func (x *ListDoctorsByDepartmentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDoctorsByDepartmentRequest.ProtoReflect.Descriptor instead.
 func (*ListDoctorsByDepartmentRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{26}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *ListDoctorsByDepartmentRequest) GetDepartmentId() string {
@@ -1686,7 +1582,7 @@ type ListDoctorsByDepartmentResponse struct {
 
 func (x *ListDoctorsByDepartmentResponse) Reset() {
 	*x = ListDoctorsByDepartmentResponse{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[27]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1698,7 +1594,7 @@ func (x *ListDoctorsByDepartmentResponse) String() string {
 func (*ListDoctorsByDepartmentResponse) ProtoMessage() {}
 
 func (x *ListDoctorsByDepartmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[27]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1711,7 +1607,7 @@ func (x *ListDoctorsByDepartmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDoctorsByDepartmentResponse.ProtoReflect.Descriptor instead.
 func (*ListDoctorsByDepartmentResponse) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{27}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ListDoctorsByDepartmentResponse) GetItems() []*DoctorSummary {
@@ -1754,7 +1650,7 @@ type ListOrganizationUnitsRequest struct {
 
 func (x *ListOrganizationUnitsRequest) Reset() {
 	*x = ListOrganizationUnitsRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[28]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1766,7 +1662,7 @@ func (x *ListOrganizationUnitsRequest) String() string {
 func (*ListOrganizationUnitsRequest) ProtoMessage() {}
 
 func (x *ListOrganizationUnitsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[28]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1779,7 +1675,7 @@ func (x *ListOrganizationUnitsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListOrganizationUnitsRequest.ProtoReflect.Descriptor instead.
 func (*ListOrganizationUnitsRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{28}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *ListOrganizationUnitsRequest) GetUnitType() string {
@@ -1819,7 +1715,7 @@ type ListOrganizationUnitsResponse struct {
 
 func (x *ListOrganizationUnitsResponse) Reset() {
 	*x = ListOrganizationUnitsResponse{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[29]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1831,7 +1727,7 @@ func (x *ListOrganizationUnitsResponse) String() string {
 func (*ListOrganizationUnitsResponse) ProtoMessage() {}
 
 func (x *ListOrganizationUnitsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[29]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1844,7 +1740,7 @@ func (x *ListOrganizationUnitsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListOrganizationUnitsResponse.ProtoReflect.Descriptor instead.
 func (*ListOrganizationUnitsResponse) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{29}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *ListOrganizationUnitsResponse) GetItems() []*AdminOrganizationUnit {
@@ -1864,7 +1760,7 @@ type GetOrganizationUnitRequest struct {
 
 func (x *GetOrganizationUnitRequest) Reset() {
 	*x = GetOrganizationUnitRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[30]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1876,7 +1772,7 @@ func (x *GetOrganizationUnitRequest) String() string {
 func (*GetOrganizationUnitRequest) ProtoMessage() {}
 
 func (x *GetOrganizationUnitRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[30]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1889,7 +1785,7 @@ func (x *GetOrganizationUnitRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetOrganizationUnitRequest.ProtoReflect.Descriptor instead.
 func (*GetOrganizationUnitRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{30}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *GetOrganizationUnitRequest) GetUnitId() string {
@@ -1919,7 +1815,7 @@ type CreateOrganizationUnitRequest struct {
 
 func (x *CreateOrganizationUnitRequest) Reset() {
 	*x = CreateOrganizationUnitRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[31]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1931,7 +1827,7 @@ func (x *CreateOrganizationUnitRequest) String() string {
 func (*CreateOrganizationUnitRequest) ProtoMessage() {}
 
 func (x *CreateOrganizationUnitRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[31]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1944,7 +1840,7 @@ func (x *CreateOrganizationUnitRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateOrganizationUnitRequest.ProtoReflect.Descriptor instead.
 func (*CreateOrganizationUnitRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{31}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *CreateOrganizationUnitRequest) GetUnitType() string {
@@ -1996,7 +1892,7 @@ type UpdateOrganizationUnitRequest struct {
 
 func (x *UpdateOrganizationUnitRequest) Reset() {
 	*x = UpdateOrganizationUnitRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[32]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2008,7 +1904,7 @@ func (x *UpdateOrganizationUnitRequest) String() string {
 func (*UpdateOrganizationUnitRequest) ProtoMessage() {}
 
 func (x *UpdateOrganizationUnitRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[32]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2021,7 +1917,7 @@ func (x *UpdateOrganizationUnitRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateOrganizationUnitRequest.ProtoReflect.Descriptor instead.
 func (*UpdateOrganizationUnitRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{32}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *UpdateOrganizationUnitRequest) GetUnitId() string {
@@ -2078,7 +1974,7 @@ type ChangeOrganizationUnitStatusRequest struct {
 
 func (x *ChangeOrganizationUnitStatusRequest) Reset() {
 	*x = ChangeOrganizationUnitStatusRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[33]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2090,7 +1986,7 @@ func (x *ChangeOrganizationUnitStatusRequest) String() string {
 func (*ChangeOrganizationUnitStatusRequest) ProtoMessage() {}
 
 func (x *ChangeOrganizationUnitStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[33]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2103,7 +1999,7 @@ func (x *ChangeOrganizationUnitStatusRequest) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use ChangeOrganizationUnitStatusRequest.ProtoReflect.Descriptor instead.
 func (*ChangeOrganizationUnitStatusRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{33}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *ChangeOrganizationUnitStatusRequest) GetUnitId() string {
@@ -2152,7 +2048,7 @@ type AdminAccountSummary struct {
 
 func (x *AdminAccountSummary) Reset() {
 	*x = AdminAccountSummary{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[34]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2164,7 +2060,7 @@ func (x *AdminAccountSummary) String() string {
 func (*AdminAccountSummary) ProtoMessage() {}
 
 func (x *AdminAccountSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[34]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2177,7 +2073,7 @@ func (x *AdminAccountSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminAccountSummary.ProtoReflect.Descriptor instead.
 func (*AdminAccountSummary) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{34}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *AdminAccountSummary) GetAccountId() string {
@@ -2268,7 +2164,7 @@ type AdminAccountDetail struct {
 
 func (x *AdminAccountDetail) Reset() {
 	*x = AdminAccountDetail{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[35]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2280,7 +2176,7 @@ func (x *AdminAccountDetail) String() string {
 func (*AdminAccountDetail) ProtoMessage() {}
 
 func (x *AdminAccountDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[35]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2293,7 +2189,7 @@ func (x *AdminAccountDetail) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminAccountDetail.ProtoReflect.Descriptor instead.
 func (*AdminAccountDetail) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{35}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *AdminAccountDetail) GetSummary() *AdminAccountSummary {
@@ -2381,7 +2277,7 @@ type ListAdminAccountsRequest struct {
 
 func (x *ListAdminAccountsRequest) Reset() {
 	*x = ListAdminAccountsRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[36]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2393,7 +2289,7 @@ func (x *ListAdminAccountsRequest) String() string {
 func (*ListAdminAccountsRequest) ProtoMessage() {}
 
 func (x *ListAdminAccountsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[36]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2406,7 +2302,7 @@ func (x *ListAdminAccountsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAdminAccountsRequest.ProtoReflect.Descriptor instead.
 func (*ListAdminAccountsRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{36}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *ListAdminAccountsRequest) GetPage() int64 {
@@ -2470,7 +2366,7 @@ type ListAdminAccountsResponse struct {
 
 func (x *ListAdminAccountsResponse) Reset() {
 	*x = ListAdminAccountsResponse{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[37]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2482,7 +2378,7 @@ func (x *ListAdminAccountsResponse) String() string {
 func (*ListAdminAccountsResponse) ProtoMessage() {}
 
 func (x *ListAdminAccountsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[37]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2495,7 +2391,7 @@ func (x *ListAdminAccountsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAdminAccountsResponse.ProtoReflect.Descriptor instead.
 func (*ListAdminAccountsResponse) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{37}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *ListAdminAccountsResponse) GetItems() []*AdminAccountSummary {
@@ -2536,7 +2432,7 @@ type GetAdminAccountRequest struct {
 
 func (x *GetAdminAccountRequest) Reset() {
 	*x = GetAdminAccountRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[38]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2548,7 +2444,7 @@ func (x *GetAdminAccountRequest) String() string {
 func (*GetAdminAccountRequest) ProtoMessage() {}
 
 func (x *GetAdminAccountRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[38]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2561,7 +2457,7 @@ func (x *GetAdminAccountRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAdminAccountRequest.ProtoReflect.Descriptor instead.
 func (*GetAdminAccountRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{38}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *GetAdminAccountRequest) GetAccountId() string {
@@ -2588,7 +2484,7 @@ type SearchAdminAccountByPhoneRequest struct {
 
 func (x *SearchAdminAccountByPhoneRequest) Reset() {
 	*x = SearchAdminAccountByPhoneRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[39]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2600,7 +2496,7 @@ func (x *SearchAdminAccountByPhoneRequest) String() string {
 func (*SearchAdminAccountByPhoneRequest) ProtoMessage() {}
 
 func (x *SearchAdminAccountByPhoneRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[39]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2613,7 +2509,7 @@ func (x *SearchAdminAccountByPhoneRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchAdminAccountByPhoneRequest.ProtoReflect.Descriptor instead.
 func (*SearchAdminAccountByPhoneRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{39}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *SearchAdminAccountByPhoneRequest) GetPhone() string {
@@ -2640,7 +2536,7 @@ type SearchAdminAccountByPhoneResponse struct {
 
 func (x *SearchAdminAccountByPhoneResponse) Reset() {
 	*x = SearchAdminAccountByPhoneResponse{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[40]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2652,7 +2548,7 @@ func (x *SearchAdminAccountByPhoneResponse) String() string {
 func (*SearchAdminAccountByPhoneResponse) ProtoMessage() {}
 
 func (x *SearchAdminAccountByPhoneResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[40]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2665,7 +2561,7 @@ func (x *SearchAdminAccountByPhoneResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use SearchAdminAccountByPhoneResponse.ProtoReflect.Descriptor instead.
 func (*SearchAdminAccountByPhoneResponse) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{40}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *SearchAdminAccountByPhoneResponse) GetIdentity() *AdminAccountSummary {
@@ -2700,7 +2596,7 @@ type PromoteDoctorRequest struct {
 
 func (x *PromoteDoctorRequest) Reset() {
 	*x = PromoteDoctorRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[41]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2712,7 +2608,7 @@ func (x *PromoteDoctorRequest) String() string {
 func (*PromoteDoctorRequest) ProtoMessage() {}
 
 func (x *PromoteDoctorRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[41]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2725,7 +2621,7 @@ func (x *PromoteDoctorRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PromoteDoctorRequest.ProtoReflect.Descriptor instead.
 func (*PromoteDoctorRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{41}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *PromoteDoctorRequest) GetAccountId() string {
@@ -2814,7 +2710,7 @@ type UpdateDoctorRequest struct {
 
 func (x *UpdateDoctorRequest) Reset() {
 	*x = UpdateDoctorRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[42]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2826,7 +2722,7 @@ func (x *UpdateDoctorRequest) String() string {
 func (*UpdateDoctorRequest) ProtoMessage() {}
 
 func (x *UpdateDoctorRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[42]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2839,7 +2735,7 @@ func (x *UpdateDoctorRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateDoctorRequest.ProtoReflect.Descriptor instead.
 func (*UpdateDoctorRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{42}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *UpdateDoctorRequest) GetAccountId() string {
@@ -2911,7 +2807,7 @@ type ChangeDoctorDepartmentRequest struct {
 
 func (x *ChangeDoctorDepartmentRequest) Reset() {
 	*x = ChangeDoctorDepartmentRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[43]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2923,7 +2819,7 @@ func (x *ChangeDoctorDepartmentRequest) String() string {
 func (*ChangeDoctorDepartmentRequest) ProtoMessage() {}
 
 func (x *ChangeDoctorDepartmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[43]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2936,7 +2832,7 @@ func (x *ChangeDoctorDepartmentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChangeDoctorDepartmentRequest.ProtoReflect.Descriptor instead.
 func (*ChangeDoctorDepartmentRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{43}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *ChangeDoctorDepartmentRequest) GetAccountId() string {
@@ -2986,7 +2882,7 @@ type AccountMutationRequest struct {
 
 func (x *AccountMutationRequest) Reset() {
 	*x = AccountMutationRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[44]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2998,7 +2894,7 @@ func (x *AccountMutationRequest) String() string {
 func (*AccountMutationRequest) ProtoMessage() {}
 
 func (x *AccountMutationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[44]
+	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3011,7 +2907,7 @@ func (x *AccountMutationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AccountMutationRequest.ProtoReflect.Descriptor instead.
 func (*AccountMutationRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{44}
+	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *AccountMutationRequest) GetAccountId() string {
@@ -3071,14 +2967,7 @@ const file_contracts_proto_identity_v1_identity_proto_rawDesc = "" +
 	"\fPhoneBinding\x12!\n" +
 	"\fphone_masked\x18\x01 \x01(\tR\vphoneMasked\x12/\n" +
 	"\x13verification_status\x18\x02 \x01(\tR\x12verificationStatus\x12/\n" +
-	"\x13verification_source\x18\x03 \x01(\tR\x12verificationSource\"P\n" +
-	"\x19FindAccountByPhoneRequest\x12\x14\n" +
-	"\x05phone\x18\x01 \x01(\tR\x05phone\x12\x1d\n" +
-	"\n" +
-	"request_id\x18\x02 \x01(\tR\trequestId\"\x9b\x01\n" +
-	"\rAccountLookup\x12P\n" +
-	"\rauthorization\x18\x01 \x01(\v2*.hospital.identity.v1.AuthorizationContextR\rauthorization\x128\n" +
-	"\x05phone\x18\x02 \x01(\v2\".hospital.identity.v1.PhoneBindingR\x05phone\"^\n" +
+	"\x13verification_source\x18\x03 \x01(\tR\x12verificationSource\"^\n" +
 	"\x1eGetAuthorizationContextRequest\x12\x1d\n" +
 	"\n" +
 	"account_id\x18\x01 \x01(\tR\taccountId\x12\x1d\n" +
@@ -3337,15 +3226,14 @@ const file_contracts_proto_identity_v1_identity_proto_rawDesc = "" +
 	"\x12management_version\x18\x02 \x01(\x03R\x11managementVersion\x12!\n" +
 	"\foperation_id\x18\x03 \x01(\tR\voperationId\x12\x1d\n" +
 	"\n" +
-	"request_id\x18\x04 \x01(\tR\trequestId2\xc3\x19\n" +
+	"request_id\x18\x04 \x01(\tR\trequestId2\xd7\x18\n" +
 	"\x0fIdentityService\x12w\n" +
 	"\x12SendPhoneLoginCode\x12/.hospital.identity.v1.SendPhoneLoginCodeRequest\x1a0.hospital.identity.v1.SendPhoneLoginCodeResponse\x12V\n" +
 	"\n" +
 	"PhoneLogin\x12'.hospital.identity.v1.PhoneLoginRequest\x1a\x1f.hospital.identity.v1.TokenPair\x12X\n" +
 	"\vWeChatLogin\x12(.hospital.identity.v1.WeChatLoginRequest\x1a\x1f.hospital.identity.v1.TokenPair\x12Y\n" +
 	"\n" +
-	"SetMyPhone\x12'.hospital.identity.v1.SetMyPhoneRequest\x1a\".hospital.identity.v1.PhoneBinding\x12j\n" +
-	"\x12FindAccountByPhone\x12/.hospital.identity.v1.FindAccountByPhoneRequest\x1a#.hospital.identity.v1.AccountLookup\x12{\n" +
+	"SetMyPhone\x12'.hospital.identity.v1.SetMyPhoneRequest\x1a\".hospital.identity.v1.PhoneBinding\x12{\n" +
 	"\x17GetAuthorizationContext\x124.hospital.identity.v1.GetAuthorizationContextRequest\x1a*.hospital.identity.v1.AuthorizationContext\x12f\n" +
 	"\x12RefreshAccessToken\x12/.hospital.identity.v1.RefreshAccessTokenRequest\x1a\x1f.hospital.identity.v1.TokenPair\x12w\n" +
 	"\x12RevokeRefreshToken\x12/.hospital.identity.v1.RevokeRefreshTokenRequest\x1a0.hospital.identity.v1.RevokeRefreshTokenResponse\x12~\n" +
@@ -3382,7 +3270,7 @@ func file_contracts_proto_identity_v1_identity_proto_rawDescGZIP() []byte {
 	return file_contracts_proto_identity_v1_identity_proto_rawDescData
 }
 
-var file_contracts_proto_identity_v1_identity_proto_msgTypes = make([]protoimpl.MessageInfo, 45)
+var file_contracts_proto_identity_v1_identity_proto_msgTypes = make([]protoimpl.MessageInfo, 43)
 var file_contracts_proto_identity_v1_identity_proto_goTypes = []any{
 	(*SendPhoneLoginCodeRequest)(nil),           // 0: hospital.identity.v1.SendPhoneLoginCodeRequest
 	(*SendPhoneLoginCodeResponse)(nil),          // 1: hospital.identity.v1.SendPhoneLoginCodeResponse
@@ -3390,119 +3278,113 @@ var file_contracts_proto_identity_v1_identity_proto_goTypes = []any{
 	(*WeChatLoginRequest)(nil),                  // 3: hospital.identity.v1.WeChatLoginRequest
 	(*SetMyPhoneRequest)(nil),                   // 4: hospital.identity.v1.SetMyPhoneRequest
 	(*PhoneBinding)(nil),                        // 5: hospital.identity.v1.PhoneBinding
-	(*FindAccountByPhoneRequest)(nil),           // 6: hospital.identity.v1.FindAccountByPhoneRequest
-	(*AccountLookup)(nil),                       // 7: hospital.identity.v1.AccountLookup
-	(*GetAuthorizationContextRequest)(nil),      // 8: hospital.identity.v1.GetAuthorizationContextRequest
-	(*AuthorizationContext)(nil),                // 9: hospital.identity.v1.AuthorizationContext
-	(*RefreshAccessTokenRequest)(nil),           // 10: hospital.identity.v1.RefreshAccessTokenRequest
-	(*RevokeRefreshTokenRequest)(nil),           // 11: hospital.identity.v1.RevokeRefreshTokenRequest
-	(*RevokeRefreshTokenResponse)(nil),          // 12: hospital.identity.v1.RevokeRefreshTokenResponse
-	(*GetAccountDisplayProfileRequest)(nil),     // 13: hospital.identity.v1.GetAccountDisplayProfileRequest
-	(*UpdateAccountDisplayProfileRequest)(nil),  // 14: hospital.identity.v1.UpdateAccountDisplayProfileRequest
-	(*AccountDisplayProfile)(nil),               // 15: hospital.identity.v1.AccountDisplayProfile
-	(*TokenPair)(nil),                           // 16: hospital.identity.v1.TokenPair
-	(*HospitalSummary)(nil),                     // 17: hospital.identity.v1.HospitalSummary
-	(*CampusSummary)(nil),                       // 18: hospital.identity.v1.CampusSummary
-	(*DepartmentSummary)(nil),                   // 19: hospital.identity.v1.DepartmentSummary
-	(*AdminOrganizationUnit)(nil),               // 20: hospital.identity.v1.AdminOrganizationUnit
-	(*GetOrganizationContextRequest)(nil),       // 21: hospital.identity.v1.GetOrganizationContextRequest
-	(*OrganizationContext)(nil),                 // 22: hospital.identity.v1.OrganizationContext
-	(*ListDepartmentsRequest)(nil),              // 23: hospital.identity.v1.ListDepartmentsRequest
-	(*ListDepartmentsResponse)(nil),             // 24: hospital.identity.v1.ListDepartmentsResponse
-	(*DoctorSummary)(nil),                       // 25: hospital.identity.v1.DoctorSummary
-	(*ListDoctorsByDepartmentRequest)(nil),      // 26: hospital.identity.v1.ListDoctorsByDepartmentRequest
-	(*ListDoctorsByDepartmentResponse)(nil),     // 27: hospital.identity.v1.ListDoctorsByDepartmentResponse
-	(*ListOrganizationUnitsRequest)(nil),        // 28: hospital.identity.v1.ListOrganizationUnitsRequest
-	(*ListOrganizationUnitsResponse)(nil),       // 29: hospital.identity.v1.ListOrganizationUnitsResponse
-	(*GetOrganizationUnitRequest)(nil),          // 30: hospital.identity.v1.GetOrganizationUnitRequest
-	(*CreateOrganizationUnitRequest)(nil),       // 31: hospital.identity.v1.CreateOrganizationUnitRequest
-	(*UpdateOrganizationUnitRequest)(nil),       // 32: hospital.identity.v1.UpdateOrganizationUnitRequest
-	(*ChangeOrganizationUnitStatusRequest)(nil), // 33: hospital.identity.v1.ChangeOrganizationUnitStatusRequest
-	(*AdminAccountSummary)(nil),                 // 34: hospital.identity.v1.AdminAccountSummary
-	(*AdminAccountDetail)(nil),                  // 35: hospital.identity.v1.AdminAccountDetail
-	(*ListAdminAccountsRequest)(nil),            // 36: hospital.identity.v1.ListAdminAccountsRequest
-	(*ListAdminAccountsResponse)(nil),           // 37: hospital.identity.v1.ListAdminAccountsResponse
-	(*GetAdminAccountRequest)(nil),              // 38: hospital.identity.v1.GetAdminAccountRequest
-	(*SearchAdminAccountByPhoneRequest)(nil),    // 39: hospital.identity.v1.SearchAdminAccountByPhoneRequest
-	(*SearchAdminAccountByPhoneResponse)(nil),   // 40: hospital.identity.v1.SearchAdminAccountByPhoneResponse
-	(*PromoteDoctorRequest)(nil),                // 41: hospital.identity.v1.PromoteDoctorRequest
-	(*UpdateDoctorRequest)(nil),                 // 42: hospital.identity.v1.UpdateDoctorRequest
-	(*ChangeDoctorDepartmentRequest)(nil),       // 43: hospital.identity.v1.ChangeDoctorDepartmentRequest
-	(*AccountMutationRequest)(nil),              // 44: hospital.identity.v1.AccountMutationRequest
+	(*GetAuthorizationContextRequest)(nil),      // 6: hospital.identity.v1.GetAuthorizationContextRequest
+	(*AuthorizationContext)(nil),                // 7: hospital.identity.v1.AuthorizationContext
+	(*RefreshAccessTokenRequest)(nil),           // 8: hospital.identity.v1.RefreshAccessTokenRequest
+	(*RevokeRefreshTokenRequest)(nil),           // 9: hospital.identity.v1.RevokeRefreshTokenRequest
+	(*RevokeRefreshTokenResponse)(nil),          // 10: hospital.identity.v1.RevokeRefreshTokenResponse
+	(*GetAccountDisplayProfileRequest)(nil),     // 11: hospital.identity.v1.GetAccountDisplayProfileRequest
+	(*UpdateAccountDisplayProfileRequest)(nil),  // 12: hospital.identity.v1.UpdateAccountDisplayProfileRequest
+	(*AccountDisplayProfile)(nil),               // 13: hospital.identity.v1.AccountDisplayProfile
+	(*TokenPair)(nil),                           // 14: hospital.identity.v1.TokenPair
+	(*HospitalSummary)(nil),                     // 15: hospital.identity.v1.HospitalSummary
+	(*CampusSummary)(nil),                       // 16: hospital.identity.v1.CampusSummary
+	(*DepartmentSummary)(nil),                   // 17: hospital.identity.v1.DepartmentSummary
+	(*AdminOrganizationUnit)(nil),               // 18: hospital.identity.v1.AdminOrganizationUnit
+	(*GetOrganizationContextRequest)(nil),       // 19: hospital.identity.v1.GetOrganizationContextRequest
+	(*OrganizationContext)(nil),                 // 20: hospital.identity.v1.OrganizationContext
+	(*ListDepartmentsRequest)(nil),              // 21: hospital.identity.v1.ListDepartmentsRequest
+	(*ListDepartmentsResponse)(nil),             // 22: hospital.identity.v1.ListDepartmentsResponse
+	(*DoctorSummary)(nil),                       // 23: hospital.identity.v1.DoctorSummary
+	(*ListDoctorsByDepartmentRequest)(nil),      // 24: hospital.identity.v1.ListDoctorsByDepartmentRequest
+	(*ListDoctorsByDepartmentResponse)(nil),     // 25: hospital.identity.v1.ListDoctorsByDepartmentResponse
+	(*ListOrganizationUnitsRequest)(nil),        // 26: hospital.identity.v1.ListOrganizationUnitsRequest
+	(*ListOrganizationUnitsResponse)(nil),       // 27: hospital.identity.v1.ListOrganizationUnitsResponse
+	(*GetOrganizationUnitRequest)(nil),          // 28: hospital.identity.v1.GetOrganizationUnitRequest
+	(*CreateOrganizationUnitRequest)(nil),       // 29: hospital.identity.v1.CreateOrganizationUnitRequest
+	(*UpdateOrganizationUnitRequest)(nil),       // 30: hospital.identity.v1.UpdateOrganizationUnitRequest
+	(*ChangeOrganizationUnitStatusRequest)(nil), // 31: hospital.identity.v1.ChangeOrganizationUnitStatusRequest
+	(*AdminAccountSummary)(nil),                 // 32: hospital.identity.v1.AdminAccountSummary
+	(*AdminAccountDetail)(nil),                  // 33: hospital.identity.v1.AdminAccountDetail
+	(*ListAdminAccountsRequest)(nil),            // 34: hospital.identity.v1.ListAdminAccountsRequest
+	(*ListAdminAccountsResponse)(nil),           // 35: hospital.identity.v1.ListAdminAccountsResponse
+	(*GetAdminAccountRequest)(nil),              // 36: hospital.identity.v1.GetAdminAccountRequest
+	(*SearchAdminAccountByPhoneRequest)(nil),    // 37: hospital.identity.v1.SearchAdminAccountByPhoneRequest
+	(*SearchAdminAccountByPhoneResponse)(nil),   // 38: hospital.identity.v1.SearchAdminAccountByPhoneResponse
+	(*PromoteDoctorRequest)(nil),                // 39: hospital.identity.v1.PromoteDoctorRequest
+	(*UpdateDoctorRequest)(nil),                 // 40: hospital.identity.v1.UpdateDoctorRequest
+	(*ChangeDoctorDepartmentRequest)(nil),       // 41: hospital.identity.v1.ChangeDoctorDepartmentRequest
+	(*AccountMutationRequest)(nil),              // 42: hospital.identity.v1.AccountMutationRequest
 }
 var file_contracts_proto_identity_v1_identity_proto_depIdxs = []int32{
-	9,  // 0: hospital.identity.v1.AccountLookup.authorization:type_name -> hospital.identity.v1.AuthorizationContext
-	5,  // 1: hospital.identity.v1.AccountLookup.phone:type_name -> hospital.identity.v1.PhoneBinding
-	17, // 2: hospital.identity.v1.OrganizationContext.hospital:type_name -> hospital.identity.v1.HospitalSummary
-	18, // 3: hospital.identity.v1.OrganizationContext.campuses:type_name -> hospital.identity.v1.CampusSummary
-	19, // 4: hospital.identity.v1.ListDepartmentsResponse.items:type_name -> hospital.identity.v1.DepartmentSummary
-	25, // 5: hospital.identity.v1.ListDoctorsByDepartmentResponse.items:type_name -> hospital.identity.v1.DoctorSummary
-	20, // 6: hospital.identity.v1.ListOrganizationUnitsResponse.items:type_name -> hospital.identity.v1.AdminOrganizationUnit
-	34, // 7: hospital.identity.v1.AdminAccountDetail.summary:type_name -> hospital.identity.v1.AdminAccountSummary
-	34, // 8: hospital.identity.v1.ListAdminAccountsResponse.items:type_name -> hospital.identity.v1.AdminAccountSummary
-	34, // 9: hospital.identity.v1.SearchAdminAccountByPhoneResponse.identity:type_name -> hospital.identity.v1.AdminAccountSummary
-	5,  // 10: hospital.identity.v1.SearchAdminAccountByPhoneResponse.phone:type_name -> hospital.identity.v1.PhoneBinding
-	0,  // 11: hospital.identity.v1.IdentityService.SendPhoneLoginCode:input_type -> hospital.identity.v1.SendPhoneLoginCodeRequest
-	2,  // 12: hospital.identity.v1.IdentityService.PhoneLogin:input_type -> hospital.identity.v1.PhoneLoginRequest
-	3,  // 13: hospital.identity.v1.IdentityService.WeChatLogin:input_type -> hospital.identity.v1.WeChatLoginRequest
-	4,  // 14: hospital.identity.v1.IdentityService.SetMyPhone:input_type -> hospital.identity.v1.SetMyPhoneRequest
-	6,  // 15: hospital.identity.v1.IdentityService.FindAccountByPhone:input_type -> hospital.identity.v1.FindAccountByPhoneRequest
-	8,  // 16: hospital.identity.v1.IdentityService.GetAuthorizationContext:input_type -> hospital.identity.v1.GetAuthorizationContextRequest
-	10, // 17: hospital.identity.v1.IdentityService.RefreshAccessToken:input_type -> hospital.identity.v1.RefreshAccessTokenRequest
-	11, // 18: hospital.identity.v1.IdentityService.RevokeRefreshToken:input_type -> hospital.identity.v1.RevokeRefreshTokenRequest
-	13, // 19: hospital.identity.v1.IdentityService.GetAccountDisplayProfile:input_type -> hospital.identity.v1.GetAccountDisplayProfileRequest
-	14, // 20: hospital.identity.v1.IdentityService.UpdateAccountDisplayProfile:input_type -> hospital.identity.v1.UpdateAccountDisplayProfileRequest
-	21, // 21: hospital.identity.v1.IdentityService.GetOrganizationContext:input_type -> hospital.identity.v1.GetOrganizationContextRequest
-	23, // 22: hospital.identity.v1.IdentityService.ListDepartments:input_type -> hospital.identity.v1.ListDepartmentsRequest
-	26, // 23: hospital.identity.v1.IdentityService.ListDoctorsByDepartment:input_type -> hospital.identity.v1.ListDoctorsByDepartmentRequest
-	28, // 24: hospital.identity.v1.IdentityService.ListOrganizationUnits:input_type -> hospital.identity.v1.ListOrganizationUnitsRequest
-	30, // 25: hospital.identity.v1.IdentityService.GetOrganizationUnit:input_type -> hospital.identity.v1.GetOrganizationUnitRequest
-	31, // 26: hospital.identity.v1.IdentityService.CreateOrganizationUnit:input_type -> hospital.identity.v1.CreateOrganizationUnitRequest
-	32, // 27: hospital.identity.v1.IdentityService.UpdateOrganizationUnit:input_type -> hospital.identity.v1.UpdateOrganizationUnitRequest
-	33, // 28: hospital.identity.v1.IdentityService.DisableOrganizationUnit:input_type -> hospital.identity.v1.ChangeOrganizationUnitStatusRequest
-	33, // 29: hospital.identity.v1.IdentityService.EnableOrganizationUnit:input_type -> hospital.identity.v1.ChangeOrganizationUnitStatusRequest
-	36, // 30: hospital.identity.v1.IdentityService.ListAdminAccounts:input_type -> hospital.identity.v1.ListAdminAccountsRequest
-	38, // 31: hospital.identity.v1.IdentityService.GetAdminAccount:input_type -> hospital.identity.v1.GetAdminAccountRequest
-	39, // 32: hospital.identity.v1.IdentityService.SearchAdminAccountByPhone:input_type -> hospital.identity.v1.SearchAdminAccountByPhoneRequest
-	41, // 33: hospital.identity.v1.IdentityService.PromoteDoctor:input_type -> hospital.identity.v1.PromoteDoctorRequest
-	42, // 34: hospital.identity.v1.IdentityService.UpdateDoctor:input_type -> hospital.identity.v1.UpdateDoctorRequest
-	43, // 35: hospital.identity.v1.IdentityService.ChangeDoctorDepartment:input_type -> hospital.identity.v1.ChangeDoctorDepartmentRequest
-	44, // 36: hospital.identity.v1.IdentityService.RevokeDoctor:input_type -> hospital.identity.v1.AccountMutationRequest
-	44, // 37: hospital.identity.v1.IdentityService.DisableAccount:input_type -> hospital.identity.v1.AccountMutationRequest
-	44, // 38: hospital.identity.v1.IdentityService.EnableAccount:input_type -> hospital.identity.v1.AccountMutationRequest
-	1,  // 39: hospital.identity.v1.IdentityService.SendPhoneLoginCode:output_type -> hospital.identity.v1.SendPhoneLoginCodeResponse
-	16, // 40: hospital.identity.v1.IdentityService.PhoneLogin:output_type -> hospital.identity.v1.TokenPair
-	16, // 41: hospital.identity.v1.IdentityService.WeChatLogin:output_type -> hospital.identity.v1.TokenPair
-	5,  // 42: hospital.identity.v1.IdentityService.SetMyPhone:output_type -> hospital.identity.v1.PhoneBinding
-	7,  // 43: hospital.identity.v1.IdentityService.FindAccountByPhone:output_type -> hospital.identity.v1.AccountLookup
-	9,  // 44: hospital.identity.v1.IdentityService.GetAuthorizationContext:output_type -> hospital.identity.v1.AuthorizationContext
-	16, // 45: hospital.identity.v1.IdentityService.RefreshAccessToken:output_type -> hospital.identity.v1.TokenPair
-	12, // 46: hospital.identity.v1.IdentityService.RevokeRefreshToken:output_type -> hospital.identity.v1.RevokeRefreshTokenResponse
-	15, // 47: hospital.identity.v1.IdentityService.GetAccountDisplayProfile:output_type -> hospital.identity.v1.AccountDisplayProfile
-	15, // 48: hospital.identity.v1.IdentityService.UpdateAccountDisplayProfile:output_type -> hospital.identity.v1.AccountDisplayProfile
-	22, // 49: hospital.identity.v1.IdentityService.GetOrganizationContext:output_type -> hospital.identity.v1.OrganizationContext
-	24, // 50: hospital.identity.v1.IdentityService.ListDepartments:output_type -> hospital.identity.v1.ListDepartmentsResponse
-	27, // 51: hospital.identity.v1.IdentityService.ListDoctorsByDepartment:output_type -> hospital.identity.v1.ListDoctorsByDepartmentResponse
-	29, // 52: hospital.identity.v1.IdentityService.ListOrganizationUnits:output_type -> hospital.identity.v1.ListOrganizationUnitsResponse
-	20, // 53: hospital.identity.v1.IdentityService.GetOrganizationUnit:output_type -> hospital.identity.v1.AdminOrganizationUnit
-	20, // 54: hospital.identity.v1.IdentityService.CreateOrganizationUnit:output_type -> hospital.identity.v1.AdminOrganizationUnit
-	20, // 55: hospital.identity.v1.IdentityService.UpdateOrganizationUnit:output_type -> hospital.identity.v1.AdminOrganizationUnit
-	20, // 56: hospital.identity.v1.IdentityService.DisableOrganizationUnit:output_type -> hospital.identity.v1.AdminOrganizationUnit
-	20, // 57: hospital.identity.v1.IdentityService.EnableOrganizationUnit:output_type -> hospital.identity.v1.AdminOrganizationUnit
-	37, // 58: hospital.identity.v1.IdentityService.ListAdminAccounts:output_type -> hospital.identity.v1.ListAdminAccountsResponse
-	35, // 59: hospital.identity.v1.IdentityService.GetAdminAccount:output_type -> hospital.identity.v1.AdminAccountDetail
-	40, // 60: hospital.identity.v1.IdentityService.SearchAdminAccountByPhone:output_type -> hospital.identity.v1.SearchAdminAccountByPhoneResponse
-	35, // 61: hospital.identity.v1.IdentityService.PromoteDoctor:output_type -> hospital.identity.v1.AdminAccountDetail
-	35, // 62: hospital.identity.v1.IdentityService.UpdateDoctor:output_type -> hospital.identity.v1.AdminAccountDetail
-	35, // 63: hospital.identity.v1.IdentityService.ChangeDoctorDepartment:output_type -> hospital.identity.v1.AdminAccountDetail
-	35, // 64: hospital.identity.v1.IdentityService.RevokeDoctor:output_type -> hospital.identity.v1.AdminAccountDetail
-	35, // 65: hospital.identity.v1.IdentityService.DisableAccount:output_type -> hospital.identity.v1.AdminAccountDetail
-	35, // 66: hospital.identity.v1.IdentityService.EnableAccount:output_type -> hospital.identity.v1.AdminAccountDetail
-	39, // [39:67] is the sub-list for method output_type
-	11, // [11:39] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	15, // 0: hospital.identity.v1.OrganizationContext.hospital:type_name -> hospital.identity.v1.HospitalSummary
+	16, // 1: hospital.identity.v1.OrganizationContext.campuses:type_name -> hospital.identity.v1.CampusSummary
+	17, // 2: hospital.identity.v1.ListDepartmentsResponse.items:type_name -> hospital.identity.v1.DepartmentSummary
+	23, // 3: hospital.identity.v1.ListDoctorsByDepartmentResponse.items:type_name -> hospital.identity.v1.DoctorSummary
+	18, // 4: hospital.identity.v1.ListOrganizationUnitsResponse.items:type_name -> hospital.identity.v1.AdminOrganizationUnit
+	32, // 5: hospital.identity.v1.AdminAccountDetail.summary:type_name -> hospital.identity.v1.AdminAccountSummary
+	32, // 6: hospital.identity.v1.ListAdminAccountsResponse.items:type_name -> hospital.identity.v1.AdminAccountSummary
+	32, // 7: hospital.identity.v1.SearchAdminAccountByPhoneResponse.identity:type_name -> hospital.identity.v1.AdminAccountSummary
+	5,  // 8: hospital.identity.v1.SearchAdminAccountByPhoneResponse.phone:type_name -> hospital.identity.v1.PhoneBinding
+	0,  // 9: hospital.identity.v1.IdentityService.SendPhoneLoginCode:input_type -> hospital.identity.v1.SendPhoneLoginCodeRequest
+	2,  // 10: hospital.identity.v1.IdentityService.PhoneLogin:input_type -> hospital.identity.v1.PhoneLoginRequest
+	3,  // 11: hospital.identity.v1.IdentityService.WeChatLogin:input_type -> hospital.identity.v1.WeChatLoginRequest
+	4,  // 12: hospital.identity.v1.IdentityService.SetMyPhone:input_type -> hospital.identity.v1.SetMyPhoneRequest
+	6,  // 13: hospital.identity.v1.IdentityService.GetAuthorizationContext:input_type -> hospital.identity.v1.GetAuthorizationContextRequest
+	8,  // 14: hospital.identity.v1.IdentityService.RefreshAccessToken:input_type -> hospital.identity.v1.RefreshAccessTokenRequest
+	9,  // 15: hospital.identity.v1.IdentityService.RevokeRefreshToken:input_type -> hospital.identity.v1.RevokeRefreshTokenRequest
+	11, // 16: hospital.identity.v1.IdentityService.GetAccountDisplayProfile:input_type -> hospital.identity.v1.GetAccountDisplayProfileRequest
+	12, // 17: hospital.identity.v1.IdentityService.UpdateAccountDisplayProfile:input_type -> hospital.identity.v1.UpdateAccountDisplayProfileRequest
+	19, // 18: hospital.identity.v1.IdentityService.GetOrganizationContext:input_type -> hospital.identity.v1.GetOrganizationContextRequest
+	21, // 19: hospital.identity.v1.IdentityService.ListDepartments:input_type -> hospital.identity.v1.ListDepartmentsRequest
+	24, // 20: hospital.identity.v1.IdentityService.ListDoctorsByDepartment:input_type -> hospital.identity.v1.ListDoctorsByDepartmentRequest
+	26, // 21: hospital.identity.v1.IdentityService.ListOrganizationUnits:input_type -> hospital.identity.v1.ListOrganizationUnitsRequest
+	28, // 22: hospital.identity.v1.IdentityService.GetOrganizationUnit:input_type -> hospital.identity.v1.GetOrganizationUnitRequest
+	29, // 23: hospital.identity.v1.IdentityService.CreateOrganizationUnit:input_type -> hospital.identity.v1.CreateOrganizationUnitRequest
+	30, // 24: hospital.identity.v1.IdentityService.UpdateOrganizationUnit:input_type -> hospital.identity.v1.UpdateOrganizationUnitRequest
+	31, // 25: hospital.identity.v1.IdentityService.DisableOrganizationUnit:input_type -> hospital.identity.v1.ChangeOrganizationUnitStatusRequest
+	31, // 26: hospital.identity.v1.IdentityService.EnableOrganizationUnit:input_type -> hospital.identity.v1.ChangeOrganizationUnitStatusRequest
+	34, // 27: hospital.identity.v1.IdentityService.ListAdminAccounts:input_type -> hospital.identity.v1.ListAdminAccountsRequest
+	36, // 28: hospital.identity.v1.IdentityService.GetAdminAccount:input_type -> hospital.identity.v1.GetAdminAccountRequest
+	37, // 29: hospital.identity.v1.IdentityService.SearchAdminAccountByPhone:input_type -> hospital.identity.v1.SearchAdminAccountByPhoneRequest
+	39, // 30: hospital.identity.v1.IdentityService.PromoteDoctor:input_type -> hospital.identity.v1.PromoteDoctorRequest
+	40, // 31: hospital.identity.v1.IdentityService.UpdateDoctor:input_type -> hospital.identity.v1.UpdateDoctorRequest
+	41, // 32: hospital.identity.v1.IdentityService.ChangeDoctorDepartment:input_type -> hospital.identity.v1.ChangeDoctorDepartmentRequest
+	42, // 33: hospital.identity.v1.IdentityService.RevokeDoctor:input_type -> hospital.identity.v1.AccountMutationRequest
+	42, // 34: hospital.identity.v1.IdentityService.DisableAccount:input_type -> hospital.identity.v1.AccountMutationRequest
+	42, // 35: hospital.identity.v1.IdentityService.EnableAccount:input_type -> hospital.identity.v1.AccountMutationRequest
+	1,  // 36: hospital.identity.v1.IdentityService.SendPhoneLoginCode:output_type -> hospital.identity.v1.SendPhoneLoginCodeResponse
+	14, // 37: hospital.identity.v1.IdentityService.PhoneLogin:output_type -> hospital.identity.v1.TokenPair
+	14, // 38: hospital.identity.v1.IdentityService.WeChatLogin:output_type -> hospital.identity.v1.TokenPair
+	5,  // 39: hospital.identity.v1.IdentityService.SetMyPhone:output_type -> hospital.identity.v1.PhoneBinding
+	7,  // 40: hospital.identity.v1.IdentityService.GetAuthorizationContext:output_type -> hospital.identity.v1.AuthorizationContext
+	14, // 41: hospital.identity.v1.IdentityService.RefreshAccessToken:output_type -> hospital.identity.v1.TokenPair
+	10, // 42: hospital.identity.v1.IdentityService.RevokeRefreshToken:output_type -> hospital.identity.v1.RevokeRefreshTokenResponse
+	13, // 43: hospital.identity.v1.IdentityService.GetAccountDisplayProfile:output_type -> hospital.identity.v1.AccountDisplayProfile
+	13, // 44: hospital.identity.v1.IdentityService.UpdateAccountDisplayProfile:output_type -> hospital.identity.v1.AccountDisplayProfile
+	20, // 45: hospital.identity.v1.IdentityService.GetOrganizationContext:output_type -> hospital.identity.v1.OrganizationContext
+	22, // 46: hospital.identity.v1.IdentityService.ListDepartments:output_type -> hospital.identity.v1.ListDepartmentsResponse
+	25, // 47: hospital.identity.v1.IdentityService.ListDoctorsByDepartment:output_type -> hospital.identity.v1.ListDoctorsByDepartmentResponse
+	27, // 48: hospital.identity.v1.IdentityService.ListOrganizationUnits:output_type -> hospital.identity.v1.ListOrganizationUnitsResponse
+	18, // 49: hospital.identity.v1.IdentityService.GetOrganizationUnit:output_type -> hospital.identity.v1.AdminOrganizationUnit
+	18, // 50: hospital.identity.v1.IdentityService.CreateOrganizationUnit:output_type -> hospital.identity.v1.AdminOrganizationUnit
+	18, // 51: hospital.identity.v1.IdentityService.UpdateOrganizationUnit:output_type -> hospital.identity.v1.AdminOrganizationUnit
+	18, // 52: hospital.identity.v1.IdentityService.DisableOrganizationUnit:output_type -> hospital.identity.v1.AdminOrganizationUnit
+	18, // 53: hospital.identity.v1.IdentityService.EnableOrganizationUnit:output_type -> hospital.identity.v1.AdminOrganizationUnit
+	35, // 54: hospital.identity.v1.IdentityService.ListAdminAccounts:output_type -> hospital.identity.v1.ListAdminAccountsResponse
+	33, // 55: hospital.identity.v1.IdentityService.GetAdminAccount:output_type -> hospital.identity.v1.AdminAccountDetail
+	38, // 56: hospital.identity.v1.IdentityService.SearchAdminAccountByPhone:output_type -> hospital.identity.v1.SearchAdminAccountByPhoneResponse
+	33, // 57: hospital.identity.v1.IdentityService.PromoteDoctor:output_type -> hospital.identity.v1.AdminAccountDetail
+	33, // 58: hospital.identity.v1.IdentityService.UpdateDoctor:output_type -> hospital.identity.v1.AdminAccountDetail
+	33, // 59: hospital.identity.v1.IdentityService.ChangeDoctorDepartment:output_type -> hospital.identity.v1.AdminAccountDetail
+	33, // 60: hospital.identity.v1.IdentityService.RevokeDoctor:output_type -> hospital.identity.v1.AdminAccountDetail
+	33, // 61: hospital.identity.v1.IdentityService.DisableAccount:output_type -> hospital.identity.v1.AdminAccountDetail
+	33, // 62: hospital.identity.v1.IdentityService.EnableAccount:output_type -> hospital.identity.v1.AdminAccountDetail
+	36, // [36:63] is the sub-list for method output_type
+	9,  // [9:36] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_contracts_proto_identity_v1_identity_proto_init() }
@@ -3510,20 +3392,20 @@ func file_contracts_proto_identity_v1_identity_proto_init() {
 	if File_contracts_proto_identity_v1_identity_proto != nil {
 		return
 	}
-	file_contracts_proto_identity_v1_identity_proto_msgTypes[15].OneofWrappers = []any{}
-	file_contracts_proto_identity_v1_identity_proto_msgTypes[25].OneofWrappers = []any{}
+	file_contracts_proto_identity_v1_identity_proto_msgTypes[13].OneofWrappers = []any{}
+	file_contracts_proto_identity_v1_identity_proto_msgTypes[23].OneofWrappers = []any{}
+	file_contracts_proto_identity_v1_identity_proto_msgTypes[30].OneofWrappers = []any{}
 	file_contracts_proto_identity_v1_identity_proto_msgTypes[32].OneofWrappers = []any{}
-	file_contracts_proto_identity_v1_identity_proto_msgTypes[34].OneofWrappers = []any{}
-	file_contracts_proto_identity_v1_identity_proto_msgTypes[35].OneofWrappers = []any{}
-	file_contracts_proto_identity_v1_identity_proto_msgTypes[41].OneofWrappers = []any{}
-	file_contracts_proto_identity_v1_identity_proto_msgTypes[42].OneofWrappers = []any{}
+	file_contracts_proto_identity_v1_identity_proto_msgTypes[33].OneofWrappers = []any{}
+	file_contracts_proto_identity_v1_identity_proto_msgTypes[39].OneofWrappers = []any{}
+	file_contracts_proto_identity_v1_identity_proto_msgTypes[40].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_contracts_proto_identity_v1_identity_proto_rawDesc), len(file_contracts_proto_identity_v1_identity_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   45,
+			NumMessages:   43,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -3,14 +3,9 @@ package account
 import (
 	"context"
 	"errors"
-	"fmt"
 	"regexp"
 	"strings"
 
-	"hospital/common/authn"
-	commonauthz "hospital/common/authz"
-	contractauthz "hospital/contracts/authz"
-	"hospital/service/identity/rpc/internal/authorization"
 	"hospital/service/identity/rpc/internal/login"
 	"hospital/service/identity/rpc/internal/session"
 )
@@ -35,15 +30,9 @@ type PhoneBinding struct {
 	VerificationSource string
 }
 
-type Lookup struct {
-	Principal authn.Principal
-	Phone     PhoneBinding
-}
-
 type Store interface {
 	FindOrCreateWeChatAccount(ctx context.Context, appID, openID string) (string, error)
 	SetSelfReportedPhone(ctx context.Context, accountID string, fingerprint []byte, masked string) (PhoneBinding, error)
-	FindAccountByPhone(ctx context.Context, fingerprint []byte) (Lookup, error)
 }
 
 type SessionStarter interface {
@@ -89,17 +78,6 @@ func (m *Manager) SetMyPhone(ctx context.Context, accountID, rawPhone string) (P
 		return PhoneBinding{}, err
 	}
 	return m.store.SetSelfReportedPhone(ctx, accountID, m.fingerprint(normalized), maskPhone(normalized))
-}
-
-func (m *Manager) FindByPhone(ctx context.Context, operator authn.Principal, rawPhone string) (Lookup, error) {
-	if err := commonauthz.RequirePermission(operator, contractauthz.PermissionIdentityAuthorizationManage); err != nil {
-		return Lookup{}, fmt.Errorf("%w: %v", authorization.ErrForbidden, err)
-	}
-	normalized, err := normalizePhone(rawPhone)
-	if err != nil {
-		return Lookup{}, err
-	}
-	return m.store.FindAccountByPhone(ctx, m.fingerprint(normalized))
 }
 
 func (m *Manager) fingerprint(phone string) []byte {

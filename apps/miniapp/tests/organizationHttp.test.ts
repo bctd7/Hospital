@@ -6,7 +6,7 @@ vi.mock("@/api/client", () => ({
   request: requestMock,
 }));
 
-describe("HTTP staff management organization adapter", () => {
+describe("organization HTTP adapters", () => {
   beforeEach(() => {
     requestMock.mockReset();
   });
@@ -32,8 +32,10 @@ describe("HTTP staff management organization adapter", () => {
       ],
     });
 
-    const { httpStaffManagementApi } = await import("@/api/staffManagement.http");
-    const context = await httpStaffManagementApi.getOrganizationContext();
+    const { httpOrganizationDirectoryApi } = await import(
+      "@/api/management/organizationDirectory.http"
+    );
+    const context = await httpOrganizationDirectoryApi.getOrganizationContext();
 
     expect(requestMock).toHaveBeenCalledWith({
       path: "/api/v1/directory/organization-context",
@@ -56,8 +58,10 @@ describe("HTTP staff management organization adapter", () => {
       ],
     });
 
-    const { httpStaffManagementApi } = await import("@/api/staffManagement.http");
-    const departments = await httpStaffManagementApi.listDepartments("campus-a", false);
+    const { httpOrganizationDirectoryApi } = await import(
+      "@/api/management/organizationDirectory.http"
+    );
+    const departments = await httpOrganizationDirectoryApi.listDepartments("campus-a");
 
     expect(requestMock).toHaveBeenCalledWith({
       path: "/api/v1/directory/departments?campus_id=campus-a",
@@ -81,8 +85,10 @@ describe("HTTP staff management organization adapter", () => {
       total: 1,
     });
 
-    const { httpStaffManagementApi } = await import("@/api/staffManagement.http");
-    const doctors = await httpStaffManagementApi.listDoctors("department-a");
+    const { httpOrganizationDirectoryApi } = await import(
+      "@/api/management/organizationDirectory.http"
+    );
+    const doctors = await httpOrganizationDirectoryApi.listDoctors("department-a");
 
     expect(doctors[0]?.accountId).toBe("account-a");
   });
@@ -90,8 +96,10 @@ describe("HTTP staff management organization adapter", () => {
   it("loads all department statuses through the protected admin route", async () => {
     requestMock.mockResolvedValueOnce({ items: [] });
 
-    const { httpStaffManagementApi } = await import("@/api/staffManagement.http");
-    await httpStaffManagementApi.listDepartments("campus-a", true);
+    const { httpOrganizationAdminApi } = await import(
+      "@/api/management/organizationAdmin.http"
+    );
+    await httpOrganizationAdminApi.listDepartments("campus-a", true);
 
     expect(requestMock).toHaveBeenCalledWith({
       path: "/api/v1/admin/identity/organization-units?unit_type=department&parent_id=campus-a&status=all",
@@ -109,8 +117,10 @@ describe("HTTP staff management organization adapter", () => {
       version: 1,
     });
 
-    const { httpStaffManagementApi } = await import("@/api/staffManagement.http");
-    await httpStaffManagementApi.createCampus({
+    const { httpOrganizationAdminApi } = await import(
+      "@/api/management/organizationAdmin.http"
+    );
+    await httpOrganizationAdminApi.createCampus({
       name: "本部院区",
       hospitalId: "hospital-a",
     });
@@ -141,8 +151,10 @@ describe("HTTP staff management organization adapter", () => {
       version: 2,
     });
 
-    const { httpStaffManagementApi } = await import("@/api/staffManagement.http");
-    await httpStaffManagementApi.setDepartmentEnabled("department-a", false, 1);
+    const { httpOrganizationAdminApi } = await import(
+      "@/api/management/organizationAdmin.http"
+    );
+    await httpOrganizationAdminApi.setDepartmentEnabled("department-a", false, 1);
 
     expect(requestMock).toHaveBeenCalledWith(
       expect.objectContaining({

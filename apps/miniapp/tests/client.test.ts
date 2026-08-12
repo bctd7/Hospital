@@ -13,7 +13,11 @@ describe("api client", () => {
       accessToken = "new-access-token";
       return true;
     });
-    configureAuthAdapter({ getAccessToken: () => accessToken, refreshOnce });
+    configureAuthAdapter({
+      getAccessToken: () => accessToken,
+      refreshOnce,
+      handleUnauthorized: vi.fn(),
+    });
 
     const authorizationHeaders: string[] = [];
     let requestCount = 0;
@@ -41,11 +45,35 @@ describe("api client", () => {
   it("does not send an authenticated request without an access token", async () => {
     const requestMock = vi.fn();
     vi.stubGlobal("uni", { request: requestMock });
-    configureAuthAdapter({ getAccessToken: () => "", refreshOnce: vi.fn() });
+    configureAuthAdapter({
+      getAccessToken: () => "",
+      refreshOnce: vi.fn(),
+      handleUnauthorized: vi.fn(),
+    });
 
     await expect(
       request({ path: "/api/v1/protected", authenticated: true }),
     ).rejects.toMatchObject({ statusCode: 401 });
     expect(requestMock).not.toHaveBeenCalled();
+  });
+
+  it("forces reauthentication when refresh cannot recover an unauthorized request", async () => {
+    const handleUnauthorized = vi.fn(async () => undefined);
+    configureAuthAdapter({
+      getAccessToken: () => "rejected-access-token",
+      refreshOnce: vi.fn(async () => false),
+      handleUnauthorized,
+    });
+    vi.stubGlobal("uni", {
+      request: vi.fn((options) => {
+        options.success({ statusCode: 401, data: "authentication required" });
+      }),
+    });
+
+    await expect(
+      request({ path: "/api/v1/protected", authenticated: true }),
+    ).rejects.toMatchObject({ statusCode: 401 });
+    expect(handleUnauthorized).toHaveBeenCalledTimes(1);
+    expect(handleUnauthorized).toHaveBeenCalledWith("rejected-access-token");
   });
 });

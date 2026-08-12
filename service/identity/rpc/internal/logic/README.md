@@ -14,7 +14,6 @@
 | 手机号登录 | `phone_login_logic.go` | 已实现 |
 | 微信登录 | `we_chat_login_logic.go` | 已实现 |
 | 绑定本人手机号 | `set_my_phone_logic.go` | 已实现 |
-| 按手机号查询账号 | `find_account_by_phone_logic.go` | 已实现 |
 
 公共错误转换在 `account_helpers.go`；登录成功后的 Token 响应转换目前在 `session_helpers.go`。
 

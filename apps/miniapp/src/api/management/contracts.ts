@@ -64,10 +64,3 @@ export interface IdentityAdminApi {
     managementVersion: number,
   ): Promise<AdminAccountDetail>;
 }
-
-// StaffManagementApi is the compatibility facade used by existing pages.
-// New code should depend on one of the narrower domain interfaces above.
-export interface StaffManagementApi
-  extends Omit<OrganizationDirectoryApi, "listDepartments">,
-    OrganizationAdminApi,
-    IdentityAdminApi {}

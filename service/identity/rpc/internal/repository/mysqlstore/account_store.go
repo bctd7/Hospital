@@ -9,7 +9,6 @@ import (
 	"github.com/google/uuid"
 
 	"hospital/service/identity/rpc/internal/account"
-	"hospital/service/identity/rpc/internal/authorization"
 )
 
 var (
@@ -201,26 +200,4 @@ VALUES (?, ?, ?, 'self_reported', 'self_reported', NULL)`, accountID, fingerprin
 		Masked: masked, VerificationStatus: account.PhoneStatusSelfReported,
 		VerificationSource: account.PhoneSourceSelfReported,
 	}, nil
-}
-
-func (s *Store) FindAccountByPhone(ctx context.Context, fingerprint []byte) (account.Lookup, error) {
-	var accountID string
-	var binding account.PhoneBinding
-	err := s.db.QueryRowContext(ctx, `
-SELECT account_id, phone_masked, verification_status, verification_source
-FROM identity_account_phones
-WHERE phone_fingerprint = ?`, fingerprint).Scan(
-		&accountID, &binding.Masked, &binding.VerificationStatus, &binding.VerificationSource,
-	)
-	if errors.Is(err, sql.ErrNoRows) {
-		return account.Lookup{}, authorization.ErrNotFound
-	}
-	if err != nil {
-		return account.Lookup{}, fmt.Errorf("find account by phone: %w", err)
-	}
-	principal, err := s.GetAuthorizationContext(ctx, accountID)
-	if err != nil {
-		return account.Lookup{}, err
-	}
-	return account.Lookup{Principal: principal, Phone: binding}, nil
 }

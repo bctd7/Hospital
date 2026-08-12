@@ -85,12 +85,8 @@ VALUES (?, 'department', 'login-test', 'Login Test')`, departmentID); err != nil
 	if account.AccountType != authn.AccountTypeStaff || account.IdentityType() != identityadmin.IdentityTypeDoctor || account.DepartmentID != departmentID {
 		t.Fatalf("unexpected promoted identity: %#v", account)
 	}
-	lookup, err := store.FindAccountByPhone(ctx, fingerprint)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if lookup.Phone.VerificationStatus != "verified" || lookup.Phone.VerificationSource != "admin" {
-		t.Fatalf("phone was not admin verified: %#v", lookup.Phone)
+	if account.PhoneVerificationStatus != "verified" || account.PhoneVerificationSource != "admin" {
+		t.Fatalf("phone was not admin verified: %#v", account)
 	}
 }
 

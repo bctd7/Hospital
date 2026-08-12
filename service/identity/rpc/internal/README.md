@@ -91,8 +91,9 @@ MySQL 类型。
 Manager 通过 Store 的 `Within...Transaction` 开始事务，并在回调内使用 TxStore。普通 Store 不能保证多条
 语句原子性，TxStore 不能在没有 BeginTx 创建的事务对象时使用。
 
-写操作在一个事务中完成：目标锁定、乐观锁、主数据、审计、Outbox 和幂等结果。提交后才发布 Redis
-授权版本。
+写操作在一个事务中完成：目标锁定、乐观锁、主数据、审计、Outbox 和幂等结果。提交后 Publisher 才能读取
+Outbox 并发布 Kafka；Consumer 只有在授权版本成功单调写入 Redis 后才提交 Offset。`published_at` 只表示
+事件已进入 Kafka，不代表 Redis 已经更新；Redis 失败依靠未提交的 Kafka Offset 重试。
 
 ## Review 建议
 

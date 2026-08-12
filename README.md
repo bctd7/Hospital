@@ -11,7 +11,7 @@ Identity 与组织管理已经完成首期闭环：
 - 医院、院区、科室公共目录及管理员组织 CRUD；
 - 账号列表、详情、手机号精确搜索、停用与恢复；
 - 医生开通、资料编辑、调岗和撤销；
-- `operation_id` 幂等、乐观锁、授权审计和 Outbox；
+- `operation_id` 幂等、乐观锁、授权审计，以及 Outbox → Kafka → Redis 授权版本投影；
 - 小程序真实 HTTP 接入，运行时 Mock 已移除；
 - HTTP → App API → Identity RPC → Manager → Repository → MySQL 全链路测试。
 
@@ -24,7 +24,8 @@ Identity 与组织管理已经完成首期闭环：
 微信小程序
   -> app-api :8888               对外 HTTP、Token 中间件和页面聚合
   -> identity-rpc :8080          认证、账号、权限、组织和医生领域
-  -> MySQL / Redis               业务事实与会话/授权版本
+  -> MySQL                      业务事实、审计和 Outbox
+  -> Kafka -> Redis             授权事件传递与版本投影
 ```
 
 | 目录 | 职责 |
@@ -52,7 +53,7 @@ Copy-Item .env.example .env
 docker compose `
   --env-file .env `
   -f deploy/compose/docker-compose.yml `
-  up -d mysql redis
+  up -d mysql redis kafka
 ```
 
 首次使用或迁移升级：

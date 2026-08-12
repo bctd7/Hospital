@@ -23,7 +23,6 @@ const (
 	IdentityService_PhoneLogin_FullMethodName                  = "/hospital.identity.v1.IdentityService/PhoneLogin"
 	IdentityService_WeChatLogin_FullMethodName                 = "/hospital.identity.v1.IdentityService/WeChatLogin"
 	IdentityService_SetMyPhone_FullMethodName                  = "/hospital.identity.v1.IdentityService/SetMyPhone"
-	IdentityService_FindAccountByPhone_FullMethodName          = "/hospital.identity.v1.IdentityService/FindAccountByPhone"
 	IdentityService_GetAuthorizationContext_FullMethodName     = "/hospital.identity.v1.IdentityService/GetAuthorizationContext"
 	IdentityService_RefreshAccessToken_FullMethodName          = "/hospital.identity.v1.IdentityService/RefreshAccessToken"
 	IdentityService_RevokeRefreshToken_FullMethodName          = "/hospital.identity.v1.IdentityService/RevokeRefreshToken"
@@ -57,7 +56,6 @@ type IdentityServiceClient interface {
 	PhoneLogin(ctx context.Context, in *PhoneLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
 	WeChatLogin(ctx context.Context, in *WeChatLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
 	SetMyPhone(ctx context.Context, in *SetMyPhoneRequest, opts ...grpc.CallOption) (*PhoneBinding, error)
-	FindAccountByPhone(ctx context.Context, in *FindAccountByPhoneRequest, opts ...grpc.CallOption) (*AccountLookup, error)
 	GetAuthorizationContext(ctx context.Context, in *GetAuthorizationContextRequest, opts ...grpc.CallOption) (*AuthorizationContext, error)
 	RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*TokenPair, error)
 	RevokeRefreshToken(ctx context.Context, in *RevokeRefreshTokenRequest, opts ...grpc.CallOption) (*RevokeRefreshTokenResponse, error)
@@ -129,16 +127,6 @@ func (c *identityServiceClient) SetMyPhone(ctx context.Context, in *SetMyPhoneRe
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(PhoneBinding)
 	err := c.cc.Invoke(ctx, IdentityService_SetMyPhone_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *identityServiceClient) FindAccountByPhone(ctx context.Context, in *FindAccountByPhoneRequest, opts ...grpc.CallOption) (*AccountLookup, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(AccountLookup)
-	err := c.cc.Invoke(ctx, IdentityService_FindAccountByPhone_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -383,7 +371,6 @@ type IdentityServiceServer interface {
 	PhoneLogin(context.Context, *PhoneLoginRequest) (*TokenPair, error)
 	WeChatLogin(context.Context, *WeChatLoginRequest) (*TokenPair, error)
 	SetMyPhone(context.Context, *SetMyPhoneRequest) (*PhoneBinding, error)
-	FindAccountByPhone(context.Context, *FindAccountByPhoneRequest) (*AccountLookup, error)
 	GetAuthorizationContext(context.Context, *GetAuthorizationContextRequest) (*AuthorizationContext, error)
 	RefreshAccessToken(context.Context, *RefreshAccessTokenRequest) (*TokenPair, error)
 	RevokeRefreshToken(context.Context, *RevokeRefreshTokenRequest) (*RevokeRefreshTokenResponse, error)
@@ -432,9 +419,6 @@ func (UnimplementedIdentityServiceServer) WeChatLogin(context.Context, *WeChatLo
 }
 func (UnimplementedIdentityServiceServer) SetMyPhone(context.Context, *SetMyPhoneRequest) (*PhoneBinding, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetMyPhone not implemented")
-}
-func (UnimplementedIdentityServiceServer) FindAccountByPhone(context.Context, *FindAccountByPhoneRequest) (*AccountLookup, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FindAccountByPhone not implemented")
 }
 func (UnimplementedIdentityServiceServer) GetAuthorizationContext(context.Context, *GetAuthorizationContextRequest) (*AuthorizationContext, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAuthorizationContext not implemented")
@@ -594,24 +578,6 @@ func _IdentityService_SetMyPhone_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(IdentityServiceServer).SetMyPhone(ctx, req.(*SetMyPhoneRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _IdentityService_FindAccountByPhone_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FindAccountByPhoneRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(IdentityServiceServer).FindAccountByPhone(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: IdentityService_FindAccountByPhone_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IdentityServiceServer).FindAccountByPhone(ctx, req.(*FindAccountByPhoneRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1052,10 +1018,6 @@ var IdentityService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SetMyPhone",
 			Handler:    _IdentityService_SetMyPhone_Handler,
-		},
-		{
-			MethodName: "FindAccountByPhone",
-			Handler:    _IdentityService_FindAccountByPhone_Handler,
 		},
 		{
 			MethodName: "GetAuthorizationContext",

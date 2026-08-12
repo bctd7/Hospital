@@ -21,6 +21,8 @@ import { getWechatLoginCode } from "@/utils/wechatCode";
 const SESSION_STORAGE_KEY = "hospital:session";
 const SESSION_STORAGE_VERSION = 1;
 const EXPIRY_CLOCK_SKEW_MS = 5000;
+const ENTRY_PAGE_URL = "/pages/entry/index";
+const IDENTITY_CHANGED_MESSAGE = "身份已变更，请重新登录";
 
 interface StoredSession {
   version: number;
@@ -37,6 +39,7 @@ const state = reactive<SessionView>({
 
 let tokens: SessionTokenPair | null = null;
 let refreshTask: Promise<boolean> | null = null;
+let forcedReauthenticationTask: Promise<void> | null = null;
 
 export const sessionState = readonly(state);
 
@@ -196,6 +199,36 @@ export function refreshOnce(): Promise<boolean> {
   return refreshTask;
 }
 
+export function handleUnauthorized(rejectedAccessToken: string): Promise<void> {
+  const currentAccessToken = getAccessToken();
+  if (currentAccessToken && currentAccessToken !== rejectedAccessToken) {
+    return Promise.resolve();
+  }
+
+  setGuestSession();
+  if (forcedReauthenticationTask) {
+    return forcedReauthenticationTask;
+  }
+
+  forcedReauthenticationTask = new Promise<void>((resolve) => {
+    uni.reLaunch({
+      url: ENTRY_PAGE_URL,
+      complete: () => {
+        uni.showToast({
+          title: IDENTITY_CHANGED_MESSAGE,
+          icon: "none",
+          duration: 3000,
+        });
+        resolve();
+      },
+    });
+  }).finally(() => {
+    forcedReauthenticationTask = null;
+  });
+
+  return forcedReauthenticationTask;
+}
+
 export async function initializeFromWechat(): Promise<boolean> {
   if (state.status === "authenticated" && hasUsableAccessToken() && state.principal) {
     return true;
@@ -258,4 +291,5 @@ export async function logout(): Promise<void> {
 configureAuthAdapter({
   getAccessToken,
   refreshOnce,
+  handleUnauthorized,
 });

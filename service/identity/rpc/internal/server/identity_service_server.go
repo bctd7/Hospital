@@ -43,11 +43,6 @@ func (s *IdentityServiceServer) SetMyPhone(ctx context.Context, in *identityv1.S
 	return l.SetMyPhone(in)
 }
 
-func (s *IdentityServiceServer) FindAccountByPhone(ctx context.Context, in *identityv1.FindAccountByPhoneRequest) (*identityv1.AccountLookup, error) {
-	l := logic.NewFindAccountByPhoneLogic(ctx, s.svcCtx)
-	return l.FindAccountByPhone(in)
-}
-
 func (s *IdentityServiceServer) GetAuthorizationContext(ctx context.Context, in *identityv1.GetAuthorizationContextRequest) (*identityv1.AuthorizationContext, error) {
 	l := logic.NewGetAuthorizationContextLogic(ctx, s.svcCtx)
 	return l.GetAuthorizationContext(in)

@@ -14,7 +14,6 @@ import (
 )
 
 type (
-	AccountLookup                       = identityv1.AccountLookup
 	AccountDisplayProfile               = identityv1.AccountDisplayProfile
 	AdminAccountDetail                  = identityv1.AdminAccountDetail
 	AdminAccountSummary                 = identityv1.AdminAccountSummary
@@ -25,7 +24,6 @@ type (
 	ChangeDoctorDepartmentRequest       = identityv1.ChangeDoctorDepartmentRequest
 	CreateOrganizationUnitRequest       = identityv1.CreateOrganizationUnitRequest
 	DepartmentSummary                   = identityv1.DepartmentSummary
-	FindAccountByPhoneRequest           = identityv1.FindAccountByPhoneRequest
 	GetAuthorizationContextRequest      = identityv1.GetAuthorizationContextRequest
 	GetAccountDisplayProfileRequest     = identityv1.GetAccountDisplayProfileRequest
 	GetAdminAccountRequest              = identityv1.GetAdminAccountRequest
@@ -64,7 +62,6 @@ type (
 		PhoneLogin(ctx context.Context, in *PhoneLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
 		WeChatLogin(ctx context.Context, in *WeChatLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
 		SetMyPhone(ctx context.Context, in *SetMyPhoneRequest, opts ...grpc.CallOption) (*PhoneBinding, error)
-		FindAccountByPhone(ctx context.Context, in *FindAccountByPhoneRequest, opts ...grpc.CallOption) (*AccountLookup, error)
 		GetAuthorizationContext(ctx context.Context, in *GetAuthorizationContextRequest, opts ...grpc.CallOption) (*AuthorizationContext, error)
 		RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*TokenPair, error)
 		RevokeRefreshToken(ctx context.Context, in *RevokeRefreshTokenRequest, opts ...grpc.CallOption) (*RevokeRefreshTokenResponse, error)
@@ -121,11 +118,6 @@ func (m *defaultIdentityService) WeChatLogin(ctx context.Context, in *WeChatLogi
 func (m *defaultIdentityService) SetMyPhone(ctx context.Context, in *SetMyPhoneRequest, opts ...grpc.CallOption) (*PhoneBinding, error) {
 	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
 	return client.SetMyPhone(ctx, in, opts...)
-}
-
-func (m *defaultIdentityService) FindAccountByPhone(ctx context.Context, in *FindAccountByPhoneRequest, opts ...grpc.CallOption) (*AccountLookup, error) {
-	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
-	return client.FindAccountByPhone(ctx, in, opts...)
 }
 
 func (m *defaultIdentityService) GetAuthorizationContext(ctx context.Context, in *GetAuthorizationContextRequest, opts ...grpc.CallOption) (*AuthorizationContext, error) {

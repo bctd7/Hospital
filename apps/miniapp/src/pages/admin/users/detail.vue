@@ -10,21 +10,20 @@ import { sessionState } from "@/stores/session";
 import type {
   AdminAccountAction,
   AdminAccountDetail,
-  DepartmentSummary,
   DoctorProfileDraft,
 } from "@/types/staffManagement";
 import { hasIdentityPermission } from "@/utils/appShell";
 import {
   invalidateDepartments,
   invalidateDoctors,
-  loadDepartments,
-  loadOrganizationContext,
+  loadDepartmentOptions,
+  type DepartmentOption,
 } from "@/services/organization";
 
 const identityLabels = { patient: "普通用户", doctor: "医生", super_admin: "超级管理员" } as const;
 const accountId = ref("");
 const detail = ref<AdminAccountDetail>();
-const departments = ref<DepartmentSummary[]>([]);
+const departmentOptions = ref<DepartmentOption[]>([]);
 const loading = ref(true);
 const error = ref("");
 const pending = ref(false);
@@ -47,6 +46,13 @@ const initialProfile = computed<DoctorProfileDraft>(() => ({
 const profileDialogTitle = computed(() =>
   profileDialogMode.value === "promote" ? "开通医生身份" : "编辑医生资料",
 );
+const currentDepartmentLabel = computed(() => {
+  const departmentId = detail.value?.departmentId;
+  if (!departmentId) return "无";
+  return departmentOptions.value.find(
+    (option) => option.department.departmentId === departmentId,
+  )?.label ?? detail.value?.departmentName ?? "无";
+});
 
 onLoad((query) => {
   accountId.value = typeof query?.account_id === "string" ? decodeURIComponent(query.account_id) : "";
@@ -67,21 +73,12 @@ async function loadDetail() {
   loading.value = true;
   error.value = "";
   try {
-    const departmentsPromise = loadOrganizationContext()
-      .then((context) =>
-        Promise.all(
-          context.campuses.map((campus) =>
-            loadDepartments(campus.campusId),
-          ),
-        ),
-      )
-      .then((items) => items.flat());
-    const [account, departmentList] = await Promise.all([
+    const [account, options] = await Promise.all([
       identityAdminApi.getAccount(accountId.value),
-      departmentsPromise,
+      loadDepartmentOptions(),
     ]);
     detail.value = account;
-    departments.value = departmentList.filter((item) => item.status === "active");
+    departmentOptions.value = options;
   } catch (caught) {
     error.value = messageOf(caught, "用户详情加载失败，请重试");
   } finally {
@@ -93,16 +90,16 @@ function supports(action: AdminAccountAction): boolean {
   return detail.value?.availableActions.includes(action) ?? false;
 }
 
-async function selectDepartment(title: string): Promise<DepartmentSummary | null> {
-  if (!departments.value.length) {
+async function selectDepartment(title: string): Promise<DepartmentOption | null> {
+  if (!departmentOptions.value.length) {
     uni.showToast({ title: "暂无可用部门", icon: "none" });
     return null;
   }
   return new Promise((resolve) => {
     uni.showActionSheet({
       title,
-      itemList: departments.value.map((item) => item.name),
-      success: (result) => resolve(departments.value[result.tapIndex] ?? null),
+      itemList: departmentOptions.value.map((item) => item.label),
+      success: (result) => resolve(departmentOptions.value[result.tapIndex] ?? null),
       fail: () => resolve(null),
     });
   });
@@ -111,7 +108,7 @@ async function selectDepartment(title: string): Promise<DepartmentSummary | null
 async function openPromoteDialog() {
   const target = await selectDepartment("选择医生所属部门");
   if (!target) return;
-  selectedTargetDepartmentId.value = target.departmentId;
+  selectedTargetDepartmentId.value = target.department.departmentId;
   profileDialogMode.value = "promote";
   profileDialogVisible.value = true;
 }
@@ -149,13 +146,13 @@ async function changeDepartment() {
   const account = detail.value;
   if (!account || pending.value) return;
   const target = await selectDepartment("选择调入部门");
-  if (!target || target.departmentId === account.departmentId) return;
+  if (!target || target.department.departmentId === account.departmentId) return;
   confirmAction(
     "确认调岗",
-    `将 ${displayName.value} 调至“${target.name}”？`,
+    `将 ${displayName.value} 调至“${target.label}”？`,
     async () => identityAdminApi.changeDoctorDepartment(
       account.accountId,
-      target.departmentId,
+      target.department.departmentId,
       account.managementVersion,
     ),
     "调岗完成",
@@ -250,7 +247,7 @@ function messageOf(value: unknown, fallback: string): string {
 
       <view class="info-card">
         <view class="info-row"><text>昵称</text><text>{{ detail.nickname || "未设置" }}</text></view>
-        <view class="info-row"><text>所属部门</text><text>{{ detail.departmentName || "无" }}</text></view>
+        <view class="info-row"><text>所属部门</text><text>{{ currentDepartmentLabel }}</text></view>
         <view v-if="detail.identityType === 'doctor'" class="info-row"><text>工号</text><text>{{ detail.staffNo || "未设置" }}</text></view>
         <view v-if="detail.staffStatus === 'revoked'" class="info-row"><text>医生档案</text><text>已撤销，可重新开通</text></view>
         <view v-if="detail.identityType === 'doctor'" class="info-row info-row--multiline"><text>医生简介</text><text>{{ detail.description || "未设置" }}</text></view>

@@ -103,4 +103,41 @@ describe("organization service", () => {
     await service.loadDepartments("campus-a");
     expect(apiMocks.listDirectoryDepartments).toHaveBeenCalledTimes(2);
   });
+
+  it("keeps duplicate department names distinguishable by campus", async () => {
+    apiMocks.getOrganizationContext.mockResolvedValue({
+      ...organizationContext,
+      campuses: [
+        organizationContext.campuses[0],
+        {
+          ...organizationContext.campuses[0],
+          campusId: "campus-b",
+          code: "C-B",
+          name: "Campus B",
+        },
+      ],
+    });
+    apiMocks.listDirectoryDepartments.mockImplementation((campusId: string) =>
+      Promise.resolve([
+        {
+          ...departments[0],
+          departmentId: `department-${campusId}`,
+          parentId: campusId,
+          name: "Cardiology",
+        },
+      ]),
+    );
+    const service = await import("@/services/organization");
+
+    const options = await service.loadDepartmentOptions();
+
+    expect(options.map((option) => option.label)).toEqual([
+      "Campus A / Cardiology",
+      "Campus B / Cardiology",
+    ]);
+    expect(options.map((option) => option.department.departmentId)).toEqual([
+      "department-campus-a",
+      "department-campus-b",
+    ]);
+  });
 });

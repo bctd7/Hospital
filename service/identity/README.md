@@ -29,7 +29,8 @@ Identity Service 是账号、登录会话、角色权限、医院组织和医生
 - 普通用户维护自己的展示昵称；
 - `management_version` 与组织 `version` 乐观锁；
 - `operation_id` 写操作幂等；
-- 授权审计、敏感访问日志保护和 Outbox 事件。
+- 授权审计、敏感访问日志保护和 Outbox 事件；
+- Outbox 轮询发布 Kafka，Consumer 将授权版本单调投影到 Redis，成功后提交 Kafka Offset。
 
 ## 调用链
 
@@ -42,7 +43,9 @@ Miniapp
   -> Identity Logic
   -> IdentityAdmin / Organization / Authorization Manager
   -> Store / Transaction Store
-  -> MySQL + Redis
+  -> MySQL（主数据、审计、Outbox）
+
+MySQL Outbox -> Kafka -> Authorization Projector -> Redis
 ```
 
 职责边界：
@@ -67,6 +70,9 @@ service/identity/rpc/
     ├── account/                   # 登录账号与手机号绑定
     ├── authorization/             # 授权上下文读取
     ├── identityadmin/             # 账号和医生管理领域
+    ├── authorizationprojection/   # Kafka 授权事件到 Redis 的版本投影
+    ├── messaging/                 # Kafka Producer/Consumer 适配
+    ├── outbox/                    # 事件构建、待发布记录和 Publisher
     ├── organization/              # 组织管理与公共目录领域
     ├── logic/                     # RPC 用例适配
     ├── repository/mysqlstore/     # MySQL Store 与事务实现
@@ -105,7 +111,7 @@ HTTP 接口由 `app-api` 暴露，完整字段见 `contracts/api/` 与 `docs/api
 docker compose `
   --env-file .env `
   -f deploy/compose/docker-compose.yml `
-  up -d mysql redis
+  up -d mysql redis kafka
 
 .\scripts\db-bootstrap-local.ps1
 .\scripts\migrate.ps1 -Service identity -Direction up
@@ -139,7 +145,7 @@ MySQL 集成测试通过 `IDENTITY_TEST_MYSQL_DSN` 显式启用。阶段收尾�
 1. 先更新 `plan/` 和 `contracts/`，不要从 Handler 直接开始写；
 2. 新管理员写能力进入 `IdentityAdminManager` 或 `OrganizationManager`，不要扩展 `AuthorizationManager`；
 3. 写操作必须在同一事务中更新主数据、审计和 Outbox；
-4. 涉及授权的变化必须递增 `authorization_version` 并发布版本；
+4. 涉及授权的变化必须递增 `authorization_version`，在同一事务写入 Outbox，并由 Kafka 投影到 Redis；
 5. 涉及手机号、验证码或 Token 的新 RPC 必须加入客户端和服务端正文日志屏蔽名单；
 6. 新查询要明确是公共目录、本人查询还是管理员查询，不能共用一个返回对象泄漏字段；
 7. 新接口完成后重新生成 Swagger，并补充数据库集成与 HTTP 全链路测试。

@@ -5,8 +5,6 @@ import (
 	"errors"
 	"testing"
 
-	"hospital/common/authn"
-	contractauthz "hospital/contracts/authz"
 	"hospital/service/identity/rpc/internal/login"
 	"hospital/service/identity/rpc/internal/session"
 )
@@ -26,24 +24,6 @@ func TestSetMyPhoneNormalizesAndMasks(t *testing.T) {
 	}
 }
 
-func TestFindByPhoneRequiresAuthorizationPermission(t *testing.T) {
-	manager, err := NewManager(&fakeStore{}, fakeProvider{}, fakeSessions{}, "wx-app", make([]byte, 32))
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = manager.FindByPhone(context.Background(), authn.Principal{AccountID: "patient"}, "13800138000")
-	if err == nil {
-		t.Fatal("expected permission denial")
-	}
-	_, err = manager.FindByPhone(context.Background(), authn.Principal{
-		AccountID: "admin", Status: authn.AccountStatusActive,
-		Permissions: []string{contractauthz.PermissionIdentityAuthorizationManage},
-	}, "13800138000")
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
 const sha256Size = 32
 
 type fakeStore struct{ fingerprint []byte }
@@ -55,10 +35,6 @@ func (s *fakeStore) FindOrCreateWeChatAccount(context.Context, string, string) (
 func (s *fakeStore) SetSelfReportedPhone(_ context.Context, _ string, fingerprint []byte, masked string) (PhoneBinding, error) {
 	s.fingerprint = append([]byte(nil), fingerprint...)
 	return PhoneBinding{Masked: masked, VerificationStatus: PhoneStatusSelfReported, VerificationSource: PhoneSourceSelfReported}, nil
-}
-
-func (s *fakeStore) FindAccountByPhone(context.Context, []byte) (Lookup, error) {
-	return Lookup{}, nil
 }
 
 type fakeProvider struct{ err error }

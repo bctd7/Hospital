@@ -8,6 +8,7 @@ import (
 
 func TestLegacyAuthorizationWriteRPCsAreNotRegistered(t *testing.T) {
 	legacyMethods := map[string]struct{}{
+		"FindAccountByPhone":        {},
 		"PromoteToDepartmentDoctor": {},
 		"AssignRole":                {},
 		"ChangeStaffDepartment":     {},

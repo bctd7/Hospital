@@ -15,7 +15,6 @@ Middlewares:
       - /hospital.identity.v1.IdentityService/PhoneLogin
       - /hospital.identity.v1.IdentityService/WeChatLogin
       - /hospital.identity.v1.IdentityService/SetMyPhone
-      - /hospital.identity.v1.IdentityService/FindAccountByPhone
       - /hospital.identity.v1.IdentityService/SearchAdminAccountByPhone
       - /hospital.identity.v1.IdentityService/RefreshAccessToken
       - /hospital.identity.v1.IdentityService/RevokeRefreshToken
