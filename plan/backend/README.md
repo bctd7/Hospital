@@ -6,10 +6,11 @@
 ## 文档结构
 
 - [overview](./overview/)：技术基线、服务边界、可观测性、能力地图和交付路线；
-- [modules](./modules/)：可以独立实现和验收的业务模块。
+- [modules](./modules/)：当前评审/实施入口、后续模块和持续约束；已经验收的模块单独归档在
+  [`modules/implemented`](./modules/implemented/) 中。
 
 Identity 与组织模块已经完成首期实现；下一阶段从
-[预约检查服务](./modules/05-appointment-and-examination-booking.md)继续。
+[预约检查服务](./modules/01-appointment-and-examination-booking.md)继续。
 
 ## 新增后端功能的标准流程
 

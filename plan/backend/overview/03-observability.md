@@ -47,7 +47,7 @@ request_id, trace_id, event, error_code, duration_ms
 HTTP 字段记录 `http_method`、规范化 `http_route` 和 `http_status`。不默认记录 Query、请求体、
 响应体、Cookie、Authorization 或完整 User-Agent。
 
-业务过程日志使用稳定事件名，例如 `planning.plan_generation_failed`，并只记录排障所需的内部 ID、
+业务过程日志使用稳定事件名，例如 `appointment.schedule_generation_failed`，并只记录排障所需的内部 ID、
 版本、数量和阶段。
 
 ## 4. 敏感信息
@@ -73,4 +73,4 @@ HTTP 字段记录 `http_method`、规范化 `http_route` 和 `http_status`。不
 - 告警以错误率、延迟、依赖健康、Kafka Lag、短信异常和资源饱和为基础。
 
 需要回答“谁对什么业务对象做了什么”的记录见
-[业务审计模块](../modules/03-business-audit.md)。
+[业务审计模块](../modules/02-business-audit.md)。

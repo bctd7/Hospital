@@ -24,7 +24,6 @@
   -> app-api (HTTP JSON)
       -> identity-rpc
       -> appointment-rpc
-      -> planning-rpc
       -> navigation-rpc
       -> 当前仍以内置模块交付的 Patient / Report / Message
 
@@ -96,7 +95,7 @@ Identity 签发短期 Access Token 和轮换 Refresh Token；App API 与业务�
 - 审计记录与运行日志分开存储和保留。
 
 详细规则见 [可观测性基线](./03-observability.md) 和
-[业务审计模块](../modules/03-business-audit.md)。
+[业务审计模块](../modules/02-business-audit.md)。
 
 ## 7. 测试与交付基线
 
@@ -112,6 +111,6 @@ Identity 签发短期 Access Token 和轮换 Refresh Token；App API 与业务�
 
 ## 8. 演进原则
 
-先实现一个本人、一个项目、一次预约的最小闭环。Planning 和 Navigation 因算法与地图数据边界
-保持独立；Patient、Report、Message 可先作为清晰模块，等独立数据所有权、发布节奏或容量需求
+先实现一个本人、一个项目、一次预约的最小闭环。Navigation 因地图数据边界保持独立；Patient、Report、
+Message 可先作为清晰模块，等独立数据所有权、发布节奏或容量需求
 成立后再拆服务。不得为了完整的微服务名称提前制造空进程和空数据库。

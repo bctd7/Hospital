@@ -68,4 +68,4 @@ ServiceContext。
 5. 本地 Compose、生产部署、CI 和测试；
 6. 本目录服务索引。
 
-未实现的 Appointment、Planning 等服务不在这里提前创建空目录。
+未实现的 Appointment、Navigation、Report 等服务不在这里提前创建空目录。

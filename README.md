@@ -15,8 +15,8 @@ Identity 与组织管理已经完成首期闭环：
 - 小程序真实 HTTP 接入，运行时 Mock 已移除；
 - HTTP → App API → Identity RPC → Manager → Repository → MySQL 全链路测试。
 
-下一阶段进入预约检查服务设计与最小业务闭环，参见
-[预约检查服务计划](./plan/backend/modules/05-appointment-and-examination-booking.md)。
+下一阶段先人工评审已按上午/下午大窗口模型收敛的预约检查服务 Plan，评审通过后进入契约与最小业务闭环，参见
+[预约检查服务计划](./plan/backend/modules/01-appointment-and-examination-booking.md)。
 
 ## 架构与目录
 

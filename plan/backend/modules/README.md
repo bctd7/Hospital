@@ -1,11 +1,23 @@
 # 后端模块设计
 
-- [01-identity-and-access-control.md](./01-identity-and-access-control.md)：账号、认证、角色、权限、部门和工作人员开通。
-- [02-examination-planning.md](./02-examination-planning.md)：检查顺序规则、计算、版本和解释。
-- [03-business-audit.md](./03-business-audit.md)：关键业务操作、授权变化和敏感访问审计。
-- [04-organization-staff-and-seed-data.md](./04-organization-staff-and-seed-data.md)：已完成的单医院、院区、科室、医生、账号管理与公共目录边界。
-- [05-appointment-and-examination-booking.md](./05-appointment-and-examination-booking.md)：检查预约服务边界、容量模型，以及精确时段、医生时段和大时间窗口三种待确认方案。
+## 当前评审与实施入口
 
-模块文档至少说明业务流程、状态机/约束、数据归属、接口或事件、具体技术方案（包括适用算法）和
-验收标准。Patient、Navigation、Report、Message 等模块在规则进入开发前再建立
-独立文档，不把总体功能清单误当成模块实现设计。
+- [01 Appointment 预约检查服务](./01-appointment-and-examination-booking.md)：当前唯一进入人工评审的模块
+  Plan；预约时间采用上午/下午大窗口模型（原时间方案 C），惩罚机制已选择方案 A“固定预约额度”。
+
+评审通过后，先更新 HTTP、RPC、事件和迁移契约，再创建 Appointment Service。已实施归档和业务审计等
+横切文档不会替代当前实施入口。
+
+## 持续约束
+
+- [02 业务审计](./02-business-audit.md)：所有业务服务持续遵守的跨模块约束；各领域随自身功能落地。
+
+独立 Planning Service 已从当前路线删除：每个检查项目形成一条独立预约、执行和报告链路；Appointment
+内部可以根据固态时间约束图、科室窗口和地图耗时计算建议顺序，但不会合并或自动修改预约。
+
+## 已实施模块
+
+- [implemented](./implemented/)：已经确认、实现并完成阶段验收的模块 Plan。
+
+模块文档至少说明业务流程、状态机与约束、数据归属、权限、失败处理、本期边界和验收标准。Patient、
+Navigation、Report、Message 等能力在真正进入开发前再建立独立 Plan，不把总体功能清单当成可执行设计。

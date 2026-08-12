@@ -35,7 +35,7 @@
 每个进入开发阶段的业务服务才创建自己的逻辑数据库、迁移目录和最小权限账号。服务之间不建立
 跨库外键、联表或触发器；跨服务状态通过 RPC 或事件传播。
 
-未实施的 Patient、Appointment、Planning、Report 和 Navigation 不预建空数据库或空迁移目录。
+未实施的 Patient、Appointment、Report 和 Navigation 不预建空数据库或空迁移目录。
 
 ### 2.3 迁移历史不可改写
 
