@@ -1,7 +1,7 @@
 # Identity 身份与访问控制模块
 
 > 状态：手机号认证、JWT、Refresh Session、首版角色授权、Redis 授权版本校验、权限变化后强制重新登录，
-> 以及管理员账号/医生管理页面已经实现；Redis 授权版本投影的自动补偿任务仍待后续基础设施阶段完成。
+> 管理员账号/医生管理，以及 Outbox → Kafka → Redis 授权版本自动补偿链路均已实现。
 
 ## 1. 模块职责
 
@@ -127,9 +127,10 @@ Access Token 包含：`account_id`、`account_type`、角色、部门、permissi
   判断 permission，只在事务中查询并锁定目标账号或本业务资源；
 - `common/authn` 只定义 Principal、Token、上下文传递、拦截器和版本校验抽象，不依赖 Identity Repository，
   也不承载账号、角色、组织等领域业务；
-- 角色、当前科室或账号状态变更在 MySQL 事务中递增授权版本并写入 Outbox，提交后由 Identity 立即更新
-  Redis；自动补偿任务以后重试失败或遗漏的投影更新。MySQL 与 Redis 不是同一事务，因此这是最终一致
-  投影，不能承诺数据库提交后的绝对下一次请求必然已经看到新版本。
+- 角色、当前科室或账号状态变更在 MySQL 事务中递增授权版本并写入 Outbox；Publisher 轮询未发布事件并
+  在 Kafka ACK 后标记 `published_at`，Consumer 将新版本单调、幂等地写入 Redis，成功后才提交 Offset；
+  发布、投影或提交 Offset 失败均会重试，旧事件不能覆盖更高版本。MySQL、Kafka 与 Redis 不是同一事务，
+  因此这是最终一致投影，不能承诺数据库提交后的绝对下一次请求必然已经看到新版本。
 
 ### 6.1 多服务复用边界
 
@@ -151,6 +152,9 @@ service/identity
   identityadmin.Manager       账号、医生、角色和账号状态管理
   organization.Manager        组织管理与公共目录
   session.Manager             Refresh Session 版本比较与新 Token 签发
+  outbox.Publisher            发布 MySQL 待处理事件并记录发布结果
+  authorizationprojection     消费 Kafka 并单调推进 Redis 版本
+  messaging                   Kafka Producer/Consumer 适配
   repository                  Identity MySQL 事实与事务实现
 ```
 
@@ -172,7 +176,8 @@ Identity。其他服务只配置公钥，不能签发 Hospital Access Token。
 - Redis 未命中不由普通拦截器回源；拦截器返回 `401`，再由不依赖旧 Access Token 的 Refresh 或登录流程
   查询 MySQL 并回填；
 - Identity/MySQL 是授权事实源，Redis 是跨服务共享的快速版本投影；
-- MySQL 事务提交后立即更新 Redis；Outbox 中保存的新版本事实供自动补偿任务重试失败或遗漏的更新；
+- 管理写事务不直接写 Redis；Outbox 保存版本事实并通过 Kafka 投影。登录和版本一致的正常刷新可以按
+  MySQL Principal 回填 Redis，用于初始化或修复缺失投影；
 - 每个可直接接收受保护请求的服务都注册公共拦截器，不能只依赖前端隐藏菜单或上游服务口头保证。
 
 请求阶段统一为：本地 JWT 验签 → 公共 VersionValidator 读取 Redis → Principal 写入 Context → 业务
@@ -194,12 +199,15 @@ Manager 使用 `common/authz` 判断 permission。Identity 业务 Manager 不再
   拒绝轮换并撤销会话；前端已有并发合并的 `refreshOnce()`、最多一次请求重试和失败后清理会话；
 - `AuthorizationManager` 已收缩为授权上下文读取；管理员账号和医生写操作统一进入
   `IdentityAdminManager`，组织写操作统一进入 `OrganizationManager`；Manager 接收拦截器验证过的
-  Principal，不重复查询操作者权限。
+  Principal，不重复查询操作者权限；
+- 授权变化与审计、幂等结果在同一 MySQL 事务写入 Outbox；Publisher 每秒轮询未发布事件，使用
+  `account_id` 作为 Kafka Key；Consumer 投影 Redis 成功后才提交 Offset，Redis Lua 脚本只接受更高版本；
+- 发布失败会保留 `published_at IS NULL` 并累计 `attempts`，Kafka/Redis/Offset 提交失败均有重试；重复发布、
+  重复消费和乱序旧事件不会降低 Redis 中的授权版本。
 
-当前仍待实现：
+下一阶段待实现：
 
-- 实现授权版本投影自动补偿链路：Outbox 发布器把未发布事件可靠发送到 Kafka，投影消费者再将目标账号的
-  新版本单调、幂等地写入 Redis；失败时重试，旧事件不得覆盖更新版本；
+- 将真实 MySQL、Kafka、Redis 的授权投影故障恢复、进程重启和并发压力场景纳入可重复执行的自动化回归；
 - Appointment、Planning、Report、Navigation 等服务创建并直接接收受保护请求时，复用相同 Reader 和
   gRPC Interceptor 装配；
 - Appointment、Planning、Report、Navigation 等新服务建立时的跨服务授权版本端到端回归。

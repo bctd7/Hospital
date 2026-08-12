@@ -65,6 +65,7 @@ HTTP Handler
 - `version`/`management_version` 乐观锁；
 - 主数据、审计和 Outbox 同一事务；
 - 授权变化后的 `authorization_version`；
+- Outbox 发布 Kafka、Consumer 幂等投影 Redis，并在成功后提交 Offset；
 - 明确的 gRPC/HTTP 错误码；
 - 敏感正文日志屏蔽；
 - 数据库集成和 HTTP 全链路测试。

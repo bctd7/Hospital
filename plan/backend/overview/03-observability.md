@@ -67,7 +67,8 @@ HTTP 字段记录 `http_method`、规范化 `http_route` 和 `http_status`。不
 - 本地可以使用可读输出，测试/预发/生产使用 JSON；
 - 生产最低等级通常为 `info`，不能只保留 error 而丢失上下文；
 - 测试覆盖 request ID 生成、透传、非法值替换、状态码、耗时和脱敏；
-- 后续接入 RPC 与 Kafka Consumer 时复用相同上下文；
+- Identity RPC 和 Kafka Consumer 已使用统一 Context 生命周期；未来新服务接入时继续复用相同日志字段、
+  脱敏和取消规则；
 - 部署环境确定后再选择 Loki/ELK/云日志、Prometheus 和 OTel Collector；
 - 告警以错误率、延迟、依赖健康、Kafka Lag、短信异常和资源饱和为基础。
 

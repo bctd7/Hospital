@@ -20,7 +20,8 @@ Copy-Item .env.example .env
 docker compose `
   --env-file .env `
   -f deploy/compose/docker-compose.yml `
-  up -d mysql redis
+  --profile messaging `
+  up -d
 ```
 
 推荐直接从仓库根目录执行：
@@ -33,14 +34,14 @@ docker compose `
 MySQL 初始化脚本仍只会在数据卷第一次创建时运行，表结构不再依赖初始化目录中的 SQL 挂载。
 旧数据库第一次接入版本管理时，按 `scripts/README.md` 完成一次基线登记。
 
-需要 Kafka 时：
+`.env.example` 默认设置 `IDENTITY_KAFKA_ENABLED=true`，因此标准 Identity 开发环境同时启动 Kafka。只有明确
+关闭 Kafka 投影、只调试不涉及授权变化的局部功能时，才使用精简启动：
 
 ```powershell
 docker compose `
   --env-file .env `
   -f deploy/compose/docker-compose.yml `
-  --profile messaging `
-  up -d
+  up -d mysql redis
 ```
 
 ## 停止
