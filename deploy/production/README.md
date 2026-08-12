@@ -33,12 +33,14 @@
   -> MySQL 创建空数据库
   -> identity-migrate 依次执行 000001 ~ 000005 后退出
   -> identity-bootstrap-admin 创建医院根节点和多个超级管理员后退出
-  -> Kafka、Redis、identity-rpc、app-api 启动
+  -> Kafka 启动，kafka-init 创建授权事件 Topic 后退出
+  -> Redis、identity-rpc、app-api 启动
   -> 后端健康检查通过
   -> 构建并上传微信体验版
 ```
 
-`identity-migrate` 和 `identity-bootstrap-admin` 是一次性任务，显示 `Exited (0)` 表示成功，不是服务崩溃。
+`identity-migrate`、`identity-bootstrap-admin` 和 `kafka-init` 是一次性任务，显示 `Exited (0)` 表示成功，
+不是服务崩溃。
 以后再次执行 `deploy.sh` 时，迁移只运行新版本，管理员初始化按手机号指纹幂等跳过已有账号。
 当前 Compose 使用单节点 Kafka（副本数 1），适合体验环境，不是高可用生产集群。
 
