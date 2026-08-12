@@ -68,13 +68,14 @@ super_admin 按完整手机号精确查找，或按昵称查询候选账号
 只负责返回分页候选。开通医生、调岗、撤销身份、禁用和恢复账号都在用户详情按 `account_id` 执行，
 不能直接以手机号或昵称作为写接口目标。
 
-首位超级管理员通过部署阶段工具初始化：
+初始超级管理员通过部署阶段工具按服务器 Secret 中的手机号列表一次性初始化：
 
-```powershell
-go run ./tools/identity-bootstrap-admin --account-id <account-id>
+```dotenv
+IDENTITY_BOOTSTRAP_ADMIN_PHONES=第一个管理员手机号,第二个管理员手机号
 ```
 
-日常授权不得绕过 Identity 业务操作直接修改数据库。
+工具创建或复用已验证手机号账号，幂等授予 `super_admin`，并写审计与 Outbox。手机号原文不得进入 Git；
+部署初始化完成后，日常授权不得绕过 Identity 业务操作直接修改数据库。
 
 ## 4. 权限模型
 

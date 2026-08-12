@@ -9,6 +9,7 @@
   → App API
   → Identity RPC
   → MySQL / Redis
+  → Outbox → Kafka → Redis 授权版本投影
 ```
 
 先判断你要做哪件事：
@@ -21,6 +22,91 @@
 | 修改小程序代码 | 否 | 是 |
 | 增加表或修改表结构 | 是 | 通常否 |
 | 增加一个全新的业务数据库 | 是 | 视前端接口是否变化而定 |
+
+## 零、从空数据卷发布当前体验版
+
+当前版本前后端、数据库结构和 Identity 异步投影都发生了变化。首次使用空数据卷时，需要完整部署应用栈，
+但“完整部署”不等于重装服务器或手写 SQL：
+
+```text
+构建最新镜像
+  -> MySQL 创建空数据库
+  -> identity-migrate 依次执行 000001 ~ 000005 后退出
+  -> identity-bootstrap-admin 创建医院根节点和多个超级管理员后退出
+  -> Kafka、Redis、identity-rpc、app-api 启动
+  -> 后端健康检查通过
+  -> 构建并上传微信体验版
+```
+
+`identity-migrate` 和 `identity-bootstrap-admin` 是一次性任务，显示 `Exited (0)` 表示成功，不是服务崩溃。
+以后再次执行 `deploy.sh` 时，迁移只运行新版本，管理员初始化按手机号指纹幂等跳过已有账号。
+当前 Compose 使用单节点 Kafka（副本数 1），适合体验环境，不是高可用生产集群。
+
+如果服务器以前运行过旧体验版，而本次已经明确决定不要旧数据，先核对并删除**这三个指定卷**：
+
+```bash
+cd /opt/hospital/deploy/production
+docker compose --env-file .env.production -f docker-compose.yml down
+docker volume inspect hospital-production-mysql-data hospital-production-redis-data hospital-production-kafka-data
+docker volume rm hospital-production-mysql-data hospital-production-redis-data hospital-production-kafka-data
+```
+
+这一步会永久删除旧账号、组织、审计、会话和未处理消息，只用于本次“全新体验环境”初始化；若卷本来不存在，
+直接跳过。不要把删卷命令加入日常发布脚本。
+
+### 1. 配置两个体验管理员
+
+复制 `env.example` 为服务器上的 `.env.production`，至少替换以下内容：
+
+```dotenv
+IDENTITY_BOOTSTRAP_HOSPITAL_CODE=HOSPITAL
+IDENTITY_BOOTSTRAP_HOSPITAL_NAME=体验医院名称
+IDENTITY_BOOTSTRAP_ADMIN_PHONES=第一个管理员手机号,第二个管理员手机号
+```
+
+手机号原文只保存在服务器 `.env.production`，不得提交 Git。初始化任务为每个号码直接创建可短信登录的
+`staff` 账号，授予 `super_admin`，并写入授权审计和 Outbox；数据库只保存 HMAC 指纹和脱敏手机号。
+除唯一医院根节点和这组管理员外，不创建院区、科室、医生或演示业务数据。
+
+以后需要追加初始化管理员时，在服务器修改手机号列表后单独运行：
+
+```bash
+docker compose --env-file .env.production -f docker-compose.yml run --rm identity-bootstrap-admin
+```
+
+已有管理员会幂等跳过，新手机号会新增管理员；从列表删除手机号不会自动撤销已有管理员。
+
+### 2. 部署后端
+
+```bash
+cd /opt/hospital/deploy/production
+chmod 600 .env.production
+chmod +x scripts/*.sh
+./scripts/deploy.sh
+```
+
+检查一次性任务和常驻服务：
+
+```bash
+docker compose --env-file .env.production -f docker-compose.yml ps -a
+docker compose --env-file .env.production -f docker-compose.yml logs identity-migrate identity-bootstrap-admin
+curl --fail http://127.0.0.1:8888/api/v1/health
+```
+
+两个管理员随后使用各自手机号接收真实短信验证码登录。登录后由管理员页面创建院区、科室和医生。
+
+### 3. 上传体验版
+
+后端健康检查和两个管理员登录均成功后，再在开发机执行：
+
+```powershell
+Set-Location C:\Users\27902\GolandProjects\Hospital\apps\miniapp
+npm run test
+npm run type-check
+npm run build:mp-weixin
+```
+
+微信开发者工具导入 `dist/build/mp-weixin`，上传新版本并设置为体验版。不要先上传依赖新接口的小程序。
 
 ## 一、更换 ECS 服务器
 
@@ -147,7 +233,7 @@ npm run build:mp-weixin
 
 在开发者工具 Console 调用 `/api/v1/health`，再在手机体验版完成一次短信登录。
 
-ECS、MySQL 和 Redis 没有变化，所以不需要搬数据库。
+ECS、MySQL、Redis 和 Kafka 没有变化，所以不需要搬数据库或消息数据。
 
 ## 三、加入新代码后如何发布
 
@@ -276,7 +362,7 @@ cd /opt/hospital/deploy/production
 ```bash
 curl --fail http://127.0.0.1:8888/api/v1/health
 docker compose --env-file .env.production -f docker-compose.yml ps
-docker compose --env-file .env.production -f docker-compose.yml logs --tail=100 app-api identity-rpc
+docker compose --env-file .env.production -f docker-compose.yml logs --tail=100 app-api identity-rpc kafka
 ```
 
 然后在手机体验版验证：启动、短信登录、退出登录和关键页面。
@@ -284,7 +370,7 @@ docker compose --env-file .env.production -f docker-compose.yml logs --tail=100 
 ## 六、禁止事项
 
 - 不提交 `.env.production`、AppSecret、AccessKey、Token 私钥；
-- 不执行 `docker compose down -v`，它会删除数据库和 Redis 数据卷；
+- 除“零、从空数据卷发布当前体验版”中已经明确确认的数据重置外，不删除 MySQL、Redis 和 Kafka 数据卷；
 - 不改写已经在共享环境执行过的迁移；
 - 不在没有备份的情况下执行生产数据库迁移；
 - 不在新服务器验证完成前释放旧服务器。

@@ -14,7 +14,9 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -trimpath -ldflags="-s -w" -o /out/app-api ./service/app/api && \
     CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
-    go build -trimpath -ldflags="-s -w" -o /out/db-migrate ./tools/db-migrate
+    go build -trimpath -ldflags="-s -w" -o /out/db-migrate ./tools/db-migrate && \
+    CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+    go build -trimpath -ldflags="-s -w" -o /out/identity-bootstrap-admin ./tools/identity-bootstrap-admin
 
 FROM alpine:3.22 AS db-migrate
 
@@ -23,6 +25,14 @@ COPY --from=builder /out/db-migrate /usr/local/bin/db-migrate
 
 USER 65532:65532
 ENTRYPOINT ["/usr/local/bin/db-migrate"]
+
+FROM alpine:3.22 AS identity-bootstrap-admin
+
+RUN apk add --no-cache ca-certificates tzdata
+COPY --from=builder /out/identity-bootstrap-admin /usr/local/bin/identity-bootstrap-admin
+
+USER 65532:65532
+ENTRYPOINT ["/usr/local/bin/identity-bootstrap-admin"]
 
 FROM alpine:3.22 AS identity-rpc
 

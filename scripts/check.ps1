@@ -40,6 +40,25 @@ try {
         "config", "--quiet"
     )
 
+    $previousProductionEnvFile = $env:HOSPITAL_PRODUCTION_ENV_FILE
+    try {
+        $env:HOSPITAL_PRODUCTION_ENV_FILE = "env.example"
+        Invoke-ExternalCheck -Label "Validating production Docker Compose configuration" -Command "docker" -Arguments @(
+            "compose",
+            "--env-file", "deploy/production/env.example",
+            "-f", "deploy/production/docker-compose.yml",
+            "config", "--quiet"
+        )
+    }
+    finally {
+        if ($null -eq $previousProductionEnvFile) {
+            Remove-Item Env:HOSPITAL_PRODUCTION_ENV_FILE -ErrorAction SilentlyContinue
+        }
+        else {
+            $env:HOSPITAL_PRODUCTION_ENV_FILE = $previousProductionEnvFile
+        }
+    }
+
     Invoke-ExternalCheck -Label "Running Go tests" -Command "go" -Arguments @("test", "./...")
     Invoke-ExternalCheck -Label "Running Go vet" -Command "go" -Arguments @("vet", "./...")
 
