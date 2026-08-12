@@ -1,13 +1,13 @@
 {
   "name": "hospital-miniapp",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "engines": {
     "node": ">=20"
   },
   "scripts": {
     "dev:mp-weixin": "uni -p mp-weixin",
-    "build:mp-weixin": "uni build -p mp-weixin",
+    "build:mp-weixin": "node scripts/build-release.mjs",
     "test": "vitest run",
     "type-check": "vue-tsc --noEmit"
   },

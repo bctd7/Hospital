@@ -62,7 +62,7 @@ npm run dev:mp-weixin
 apps/miniapp/dist/dev/mp-weixin
 ```
 
-普通构建：
+正式体验版构建：
 
 ```powershell
 npm run build:mp-weixin
@@ -74,6 +74,10 @@ npm run build:mp-weixin
 apps/miniapp/dist/build/mp-weixin
 ```
 
+正式构建固定读取 `.env.production` 并强制使用 CloudBase AnyService，不继承 `.env.local`、
+`.env.production.local` 或当前 Shell 中的 `VITE_*`。构建结束会检查产物；发现局域网 API 地址、
+缺失 CloudBase 环境或没有编译为 AnyService 调用时直接失败。不要绕过该脚本直接执行 `uni build`。
+
 ## API 地址
 
 开发者工具模拟器可以访问 `127.0.0.1`；真机中的 `127.0.0.1` 指向手机自身，必须配置电脑局域网地址：
@@ -83,6 +87,7 @@ VITE_API_BASE_URL=http://192.168.x.x:8888
 ```
 
 前端环境文件只保存公开连接信息，不能放 AppSecret、阿里云 AccessKey、JWT 私钥或手机号 HMAC Key。
+本地真机调试只使用 `.env.local`；不要创建 `.env.production.local`。
 
 ## 登录联调
 
