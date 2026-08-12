@@ -5,6 +5,9 @@
 - [01 Appointment 预约检查服务](./01-appointment-and-examination-booking.md)：当前唯一进入人工评审的模块
   Plan；预约时间采用上午/下午大窗口模型（原时间方案 C），惩罚机制已选择方案 A“固定预约额度”。
 
+- [Appointment 阶段 1：检查项目描述 CRUD 与服务骨架](./appointment/01-examination-item-description-crud.md)：
+  已确认的第一阶段实施子 Plan，供 Proto、RPC 骨架、MySQL 连接和基础 CRUD 开发使用。
+
 评审通过后，先更新 HTTP、RPC、事件和迁移契约，再创建 Appointment Service。已实施归档和业务审计等
 横切文档不会替代当前实施入口。
 
