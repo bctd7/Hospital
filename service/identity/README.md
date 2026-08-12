@@ -130,6 +130,10 @@ LOCAL_SMS_CODE=246810
 
 真实联调使用 `SMS_PROVIDER=aliyun`。生产环境配置为 `local` 时 Identity 会拒绝启动。
 
+全新体验环境由 `identity-bootstrap-admin` 一次性任务在迁移后创建唯一医院根节点，并根据
+`IDENTITY_BOOTSTRAP_ADMIN_PHONES` 创建多个初始超级管理员。该工具只用于部署初始化；正常运行后不得用它
+替代管理员业务接口。具体配置与顺序见 `deploy/production/README.md`。
+
 ## 测试
 
 ```powershell

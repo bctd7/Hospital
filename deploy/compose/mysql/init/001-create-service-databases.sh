@@ -1,4 +1,8 @@
 #!/bin/sh
+
+# The official MySQL entrypoint sources *.sh files in its own shell. Keep
+# strict-mode options inside a subshell so they cannot leak into that script.
+(
 set -eu
 
 : "${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}"
@@ -14,3 +18,4 @@ CREATE USER IF NOT EXISTS '${IDENTITY_MYSQL_USER}'@'%'
 GRANT ALL PRIVILEGES ON hospital_identity.* TO '${IDENTITY_MYSQL_USER}'@'%';
 FLUSH PRIVILEGES;
 EOSQL
+)

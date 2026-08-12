@@ -30,6 +30,6 @@ for attempt in $(seq 1 30); do
 done
 
 "${compose[@]}" ps
-"${compose[@]}" logs --tail=100 app-api identity-rpc
+"${compose[@]}" logs --tail=100 identity-migrate identity-bootstrap-admin kafka kafka-init identity-rpc app-api
 echo "Deployment did not become healthy in time." >&2
 exit 1
