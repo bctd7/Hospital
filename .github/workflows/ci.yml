@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - plan
+      - server-deploy
+      - ci-cd
       - "feature/**"
       - "chore/**"
       - "fix/**"
