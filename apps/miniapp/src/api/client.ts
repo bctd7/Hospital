@@ -22,6 +22,7 @@ interface AuthAdapter {
 }
 
 interface ErrorPayload {
+  code?: string;
   message?: string;
   error?: string;
 }
@@ -29,12 +30,14 @@ interface ErrorPayload {
 let authAdapter: AuthAdapter | undefined;
 
 export class ApiError extends Error {
+  readonly code: string;
   readonly statusCode: number;
   readonly networkError: boolean;
 
-  constructor(message: string, statusCode = 0, networkError = false) {
+  constructor(message: string, statusCode = 0, networkError = false, code = "") {
     super(message);
     this.name = "ApiError";
+    this.code = code;
     this.statusCode = statusCode;
     this.networkError = networkError;
   }
@@ -156,6 +159,10 @@ async function sendRequest<TResponse, TData>(
   throw new ApiError(
     errorMessage(response.data, `请求失败（${statusCode}）`),
     statusCode,
+    false,
+    response.data && typeof response.data === "object"
+      ? (response.data as ErrorPayload).code ?? ""
+      : "",
   );
 }
 

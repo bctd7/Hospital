@@ -78,6 +78,9 @@ FOR UPDATE SKIP LOCKED`, beforeDate.Format("2006-01-02"), limit)
 		if err := txStore.DecreaseOccupiedCapacity(ctx, capacity.CapacityID); err != nil {
 			return rollback(err)
 		}
+		if err := txStore.ReleasePatientSession(ctx, bookingID); err != nil {
+			return rollback(err)
+		}
 		if err := txStore.DeleteBooking(ctx, bookingID); err != nil {
 			return rollback(err)
 		}

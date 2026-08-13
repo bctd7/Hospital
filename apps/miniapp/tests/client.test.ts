@@ -76,4 +76,25 @@ describe("api client", () => {
     expect(handleUnauthorized).toHaveBeenCalledTimes(1);
     expect(handleUnauthorized).toHaveBeenCalledWith("rejected-access-token");
   });
+
+  it("preserves the stable backend error code", async () => {
+    vi.stubGlobal("uni", {
+      request: vi.fn((options) => {
+        options.success({
+          statusCode: 409,
+          data: {
+            code: "PATIENT_SESSION_OCCUPIED",
+            message: "patient already has a pending booking in this date and session",
+          },
+        });
+      }),
+    });
+
+    await expect(
+      request({ path: "/api/v1/patient/appointment/bookings", method: "POST" }),
+    ).rejects.toMatchObject({
+      code: "PATIENT_SESSION_OCCUPIED",
+      statusCode: 409,
+    });
+  });
 });

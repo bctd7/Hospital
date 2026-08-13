@@ -3,6 +3,7 @@ package logic
 import (
 	"errors"
 
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -22,6 +23,8 @@ func bookingRPCError(err error) error {
 		return status.Error(codes.NotFound, "booking or booking resource not found")
 	case errors.Is(err, manager.ErrCapacityFull):
 		return status.Error(codes.ResourceExhausted, "booking capacity is full")
+	case errors.Is(err, manager.ErrPatientSessionOccupied):
+		return bookingStatusError(codes.FailedPrecondition, "patient already has a pending booking in this date and session", "PATIENT_SESSION_OCCUPIED")
 	case errors.Is(err, manager.ErrBookingClosed), errors.Is(err, manager.ErrInvalidState):
 		return status.Error(codes.FailedPrecondition, "booking state does not allow the operation")
 	case errors.Is(err, manager.ErrConflict), errors.Is(err, manager.ErrVersionConflict):
@@ -29,6 +32,18 @@ func bookingRPCError(err error) error {
 	default:
 		return status.Error(codes.Internal, "internal server error")
 	}
+}
+
+func bookingStatusError(code codes.Code, message, reason string) error {
+	value := status.New(code, message)
+	withDetails, err := value.WithDetails(&errdetails.ErrorInfo{
+		Reason: reason,
+		Domain: "hospital.appointment",
+	})
+	if err != nil {
+		return value.Err()
+	}
+	return withDetails.Err()
 }
 
 func bookingResponse(value manager.Booking) *appointmentv1.Booking {

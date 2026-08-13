@@ -42,6 +42,28 @@ func TestNormalizeClockRejectsSecondsAndNormalizes(t *testing.T) {
 	}
 }
 
+func TestFitsSessionBoundaryUsesNoonAsTheOnlySplit(t *testing.T) {
+	tests := []struct {
+		name    string
+		session Session
+		start   int
+		end     int
+		want    bool
+	}{
+		{name: "morning may end at noon", session: SessionMorning, start: 9 * 60, end: 12 * 60, want: true},
+		{name: "morning may not cross noon", session: SessionMorning, start: 11 * 60, end: 13 * 60, want: false},
+		{name: "afternoon may start at noon", session: SessionAfternoon, start: 12 * 60, end: 13 * 60, want: true},
+		{name: "afternoon may not start before noon", session: SessionAfternoon, start: 11 * 60, end: 12 * 60, want: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := fitsSessionBoundary(tt.session, tt.start, tt.end); got != tt.want {
+				t.Fatalf("fitsSessionBoundary() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestNormalizeRoomLocationProducesCanonicalDisplayName(t *testing.T) {
 	campusID := uuid.NewString()
 	gotCampus, building, floor, roomNumber, displayName, err := normalizeRoomLocation(

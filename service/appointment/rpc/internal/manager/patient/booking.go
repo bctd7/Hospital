@@ -101,6 +101,7 @@ func (m *Manager) CreateBooking(ctx context.Context, patient authn.Principal, co
 		Session     Session
 		OperationID string
 	}{command.ItemID, command.RoomID, command.ServiceDate, command.Session, command.OperationID})
+	bookingID := uuid.NewString()
 	var result Booking
 	err = m.bookings.WithinBookingTransaction(ctx, func(tx BookingTxStore) error {
 		operation, found, findErr := tx.FindBookingOperation(ctx, command.OperationID)
@@ -115,6 +116,9 @@ func (m *Manager) CreateBooking(ctx context.Context, patient authn.Principal, co
 				return fmt.Errorf("decode create booking result: %w", err)
 			}
 			return nil
+		}
+		if err := tx.ClaimPatientSession(ctx, patient.AccountID, serviceDate, command.Session, bookingID); err != nil {
+			return err
 		}
 
 		selection, lockErr := tx.LockBookingSelection(ctx, command.ItemID, command.RoomID, serviceDate, command.Session)
@@ -158,7 +162,7 @@ func (m *Manager) CreateBooking(ctx context.Context, patient authn.Principal, co
 			return err
 		}
 		result = Booking{
-			BookingID: uuid.NewString(), PatientAccountID: patient.AccountID,
+			BookingID: bookingID, PatientAccountID: patient.AccountID,
 			DepartmentID: selection.DepartmentID, ItemID: selection.ItemID, ItemName: selection.ItemName,
 			RoomID: selection.RoomID, RoomDisplayName: selection.RoomDisplayName, CampusID: selection.CampusID,
 			ServiceDate: serviceDate, Session: selection.Session, Status: BookingStatusConfirmed,
@@ -269,6 +273,9 @@ func (m *Manager) DeleteMyBooking(ctx context.Context, patient authn.Principal, 
 			return fmt.Errorf("%w: booking capacity not found", ErrInvalidState)
 		}
 		if err := tx.DecreaseOccupiedCapacity(ctx, capacity.CapacityID); err != nil {
+			return err
+		}
+		if err := tx.ReleasePatientSession(ctx, booking.BookingID); err != nil {
 			return err
 		}
 		if err := tx.DeleteBooking(ctx, booking.BookingID); err != nil {

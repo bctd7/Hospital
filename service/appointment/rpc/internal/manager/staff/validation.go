@@ -112,6 +112,17 @@ func normalizeClock(value, field string) (string, int, error) {
 	return parsed.Format("15:04"), minutes, nil
 }
 
+func fitsSessionBoundary(session Session, startMinutes, endMinutes int) bool {
+	const noon = 12 * 60
+	if session == SessionMorning {
+		return startMinutes < endMinutes && endMinutes <= noon
+	}
+	if session == SessionAfternoon {
+		return noon <= startMinutes && startMinutes < endMinutes
+	}
+	return false
+}
+
 func containsWindow(room RoomWeeklyWindow, item ItemWeeklyWindow) bool {
 	if room.Status != StatusActive || item.Status != StatusActive || room.Weekday != item.Weekday || room.Session != item.Session {
 		return false

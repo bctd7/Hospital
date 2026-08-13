@@ -16,6 +16,8 @@ type BookingTxStore interface {
 	FindBookingOperation(ctx context.Context, operationID string) (BookingOperation, bool, error)
 	RecordBookingOperation(ctx context.Context, change BookingOperationChange) error
 	ListBookingsForUpdate(ctx context.Context, filter BookingListFilter) ([]Booking, error)
+	ClaimPatientSession(ctx context.Context, patientAccountID string, serviceDate time.Time, session Session, bookingID string) error
+	ReleasePatientSession(ctx context.Context, bookingID string) error
 	LockBookingSelection(ctx context.Context, itemID, roomID string, serviceDate time.Time, session Session) (BookingSelection, error)
 	FindDateCapacityForUpdate(ctx context.Context, roomID string, serviceDate time.Time, session Session) (DateCapacity, bool, error)
 	CreateDateCapacity(ctx context.Context, capacity DateCapacity) error

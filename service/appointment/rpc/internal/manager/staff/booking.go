@@ -177,6 +177,9 @@ func (m *Manager) CheckInBooking(ctx context.Context, operator authn.Principal, 
 		if err := tx.CheckInBooking(ctx, booking, command.ExpectedVersion); err != nil {
 			return err
 		}
+		if err := tx.ReleasePatientSession(ctx, booking.BookingID); err != nil {
+			return err
+		}
 		result = booking
 		return tx.RecordBookingOperation(ctx, BookingOperationChange{
 			OperationID: command.OperationID, OperatorAccountID: operator.AccountID,
@@ -243,6 +246,11 @@ func (m *Manager) DeleteBooking(ctx context.Context, operator authn.Principal, c
 		}
 		if err := tx.DecreaseOccupiedCapacity(ctx, capacity.CapacityID); err != nil {
 			return err
+		}
+		if booking.Status == BookingStatusConfirmed {
+			if err := tx.ReleasePatientSession(ctx, booking.BookingID); err != nil {
+				return err
+			}
 		}
 		if err := tx.DeleteBooking(ctx, booking.BookingID); err != nil {
 			return err

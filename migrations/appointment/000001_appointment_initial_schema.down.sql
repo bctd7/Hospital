@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS appointment_booking_operations;
+DROP TABLE IF EXISTS appointment_patient_session_claims;
 DROP TABLE IF EXISTS appointment_bookings;
 DROP TABLE IF EXISTS appointment_room_date_capacity;
 DROP TABLE IF EXISTS appointment_resource_audit;

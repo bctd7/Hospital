@@ -65,6 +65,9 @@ func deleteBookingForConfiguration(ctx context.Context, tx BookingTxStore, opera
 	if err := tx.DecreaseOccupiedCapacity(ctx, capacity.CapacityID); err != nil {
 		return err
 	}
+	if err := tx.ReleasePatientSession(ctx, booking.BookingID); err != nil {
+		return err
+	}
 	if err := tx.DeleteBooking(ctx, booking.BookingID); err != nil {
 		return err
 	}

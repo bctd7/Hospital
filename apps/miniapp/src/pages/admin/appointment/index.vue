@@ -347,16 +347,19 @@ function navigate(url: string) {
         </view>
         <scroll-view scroll-y class="column-body">
           <text v-if="loadingRooms" class="column-empty">加载中...</text>
-          <button
+          <view
             v-for="room in rooms"
             :key="room.roomId"
             class="resource-row"
             :class="{ 'resource-row--active': room.roomId === selectedRoomId }"
             @tap="chooseRoom(room)"
           >
-            <text class="resource-row__name">{{ room.displayName }}</text>
-            <text class="resource-row__minor">{{ room.building }} · {{ room.floorNumber }} 层</text>
-          </button>
+            <view class="resource-row__copy">
+              <text class="resource-row__name">{{ room.displayName }}</text>
+              <text class="resource-row__minor">{{ room.building }} · {{ room.floorNumber }} 层</text>
+            </view>
+            <button class="resource-row__detail" @tap.stop="openRoom(room)">编辑 ›</button>
+          </view>
           <button
             v-if="canLoadMore"
             class="column-action"
@@ -393,8 +396,11 @@ function navigate(url: string) {
             class="resource-row"
             @tap="openItem(relation)"
           >
-            <text class="resource-row__name">{{ relation.itemName }}</text>
-            <text class="resource-row__minor">当前房间可执行</text>
+            <view class="resource-row__copy">
+              <text class="resource-row__name">{{ relation.itemName }}</text>
+              <text class="resource-row__minor">当前房间可执行</text>
+            </view>
+            <text class="resource-row__detail">编辑 ›</text>
           </button>
           <text v-if="relationError" class="column-empty column-empty--error">{{ relationError }}</text>
           <text v-else-if="selectedRoom && !loadingRelations && !relations.length" class="column-empty">
@@ -403,13 +409,6 @@ function navigate(url: string) {
           <text v-else-if="!selectedRoom && !loadingRooms" class="column-empty">
             {{ roomError ? "房间加载成功后显示项目" : "新增房间后配置项目" }}
           </text>
-          <button
-            v-if="selectedRoom"
-            class="column-action column-action--primary"
-            @tap="openRoom(selectedRoom)"
-          >
-            管理当前房间
-          </button>
         </scroll-view>
       </view>
     </view>
@@ -449,15 +448,16 @@ button::after { display: none; }
 .department-row__name,.department-row__minor,.resource-row__name,.resource-row__minor { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .department-row__name,.resource-row__name { color: #2c384b; font-size: 21rpx; font-weight: 620; }
 .department-row__minor,.resource-row__minor { margin-top: 6rpx; color: #939eae; font-size: 17rpx; font-weight: 400; }
-.resource-row { position: relative; min-height: 86rpx; background: #fff; }
+.resource-row { position: relative; display: flex; min-height: 86rpx; align-items: center; gap: 8rpx; background: #fff; }
 .resource-row:active { background: #f5faff; }
 .resource-row--active { background: #edf7fc; }
 .resource-row--active::before { position: absolute; top: 0; bottom: 0; left: 0; width: 5rpx; content: ""; background: #2188c7; }
 .resource-row--active .resource-row__name { color: #177dbb; }
+.resource-row__copy { min-width: 0; flex: 1; }
+.resource-row__detail { flex: 0 0 auto; padding: 0; margin: 0; color: #2188c7; font-size: 16rpx; line-height: 40rpx; background: transparent; }
 .resource-row__title-line { display: flex; align-items: center; gap: 7rpx; min-width: 0; }
 .status-tag { flex: 0 0 auto; padding: 2rpx 7rpx; color: #a05d67; font-size: 14rpx; line-height: 1.4; background: #f8e9ec; border-radius: 8rpx; }
 .column-action { width: calc(100% - 20rpx); margin: 12rpx 10rpx 0; padding: 0 8rpx; color: #177dbb; font-size: 18rpx; line-height: 54rpx; background: #edf6fb; border-radius: 12rpx; }
-.column-action--primary { color: #fff; background: #2188c7; }
 .column-empty { display: block; padding: 28rpx 12rpx; color: #929dad; font-size: 18rpx; line-height: 1.5; text-align: center; }
 .column-empty--error { color: #bf5363; }
 .empty-state { padding: 20rpx 12rpx; text-align: center; }

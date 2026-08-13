@@ -121,6 +121,9 @@ CREATE TABLE appointment_room_weekly_windows (
     CONSTRAINT chk_appointment_room_weekly_windows_weekday CHECK (weekday BETWEEN 1 AND 7),
     CONSTRAINT chk_appointment_room_weekly_windows_session CHECK (session IN ('morning', 'afternoon')),
     CONSTRAINT chk_appointment_room_weekly_windows_time CHECK (open_time < close_time),
+    CONSTRAINT chk_appointment_room_weekly_windows_session_time
+        CHECK ((session = 'morning' AND close_time <= '12:00:00') OR
+               (session = 'afternoon' AND open_time >= '12:00:00')),
     CONSTRAINT chk_appointment_room_weekly_windows_capacity CHECK (active_capacity > 0),
     CONSTRAINT chk_appointment_room_weekly_windows_status CHECK (status IN ('active', 'disabled')),
     CONSTRAINT chk_appointment_room_weekly_windows_version CHECK (version > 0)
@@ -147,6 +150,9 @@ CREATE TABLE appointment_item_weekly_windows (
     CONSTRAINT chk_appointment_item_weekly_windows_session CHECK (session IN ('morning', 'afternoon')),
     CONSTRAINT chk_appointment_item_weekly_windows_time
         CHECK (start_time <= booking_cutoff_time AND booking_cutoff_time < end_time),
+    CONSTRAINT chk_appointment_item_weekly_windows_session_time
+        CHECK ((session = 'morning' AND end_time <= '12:00:00') OR
+               (session = 'afternoon' AND start_time >= '12:00:00')),
     CONSTRAINT chk_appointment_item_weekly_windows_status CHECK (status IN ('active', 'disabled')),
     CONSTRAINT chk_appointment_item_weekly_windows_version CHECK (version > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -264,6 +270,21 @@ CREATE TABLE appointment_bookings (
         OR (status = 'checked_in' AND checked_in_at IS NOT NULL AND checked_in_by IS NOT NULL)
     ),
     CONSTRAINT chk_appointment_bookings_version CHECK (version > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- A patient may hold only one un-checked-in booking in a concrete date/session.
+-- This small transactional guard is released at check-in or deletion. Keeping it
+-- separate from appointment_bookings allows checked-in history to remain stored.
+CREATE TABLE appointment_patient_session_claims (
+    patient_account_id CHAR(36)    NOT NULL,
+    service_date       DATE        NOT NULL,
+    session            VARCHAR(16) NOT NULL,
+    booking_id         CHAR(36)    NOT NULL,
+    created_at         DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (patient_account_id, service_date, session),
+    UNIQUE KEY uk_appointment_patient_session_claims_booking (booking_id),
+    CONSTRAINT chk_appointment_patient_session_claims_session
+        CHECK (session IN ('morning', 'afternoon'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE appointment_booking_operations (

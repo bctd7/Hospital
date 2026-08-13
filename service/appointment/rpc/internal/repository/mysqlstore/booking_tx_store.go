@@ -88,6 +88,37 @@ WHERE operation_id = ?`, operationID).Scan(
 	return value, true, nil
 }
 
+func (s *bookingTxStore) ClaimPatientSession(ctx context.Context, patientAccountID string, serviceDate time.Time, session appointmentmanager.Session, bookingID string) error {
+	_, err := s.tx.ExecContext(ctx, `
+INSERT INTO appointment_patient_session_claims
+    (patient_account_id, service_date, session, booking_id)
+VALUES (?, ?, ?, ?)`, patientAccountID, serviceDate.Format("2006-01-02"), session, bookingID)
+	if err != nil {
+		if isDuplicateEntry(err) {
+			return appointmentmanager.ErrPatientSessionOccupied
+		}
+		return fmt.Errorf("claim patient booking session: %w", err)
+	}
+	return nil
+}
+
+func (s *bookingTxStore) ReleasePatientSession(ctx context.Context, bookingID string) error {
+	result, err := s.tx.ExecContext(ctx, `
+DELETE FROM appointment_patient_session_claims
+WHERE booking_id = ?`, bookingID)
+	if err != nil {
+		return fmt.Errorf("release patient booking session: %w", err)
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("read patient session release result: %w", err)
+	}
+	if affected != 1 {
+		return fmt.Errorf("%w: patient booking session claim is missing", appointmentmanager.ErrInvalidState)
+	}
+	return nil
+}
+
 func (s *bookingTxStore) RecordBookingOperation(ctx context.Context, change appointmentmanager.BookingOperationChange) error {
 	result, err := json.Marshal(change.Result)
 	if err != nil {

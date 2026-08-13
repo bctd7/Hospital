@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 
 import { patientAppointmentApi } from "@/api/appointment";
+import { ApiError } from "@/api/client";
 import { loadDepartmentOptions, type DepartmentOption } from "@/services/organization";
 import type { BookingOption, ExaminationItem } from "@/types/appointment";
 
@@ -111,7 +112,10 @@ async function confirmAppointment() {
     uni.showToast({ title: "预约成功", icon: "success" });
     setTimeout(() => void uni.navigateTo({ url: "/pages/profile/appointments/index" }), 500);
   } catch (error) {
-    uni.showModal({ title: "预约失败", content: messageOf(error, "请刷新后重试"), showCancel: false });
+    const content = error instanceof ApiError && error.code === "PATIENT_SESSION_OCCUPIED"
+      ? "同一天的同一上午或下午只能保留一个待核销预约；完成核销后可立即再次预约。"
+      : messageOf(error, "请刷新后重试");
+    uni.showModal({ title: "预约失败", content, showCancel: false });
   } finally {
     submitting.value = false;
   }

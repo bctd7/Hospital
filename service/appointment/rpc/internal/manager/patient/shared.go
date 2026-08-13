@@ -40,13 +40,14 @@ const (
 )
 
 var (
-	ErrForbidden     = appointmentmanager.ErrForbidden
-	ErrNotFound      = appointmentmanager.ErrNotFound
-	ErrInvalid       = appointmentmanager.ErrInvalid
-	ErrConflict      = appointmentmanager.ErrConflict
-	ErrInvalidState  = appointmentmanager.ErrInvalidState
-	ErrCapacityFull  = appointmentmanager.ErrCapacityFull
-	ErrBookingClosed = appointmentmanager.ErrBookingClosed
+	ErrForbidden              = appointmentmanager.ErrForbidden
+	ErrNotFound               = appointmentmanager.ErrNotFound
+	ErrInvalid                = appointmentmanager.ErrInvalid
+	ErrConflict               = appointmentmanager.ErrConflict
+	ErrInvalidState           = appointmentmanager.ErrInvalidState
+	ErrCapacityFull           = appointmentmanager.ErrCapacityFull
+	ErrBookingClosed          = appointmentmanager.ErrBookingClosed
+	ErrPatientSessionOccupied = appointmentmanager.ErrPatientSessionOccupied
 )
 
 func loadCached[T any](ctx context.Context, cache Cache, flights *flightGroup, key string, ttl time.Duration, loader func() (T, bool, error)) (T, bool, error) {

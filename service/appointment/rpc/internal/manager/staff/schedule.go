@@ -39,7 +39,7 @@ func (m *Manager) SetRoomWindow(ctx context.Context, operator authn.Principal, c
 	if err != nil {
 		return RoomWeeklyWindow{}, err
 	}
-	if openMinutes >= closeMinutes || command.ActiveCapacity < 1 {
+	if !fitsSessionBoundary(session, openMinutes, closeMinutes) || command.ActiveCapacity < 1 {
 		return RoomWeeklyWindow{}, fmt.Errorf("%w: room window time or capacity is invalid", ErrInvalid)
 	}
 	meta, err := normalizeOperation(command.OperationMeta)
@@ -165,7 +165,7 @@ func (m *Manager) SetItemWindow(ctx context.Context, operator authn.Principal, c
 	if err != nil {
 		return ItemWeeklyWindow{}, err
 	}
-	if startMin > cutoffMin || cutoffMin >= endMin {
+	if startMin > cutoffMin || cutoffMin >= endMin || !fitsSessionBoundary(session, startMin, endMin) {
 		return ItemWeeklyWindow{}, fmt.Errorf("%w: item window time is invalid", ErrInvalid)
 	}
 	meta, err := normalizeOperation(command.OperationMeta)

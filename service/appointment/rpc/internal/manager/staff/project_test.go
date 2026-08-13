@@ -363,6 +363,14 @@ func (s *memoryCatalogStore) ListBookingsForUpdate(context.Context, BookingListF
 	return nil, nil
 }
 
+func (s *memoryCatalogStore) ClaimPatientSession(context.Context, string, time.Time, Session, string) error {
+	return ErrNotImplemented
+}
+
+func (s *memoryCatalogStore) ReleasePatientSession(context.Context, string) error {
+	return ErrNotImplemented
+}
+
 func (s *memoryCatalogStore) LockBookingSelection(context.Context, string, string, time.Time, Session) (BookingSelection, error) {
 	return BookingSelection{}, ErrNotImplemented
 }
