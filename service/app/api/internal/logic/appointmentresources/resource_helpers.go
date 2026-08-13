@@ -57,7 +57,7 @@ func listRooms(ctx context.Context, s *svc.ServiceContext, req *types.ListAppoin
 	if err != nil {
 		return nil, err
 	}
-	out := &types.ListAppointmentRoomsResponse{Page: v.Page, PageSize: v.PageSize, Total: v.Total}
+	out := &types.ListAppointmentRoomsResponse{Rooms: make([]types.AppointmentRoomResponse, 0, len(v.Rooms)), Page: v.Page, PageSize: v.PageSize, Total: v.Total}
 	for _, x := range v.Rooms {
 		out.Rooms = append(out.Rooms, *room(x))
 	}
@@ -124,7 +124,7 @@ func listRoomItems(ctx context.Context, s *svc.ServiceContext, req *types.ListRo
 	if err != nil {
 		return nil, err
 	}
-	out := &types.ListRoomExaminationItemsAPIResponse{Page: v.Page, PageSize: v.PageSize, Total: v.Total}
+	out := &types.ListRoomExaminationItemsAPIResponse{Relations: make([]types.RoomExaminationItemResponse, 0, len(v.Relations)), Page: v.Page, PageSize: v.PageSize, Total: v.Total}
 	for _, x := range v.Relations {
 		out.Relations = append(out.Relations, relation(x))
 	}
@@ -139,7 +139,7 @@ func listItemRooms(ctx context.Context, s *svc.ServiceContext, req *types.ItemRo
 	if err != nil {
 		return nil, err
 	}
-	out := &types.ListRoomExaminationItemsAPIResponse{Page: v.Page, PageSize: v.PageSize, Total: v.Total}
+	out := &types.ListRoomExaminationItemsAPIResponse{Relations: make([]types.RoomExaminationItemResponse, 0, len(v.Relations)), Page: v.Page, PageSize: v.PageSize, Total: v.Total}
 	for _, x := range v.Relations {
 		out.Relations = append(out.Relations, relation(x))
 	}
@@ -176,7 +176,7 @@ func listRoomWindows(ctx context.Context, s *svc.ServiceContext, req *types.Week
 	if err != nil {
 		return nil, err
 	}
-	out := &types.ListRoomWeeklyWindowsAPIResponse{}
+	out := &types.ListRoomWeeklyWindowsAPIResponse{Windows: make([]types.RoomWeeklyWindowResponse, 0, len(v.Windows))}
 	for _, x := range v.Windows {
 		out.Windows = append(out.Windows, *roomWindow(x))
 	}
@@ -213,7 +213,7 @@ func listItemWindows(ctx context.Context, s *svc.ServiceContext, req *types.Week
 	if err != nil {
 		return nil, err
 	}
-	out := &types.ListItemWeeklyWindowsAPIResponse{}
+	out := &types.ListItemWeeklyWindowsAPIResponse{Windows: make([]types.ItemWeeklyWindowResponse, 0, len(v.Windows))}
 	for _, x := range v.Windows {
 		out.Windows = append(out.Windows, *itemWindow(x))
 	}

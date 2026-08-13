@@ -16,7 +16,7 @@
     {
       "path": "pages/registration/index",
       "style": {
-        "navigationBarTitleText": "科室医生"
+        "navigationBarTitleText": "医生名录"
       }
     },
     {
@@ -131,7 +131,7 @@
       },
       {
         "pagePath": "pages/registration/index",
-        "text": "科室医生"
+        "text": "医生名录"
       },
       {
         "pagePath": "pages/messages/index",

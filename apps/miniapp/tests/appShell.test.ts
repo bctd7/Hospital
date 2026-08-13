@@ -56,7 +56,7 @@ describe("app shell identity resolution", () => {
       expect.objectContaining({ index: 0, text: "首页" }),
     );
     expect(setTabBarItem).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 1, text: "部门管理" }),
+      expect.objectContaining({ index: 1, text: "人员管理" }),
     );
     expect(setTabBarItem).toHaveBeenCalledWith(
       expect.objectContaining({ index: 2, text: "消息" }),
@@ -73,7 +73,7 @@ describe("app shell identity resolution", () => {
       expect.objectContaining({ index: 0, text: "首页" }),
     );
     expect(setTabBarItem).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 1, text: "挂号" }),
+      expect.objectContaining({ index: 1, text: "医生名录" }),
     );
   });
 

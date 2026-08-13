@@ -51,7 +51,7 @@ const hasDepartment = computed(() => departmentView.value.departmentId.length > 
       </view>
     </view>
 
-    <view class="doctor-list">
+    <scroll-view class="doctor-list" scroll-y>
       <view v-if="!hasDepartment" class="panel-state">请选择部门</view>
       <view v-else-if="departmentView.status === 'disabled'" class="panel-state">
         恢复部门后才能重新关联医生
@@ -62,8 +62,7 @@ const hasDepartment = computed(() => departmentView.value.departmentId.length > 
         <button class="panel-state__retry" @tap="$emit('retry', departmentView.departmentId)">重试</button>
       </view>
       <view v-else-if="doctors.length === 0" class="panel-state">
-        <text class="panel-state__icon">医</text>
-        <text>当前部门暂无医生</text>
+        <text>当前科室暂无医生</text>
       </view>
       <template v-else>
         <view
@@ -80,7 +79,7 @@ const hasDepartment = computed(() => departmentView.value.departmentId.length > 
           <text v-if="canOpenDoctor" class="doctor-item__arrow">›</text>
         </view>
       </template>
-    </view>
+    </scroll-view>
   </view>
 </template>
 
@@ -149,7 +148,7 @@ const hasDepartment = computed(() => departmentView.value.departmentId.length > 
 
 .doctor-list {
   flex: 1;
-  min-height: 0;
+  height: 0;
 }
 
 .doctor-item {
@@ -212,15 +211,16 @@ const hasDepartment = computed(() => departmentView.value.departmentId.length > 
 
 .panel-state {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 18rpx;
-  min-height: 240rpx;
-  padding: 30rpx;
+  gap: 14rpx;
+  min-height: 112rpx;
+  padding: 20rpx 24rpx;
+  box-sizing: border-box;
   color: #98a2b2;
   font-size: 23rpx;
   text-align: center;
+  border-bottom: 1rpx solid #f0f2f6;
 }
 
 .panel-state__retry {
@@ -230,17 +230,6 @@ const hasDepartment = computed(() => departmentView.value.departmentId.length > 
   line-height: 58rpx;
   background: #edf7ff;
   border-radius: 28rpx;
-}
-
-.panel-state__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 74rpx;
-  height: 74rpx;
-  color: #71a9d1;
-  background: #edf7ff;
-  border-radius: 50%;
 }
 
 .panel-state--error {

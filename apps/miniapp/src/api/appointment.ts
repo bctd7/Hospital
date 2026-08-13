@@ -179,9 +179,13 @@ function page<T>(values: T[], value: { page: number; page_size: number; total: n
   return { items: values, page: value.page, pageSize: value.page_size, total: value.total };
 }
 
+function arrayOrEmpty<T>(values: T[] | null | undefined): T[] {
+  return Array.isArray(values) ? values : [];
+}
+
 export const appointmentManagementApi: AppointmentManagementApi = {
   async listItems(departmentId, status, currentPage = 1, pageSize = 50) {
-    const value = await request<{ items: ItemResponse[]; page: number; page_size: number; total: number }>({
+    const value = await request<{ items: ItemResponse[] | null; page: number; page_size: number; total: number }>({
       path: queryPath("/api/v1/admin/appointment/examination-items", {
         owner_department_id: departmentId,
         status,
@@ -190,7 +194,7 @@ export const appointmentManagementApi: AppointmentManagementApi = {
       }),
       authenticated: true,
     });
-    return page(value.items.map(item), value);
+    return page(arrayOrEmpty(value.items).map(item), value);
   },
 
   async getItem(itemId) {
@@ -217,11 +221,11 @@ export const appointmentManagementApi: AppointmentManagementApi = {
   },
 
   async listRooms(departmentId, currentPage = 1, pageSize = 50) {
-    const value = await request<{ rooms: RoomResponse[]; page: number; page_size: number; total: number }>({
+    const value = await request<{ rooms: RoomResponse[] | null; page: number; page_size: number; total: number }>({
       path: queryPath("/api/v1/admin/appointment/rooms", { department_id: departmentId, page: currentPage, page_size: pageSize }),
       authenticated: true,
     });
-    return page(value.rooms.map(room), value);
+    return page(arrayOrEmpty(value.rooms).map(room), value);
   },
 
   async getRoom(roomId) {
@@ -243,11 +247,11 @@ export const appointmentManagementApi: AppointmentManagementApi = {
   },
 
   async listRoomItems(roomId, status, currentPage = 1, pageSize = 100) {
-    const value = await request<{ relations: RelationResponse[]; page: number; page_size: number; total: number }>({
+    const value = await request<{ relations: RelationResponse[] | null; page: number; page_size: number; total: number }>({
       path: queryPath(`/api/v1/admin/appointment/rooms/${encodeURIComponent(roomId)}/examination-items`, { status, page: currentPage, page_size: pageSize }),
       authenticated: true,
     });
-    return page(value.relations.map(relation), value);
+    return page(arrayOrEmpty(value.relations).map(relation), value);
   },
 
   async addRoomItem(roomId, itemId) {
@@ -261,19 +265,19 @@ export const appointmentManagementApi: AppointmentManagementApi = {
   },
 
   async listItemRooms(itemId) {
-    const value = await request<{ relations: RelationResponse[] }>({
+    const value = await request<{ relations: RelationResponse[] | null }>({
       path: `/api/v1/appointment/examination-items/${encodeURIComponent(itemId)}/rooms`,
       authenticated: true,
     });
-    return value.relations.map(relation);
+    return arrayOrEmpty(value.relations).map(relation);
   },
 
   async listRoomWindows(roomId) {
-    const value = await request<{ windows: RoomWindowResponse[] }>({
+    const value = await request<{ windows: RoomWindowResponse[] | null }>({
       path: `/api/v1/admin/appointment/rooms/${encodeURIComponent(roomId)}/weekly-windows`,
       authenticated: true,
     });
-    return value.windows.map(roomWindow);
+    return arrayOrEmpty(value.windows).map(roomWindow);
   },
 
   async saveRoomWindow(roomId, input: SaveRoomWindowInput) {
@@ -291,11 +295,11 @@ export const appointmentManagementApi: AppointmentManagementApi = {
   },
 
   async listItemWindows(itemId) {
-    const value = await request<{ windows: ItemWindowResponse[] }>({
+    const value = await request<{ windows: ItemWindowResponse[] | null }>({
       path: `/api/v1/admin/appointment/examination-items/${encodeURIComponent(itemId)}/weekly-windows`,
       authenticated: true,
     });
-    return value.windows.map(itemWindow);
+    return arrayOrEmpty(value.windows).map(itemWindow);
   },
 
   async saveItemWindow(itemId, input: SaveItemWindowInput) {

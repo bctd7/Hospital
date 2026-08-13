@@ -12,8 +12,8 @@ const SUPER_ADMIN_ROLE = "super_admin";
 export const STAFF_APP_ENABLED = true;
 
 const TAB_LABELS: Record<AppVariant, string[]> = {
-  patient: ["首页", "挂号", "消息", "我的"],
-  staff: ["首页", "部门管理", "消息", "我的"],
+  patient: ["首页", "医生名录", "消息", "我的"],
+  staff: ["首页", "人员管理", "消息", "我的"],
 };
 
 let appliedVariant: AppVariant | null = null;

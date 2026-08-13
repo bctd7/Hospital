@@ -7,7 +7,7 @@
 | 顺序 | 患者端 | 工作人员端 | 路由 |
 |---|---|---|---|
 | 1 | 首页 | 工作台 | `pages/home/index` |
-| 2 | 挂号 | 部门管理 | `pages/registration/index` |
+| 2 | 医生名录 | 人员管理 | `pages/registration/index` |
 | 3 | 消息 | 消息 | `pages/messages/index` |
 | 4 | 我的 | 我的 | `pages/profile/index` |
 
@@ -15,7 +15,7 @@
 `appVariant` 切换文案和内容组件，从而复用布局、会话、请求层和公共组件。
 
 首版固定保留四个 Tab，不因超级管理员身份动态增加第五项。“用户管理”是超级管理员专属二级页，
-从“部门管理”右上角进入；这样继续使用原生 TabBar，不引入自定义 TabBar 的状态同步和兼容成本。
+从“人员管理”右上角进入；这样继续使用原生 TabBar，不引入自定义 TabBar 的状态同步和兼容成本。
 
 ## 2. 应用版本规则
 
@@ -37,13 +37,12 @@ department_doctor / super_admin
 
 ## 3. 当前页面状态
 
-- 患者首页和消息显示真实空状态；挂号页按 Appointment 页面 Plan 逐步接入“科室—项目—房间—本周窗口”；
+- 患者首页和消息显示真实空状态；“医生名录”按院区、科室展示真实医生目录；
 - 工作台和工作人员消息暂时显示建设中，不伪造数据；
-- 工作人员“部门管理”保留[组织与医生管理](./04-department-management.md)，并按
-  [工作人员 Appointment 页面文档](./06-admin-appointment-resource-management.md)接入检查项目、房间、项目关系与周配置；
+- 工作人员“人员管理”保留[医生目录与用户管理](./04-department-management.md)，不混入检查项目、房间或开放时间配置；
 - 首页同一服务卡按版本分流：患者端显示“检查项目”，工作人员端显示“检查项目管理”，分别进入
   [患者展示页](./07-patient-examination-item-browser.md)和管理页；
-- 超级管理员从部门管理页进入[用户管理二级页](./05-admin-user-management.md)，医生不显示入口；
+- 超级管理员从人员管理页进入[用户管理二级页](./05-admin-user-management.md)，医生不显示入口；
 - “我的”使用同一资料头部与菜单组件，并显示可用版本切换入口；
 - 二级页面使用 `navigateTo`，Tab 页面使用 `switchTab`；
 - 跳转具有互斥保护和失败反馈，避免连续点击造成并发跳转。

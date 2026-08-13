@@ -31,7 +31,7 @@ defineEmits<{
     >
       ＋ 新增
     </button>
-    <view class="department-list">
+    <scroll-view class="department-list" scroll-y>
       <view v-if="loading" class="sidebar-state">加载中...</view>
       <view v-else-if="departments.length === 0" class="sidebar-state">
         {{ showDisabled ? "暂无停用部门" : "暂无部门" }}
@@ -48,7 +48,7 @@ defineEmits<{
           {{ department.status === "active" ? `${department.doctorCount}人` : "已停用" }}
         </text>
       </button>
-    </view>
+    </scroll-view>
   </view>
 </template>
 
@@ -105,7 +105,7 @@ defineEmits<{
 
 .department-list {
   flex: 1;
-  min-height: 0;
+  height: 0;
 }
 
 .department-item {
@@ -159,8 +159,9 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 240rpx;
-  padding: 30rpx;
+  min-height: 112rpx;
+  padding: 20rpx;
+  box-sizing: border-box;
   color: #98a2b2;
   font-size: 23rpx;
   text-align: center;

@@ -706,6 +706,8 @@ button::after {
 .department-board {
   display: flex;
   align-items: stretch;
+  height: calc(100vh - 300rpx);
+  min-height: 720rpx;
   overflow: hidden;
   background: #ffffff;
   border: 1rpx solid #e8edf4;

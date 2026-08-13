@@ -19,6 +19,19 @@ describe("appointment HTTP adapter", () => {
     });
   });
 
+  it("normalizes null empty collections returned by Go JSON", async () => {
+    requestMock
+      .mockResolvedValueOnce({ rooms: null, page: 1, page_size: 50, total: 0 })
+      .mockResolvedValueOnce({ relations: null, page: 1, page_size: 100, total: 0 });
+    const { appointmentManagementApi } = await import("@/api/appointment");
+
+    const rooms = await appointmentManagementApi.listRooms("department-empty");
+    const relations = await appointmentManagementApi.listRoomItems("room-empty", "active");
+
+    expect(rooms.items).toEqual([]);
+    expect(relations.items).toEqual([]);
+  });
+
   it("creates an examination item with a fresh idempotency id", async () => {
     requestMock.mockResolvedValueOnce({
       item_id: "item-a",
