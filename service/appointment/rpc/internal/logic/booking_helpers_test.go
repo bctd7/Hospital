@@ -7,11 +7,11 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"hospital/service/appointment/rpc/internal/manager"
+	"hospital/service/appointment/rpc/internal/manager/common"
 )
 
 func TestBookingRPCErrorIncludesPatientSessionReason(t *testing.T) {
-	value, ok := status.FromError(bookingRPCError(manager.ErrPatientSessionOccupied))
+	value, ok := status.FromError(bookingRPCError(common.ErrPatientSessionOccupied))
 	if !ok {
 		t.Fatal("bookingRPCError did not return a gRPC status")
 	}

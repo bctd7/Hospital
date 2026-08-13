@@ -1,17 +1,12 @@
-package manager
+package common
 
 import (
 	"context"
 	"time"
 )
 
-type BookingStore interface {
-	ListBookingOptions(ctx context.Context, itemID string, fromDate, throughDate time.Time) ([]BookingOption, error)
-	GetBooking(ctx context.Context, bookingID string) (Booking, error)
-	ListBookings(ctx context.Context, filter BookingListFilter) ([]Booking, int64, error)
-	WithinBookingTransaction(ctx context.Context, fn func(BookingTxStore) error) error
-}
-
+// BookingTxStore 是预约创建、核销、删除和容量变更共享的事务原子操作。
+// 患者端与工作人员端分别在自己的 store.go 中声明所需的对外查询能力。
 type BookingTxStore interface {
 	FindBookingOperation(ctx context.Context, operationID string) (BookingOperation, bool, error)
 	RecordBookingOperation(ctx context.Context, change BookingOperationChange) error

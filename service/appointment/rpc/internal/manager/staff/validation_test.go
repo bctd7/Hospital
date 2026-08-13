@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	staffsupport "hospital/service/appointment/rpc/internal/manager/staff/support"
 )
 
 func TestContainsWindowRequiresFullContainmentAndSameSlot(t *testing.T) {
@@ -25,7 +27,7 @@ func TestContainsWindowRequiresFullContainmentAndSameSlot(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := containsWindow(room, tt.item); got != tt.want {
+			if got := staffsupport.ContainsWindow(room, tt.item); got != tt.want {
 				t.Fatalf("containsWindow() = %v, want %v", got, tt.want)
 			}
 		})
@@ -33,12 +35,12 @@ func TestContainsWindowRequiresFullContainmentAndSameSlot(t *testing.T) {
 }
 
 func TestNormalizeClockRejectsSecondsAndNormalizes(t *testing.T) {
-	value, minutes, err := normalizeClock(" 09:05 ", "open_time")
+	value, minutes, err := staffsupport.NormalizeClock(" 09:05 ", "open_time")
 	if err != nil || value != "09:05" || minutes != 545 {
-		t.Fatalf("normalizeClock() = %q, %d, %v", value, minutes, err)
+		t.Fatalf("staffsupport.NormalizeClock() = %q, %d, %v", value, minutes, err)
 	}
-	if _, _, err := normalizeClock("09:05:30", "open_time"); err == nil {
-		t.Fatal("normalizeClock accepted seconds")
+	if _, _, err := staffsupport.NormalizeClock("09:05:30", "open_time"); err == nil {
+		t.Fatal("staffsupport.NormalizeClock accepted seconds")
 	}
 }
 
@@ -57,8 +59,8 @@ func TestFitsSessionBoundaryUsesNoonAsTheOnlySplit(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := fitsSessionBoundary(tt.session, tt.start, tt.end); got != tt.want {
-				t.Fatalf("fitsSessionBoundary() = %v, want %v", got, tt.want)
+			if got := staffsupport.FitsSessionBoundary(tt.session, tt.start, tt.end); got != tt.want {
+				t.Fatalf("staffsupport.FitsSessionBoundary() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -66,11 +68,11 @@ func TestFitsSessionBoundaryUsesNoonAsTheOnlySplit(t *testing.T) {
 
 func TestNormalizeRoomLocationProducesCanonicalDisplayName(t *testing.T) {
 	campusID := uuid.NewString()
-	gotCampus, building, floor, roomNumber, displayName, err := normalizeRoomLocation(
+	gotCampus, building, floor, roomNumber, displayName, err := staffsupport.NormalizeRoomLocation(
 		" "+campusID+" ", " 门诊楼 ", -1, " A_01 ",
 	)
 	if err != nil {
-		t.Fatalf("normalizeRoomLocation() error = %v", err)
+		t.Fatalf("staffsupport.NormalizeRoomLocation() error = %v", err)
 	}
 	if gotCampus != campusID || building != "门诊楼" || floor != -1 || roomNumber != "A_01" {
 		t.Fatalf("unexpected normalized location: %q, %q, %d, %q", gotCampus, building, floor, roomNumber)
@@ -96,8 +98,8 @@ func TestNormalizeRoomLocationRejectsInvalidStructure(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if _, _, _, _, _, err := normalizeRoomLocation(tt.campusID, tt.building, tt.floor, tt.roomNumber); err == nil {
-				t.Fatal("normalizeRoomLocation accepted invalid structure")
+			if _, _, _, _, _, err := staffsupport.NormalizeRoomLocation(tt.campusID, tt.building, tt.floor, tt.roomNumber); err == nil {
+				t.Fatal("staffsupport.NormalizeRoomLocation accepted invalid structure")
 			}
 		})
 	}
@@ -136,7 +138,7 @@ func (c *memoryCache) BumpDepartment(context.Context, string) error             
 
 func TestLoadCachedCollapsesConcurrentMisses(t *testing.T) {
 	cache := &memoryCache{values: map[string][]byte{}}
-	var flights flightGroup
+	var flights staffsupport.FlightGroup
 	var loads atomic.Int32
 	start := make(chan struct{})
 	loader := func() (string, bool, error) { loads.Add(1); <-start; return "hot", true, nil }
@@ -147,7 +149,7 @@ func TestLoadCachedCollapsesConcurrentMisses(t *testing.T) {
 	for range callers {
 		go func() {
 			defer wg.Done()
-			value, found, err := loadCached(context.Background(), cache, &flights, "same-key", time.Minute, loader)
+			value, found, err := staffsupport.LoadCached(context.Background(), cache, &flights, "same-key", time.Minute, loader)
 			if err != nil || !found {
 				results <- "error"
 				return
@@ -185,7 +187,7 @@ func TestLoadCachedCollapsesConcurrentMisses(t *testing.T) {
 func TestJitteredTTLStaysWithinTwentyPercent(t *testing.T) {
 	base := 5 * time.Minute
 	for range 100 {
-		got := jitteredTTL(base)
+		got := staffsupport.JitteredTTL(base)
 		if got < base || got > base+base/5 {
 			t.Fatalf("jitteredTTL() = %s", got)
 		}

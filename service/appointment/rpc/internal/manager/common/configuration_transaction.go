@@ -1,50 +1,8 @@
-package manager
+package common
 
 import "context"
 
-type ProjectOperation struct {
-	OperatorAccountID  string
-	ItemID             string
-	Action             string
-	RequestFingerprint string
-	Result             ExaminationItem
-}
-
-type ProjectChange struct {
-	OperationID        string
-	OperatorAccountID  string
-	ItemID             string
-	Action             string
-	RequestFingerprint string
-	Before             *ExaminationItem
-	After              ExaminationItem
-	RequestID          string
-}
-
-type ProjectListFilter struct {
-	OwnerDepartmentID string
-	Status            Status
-	Offset            int64
-	Limit             int64
-}
-
-type ProjectStore interface {
-	GetItem(ctx context.Context, itemID string) (ExaminationItem, error)
-	ListItems(ctx context.Context, filter ProjectListFilter) ([]ExaminationItem, int64, error)
-	WithinProjectTransaction(ctx context.Context, fn func(ProjectTxStore) error) error
-}
-
-type ProjectTxStore interface {
-	BookingTxStore
-	FindOperation(ctx context.Context, operationID string) (ProjectOperation, bool, error)
-	GetItemForUpdate(ctx context.Context, itemID string) (ExaminationItem, error)
-	CreateItem(ctx context.Context, item ExaminationItem) error
-	UpdateItem(ctx context.Context, item ExaminationItem, expectedVersion int64) error
-	SetItemStatus(ctx context.Context, item ExaminationItem, expectedVersion int64) error
-	RecordChange(ctx context.Context, change ProjectChange) error
-}
-
-type RoomScheduleOperation struct {
+type ConfigurationOperation struct {
 	OperatorAccountID  string
 	ResourceType       string
 	ResourceID         string
@@ -53,7 +11,7 @@ type RoomScheduleOperation struct {
 	ResultData         []byte
 }
 
-type RoomScheduleChange struct {
+type ConfigurationChange struct {
 	OperationID        string
 	OperatorAccountID  string
 	DepartmentID       string
@@ -66,21 +24,11 @@ type RoomScheduleChange struct {
 	RequestID          string
 }
 
-type RoomScheduleStore interface {
-	GetRoom(ctx context.Context, roomID string) (Room, error)
-	ListRooms(ctx context.Context, departmentID string, offset, limit int64) ([]Room, int64, error)
-	GetItemSummary(ctx context.Context, itemID string) (ItemSummary, error)
-	ListRoomItems(ctx context.Context, roomID string, status Status, offset, limit int64) ([]RoomItem, int64, error)
-	ListItemRooms(ctx context.Context, itemID string, activeOnly bool) ([]RoomItem, error)
-	ListRoomWindows(ctx context.Context, roomID string, activeOnly bool) ([]RoomWeeklyWindow, error)
-	ListItemWindows(ctx context.Context, itemID string, activeOnly bool) ([]ItemWeeklyWindow, error)
-	WithinRoomScheduleTransaction(ctx context.Context, fn func(RoomScheduleTxStore) error) error
-}
-
-type RoomScheduleTxStore interface {
+// ConfigurationTxStore 是房间、项目关系和周配置写事务内的原子操作集合。
+type ConfigurationTxStore interface {
 	BookingTxStore
-	FindOperation(ctx context.Context, operationID string) (RoomScheduleOperation, bool, error)
-	RecordChange(ctx context.Context, change RoomScheduleChange) error
+	FindOperation(ctx context.Context, operationID string) (ConfigurationOperation, bool, error)
+	RecordChange(ctx context.Context, change ConfigurationChange) error
 	GetRoomForUpdate(ctx context.Context, roomID string) (Room, error)
 	CreateRoom(ctx context.Context, room Room) error
 	UpdateRoom(ctx context.Context, room Room, expectedVersion int64) error

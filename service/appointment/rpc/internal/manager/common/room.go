@@ -1,39 +1,11 @@
-package manager
+package common
 
 import (
 	"fmt"
 	"time"
 )
 
-type Status string
-
-const (
-	StatusActive   Status = "active"
-	StatusDisabled Status = "disabled"
-)
-
-func (s Status) Valid() bool { return s == StatusActive || s == StatusDisabled }
-
-type Session string
-
-const (
-	SessionMorning   Session = "morning"
-	SessionAfternoon Session = "afternoon"
-)
-
-func (s Session) Valid() bool { return s == SessionMorning || s == SessionAfternoon }
-
-type ExaminationItem struct {
-	ItemID            string
-	OwnerDepartmentID string
-	Name              string
-	Description       string
-	Status            Status
-	Version           int64
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
-}
-
+// Room 保存严格的院区、楼栋、楼层和房间号信息。
 type Room struct {
 	RoomID       string     `json:"room_id"`
 	DepartmentID string     `json:"department_id"`
@@ -48,14 +20,7 @@ type Room struct {
 	UpdatedAt    time.Time  `json:"updated_at"`
 }
 
-type ItemSummary struct {
-	ItemID       string `json:"item_id"`
-	DepartmentID string `json:"department_id"`
-	Name         string `json:"name"`
-	Status       Status `json:"status"`
-	Version      int64  `json:"version"`
-}
-
+// RoomItem 表示房间能够执行某个检查项目的关系。
 type RoomItem struct {
 	RelationID      string    `json:"relation_id"`
 	RoomID          string    `json:"room_id"`
@@ -72,6 +37,7 @@ type RoomItem struct {
 	UpdatedAt       time.Time `json:"updated_at"`
 }
 
+// RoomWeeklyWindow 表示房间自身的每周开放时间和容量。
 type RoomWeeklyWindow struct {
 	WindowID       string    `json:"window_id"`
 	RoomID         string    `json:"room_id"`
@@ -86,27 +52,7 @@ type RoomWeeklyWindow struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 }
 
-type ItemWeeklyWindow struct {
-	WindowID          string    `json:"window_id"`
-	ItemID            string    `json:"item_id"`
-	Weekday           int32     `json:"weekday"`
-	Session           Session   `json:"session"`
-	StartTime         string    `json:"start_time"`
-	BookingCutoffTime string    `json:"booking_cutoff_time"`
-	EndTime           string    `json:"end_time"`
-	Status            Status    `json:"status"`
-	Version           int64     `json:"version"`
-	CreatedAt         time.Time `json:"created_at"`
-	UpdatedAt         time.Time `json:"updated_at"`
-}
-
-type Page[T any] struct {
-	Items    []T   `json:"items"`
-	Page     int64 `json:"page"`
-	PageSize int64 `json:"page_size"`
-	Total    int64 `json:"total"`
-}
-
+// FormatRoomDisplayName 根据严格地址字段生成稳定的房间展示名。
 func FormatRoomDisplayName(building string, floorNumber int32, roomNumber string) string {
 	floor := fmt.Sprintf("%d层", floorNumber)
 	if floorNumber < 0 {

@@ -10,28 +10,37 @@ import (
 
 	"hospital/common/authn"
 	contractauthz "hospital/contracts/authz"
+	staffinput "hospital/service/appointment/rpc/internal/manager/staff/input"
+	staffsupport "hospital/service/appointment/rpc/internal/manager/staff/support"
 )
 
-func (m *Manager) AddRoomItem(ctx context.Context, operator authn.Principal, command AddRoomItemCommand) (RoomItem, error) {
-	if err := requirePermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
+const (
+	actionRelationAdded    = "appointment.resource.room_item.added"
+	actionRelationDisabled = "appointment.resource.room_item.disabled"
+	actionRelationEnabled  = "appointment.resource.room_item.enabled"
+)
+
+// AddRoomItem 建立房间能够执行某个检查项目的关系。
+func (m *Manager) AddRoomItem(ctx context.Context, operator authn.Principal, command staffinput.AddRoomItem) (RoomItem, error) {
+	if err := staffsupport.RequirePermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
 		return RoomItem{}, err
 	}
-	roomID, err := normalizeUUID(command.RoomID, "room_id")
+	roomID, err := staffsupport.NormalizeUUID(command.RoomID, "room_id")
 	if err != nil {
 		return RoomItem{}, err
 	}
-	itemID, err := normalizeUUID(command.ItemID, "item_id")
+	itemID, err := staffsupport.NormalizeUUID(command.ItemID, "item_id")
 	if err != nil {
 		return RoomItem{}, err
 	}
-	meta, err := normalizeOperation(command.OperationMeta)
+	meta, err := staffinput.NormalizeOperation(command.Operation)
 	if err != nil {
 		return RoomItem{}, err
 	}
-	command.RoomID, command.ItemID, command.OperationMeta = roomID, itemID, meta
+	command.RoomID, command.ItemID, command.Operation = roomID, itemID, meta
 	var result RoomItem
 	var departmentID string
-	err = m.mutate(ctx, operator, meta, "room_item", "", actionRelationAdded, command, func() string { return departmentID }, func(tx RoomScheduleTxStore) (any, string, error) {
+	err = m.mutate(ctx, m.rooms, operator, meta, "room_item", "", actionRelationAdded, command, func() string { return departmentID }, func(tx ConfigurationTxStore) (any, string, error) {
 		room, lockErr := tx.GetRoomForUpdate(ctx, roomID)
 		if lockErr != nil {
 			return nil, "", lockErr
@@ -41,7 +50,7 @@ func (m *Manager) AddRoomItem(ctx context.Context, operator authn.Principal, com
 			return nil, "", lockErr
 		}
 		departmentID = room.DepartmentID
-		if err := requireScope(operator, departmentID); err != nil {
+		if err := staffsupport.RequireDepartmentScope(operator, departmentID); err != nil {
 			return nil, "", err
 		}
 		if room.DepartmentID != item.DepartmentID {
@@ -55,7 +64,7 @@ func (m *Manager) AddRoomItem(ctx context.Context, operator authn.Principal, com
 		} else if exists {
 			return nil, "", fmt.Errorf("%w: room and item relation already exists as %s", ErrConflict, existing.Status)
 		}
-		if err := validatePair(ctx, tx, roomID, itemID, nil, nil); err != nil {
+		if err := staffsupport.ValidatePair(ctx, tx, roomID, itemID, nil, nil); err != nil {
 			return nil, "", err
 		}
 		now := time.Now().UTC()
@@ -71,32 +80,35 @@ func (m *Manager) AddRoomItem(ctx context.Context, operator authn.Principal, com
 	return result, err
 }
 
-func (m *Manager) DisableRoomItem(ctx context.Context, operator authn.Principal, command ChangeStatusCommand) (RoomItem, error) {
+// DisableRoomItem 停用房间与检查项目的执行关系。
+func (m *Manager) DisableRoomItem(ctx context.Context, operator authn.Principal, command staffinput.ChangeStatus) (RoomItem, error) {
 	return m.changeRelationStatus(ctx, operator, command, StatusDisabled, actionRelationDisabled)
 }
-func (m *Manager) EnableRoomItem(ctx context.Context, operator authn.Principal, command ChangeStatusCommand) (RoomItem, error) {
+
+// EnableRoomItem 重新启用房间与检查项目的执行关系。
+func (m *Manager) EnableRoomItem(ctx context.Context, operator authn.Principal, command staffinput.ChangeStatus) (RoomItem, error) {
 	return m.changeRelationStatus(ctx, operator, command, StatusActive, actionRelationEnabled)
 }
 
-func (m *Manager) changeRelationStatus(ctx context.Context, operator authn.Principal, command ChangeStatusCommand, target Status, action string) (RoomItem, error) {
-	if err := requirePermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
+func (m *Manager) changeRelationStatus(ctx context.Context, operator authn.Principal, command staffinput.ChangeStatus, target Status, action string) (RoomItem, error) {
+	if err := staffsupport.RequirePermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
 		return RoomItem{}, err
 	}
-	id, err := normalizeUUID(command.ResourceID, "relation_id")
+	id, err := staffsupport.NormalizeUUID(command.ResourceID, "relation_id")
 	if err != nil {
 		return RoomItem{}, err
 	}
-	meta, err := normalizeOperation(command.OperationMeta)
+	meta, err := staffinput.NormalizeOperation(command.Operation)
 	if err != nil {
 		return RoomItem{}, err
 	}
 	if command.ExpectedVersion < 1 {
 		return RoomItem{}, fmt.Errorf("%w: expected_version must be positive", ErrInvalid)
 	}
-	command.ResourceID, command.OperationMeta = id, meta
+	command.ResourceID, command.Operation = id, meta
 	var result RoomItem
 	var departmentID string
-	err = m.mutate(ctx, operator, meta, "room_item", id, action, command, func() string { return departmentID }, func(tx RoomScheduleTxStore) (any, string, error) {
+	err = m.mutate(ctx, m.rooms, operator, meta, "room_item", id, action, command, func() string { return departmentID }, func(tx ConfigurationTxStore) (any, string, error) {
 		before, lockErr := tx.GetRelationForUpdate(ctx, id)
 		if lockErr != nil {
 			return nil, "", lockErr
@@ -106,7 +118,7 @@ func (m *Manager) changeRelationStatus(ctx context.Context, operator authn.Princ
 			return nil, "", lockErr
 		}
 		departmentID = room.DepartmentID
-		if err := requireScope(operator, departmentID); err != nil {
+		if err := staffsupport.RequireDepartmentScope(operator, departmentID); err != nil {
 			return nil, "", err
 		}
 		if before.Version != command.ExpectedVersion {
@@ -120,7 +132,7 @@ func (m *Manager) changeRelationStatus(ctx context.Context, operator authn.Princ
 			if room.RetiredAt != nil || item.Status != StatusActive || room.DepartmentID != item.DepartmentID {
 				return nil, "", ErrInvalidState
 			}
-			if err := validatePair(ctx, tx, before.RoomID, before.ItemID, nil, nil); err != nil {
+			if err := staffsupport.ValidatePair(ctx, tx, before.RoomID, before.ItemID, nil, nil); err != nil {
 				return nil, "", err
 			}
 		}
@@ -142,14 +154,15 @@ func (m *Manager) changeRelationStatus(ctx context.Context, operator authn.Princ
 			}
 		}
 		return struct{ Before, After RoomItem }{before, result}, id, nil
-	}, func(data []byte) error { return decodeAfter(data, &result) })
+	}, func(data []byte) error { return staffsupport.DecodeAfter(data, &result) })
 	if err == nil {
 		m.invalidate(ctx, departmentID)
 	}
 	return result, err
 }
 
-func (m *Manager) ListRoomItems(ctx context.Context, operator authn.Principal, roomID string, query ListRelationsQuery) (Page[RoomItem], error) {
+// ListRoomItems 分页返回某个房间可以执行的检查项目。
+func (m *Manager) ListRoomItems(ctx context.Context, operator authn.Principal, roomID string, query staffinput.ListRelations) (Page[RoomItem], error) {
 	room, err := m.GetRoom(ctx, operator, roomID)
 	if err != nil {
 		return Page[RoomItem]{}, err
@@ -157,14 +170,14 @@ func (m *Manager) ListRoomItems(ctx context.Context, operator authn.Principal, r
 	if query.Status != "" && !query.Status.Valid() {
 		return Page[RoomItem]{}, ErrInvalid
 	}
-	page, size, offset, err := normalizePage(query.Page, query.PageSize)
+	page, size, offset, err := staffsupport.NormalizePage(query.Page, query.PageSize)
 	if err != nil {
 		return Page[RoomItem]{}, err
 	}
 	gen := m.generation(ctx, room.DepartmentID)
 	key := fmt.Sprintf("department:%s:g:%s:room:%s:items:%s:%d:%d", room.DepartmentID, gen, room.RoomID, query.Status, page, size)
-	result, _, err := loadCached(ctx, m.cache, &m.flights, key, hotReadCacheTTL, func() (Page[RoomItem], bool, error) {
-		items, total, e := m.store.ListRoomItems(ctx, room.RoomID, query.Status, offset, size)
+	result, _, err := staffsupport.LoadCached(ctx, m.cache, &m.flights, key, staffsupport.HotReadCacheTTL, func() (Page[RoomItem], bool, error) {
+		items, total, e := m.rooms.ListRoomItems(ctx, room.RoomID, query.Status, offset, size)
 		return Page[RoomItem]{Items: items, Page: page, PageSize: size, Total: total}, true, e
 	})
 	return result, err

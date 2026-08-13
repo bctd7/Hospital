@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"hospital/contracts/gen/appointment/v1"
-	"hospital/service/appointment/rpc/internal/manager"
+	"hospital/service/appointment/rpc/internal/manager/common"
 	"hospital/service/appointment/rpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -30,9 +30,9 @@ func (l *DisableExaminationItemLogic) DisableExaminationItem(in *appointmentv1.C
 		return nil, err
 	}
 	if in == nil {
-		return nil, projectRPCError(manager.ErrInvalid)
+		return nil, projectRPCError(common.ErrInvalid)
 	}
-	item, err := l.svcCtx.StaffManager.DisableProject(l.ctx, principal, changeStatusCommand(in))
+	item, err := l.svcCtx.StaffManager.DisableProject(l.ctx, principal, changeStatusInput(in))
 	if err != nil {
 		return nil, projectRPCError(err)
 	}

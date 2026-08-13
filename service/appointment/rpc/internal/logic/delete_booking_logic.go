@@ -4,7 +4,7 @@ import (
 	"context"
 
 	appointmentv1 "hospital/contracts/gen/appointment/v1"
-	staffmanager "hospital/service/appointment/rpc/internal/manager/staff"
+	staffinput "hospital/service/appointment/rpc/internal/manager/staff/input"
 	"hospital/service/appointment/rpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -29,7 +29,7 @@ func (l *DeleteBookingLogic) DeleteBooking(in *appointmentv1.DeleteBookingReques
 	if err != nil {
 		return nil, err
 	}
-	bookingID, err := l.svcCtx.StaffManager.DeleteBooking(l.ctx, principal, staffmanager.DeleteBookingCommand{
+	bookingID, err := l.svcCtx.StaffManager.DeleteBooking(l.ctx, principal, staffinput.DeleteBooking{
 		BookingID: in.GetBookingId(), OperationID: in.GetOperationId(), Reason: in.GetReason(), RequestID: in.GetRequestId(),
 	})
 	if err != nil {

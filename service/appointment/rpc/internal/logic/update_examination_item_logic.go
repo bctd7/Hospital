@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"hospital/contracts/gen/appointment/v1"
-	"hospital/service/appointment/rpc/internal/manager"
-	staffmanager "hospital/service/appointment/rpc/internal/manager/staff"
+	"hospital/service/appointment/rpc/internal/manager/common"
+	staffinput "hospital/service/appointment/rpc/internal/manager/staff/input"
 	"hospital/service/appointment/rpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -31,9 +31,9 @@ func (l *UpdateExaminationItemLogic) UpdateExaminationItem(in *appointmentv1.Upd
 		return nil, err
 	}
 	if in == nil {
-		return nil, projectRPCError(manager.ErrInvalid)
+		return nil, projectRPCError(common.ErrInvalid)
 	}
-	item, err := l.svcCtx.StaffManager.UpdateProject(l.ctx, principal, staffmanager.UpdateProjectCommand{
+	item, err := l.svcCtx.StaffManager.UpdateProject(l.ctx, principal, staffinput.UpdateProject{
 		ItemID:          in.ItemId,
 		Name:            in.Name,
 		Description:     in.Description,

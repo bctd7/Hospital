@@ -9,20 +9,22 @@ import (
 
 	"hospital/common/authn"
 	contractauthz "hospital/contracts/authz"
-	appointmentmanager "hospital/service/appointment/rpc/internal/manager"
+	appointmentmanager "hospital/service/appointment/rpc/internal/manager/common"
+	sharedmanager "hospital/service/appointment/rpc/internal/manager/shared"
 	staffmanager "hospital/service/appointment/rpc/internal/manager/staff"
+	staffinput "hospital/service/appointment/rpc/internal/manager/staff/input"
 )
 
 const (
-	catalogIntegrationOperatorID       = "30000000-0000-0000-0000-000000000001"
-	catalogIntegrationDepartment       = "30000000-0000-0000-0000-000000000010"
-	catalogIntegrationCreateOperation  = "30000000-0000-0000-0000-000000000020"
-	catalogIntegrationUpdateOperation  = "30000000-0000-0000-0000-000000000021"
-	catalogIntegrationDisableOperation = "30000000-0000-0000-0000-000000000022"
-	catalogIntegrationEnableOperation  = "30000000-0000-0000-0000-000000000023"
+	projectIntegrationOperatorID       = "30000000-0000-0000-0000-000000000001"
+	projectIntegrationDepartment       = "30000000-0000-0000-0000-000000000010"
+	projectIntegrationCreateOperation  = "30000000-0000-0000-0000-000000000020"
+	projectIntegrationUpdateOperation  = "30000000-0000-0000-0000-000000000021"
+	projectIntegrationDisableOperation = "30000000-0000-0000-0000-000000000022"
+	projectIntegrationEnableOperation  = "30000000-0000-0000-0000-000000000023"
 )
 
-func TestMySQLCatalogLifecycle(t *testing.T) {
+func TestMySQLProjectLifecycle(t *testing.T) {
 	dataSource := os.Getenv("APPOINTMENT_TEST_MYSQL_DSN")
 	if dataSource == "" {
 		t.Skip("APPOINTMENT_TEST_MYSQL_DSN is not set")
@@ -34,15 +36,19 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 	}
 	defer store.Close()
 	ctx := context.Background()
-	cleanupCatalogIntegrationData(t, store, ctx)
-	defer cleanupCatalogIntegrationData(t, store, ctx)
+	cleanupProjectIntegrationData(t, store, ctx)
+	defer cleanupProjectIntegrationData(t, store, ctx)
 
 	manager, err := staffmanager.NewManager(store, store, store, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
+	shared, err := sharedmanager.NewManager(store, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 	operator := authn.Principal{
-		AccountID:   catalogIntegrationOperatorID,
+		AccountID:   projectIntegrationOperatorID,
 		AccountType: authn.AccountTypeStaff,
 		Status:      authn.AccountStatusActive,
 		Roles:       []string{authn.RoleSuperAdmin},
@@ -52,12 +58,12 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 			contractauthz.PermissionAppointmentUpdate,
 		},
 	}
-	command := staffmanager.CreateProjectCommand{
-		OwnerDepartmentID: catalogIntegrationDepartment,
+	command := staffinput.CreateProject{
+		OwnerDepartmentID: projectIntegrationDepartment,
 		Name:              "Integration Examination Item",
 		Description:       "Integration preparation description",
-		OperationID:       catalogIntegrationCreateOperation,
-		RequestID:         "catalog-integration-create",
+		OperationID:       projectIntegrationCreateOperation,
+		RequestID:         "project-integration-create",
 	}
 
 	created, err := manager.CreateProject(ctx, operator, command)
@@ -80,12 +86,12 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 	if _, err := manager.CreateProject(ctx, operator, command); !errors.Is(err, appointmentmanager.ErrConflict) {
 		t.Fatalf("operation reuse error = %v, want ErrConflict", err)
 	}
-	got, err := manager.GetProject(ctx, operator, created.ItemID)
+	got, err := shared.GetStaffProject(ctx, operator, created.ItemID)
 	if err != nil || got.ItemID != created.ItemID {
 		t.Fatalf("get item=%#v err=%v", got, err)
 	}
-	page, err := manager.ListProjects(ctx, operator, staffmanager.ListProjectsQuery{
-		OwnerDepartmentID: catalogIntegrationDepartment,
+	page, err := shared.ListStaffProjects(ctx, operator, sharedmanager.ListProjectsQuery{
+		OwnerDepartmentID: projectIntegrationDepartment,
 		Status:            appointmentmanager.StatusActive,
 		Page:              1,
 		PageSize:          10,
@@ -96,10 +102,10 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 
 	name := "Updated Integration Examination Item"
 	description := "Updated integration preparation description"
-	updated, err := manager.UpdateProject(ctx, operator, staffmanager.UpdateProjectCommand{
+	updated, err := manager.UpdateProject(ctx, operator, staffinput.UpdateProject{
 		ItemID: created.ItemID, Name: &name, Description: &description,
-		ExpectedVersion: 1, OperationID: catalogIntegrationUpdateOperation,
-		RequestID: "catalog-integration-update",
+		ExpectedVersion: 1, OperationID: projectIntegrationUpdateOperation,
+		RequestID: "project-integration-update",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -108,16 +114,16 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 		t.Fatalf("unexpected updated item: %#v", updated)
 	}
 
-	disabled, err := manager.DisableProject(ctx, operator, staffmanager.ChangeProjectStatusCommand{
+	disabled, err := manager.DisableProject(ctx, operator, staffinput.ChangeProjectStatus{
 		ItemID: created.ItemID, ExpectedVersion: 2,
-		OperationID: catalogIntegrationDisableOperation,
+		OperationID: projectIntegrationDisableOperation,
 	})
 	if err != nil || disabled.Status != appointmentmanager.StatusDisabled || disabled.Version != 3 {
 		t.Fatalf("disabled item=%#v err=%v", disabled, err)
 	}
-	enabledCommand := staffmanager.ChangeProjectStatusCommand{
+	enabledCommand := staffinput.ChangeProjectStatus{
 		ItemID: created.ItemID, ExpectedVersion: 3,
-		OperationID: catalogIntegrationEnableOperation,
+		OperationID: projectIntegrationEnableOperation,
 	}
 	enabled, err := manager.EnableProject(ctx, operator, enabledCommand)
 	if err != nil || enabled.Status != appointmentmanager.StatusActive || enabled.Version != 4 {
@@ -148,7 +154,7 @@ SELECT COUNT(*) FROM appointment_examination_item_audit WHERE item_id = ?`, crea
 	if err := store.db.QueryRowContext(ctx, `
 SELECT CAST(after_data AS CHAR)
 FROM appointment_examination_item_audit
-WHERE operation_id = ?`, catalogIntegrationUpdateOperation).Scan(&auditJSON); err != nil {
+WHERE operation_id = ?`, projectIntegrationUpdateOperation).Scan(&auditJSON); err != nil {
 		t.Fatal(err)
 	}
 	if strings.Contains(auditJSON, description) {
@@ -156,18 +162,18 @@ WHERE operation_id = ?`, catalogIntegrationUpdateOperation).Scan(&auditJSON); er
 	}
 }
 
-func cleanupCatalogIntegrationData(t *testing.T, store *Store, ctx context.Context) {
+func cleanupProjectIntegrationData(t *testing.T, store *Store, ctx context.Context) {
 	t.Helper()
 	if _, err := store.db.ExecContext(ctx, `
-DELETE FROM appointment_examination_item_audit WHERE operator_account_id = ?`, catalogIntegrationOperatorID); err != nil {
+DELETE FROM appointment_examination_item_audit WHERE operator_account_id = ?`, projectIntegrationOperatorID); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := store.db.ExecContext(ctx, `
-DELETE FROM appointment_examination_item_operations WHERE operator_account_id = ?`, catalogIntegrationOperatorID); err != nil {
+DELETE FROM appointment_examination_item_operations WHERE operator_account_id = ?`, projectIntegrationOperatorID); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := store.db.ExecContext(ctx, `
-DELETE FROM appointment_examination_items WHERE owner_department_id = ?`, catalogIntegrationDepartment); err != nil {
+DELETE FROM appointment_examination_items WHERE owner_department_id = ?`, projectIntegrationDepartment); err != nil {
 		t.Fatal(err)
 	}
 }

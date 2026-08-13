@@ -8,7 +8,9 @@ import (
 	"strings"
 	"time"
 
-	appointmentmanager "hospital/service/appointment/rpc/internal/manager"
+	appointmentmanager "hospital/service/appointment/rpc/internal/manager/common"
+	patientmanager "hospital/service/appointment/rpc/internal/manager/patient"
+	staffmanager "hospital/service/appointment/rpc/internal/manager/staff"
 )
 
 const bookingSelect = `
@@ -218,4 +220,7 @@ func scanBooking(scanner bookingScanner) (appointmentmanager.Booking, error) {
 	return value, nil
 }
 
-var _ appointmentmanager.BookingStore = (*Store)(nil)
+var (
+	_ patientmanager.BookingStore = (*Store)(nil)
+	_ staffmanager.BookingStore   = (*Store)(nil)
+)

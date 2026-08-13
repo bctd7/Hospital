@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"strings"
 
-	appointmentmanager "hospital/service/appointment/rpc/internal/manager"
+	appointmentmanager "hospital/service/appointment/rpc/internal/manager/common"
+	staffmanager "hospital/service/appointment/rpc/internal/manager/staff"
 )
 
 const roomSelect = `SELECT id, department_id, campus_id, building, floor_number, room_number, retired_at, version, created_at, updated_at FROM appointment_rooms`
@@ -129,27 +130,30 @@ func (s *Store) ListItemWindows(ctx context.Context, itemID string, activeOnly b
 	return scanItemWindows(rows)
 }
 
-func (s *Store) WithinRoomScheduleTransaction(ctx context.Context, fn func(appointmentmanager.RoomScheduleTxStore) error) error {
+func (s *Store) WithinConfigurationTransaction(ctx context.Context, fn func(appointmentmanager.ConfigurationTxStore) error) error {
 	if fn == nil {
-		return errors.New("room and schedule transaction callback is required")
+		return errors.New("room and project configuration transaction callback is required")
 	}
 	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 	if err != nil {
-		return fmt.Errorf("begin room and schedule transaction: %w", err)
+		return fmt.Errorf("begin room and project configuration transaction: %w", err)
 	}
-	if err = fn(&roomScheduleTxStore{bookingTxStore: &bookingTxStore{tx: tx}}); err != nil {
+	if err = fn(&configurationTxStore{bookingTxStore: &bookingTxStore{tx: tx}}); err != nil {
 		if rb := tx.Rollback(); rb != nil && !errors.Is(rb, sql.ErrTxDone) {
 			return errors.Join(err, rb)
 		}
 		return err
 	}
 	if err = tx.Commit(); err != nil {
-		return fmt.Errorf("commit room and schedule transaction: %w", err)
+		return fmt.Errorf("commit room and project configuration transaction: %w", err)
 	}
 	return nil
 }
 
-var _ appointmentmanager.RoomScheduleStore = (*Store)(nil)
+var (
+	_ staffmanager.ProjectStore = (*Store)(nil)
+	_ staffmanager.RoomStore    = (*Store)(nil)
+)
 
 type rowScanner interface{ Scan(...any) error }
 

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	appointmentmanager "hospital/service/appointment/rpc/internal/manager"
+	appointmentmanager "hospital/service/appointment/rpc/internal/manager/common"
 )
 
 type bookingTxStore struct{ tx *sql.Tx }

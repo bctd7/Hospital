@@ -4,7 +4,8 @@ import (
 	"context"
 
 	appointmentv1 "hospital/contracts/gen/appointment/v1"
-	staffmanager "hospital/service/appointment/rpc/internal/manager/staff"
+	"hospital/service/appointment/rpc/internal/manager/common"
+	staffinput "hospital/service/appointment/rpc/internal/manager/staff/input"
 	"hospital/service/appointment/rpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -29,10 +30,10 @@ func (l *ListBookingsLogic) ListBookings(in *appointmentv1.ListBookingsRequest) 
 	if err != nil {
 		return nil, err
 	}
-	page, err := l.svcCtx.StaffManager.ListBookings(l.ctx, principal, staffmanager.ListBookingsQuery{
+	page, err := l.svcCtx.StaffManager.ListBookings(l.ctx, principal, staffinput.ListBookings{
 		DepartmentID: in.GetDepartmentId(), ServiceDate: in.GetServiceDate(),
-		Session: staffmanager.Session(in.GetSession()), ItemID: in.GetItemId(), RoomID: in.GetRoomId(),
-		Status: staffmanager.BookingStatus(in.GetStatus()), Page: in.GetPage(), PageSize: in.GetPageSize(),
+		Session: common.Session(in.GetSession()), ItemID: in.GetItemId(), RoomID: in.GetRoomId(),
+		Status: common.BookingStatus(in.GetStatus()), Page: in.GetPage(), PageSize: in.GetPageSize(),
 	})
 	if err != nil {
 		return nil, bookingRPCError(err)

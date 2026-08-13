@@ -5,8 +5,8 @@ import (
 
 	"hospital/common/authn"
 	"hospital/contracts/gen/appointment/v1"
-	"hospital/service/appointment/rpc/internal/manager"
-	staffmanager "hospital/service/appointment/rpc/internal/manager/staff"
+	"hospital/service/appointment/rpc/internal/manager/common"
+	sharedmanager "hospital/service/appointment/rpc/internal/manager/shared"
 	"hospital/service/appointment/rpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -32,14 +32,14 @@ func (l *ListExaminationItemsLogic) ListExaminationItems(in *appointmentv1.ListE
 		return nil, err
 	}
 	if in == nil {
-		return nil, projectRPCError(manager.ErrInvalid)
+		return nil, projectRPCError(common.ErrInvalid)
 	}
 	if in.Audience != "" && in.Audience != "patient" && in.Audience != "staff" {
-		return nil, projectRPCError(manager.ErrInvalid)
+		return nil, projectRPCError(common.ErrInvalid)
 	}
 	patientAudience := in.Audience == "patient" || (in.Audience == "" && principal.AccountType == authn.AccountTypePatient)
 	if patientAudience {
-		result, err := l.svcCtx.PatientManager.ListProjects(l.ctx, principal, in.OwnerDepartmentId, in.Page, in.PageSize)
+		result, err := l.svcCtx.SharedManager.ListPatientProjects(l.ctx, principal, in.OwnerDepartmentId, in.Page, in.PageSize)
 		if err != nil {
 			return nil, projectRPCError(err)
 		}
@@ -49,12 +49,11 @@ func (l *ListExaminationItemsLogic) ListExaminationItems(in *appointmentv1.ListE
 		}
 		return &appointmentv1.ListExaminationItemsResponse{Items: items, Page: result.Page, PageSize: result.PageSize, Total: result.Total}, nil
 	}
-	result, err := l.svcCtx.StaffManager.ListProjects(l.ctx, principal, staffmanager.ListProjectsQuery{
+	result, err := l.svcCtx.SharedManager.ListStaffProjects(l.ctx, principal, sharedmanager.ListProjectsQuery{
 		OwnerDepartmentID: in.OwnerDepartmentId,
-		Status:            manager.Status(in.Status),
+		Status:            common.Status(in.Status),
 		Page:              in.Page,
 		PageSize:          in.PageSize,
-		RequestID:         in.RequestId,
 	})
 	if err != nil {
 		return nil, projectRPCError(err)

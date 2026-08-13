@@ -10,11 +10,12 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	appointmentmanager "hospital/service/appointment/rpc/internal/manager"
+	appointmentmanager "hospital/service/appointment/rpc/internal/manager/common"
+	sharedmanager "hospital/service/appointment/rpc/internal/manager/shared"
+	staffmanager "hospital/service/appointment/rpc/internal/manager/staff"
 )
 
-// Store owns the Appointment database connection pool and will provide the
-// MySQL adapter for Appointment domain stores.
+// Store 持有 Appointment 数据库连接池，并实现各业务包声明的窄持久化接口。
 type Store struct {
 	db *sql.DB
 }
@@ -125,7 +126,10 @@ func (s *Store) WithinProjectTransaction(ctx context.Context, fn func(appointmen
 	return nil
 }
 
-var _ appointmentmanager.ProjectStore = (*Store)(nil)
+var (
+	_ sharedmanager.Store       = (*Store)(nil)
+	_ staffmanager.ProjectStore = (*Store)(nil)
+)
 
 type examinationItemScanner interface {
 	Scan(dest ...any) error

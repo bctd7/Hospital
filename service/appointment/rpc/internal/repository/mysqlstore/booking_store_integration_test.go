@@ -10,9 +10,10 @@ import (
 
 	"hospital/common/authn"
 	contractauthz "hospital/contracts/authz"
-	appointmentmanager "hospital/service/appointment/rpc/internal/manager"
+	appointmentmanager "hospital/service/appointment/rpc/internal/manager/common"
 	patientmanager "hospital/service/appointment/rpc/internal/manager/patient"
 	staffmanager "hospital/service/appointment/rpc/internal/manager/staff"
+	staffinput "hospital/service/appointment/rpc/internal/manager/staff/input"
 )
 
 const (
@@ -57,7 +58,7 @@ func TestBookingCapacityAllowsOnlyOneConcurrentWinner(t *testing.T) {
 	defer cleanupBookingIntegrationData(t, store, ctx)
 	seedBookingIntegrationData(t, store, ctx, weekday)
 
-	manager, err := patientmanager.NewManager(store, store, store, nil)
+	manager, err := patientmanager.NewManager(store, store, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -164,7 +165,7 @@ func TestPatientSessionClaimBlocksMultipleRoomsUntilCheckIn(t *testing.T) {
 	defer cleanupBookingIntegrationData(t, store, ctx)
 	seedBookingIntegrationData(t, store, ctx, weekday)
 
-	patientManager, err := patientmanager.NewManager(store, store, store, nil)
+	patientManager, err := patientmanager.NewManager(store, store, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -193,7 +194,7 @@ func TestPatientSessionClaimBlocksMultipleRoomsUntilCheckIn(t *testing.T) {
 		Roles: []string{authn.RoleDepartmentDoctor}, DepartmentID: bookingTestDepartment,
 		Permissions: []string{contractauthz.PermissionAppointmentUpdate},
 	}
-	checkedIn, err := staffManager.CheckInBooking(ctx, staff, staffmanager.CheckInBookingCommand{
+	checkedIn, err := staffManager.CheckInBooking(ctx, staff, staffinput.CheckInBooking{
 		BookingID: first.BookingID, ExpectedVersion: first.Version,
 		OperationID: "41000000-0000-0000-0000-000000000023",
 	})

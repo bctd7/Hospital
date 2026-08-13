@@ -2,13 +2,19 @@ package staff
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
+
 	"hospital/common/authn"
 	contractauthz "hospital/contracts/authz"
+	staffinput "hospital/service/appointment/rpc/internal/manager/staff/input"
+	staffsupport "hospital/service/appointment/rpc/internal/manager/staff/support"
 )
 
 const (
@@ -25,36 +31,12 @@ var bookingHospitalLocation = func() *time.Location {
 	return location
 }()
 
-type ListBookingsQuery struct {
-	DepartmentID string
-	ServiceDate  string
-	Session      Session
-	ItemID       string
-	RoomID       string
-	Status       BookingStatus
-	Page         int64
-	PageSize     int64
-}
-
-type CheckInBookingCommand struct {
-	BookingID       string
-	ExpectedVersion int64
-	OperationID     string
-	RequestID       string
-}
-
-type DeleteBookingCommand struct {
-	BookingID   string
-	OperationID string
-	Reason      string
-	RequestID   string
-}
-
+// GetBooking 返回工作人员权限范围内的预约详情。
 func (m *Manager) GetBooking(ctx context.Context, operator authn.Principal, bookingID string) (Booking, error) {
-	if err := requirePermission(operator, contractauthz.PermissionAppointmentRead); err != nil {
+	if err := staffsupport.RequirePermission(operator, contractauthz.PermissionAppointmentRead); err != nil {
 		return Booking{}, err
 	}
-	bookingID, err := normalizeUUID(bookingID, "booking_id")
+	bookingID, err := staffsupport.NormalizeUUID(bookingID, "booking_id")
 	if err != nil {
 		return Booking{}, err
 	}
@@ -62,21 +44,22 @@ func (m *Manager) GetBooking(ctx context.Context, operator authn.Principal, book
 	if err != nil {
 		return Booking{}, err
 	}
-	if err := requireScope(operator, value.DepartmentID); err != nil {
+	if err := staffsupport.RequireDepartmentScope(operator, value.DepartmentID); err != nil {
 		return Booking{}, err
 	}
 	return value, nil
 }
 
-func (m *Manager) ListBookings(ctx context.Context, operator authn.Principal, query ListBookingsQuery) (Page[Booking], error) {
-	if err := requirePermission(operator, contractauthz.PermissionAppointmentRead); err != nil {
+// ListBookings 按工作人员权限范围和筛选条件分页查询预约。
+func (m *Manager) ListBookings(ctx context.Context, operator authn.Principal, query staffinput.ListBookings) (Page[Booking], error) {
+	if err := staffsupport.RequirePermission(operator, contractauthz.PermissionAppointmentRead); err != nil {
 		return Page[Booking]{}, err
 	}
-	departmentID, err := scopedDepartment(operator, query.DepartmentID)
+	departmentID, err := staffsupport.ScopedDepartment(operator, query.DepartmentID)
 	if err != nil {
 		return Page[Booking]{}, err
 	}
-	page, pageSize, offset, err := normalizePage(query.Page, query.PageSize)
+	page, pageSize, offset, err := staffsupport.NormalizePage(query.Page, query.PageSize)
 	if err != nil {
 		return Page[Booking]{}, err
 	}
@@ -103,13 +86,13 @@ func (m *Manager) ListBookings(ctx context.Context, operator authn.Principal, qu
 		filter.Status = query.Status
 	}
 	if strings.TrimSpace(query.ItemID) != "" {
-		filter.ItemID, err = normalizeUUID(query.ItemID, "item_id")
+		filter.ItemID, err = staffsupport.NormalizeUUID(query.ItemID, "item_id")
 		if err != nil {
 			return Page[Booking]{}, err
 		}
 	}
 	if strings.TrimSpace(query.RoomID) != "" {
-		filter.RoomID, err = normalizeUUID(query.RoomID, "room_id")
+		filter.RoomID, err = staffsupport.NormalizeUUID(query.RoomID, "room_id")
 		if err != nil {
 			return Page[Booking]{}, err
 		}
@@ -121,16 +104,17 @@ func (m *Manager) ListBookings(ctx context.Context, operator authn.Principal, qu
 	return Page[Booking]{Items: values, Page: page, PageSize: pageSize, Total: total}, nil
 }
 
-func (m *Manager) CheckInBooking(ctx context.Context, operator authn.Principal, command CheckInBookingCommand) (Booking, error) {
-	if err := requirePermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
+// CheckInBooking 核销预约，并记录实际操作人员和核销时间。
+func (m *Manager) CheckInBooking(ctx context.Context, operator authn.Principal, command staffinput.CheckInBooking) (Booking, error) {
+	if err := staffsupport.RequirePermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
 		return Booking{}, err
 	}
 	var err error
-	command.BookingID, err = normalizeUUID(command.BookingID, "booking_id")
+	command.BookingID, err = staffsupport.NormalizeUUID(command.BookingID, "booking_id")
 	if err != nil {
 		return Booking{}, err
 	}
-	command.OperationID, err = normalizeUUID(command.OperationID, "operation_id")
+	command.OperationID, err = staffsupport.NormalizeUUID(command.OperationID, "operation_id")
 	if err != nil {
 		return Booking{}, err
 	}
@@ -138,7 +122,7 @@ func (m *Manager) CheckInBooking(ctx context.Context, operator authn.Principal, 
 		return Booking{}, fmt.Errorf("%w: expected_version must be positive", ErrInvalid)
 	}
 	command.RequestID = strings.TrimSpace(command.RequestID)
-	fingerprintValue := fingerprint(bookingActionCheckIn, struct {
+	fingerprintValue := staffsupport.Fingerprint(bookingActionCheckIn, struct {
 		BookingID       string
 		ExpectedVersion int64
 		OperationID     string
@@ -159,7 +143,7 @@ func (m *Manager) CheckInBooking(ctx context.Context, operator authn.Principal, 
 		if lockErr != nil {
 			return lockErr
 		}
-		if err := requireScope(operator, booking.DepartmentID); err != nil {
+		if err := staffsupport.RequireDepartmentScope(operator, booking.DepartmentID); err != nil {
 			return err
 		}
 		if booking.Status != BookingStatusConfirmed {
@@ -194,16 +178,17 @@ func (m *Manager) CheckInBooking(ctx context.Context, operator authn.Principal, 
 	return result, nil
 }
 
-func (m *Manager) DeleteBooking(ctx context.Context, operator authn.Principal, command DeleteBookingCommand) (string, error) {
-	if err := requirePermission(operator, contractauthz.PermissionAppointmentCancel); err != nil {
+// DeleteBooking 由工作人员删除预约，并在同一事务中释放容量和患者时段。
+func (m *Manager) DeleteBooking(ctx context.Context, operator authn.Principal, command staffinput.DeleteBooking) (string, error) {
+	if err := staffsupport.RequirePermission(operator, contractauthz.PermissionAppointmentCancel); err != nil {
 		return "", err
 	}
 	var err error
-	command.BookingID, err = normalizeUUID(command.BookingID, "booking_id")
+	command.BookingID, err = staffsupport.NormalizeUUID(command.BookingID, "booking_id")
 	if err != nil {
 		return "", err
 	}
-	command.OperationID, err = normalizeUUID(command.OperationID, "operation_id")
+	command.OperationID, err = staffsupport.NormalizeUUID(command.OperationID, "operation_id")
 	if err != nil {
 		return "", err
 	}
@@ -212,7 +197,7 @@ func (m *Manager) DeleteBooking(ctx context.Context, operator authn.Principal, c
 		return "", fmt.Errorf("%w: reason is too long", ErrInvalid)
 	}
 	command.RequestID = strings.TrimSpace(command.RequestID)
-	fingerprintValue := fingerprint(bookingActionDeleteByStaff, struct {
+	fingerprintValue := staffsupport.Fingerprint(bookingActionDeleteByStaff, struct {
 		BookingID   string
 		OperationID string
 		Reason      string
@@ -234,7 +219,7 @@ func (m *Manager) DeleteBooking(ctx context.Context, operator authn.Principal, c
 		if lockErr != nil {
 			return lockErr
 		}
-		if err := requireScope(operator, booking.DepartmentID); err != nil {
+		if err := staffsupport.RequireDepartmentScope(operator, booking.DepartmentID); err != nil {
 			return err
 		}
 		capacity, found, capacityErr := tx.FindDateCapacityForUpdate(ctx, booking.RoomID, booking.ServiceDate, booking.Session)
@@ -276,4 +261,120 @@ func (m *Manager) invalidateBookingReads(ctx context.Context, departmentID strin
 	if m.cache != nil && departmentID != "" {
 		_ = m.cache.BumpDepartment(ctx, departmentID)
 	}
+}
+
+func currentBookingWeek() (time.Time, time.Time) {
+	now := time.Now().In(bookingHospitalLocation)
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, bookingHospitalLocation)
+	weekday := (int(today.Weekday()) + 6) % 7
+	weekStart := today.AddDate(0, 0, -weekday)
+	return today, weekStart.AddDate(0, 0, 6)
+}
+
+func currentWeekDateForWeekday(weekday int32) (time.Time, bool) {
+	today, weekEnd := currentBookingWeek()
+	weekStart := weekEnd.AddDate(0, 0, -6)
+	serviceDate := weekStart.AddDate(0, 0, int(weekday)-1)
+	return serviceDate, !serviceDate.Before(today)
+}
+
+func deleteBookingsForConfiguration(
+	ctx context.Context,
+	tx BookingTxStore,
+	operatorAccountID string,
+	configurationOperationID string,
+	filter BookingListFilter,
+) ([]Booking, error) {
+	bookings, err := tx.ListBookingsForUpdate(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	for _, booking := range bookings {
+		if booking.Status == BookingStatusCheckedIn {
+			return nil, fmt.Errorf("%w: checked-in booking %s blocks configuration change", ErrInvalidState, booking.BookingID)
+		}
+	}
+	deleted := make([]Booking, 0, len(bookings))
+	for _, booking := range bookings {
+		if booking.Status != BookingStatusConfirmed {
+			continue
+		}
+		if err := deleteBookingForConfiguration(ctx, tx, operatorAccountID, configurationOperationID, booking); err != nil {
+			return nil, err
+		}
+		deleted = append(deleted, booking)
+	}
+	return deleted, nil
+}
+
+func deleteBookingForConfiguration(ctx context.Context, tx BookingTxStore, operatorAccountID, configurationOperationID string, booking Booking) error {
+	capacity, found, err := tx.FindDateCapacityForUpdate(ctx, booking.RoomID, booking.ServiceDate, booking.Session)
+	if err != nil {
+		return err
+	}
+	if !found {
+		return fmt.Errorf("%w: capacity missing for booking %s", ErrInvalidState, booking.BookingID)
+	}
+	if err := tx.DecreaseOccupiedCapacity(ctx, capacity.CapacityID); err != nil {
+		return err
+	}
+	if err := tx.ReleasePatientSession(ctx, booking.BookingID); err != nil {
+		return err
+	}
+	if err := tx.DeleteBooking(ctx, booking.BookingID); err != nil {
+		return err
+	}
+	fingerprint := sha256.Sum256([]byte(configurationOperationID + ":" + booking.BookingID))
+	return tx.RecordBookingOperation(ctx, BookingOperationChange{
+		OperationID: uuid.NewString(), OperatorAccountID: operatorAccountID,
+		BookingID: booking.BookingID, Action: "delete_by_configuration",
+		RequestFingerprint: hex.EncodeToString(fingerprint[:]),
+		Result:             map[string]any{"booking_id": booking.BookingID, "deleted": true},
+	})
+}
+
+func reconcileRoomWindowCapacity(
+	ctx context.Context,
+	tx BookingTxStore,
+	operatorAccountID string,
+	configurationOperationID string,
+	window RoomWeeklyWindow,
+) error {
+	serviceDate, relevant := currentWeekDateForWeekday(window.Weekday)
+	if !relevant {
+		return nil
+	}
+	capacity, found, err := tx.FindDateCapacityForUpdate(ctx, window.RoomID, serviceDate, window.Session)
+	if err != nil || !found {
+		return err
+	}
+	bookings, err := tx.ListBookingsForUpdate(ctx, BookingListFilter{
+		RoomID: window.RoomID, ServiceDate: &serviceDate, Session: window.Session,
+	})
+	if err != nil {
+		return err
+	}
+	checkedIn := 0
+	confirmed := make([]Booking, 0, len(bookings))
+	for _, booking := range bookings {
+		switch booking.Status {
+		case BookingStatusCheckedIn:
+			checkedIn++
+		case BookingStatusConfirmed:
+			confirmed = append(confirmed, booking)
+		}
+	}
+	if int64(checkedIn) > window.ActiveCapacity {
+		return fmt.Errorf("%w: checked-in bookings exceed requested capacity", ErrInvalidState)
+	}
+	excess := capacity.OccupiedCapacity - window.ActiveCapacity
+	if excess > int64(len(confirmed)) {
+		return fmt.Errorf("%w: checked-in bookings block capacity reduction", ErrInvalidState)
+	}
+	for index := int64(0); index < excess; index++ {
+		if err := deleteBookingForConfiguration(ctx, tx, operatorAccountID, configurationOperationID, confirmed[index]); err != nil {
+			return err
+		}
+	}
+	return tx.UpdateDateCapacity(ctx, capacity.CapacityID, window.ActiveCapacity, window.WindowID, window.Version)
 }

@@ -8,26 +8,26 @@ import (
 	"google.golang.org/grpc/status"
 
 	appointmentv1 "hospital/contracts/gen/appointment/v1"
-	"hospital/service/appointment/rpc/internal/manager"
+	"hospital/service/appointment/rpc/internal/manager/common"
 )
 
 func bookingRPCError(err error) error {
 	switch {
 	case err == nil:
 		return nil
-	case errors.Is(err, manager.ErrInvalid):
+	case errors.Is(err, common.ErrInvalid):
 		return status.Error(codes.InvalidArgument, "invalid booking request")
-	case errors.Is(err, manager.ErrForbidden):
+	case errors.Is(err, common.ErrForbidden):
 		return status.Error(codes.PermissionDenied, "permission denied")
-	case errors.Is(err, manager.ErrNotFound):
+	case errors.Is(err, common.ErrNotFound):
 		return status.Error(codes.NotFound, "booking or booking resource not found")
-	case errors.Is(err, manager.ErrCapacityFull):
+	case errors.Is(err, common.ErrCapacityFull):
 		return status.Error(codes.ResourceExhausted, "booking capacity is full")
-	case errors.Is(err, manager.ErrPatientSessionOccupied):
+	case errors.Is(err, common.ErrPatientSessionOccupied):
 		return bookingStatusError(codes.FailedPrecondition, "patient already has a pending booking in this date and session", "PATIENT_SESSION_OCCUPIED")
-	case errors.Is(err, manager.ErrBookingClosed), errors.Is(err, manager.ErrInvalidState):
+	case errors.Is(err, common.ErrBookingClosed), errors.Is(err, common.ErrInvalidState):
 		return status.Error(codes.FailedPrecondition, "booking state does not allow the operation")
-	case errors.Is(err, manager.ErrConflict), errors.Is(err, manager.ErrVersionConflict):
+	case errors.Is(err, common.ErrConflict), errors.Is(err, common.ErrVersionConflict):
 		return status.Error(codes.Aborted, "booking data conflict")
 	default:
 		return status.Error(codes.Internal, "internal server error")
@@ -46,7 +46,7 @@ func bookingStatusError(code codes.Code, message, reason string) error {
 	return withDetails.Err()
 }
 
-func bookingResponse(value manager.Booking) *appointmentv1.Booking {
+func bookingResponse(value common.Booking) *appointmentv1.Booking {
 	response := &appointmentv1.Booking{
 		BookingId: value.BookingID, PatientAccountId: value.PatientAccountID,
 		DepartmentId: value.DepartmentID, ItemId: value.ItemID, ItemName: value.ItemName,
@@ -64,7 +64,7 @@ func bookingResponse(value manager.Booking) *appointmentv1.Booking {
 	return response
 }
 
-func bookingListResponse(values []manager.Booking, page, pageSize, total int64) *appointmentv1.ListBookingsResponse {
+func bookingListResponse(values []common.Booking, page, pageSize, total int64) *appointmentv1.ListBookingsResponse {
 	response := &appointmentv1.ListBookingsResponse{Page: page, PageSize: pageSize, Total: total}
 	response.Bookings = make([]*appointmentv1.Booking, 0, len(values))
 	for _, value := range values {

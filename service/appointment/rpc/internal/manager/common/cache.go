@@ -1,4 +1,4 @@
-package manager
+package common
 
 import (
 	"context"
@@ -93,7 +93,7 @@ func JitteredTTL(base time.Duration) time.Duration {
 	if _, err := rand.Read(raw[:]); err != nil {
 		return base
 	}
-	// Add 0-20% jitter to avoid synchronized expiration.
+	// 增加 0%～20% 的随机抖动，避免大量缓存同时过期。
 	return base + time.Duration(binary.LittleEndian.Uint64(raw[:])%uint64(base/5+1))
 }
 

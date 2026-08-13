@@ -11,7 +11,7 @@ import (
 	mysql "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 
-	appointmentmanager "hospital/service/appointment/rpc/internal/manager"
+	appointmentmanager "hospital/service/appointment/rpc/internal/manager/common"
 )
 
 var _ appointmentmanager.ProjectTxStore = (*projectTxStore)(nil)

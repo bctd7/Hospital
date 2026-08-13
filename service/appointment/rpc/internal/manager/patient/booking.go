@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 
 	"hospital/common/authn"
+	"hospital/service/appointment/rpc/internal/manager/common"
 )
 
 const (
@@ -45,6 +46,7 @@ type DeleteBookingCommand struct {
 	RequestID   string
 }
 
+// ListBookingOptions 返回本周仍可预约且未超过截止时间的房间时间选项。
 func (m *Manager) ListBookingOptions(ctx context.Context, patient authn.Principal, itemID string) ([]BookingOption, time.Time, time.Time, error) {
 	if err := requirePatient(patient); err != nil {
 		return nil, time.Time{}, time.Time{}, err
@@ -53,14 +55,14 @@ func (m *Manager) ListBookingOptions(ctx context.Context, patient authn.Principa
 	if err != nil {
 		return nil, time.Time{}, time.Time{}, err
 	}
-	item, err := m.getItemSummary(ctx, itemID)
+	item, err := m.projects.GetItemSummary(ctx, itemID)
 	if err != nil || item.Status != StatusActive {
 		return nil, time.Time{}, time.Time{}, ErrNotFound
 	}
 	now := time.Now().In(hospitalLocation)
 	today := dateOnly(now)
 	weekStart, weekEnd := currentWeek(today)
-	key := fmt.Sprintf("department:%s:g:%s:booking-options:item:%s:week:%s", item.DepartmentID, m.generation(ctx, item.DepartmentID), itemID, weekStart.Format(bookingDateLayout))
+	key := fmt.Sprintf("department:%s:g:%s:booking-options:item:%s:week:%s", item.DepartmentID, cacheGeneration(ctx, m.cache, item.DepartmentID), itemID, weekStart.Format(bookingDateLayout))
 	options, _, err := loadCached(ctx, m.cache, &m.flights, key, bookingOptionsTTL, func() ([]BookingOption, bool, error) {
 		values, loadErr := m.bookings.ListBookingOptions(ctx, itemID, today, weekEnd)
 		return values, loadErr == nil, loadErr
@@ -82,6 +84,7 @@ func (m *Manager) ListBookingOptions(ctx context.Context, patient authn.Principa
 	return available, weekStart, weekEnd, nil
 }
 
+// CreateBooking 在事务中占用患者时段和日期容量，并创建本人预约。
 func (m *Manager) CreateBooking(ctx context.Context, patient authn.Principal, command CreateBookingCommand) (Booking, error) {
 	if err := requirePatient(patient); err != nil {
 		return Booking{}, err
@@ -187,6 +190,7 @@ func (m *Manager) CreateBooking(ctx context.Context, patient authn.Principal, co
 	return result, nil
 }
 
+// GetMyBooking 只允许患者读取属于自己的预约。
 func (m *Manager) GetMyBooking(ctx context.Context, patient authn.Principal, bookingID string) (Booking, error) {
 	if err := requirePatient(patient); err != nil {
 		return Booking{}, err
@@ -205,6 +209,7 @@ func (m *Manager) GetMyBooking(ctx context.Context, patient authn.Principal, boo
 	return value, nil
 }
 
+// ListMyBookings 分页返回当前患者的预约记录。
 func (m *Manager) ListMyBookings(ctx context.Context, patient authn.Principal, page, pageSize int64) (Page[Booking], error) {
 	if err := requirePatient(patient); err != nil {
 		return Page[Booking]{}, err
@@ -222,6 +227,7 @@ func (m *Manager) ListMyBookings(ctx context.Context, patient authn.Principal, p
 	return Page[Booking]{Items: values, Page: page, PageSize: pageSize, Total: total}, nil
 }
 
+// DeleteMyBooking 取消尚未开始的本人预约，并在同一事务中释放容量。
 func (m *Manager) DeleteMyBooking(ctx context.Context, patient authn.Principal, command DeleteBookingCommand) (string, error) {
 	if err := requirePatient(patient); err != nil {
 		return "", err
@@ -400,4 +406,15 @@ func (m *Manager) invalidateBookingReads(ctx context.Context, departmentID strin
 	if m.cache != nil && departmentID != "" {
 		_ = m.cache.BumpDepartment(ctx, departmentID)
 	}
+}
+
+func cacheGeneration(ctx context.Context, cache common.Cache, departmentID string) string {
+	if cache == nil {
+		return "0"
+	}
+	value, err := cache.DepartmentGeneration(ctx, departmentID)
+	if err != nil {
+		return "0"
+	}
+	return value
 }

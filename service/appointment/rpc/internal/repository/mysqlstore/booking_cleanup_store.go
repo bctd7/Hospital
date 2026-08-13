@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
-	appointmentmanager "hospital/service/appointment/rpc/internal/manager"
+	appointmentmanager "hospital/service/appointment/rpc/internal/manager/common"
 )
 
 const cleanupOperatorAccountID = "00000000-0000-0000-0000-000000000000"
