@@ -8,18 +8,18 @@ import (
 
 	"hospital/common/authn"
 	commonauthversion "hospital/common/authz/version"
-	"hospital/common/authz/version/redisstore"
+	authzredisstore "hospital/common/authz/version/redisstore"
 	"hospital/service/identity/rpc/internal/config"
-	"hospital/service/identity/rpc/internal/repository"
+	sessionredisstore "hospital/service/identity/rpc/internal/repository/redisstore"
 )
 
 // tokenComponents 是 Token、授权版本和 Refresh Session 所需的底层组件。
 // 它只保存装配结果，不包含登录渠道选择或账号业务规则。
 type tokenComponents struct {
 	tokenManager                  *authn.TokenManager
-	authorizationVersions         *redisstore.Store
+	authorizationVersions         *authzredisstore.Store
 	authorizationVersionValidator *commonauthversion.Validator
-	refreshSessions               *repository.RedisSessionStore
+	refreshSessions               *sessionredisstore.SessionStore
 	phoneLookupKey                []byte
 }
 
@@ -45,11 +45,11 @@ func buildTokenComponents(c config.Config, resourceSet serviceResources) (tokenC
 		return tokenComponents{}, fmt.Errorf("create identity token manager: %w", err)
 	}
 
-	refreshSessions, err := repository.NewRedisSessionStore(resourceSet.redisClient, c.SessionRedis.Prefix)
+	refreshSessions, err := sessionredisstore.NewSessionStore(resourceSet.redisClient, c.SessionRedis.Prefix)
 	if err != nil {
 		return tokenComponents{}, err
 	}
-	authorizationVersions, err := redisstore.NewStore(resourceSet.redisClient, c.SessionRedis.AuthorizationVersionPrefix)
+	authorizationVersions, err := authzredisstore.NewStore(resourceSet.redisClient, c.SessionRedis.AuthorizationVersionPrefix)
 	if err != nil {
 		return tokenComponents{}, fmt.Errorf("create authorization version store: %w", err)
 	}

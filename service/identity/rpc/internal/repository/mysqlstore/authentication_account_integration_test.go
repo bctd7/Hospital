@@ -10,7 +10,7 @@ import (
 	accountmanager "hospital/service/identity/rpc/internal/account/manager"
 )
 
-func TestMySQLWeChatRegistrationPhoneAndDoctorPromotion(t *testing.T) {
+func TestMySQLPhoneRegistrationAndDoctorPromotion(t *testing.T) {
 	dataSource := os.Getenv("IDENTITY_TEST_MYSQL_DSN")
 	if dataSource == "" {
 		t.Skip("IDENTITY_TEST_MYSQL_DSN is not set")
@@ -44,23 +44,19 @@ VALUES (?, 'department', 'login-test', 'Login Test')`, departmentID); err != nil
 		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_account_roles WHERE account_id IN (?, ?)", adminID, patientID)
 		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_staff_profiles WHERE account_id = ?", patientID)
 		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_account_phones WHERE account_id = ?", patientID)
-		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_external_identities WHERE account_id = ?", patientID)
 		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_accounts WHERE id IN (?, ?)", adminID, patientID)
 		_, _ = store.db.ExecContext(ctx, "DELETE FROM identity_organization_units WHERE id = ?", departmentID)
 	}()
 
-	patientID, err = store.FindOrCreateWeChatAccount(ctx, "wx-app", "openid-integration")
+	fingerprint := make([]byte, 32)
+	fingerprint[0] = 1
+	patientID, err = store.FindOrCreateVerifiedPhoneAccount(ctx, fingerprint, "138****8000")
 	if err != nil {
 		t.Fatal(err)
 	}
-	repeatedID, err := store.FindOrCreateWeChatAccount(ctx, "wx-app", "openid-integration")
+	repeatedID, err := store.FindOrCreateVerifiedPhoneAccount(ctx, fingerprint, "138****8000")
 	if err != nil || repeatedID != patientID {
-		t.Fatalf("wechat registration was not idempotent: id=%s err=%v", repeatedID, err)
-	}
-	fingerprint := make([]byte, 32)
-	fingerprint[0] = 1
-	if _, err := store.SetSelfReportedPhone(ctx, patientID, fingerprint, "138****8000"); err != nil {
-		t.Fatal(err)
+		t.Fatalf("phone registration was not idempotent: id=%s err=%v", repeatedID, err)
 	}
 
 	admin, err := store.GetPrincipal(ctx, adminID)

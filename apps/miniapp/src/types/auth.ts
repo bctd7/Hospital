@@ -27,12 +27,6 @@ export interface RevokeTokenResponse {
   revoked: boolean;
 }
 
-export interface PhoneBindingResponse {
-  phone_masked: string;
-  verification_status: string;
-  verification_source: string;
-}
-
 export interface SessionTokenPair {
   accessToken: string;
   refreshToken: string;

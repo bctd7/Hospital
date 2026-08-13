@@ -171,7 +171,6 @@ func TestMySQLOrganizationStoreLifecycle(t *testing.T) {
 	}
 
 	assertCount(t, store, ctx, "identity_organization_audit", "unit_id", organizationTestDepartmentIDValue, 4)
-	assertCount(t, store, ctx, "identity_outbox_events", "aggregate_id", organizationTestDepartmentIDValue, 4)
 }
 
 func seedOrganizationTestData(t *testing.T, store *Store, ctx context.Context) {
@@ -199,7 +198,6 @@ func cleanupOrganizationTestData(t *testing.T, store *Store, ctx context.Context
 		query string
 		args  []any
 	}{
-		{"DELETE FROM identity_outbox_events WHERE aggregate_id IN (SELECT unit_id FROM identity_organization_audit WHERE operator_account_id = ?)", []any{organizationTestAdminID}},
 		{"DELETE FROM identity_organization_audit WHERE operator_account_id = ?", []any{organizationTestAdminID}},
 		{"DELETE FROM identity_organization_units WHERE parent_id = ?", []any{organizationTestCampusID}},
 		{"DELETE FROM identity_organization_units WHERE id = ?", []any{organizationTestCampusID}},

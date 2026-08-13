@@ -1,4 +1,4 @@
-package repository
+package redisstore
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	"hospital/service/identity/rpc/internal/session"
 )
 
-func TestRedisSessionStoreLifecycle(t *testing.T) {
+func TestSessionStoreLifecycle(t *testing.T) {
 	addr := os.Getenv("IDENTITY_REDIS_TEST_ADDR")
 	if addr == "" {
 		t.Skip("IDENTITY_REDIS_TEST_ADDR is not configured")
@@ -27,7 +27,7 @@ func TestRedisSessionStoreLifecycle(t *testing.T) {
 		t.Fatal(err)
 	}
 	prefix := "identity:test:refresh:" + uuid.NewString() + ":"
-	store, err := NewRedisSessionStore(client, prefix)
+	store, err := NewSessionStore(client, prefix)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 
@@ -186,25 +185,6 @@ VALUES (?, ?, ?, ?, ?, ?, ?, NULLIF(?, ''))`,
 		return fmt.Errorf("insert organization audit: %w", err)
 	}
 
-	payload, err := json.Marshal(map[string]any{
-		"operation_id":        change.OperationID,
-		"operator_account_id": change.OperatorAccountID,
-		"unit_id":             change.UnitID,
-		"action":              change.Action,
-		"before":              change.Before,
-		"after":               change.After,
-	})
-	if err != nil {
-		return fmt.Errorf("marshal organization event: %w", err)
-	}
-	_, err = s.tx.ExecContext(ctx, `
-INSERT INTO identity_outbox_events
-    (event_id, aggregate_id, event_type, schema_version, payload, occurred_at)
-VALUES (?, ?, ?, 1, ?, ?)`,
-		uuid.NewString(), change.UnitID, change.Action, payload, time.Now().UTC())
-	if err != nil {
-		return fmt.Errorf("insert organization outbox: %w", err)
-	}
 	return nil
 }
 

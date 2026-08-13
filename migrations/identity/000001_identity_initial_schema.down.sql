@@ -6,7 +6,6 @@ DROP TABLE IF EXISTS identity_role_permissions;
 DROP TABLE IF EXISTS identity_permissions;
 DROP TABLE IF EXISTS identity_roles;
 DROP TABLE IF EXISTS identity_account_phones;
-DROP TABLE IF EXISTS identity_external_identities;
 DROP TABLE IF EXISTS identity_account_profiles;
 DROP TABLE IF EXISTS identity_staff_profiles;
 DROP TABLE IF EXISTS identity_organization_units;

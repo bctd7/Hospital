@@ -1,4 +1,4 @@
-package provider
+package sms
 
 import (
 	"context"
@@ -12,12 +12,12 @@ import (
 
 func TestAlibabaPNVSSendsProviderGeneratedCodeWithoutReturningIt(t *testing.T) {
 	client := &fakeAlibabaPNVSClient{}
-	provider := newAlibabaPNVS(client, AlibabaPNVSConfig{
+	verifier := newAliyunVerifier(client, AliyunConfig{
 		SignName: "system-sign", TemplateCode: "100001", SchemeName: "hospital-login",
 		ValidSeconds: 300, IntervalSeconds: 60, CodeLength: 6,
 	})
 
-	if err := provider.SendLoginCode(context.Background(), "+8613800138000"); err != nil {
+	if err := verifier.SendLoginCode(context.Background(), "+8613800138000"); err != nil {
 		t.Fatal(err)
 	}
 	request := client.sendRequest
@@ -34,10 +34,10 @@ func TestAlibabaPNVSSendsProviderGeneratedCodeWithoutReturningIt(t *testing.T) {
 
 func TestAlibabaPNVSRequiresPassVerificationResult(t *testing.T) {
 	client := &fakeAlibabaPNVSClient{verifyResult: "UNKNOWN"}
-	provider := newAlibabaPNVS(client, AlibabaPNVSConfig{})
+	verifier := newAliyunVerifier(client, AliyunConfig{})
 
-	err := provider.VerifyLoginCode(context.Background(), "+8613800138000", "123456")
-	if !errors.Is(err, ErrInvalidCredential) {
+	err := verifier.VerifyLoginCode(context.Background(), "+8613800138000", "123456")
+	if !errors.Is(err, ErrInvalidCode) {
 		t.Fatalf("expected invalid credential, got %v", err)
 	}
 }
@@ -63,10 +63,10 @@ func TestAlibabaPNVSPreservesOnlyProviderErrorCode(t *testing.T) {
 		"code":    "InvalidAccessKeyId.NotFound",
 		"message": "sensitive provider detail",
 	})}
-	provider := newAlibabaPNVS(client, AlibabaPNVSConfig{})
+	verifier := newAliyunVerifier(client, AliyunConfig{})
 
-	err := provider.SendLoginCode(context.Background(), "+8613800138000")
-	if !errors.Is(err, ErrProviderUnavailable) {
+	err := verifier.SendLoginCode(context.Background(), "+8613800138000")
+	if !errors.Is(err, ErrUnavailable) {
 		t.Fatalf("expected unavailable provider, got %v", err)
 	}
 	if !strings.Contains(err.Error(), "InvalidAccessKeyId.NotFound") {
@@ -98,9 +98,9 @@ func TestAlibabaPNVSMapsSDKRateLimitError(t *testing.T) {
 		"code":    "biz.FREQUENCY",
 		"message": "frequency check failed",
 	})}
-	provider := newAlibabaPNVS(client, AlibabaPNVSConfig{})
+	verifier := newAliyunVerifier(client, AliyunConfig{})
 
-	err := provider.SendLoginCode(context.Background(), "+8613800138000")
+	err := verifier.SendLoginCode(context.Background(), "+8613800138000")
 	if !errors.Is(err, ErrRateLimited) {
 		t.Fatalf("expected rate-limited error, got %v", err)
 	}

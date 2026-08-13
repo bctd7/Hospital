@@ -4933,63 +4933,6 @@
         }
       }
     },
-    "/api/v1/auth/me/phone": {
-      "put": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "https"
-        ],
-        "summary": "setMyPhone",
-        "operationId": "authSetMyPhone",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "required": [
-                "phone"
-              ],
-              "properties": {
-                "phone": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "phone_masked": {
-                  "type": "string"
-                },
-                "verification_source": {
-                  "type": "string"
-                },
-                "verification_status": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/auth/phone/code": {
       "post": {
         "consumes": [
@@ -5192,61 +5135,6 @@
               "properties": {
                 "revoked": {
                   "type": "boolean"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/auth/wechat/login": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "https"
-        ],
-        "summary": "weChatLogin",
-        "operationId": "authWeChatLogin",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "required": [
-                "login_code"
-              ],
-              "properties": {
-                "login_code": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "access_expires_in_seconds": {
-                  "type": "integer"
-                },
-                "access_token": {
-                  "type": "string"
-                },
-                "refresh_expires_in_seconds": {
-                  "type": "integer"
-                },
-                "refresh_token": {
-                  "type": "string"
                 }
               }
             }
@@ -5536,7 +5424,7 @@
       "in": "header"
     }
   },
-  "x-date": "2026-08-13 22:14:22",
+  "x-date": "2026-08-14 02:43:45",
   "x-description": "This is a goctl generated swagger file.",
   "x-github": "https://github.com/zeromicro/go-zero",
   "x-go-zero-doc": "https://go-zero.dev/",

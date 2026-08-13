@@ -8,16 +8,14 @@
 
 | 功能 | Logic | 业务入口 |
 | --- | --- | --- |
-| 发送手机验证码 | `send_phone_login_code_logic.go` | `Managers.PhoneLogin` |
-| 手机号登录 | `phone_login_logic.go` | `Managers.PhoneLogin` |
-| 微信登录 | `we_chat_login_logic.go` | `Managers.Authentication` |
-| 绑定本人手机号 | `set_my_phone_logic.go` | `Managers.Authentication` |
+| 发送手机验证码 | `send_phone_login_code_logic.go` | `Managers.Authentication` |
+| 手机号登录 | `phone_login_logic.go` | `Managers.Authentication` |
 | 刷新访问令牌 | `refresh_access_token_logic.go` | `Managers.Session` |
 | 撤销刷新令牌 | `revoke_refresh_token_logic.go` | `Managers.Session` |
 
-微信、阿里云手机号和本地测试实现位于 `authentication/provider/`。Provider 只适配外部登录渠道；账号解析由 `authentication` 完成，Token 与 Refresh Session 生命周期由 `session` 完成。
+阿里云和本地测试实现位于 `authentication/sms/`。短信校验器负责生成、发送和校验验证码；账号解析由 `authentication/manager` 完成，Token 与 Refresh Session 生命周期由 `session` 完成。
 
-公共登录错误转换位于 `account_helpers.go`，Token 响应转换位于 `session_helpers.go`。
+短信认证错误转换位于 `authentication_helpers.go`，Token 响应转换位于 `session_helpers.go`。
 
 ## 请求上下文
 

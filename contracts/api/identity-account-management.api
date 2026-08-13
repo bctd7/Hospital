@@ -91,6 +91,12 @@ type (
         Phone string `json:"phone"`
     }
 
+    PhoneBindingResponse {
+        PhoneMasked        string `json:"phone_masked"`
+        VerificationStatus string `json:"verification_status"`
+        VerificationSource string `json:"verification_source"`
+    }
+
     AdminSearchAccountByPhoneResponse {
         Identity AdminAccountSummaryResponse `json:"identity"`
         Phone    PhoneBindingResponse         `json:"phone"`

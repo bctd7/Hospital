@@ -31,17 +31,9 @@ type Config struct {
 		AccessTTLSeconds       int64 `json:",default=900"`
 		RefreshTTLSeconds      int64 `json:",default=2592000"`
 	}
-	WeChat struct {
-		AppID           string `json:",optional"`
-		AppSecret       string `json:",optional"`
-		Code2SessionURL string `json:",default=https://api.weixin.qq.com/sns/jscode2session"`
-	}
 	PhoneLogin struct {
-		Provider  string `json:",optional"`
-		LocalCode string `json:",optional"`
-		// Enabled is retained for compatibility. When Provider is empty,
-		// Enabled=true selects aliyun and false selects disabled.
-		Enabled         bool   `json:",default=false"`
+		Verifier        string `json:",optional"`
+		LocalCode       string `json:",optional"`
 		AccessKeyID     string `json:",optional"`
 		AccessKeySecret string `json:",optional"`
 		RegionID        string `json:",default=cn-shanghai"`

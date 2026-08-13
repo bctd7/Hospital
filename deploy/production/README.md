@@ -9,7 +9,7 @@
   → App API
   → Identity RPC
   → MySQL / Redis
-  → Outbox → Kafka → Redis 授权版本投影
+  → Outbox → Kafka → Redis 授权版本同步
 ```
 
 先判断你要做哪件事：
@@ -25,7 +25,7 @@
 
 ## 零、从空数据卷发布当前体验版
 
-当前版本前后端、数据库结构和 Identity 异步投影都发生了变化。首次使用空数据卷时，需要完整部署应用栈，
+当前版本前后端、数据库结构和 Identity 异步授权同步都发生了变化。首次使用空数据卷时，需要完整部署应用栈，
 但“完整部署”不等于重装服务器或手写 SQL：
 
 ```text
@@ -139,7 +139,7 @@ gzip -t backups/hospital-时间戳.sql.gz
 /opt/hospital/deploy/production/.env.production
 ```
 
-必须保留原来的 Token 公私钥、手机号指纹密钥、微信 AppSecret 和短信配置。否则现有会话可能失效，手机号指纹也无法继续匹配旧账号。
+必须保留原来的 Token 公私钥、手机号指纹密钥和短信配置。否则现有会话可能失效，手机号指纹也无法继续匹配旧账号。
 
 ### 3. 首次启动并恢复数据
 
@@ -371,7 +371,7 @@ docker compose --env-file .env.production -f docker-compose.yml logs --tail=100 
 
 ## 六、禁止事项
 
-- 不提交 `.env.production`、AppSecret、AccessKey、Token 私钥；
+- 不提交 `.env.production`、AccessKey、Token 私钥；
 - 除“零、从空数据卷发布当前体验版”中已经明确确认的数据重置外，不删除 MySQL、Redis 和 Kafka 数据卷；
 - 不改写已经在共享环境执行过的迁移；
 - 不在没有备份的情况下执行生产数据库迁移；

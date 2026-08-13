@@ -7,8 +7,8 @@
 | 组件 | 镜像 | 主机地址 | 用途 |
 |---|---|---|---|
 | MySQL | `mysql:8.4.11` | `127.0.0.1:3306` | 业务事实库；首期包含独立 `hospital_identity` 数据库和账号 |
-| Redis | `redis:7.4.10-alpine` | `127.0.0.1:6379` | Refresh Session 和授权版本投影 |
-| Kafka | `apache/kafka:4.2.0` | `127.0.0.1:9092` | Identity Outbox 授权事件与 Redis 版本投影 |
+| Redis | `redis:7.4.10-alpine` | `127.0.0.1:6379` | Refresh Session 和授权版本同步状态 |
+| Kafka | `apache/kafka:4.2.0` | `127.0.0.1:9092` | 传递 Identity Outbox 授权版本事件 |
 
 Kafka 使用单节点 KRaft combined mode，仅用于本地开发、集成测试和功能验证。容器内客户端使用 `kafka:29092`，运行在 Windows 主机上的 Go 服务使用 `127.0.0.1:9092`。
 
@@ -35,7 +35,7 @@ MySQL 初始化脚本仍只会在数据卷第一次创建时运行，表结构�
 旧数据库第一次接入版本管理时，按 `scripts/README.md` 完成一次基线登记。
 
 `.env.example` 默认设置 `IDENTITY_KAFKA_ENABLED=true`，因此标准 Identity 开发环境同时启动 Kafka。只有明确
-关闭 Kafka 投影、只调试不涉及授权变化的局部功能时，才使用精简启动：
+关闭 Kafka 授权版本同步、只调试不涉及授权变化的局部功能时，才使用精简启动：
 
 ```powershell
 docker compose `

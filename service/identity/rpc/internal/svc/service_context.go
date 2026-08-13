@@ -17,7 +17,6 @@ import (
 // ServiceContext 只保存这些入口，不在这里实现账号、授权或会话规则。
 type Managers struct {
 	Authentication        *authenticationmanager.Manager
-	PhoneLogin            *authenticationmanager.PhoneLoginManager
 	Session               *session.Manager
 	Account               *accountmanager.Manager
 	OrganizationUnit      *organizationmanager.UnitManager
@@ -37,7 +36,7 @@ type Workers struct {
 }
 
 // ServiceContext 是 Identity 的唯一依赖装配入口，由所有生成的 Logic 共享。
-// 各类组件分别在 resources.go、token_components.go、login_providers.go、
+// 各类组件分别在 resources.go、token_components.go、sms_verifier.go、
 // manager_wiring.go 和 messaging.go 中创建，这里只定义总装配和关闭顺序。
 type ServiceContext struct {
 	Config      config.Config
@@ -49,7 +48,7 @@ type ServiceContext struct {
 	kafkaReader *kafka.Reader
 }
 
-// NewServiceContext 按“基础资源 → Token 组件 → 登录 Provider → 业务 Manager → 消息任务”
+// NewServiceContext 按“基础资源 → Token 组件 → 短信校验器 → 业务 Manager → 消息任务”
 // 的顺序完成装配。任一步失败都会关闭此前已经创建的基础资源。
 func NewServiceContext(c config.Config) (*ServiceContext, error) {
 	resourceSet, err := openResources(c)
@@ -67,11 +66,11 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 	if err != nil {
 		return nil, err
 	}
-	providers, err := buildLoginProviders(c)
+	verifier, err := buildSMSVerifier(c)
 	if err != nil {
 		return nil, err
 	}
-	managers, err := wireManagers(c, resourceSet, tokens, providers)
+	managers, err := wireManagers(c, resourceSet, tokens, verifier)
 	if err != nil {
 		return nil, err
 	}

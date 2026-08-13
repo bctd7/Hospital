@@ -17,7 +17,7 @@ miniapp -> HTTP App API -> gRPC Identity -> MySQL / Redis / PNVS
 
 ## 2. 登录与展示资料
 
-- 主登录使用手机号和阿里云 PNVS 验证码；微信登录只保留兼容能力，不作为当前页面入口；
+- 当前唯一登录方式是手机号和阿里云 PNVS 验证码；
 - 手机号只证明号码控制权，不代表医疗实名，也不作为数据库业务主键；
 - 登录后读取当前 Principal，再按角色和 permissions 确定患者端或工作人员端；
 - 昵称由 Identity 保存，本地 Storage 只做按 `account_id` 隔离的界面缓存；
@@ -38,7 +38,7 @@ miniapp -> HTTP App API -> gRPC Identity -> MySQL / Redis / PNVS
 并发请求必须共享同一次失效处理，不得重复提示或重复跳转。失效处理需携带被拒绝的 Access Token；
 如果用户已经完成新一次登录，较晚返回的旧 `401` 不得清理新会话。
 
-Token、验证码、完整手机号和微信临时 code 不进入日志、Toast、埋点或错误上报正文。
+Token、验证码和完整手机号不进入日志、Toast、埋点或错误上报正文。
 
 ## 4. 客户端状态
 

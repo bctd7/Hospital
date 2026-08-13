@@ -12,7 +12,7 @@ Identity Service 是账号、登录会话、角色权限、医院组织和医生
 - Ed25519 JWT Access Token；
 - Redis Refresh Session、Token 轮换、重放检测和注销；
 - Redis 授权版本校验，账号、角色或科室权限变化后旧 Token 失效；
-- 受限的本地固定验证码 Provider，仅允许 `local/test` 环境。
+- 受限的本地固定验证码校验器，仅允许 `local/test` 环境。
 
 ### 组织与公共目录
 
@@ -41,7 +41,7 @@ Miniapp
   -> Identity gRPC Client
   -> Identity Unary Auth Interceptor
   -> Identity Logic
-  -> Account / Organization / Authorization Manager
+  -> Authentication / Session / Account / Organization Manager
   -> Store / Transaction Store
   -> MySQL（主数据、审计、Outbox）
 
@@ -67,8 +67,9 @@ service/identity/rpc/
 ├── etc/                           # 本地配置
 ├── identityservice/               # 生成的 RPC Client 包装
 └── internal/
-    ├── authentication/manager/    # 微信登录、手机号登录与认证校验
-    ├── authentication/provider/   # 微信、阿里云与本地测试 Provider
+    ├── authentication/            # 认证错误、Store/Session 端口
+    │   ├── manager/               # 手机号验证码认证编排
+    │   └── sms/                   # 阿里云与本地短信校验实现
     ├── account/                   # 账号领域模型、Store 端口与 manager
     ├── authorization/version/     # 授权版本事件与 Kafka→Redis Consumer
     ├── messaging/kafka/           # transport-only Reader/Writer
@@ -76,6 +77,7 @@ service/identity/rpc/
     ├── organization/              # 组织模型、Store 端口与 manager
     ├── logic/                     # RPC 用例适配
     ├── repository/mysqlstore/     # MySQL Store 与事务实现
+    ├── repository/redisstore/     # Refresh Session 的 Redis 实现
     ├── server/                    # gRPC Server 方法
     ├── session/                   # Access/Refresh 会话
     └── svc/                       # 依赖装配
@@ -149,8 +151,8 @@ MySQL 集成测试通过 `IDENTITY_TEST_MYSQL_DSN` 显式启用。阶段收尾�
 
 1. 先更新 `plan/` 和 `contracts/`，不要从 Handler 直接开始写；
 2. 新账号管理能力进入 `account/manager`，新组织管理能力进入 `organization/manager`；不要为没有业务调用方的授权资料查询新增 RPC；
-3. 写操作必须在同一事务中更新主数据、审计和 Outbox；
-4. 涉及授权的变化必须递增 `authorization_version`，在同一事务写入 Outbox，并由 Consumer 从 Kafka 同步到 Redis；
+3. 写操作必须在同一事务中更新主数据和审计；需要发布集成事件时，Outbox 也必须进入同一事务；
+4. 涉及授权的变化必须递增 `authorization_version`，在同一事务写入授权 Outbox，并由 Consumer 从 Kafka 同步到 Redis；组织变化当前只写审计，不发布事件；
 5. 涉及手机号、验证码或 Token 的新 RPC 必须加入客户端和服务端正文日志屏蔽名单；
 6. 新查询要明确是公共目录、本人查询还是管理员查询，不能共用一个返回对象泄漏字段；
 7. 新接口完成后重新生成 Swagger，并补充数据库集成与 HTTP 全链路测试。

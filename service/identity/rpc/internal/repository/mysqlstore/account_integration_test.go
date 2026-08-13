@@ -74,7 +74,7 @@ func TestMySQLAccountManagerLifecycle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if byPhone.ID != identityAdminTestPatientID || maskedPhone != identityAdminTestMaskedPhone || verificationStatus != "self_reported" || verificationSource != "self_reported" {
+	if byPhone.ID != identityAdminTestPatientID || maskedPhone != identityAdminTestMaskedPhone || verificationStatus != "verified" || verificationSource != "sms" {
 		t.Fatalf("unexpected phone search result: account=%#v phone=%s status=%s source=%s", byPhone, maskedPhone, verificationStatus, verificationSource)
 	}
 
@@ -237,7 +237,7 @@ func seedAccountManagerTestData(t *testing.T, store *Store, ctx context.Context,
 		{"INSERT INTO identity_staff_profiles (account_id, department_id, display_name) VALUES (?, ?, '管理员')", []any{identityAdminTestAdminID, identityAdminTestDepartmentA}},
 		{"INSERT INTO identity_account_roles (account_id, role_id) SELECT ?, id FROM identity_roles WHERE code = 'super_admin'", []any{identityAdminTestAdminID}},
 		{"INSERT INTO identity_accounts (id, account_type, status) VALUES (?, 'patient', 'active')", []any{identityAdminTestPatientID}},
-		{"INSERT INTO identity_account_phones (account_id, phone_fingerprint, phone_masked, verification_status, verification_source) VALUES (?, ?, ?, 'self_reported', 'self_reported')", []any{identityAdminTestPatientID, fingerprint.Sum(nil), identityAdminTestMaskedPhone}},
+		{"INSERT INTO identity_account_phones (account_id, phone_fingerprint, phone_masked, verification_status, verification_source, verified_at) VALUES (?, ?, ?, 'verified', 'sms', CURRENT_TIMESTAMP(3))", []any{identityAdminTestPatientID, fingerprint.Sum(nil), identityAdminTestMaskedPhone}},
 	}
 	for _, statement := range statements {
 		if _, err := store.db.ExecContext(ctx, statement.query, statement.args...); err != nil {

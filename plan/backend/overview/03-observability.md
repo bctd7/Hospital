@@ -55,7 +55,7 @@ HTTP 字段记录 `http_method`、规范化 `http_route` 和 `http_status`。不
 普通日志禁止记录：
 
 - Access/Refresh Token、Authorization、Cookie；
-- 短信验证码、完整手机号、微信 code、OpenID 和 Secret；
+- 短信验证码、完整手机号和 Secret；
 - 数据库连接串、私钥和第三方 AccessKey；
 - 姓名、证件号、住址、完整病历、报告内容和健康数据；
 - 完整请求体、响应体和上传文件。

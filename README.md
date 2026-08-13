@@ -11,7 +11,7 @@ Identity 与组织管理已经完成首期闭环：
 - 医院、院区、科室公共目录及管理员组织 CRUD；
 - 账号列表、详情、手机号精确搜索、停用与恢复；
 - 医生开通、资料编辑、调岗和撤销；
-- `operation_id` 幂等、乐观锁、授权审计，以及 Outbox → Kafka → Redis 授权版本投影；
+- `operation_id` 幂等、乐观锁、授权审计，以及 Outbox → Kafka → Redis 授权版本同步；
 - 小程序真实 HTTP 接入，运行时 Mock 已移除；
 - HTTP → App API → Identity RPC → Manager → Repository → MySQL 全链路测试。
 
@@ -25,7 +25,7 @@ Identity 与组织管理已经完成首期闭环：
   -> app-api :8888               对外 HTTP、Token 中间件和页面聚合
   -> identity-rpc :8080          认证、账号、权限、组织和医生领域
   -> MySQL                      业务事实、审计和 Outbox
-  -> Kafka -> Redis             授权事件传递与版本投影
+  -> Kafka -> Redis             授权事件传递与版本同步
 ```
 
 | 目录 | 职责 |
@@ -118,8 +118,8 @@ goctl api swagger --api contracts/api/app.api --dir docs/api --filename openapi
 
 ## 安全约束
 
-- `.env`、AccessKey、AppSecret、Token 密钥和生产凭据不得提交；
+- `.env`、AccessKey、Token 密钥和生产凭据不得提交；
 - 完整手机号、验证码、Access/Refresh Token 不得进入日志、Swagger 示例或测试快照；
 - 小程序只调用 App API，禁止直接访问 RPC 或业务数据库；
-- 生产环境禁止使用本地固定验证码 Provider；
+- 生产环境禁止使用本地固定验证码校验器；
 - 跨服务不得直接读写其他服务的数据表。

@@ -10,7 +10,7 @@
 
 Identity Service 是身份、账号、工作人员角色和组织主数据的事实源，已经完成：
 
-- 阿里云 PNVS 手机号验证码登录和兼容的微信外部身份；
+- 阿里云 PNVS 手机号验证码登录；
 - Access Token、Refresh Session、Token 轮换、退出和重放防护；
 - `super_admin`、`department_doctor` 角色和 permission 快照；
 - 授权版本的 MySQL 事实、Outbox、Kafka 发布和 Redis 单调同步；
@@ -18,7 +18,7 @@ Identity Service 是身份、账号、工作人员角色和组织主数据的事
 - 账号列表、详情、手机号精确搜索、停用和恢复；
 - 医生开通、资料维护、调岗和撤销；
 - 公共组织、科室和医生目录；
-- `operation_id` 幂等、乐观锁、审计和事务 Outbox；
+- `operation_id` 幂等、乐观锁和审计，以及授权变化的事务 Outbox；
 - App API → Identity RPC → Manager → MySQL 的真实 HTTP 全链路；
 - 小程序真实 HTTP Adapter，运行时 Mock 和重叠旧写链路已经删除。
 
@@ -45,7 +45,7 @@ Appointment、Navigation、Report 等业务服务本地验证 Token 和授权版
 - 发送验证码阶段维持统一响应，不在验证前暴露账号是否存在或被禁用；
 - 验证成功后，禁用账号返回稳定 `ACCOUNT_DISABLED` 且不能获得 Token；
 - 账号可维护重名的展示昵称，昵称不参与登录、不证明实名身份，也不能替代 `account_id`；
-- OpenID 不能证明手机号、患者身份或医生资格，微信 code、OpenID 和 `session_key` 不进入业务日志。
+- 展示昵称不证明手机号、患者身份或医生资格，也不能替代稳定的 `account_id`。
 
 ## 3. 会话与授权版本
 
@@ -185,21 +185,22 @@ permission 和状态 → Store 持久化。账号/医生写入统一由 `account
   -> 校验 expected version
   -> 校验权限、层级和状态
   -> 更新主数据和版本
-  -> 写审计与 Outbox
+  -> 写审计；授权发生变化时同时写 Outbox
   -> 保存幂等结果
   -> 提交事务
 ```
 
 同一 `operation_id` 携带不同动作、目标或请求摘要返回冲突。过期版本返回 `409`，客户端重新读取并由用户
-确认，不能静默覆盖。主数据、授权版本、审计、Outbox 和幂等结果必须在同一 MySQL 事务内保持一致。
+确认，不能静默覆盖。主数据、审计和幂等结果必须在同一 MySQL 事务内保持一致；授权发生变化时，
+授权版本和 Outbox 也必须进入该事务。组织变化当前只写组织审计，不发布组织事件。
 
 ## 9. 数据、隐私、审计与日志
 
-Identity 数据职责以 `migrations/identity/README.md` 为准，包括账号、手机号绑定、外部身份、工作人员档案、
-组织、RBAC、Refresh Session、授权/组织审计和 Outbox。
+Identity 数据职责以 `migrations/identity/README.md` 为准，包括账号、手机号绑定、工作人员档案、
+组织、RBAC、Refresh Session、授权/组织审计和用于授权版本失效通知的 Outbox。
 
-- PNVS AccessKey、手机号 HMAC Key、JWT 私钥、微信 AppSecret 只从运行环境注入；
-- 验证码、完整手机号、Token、OpenID、AccessKey 和请求 Secret 不进入普通日志；
+- PNVS AccessKey、手机号 HMAC Key、JWT 私钥只从运行环境注入；
+- 验证码、完整手机号、Token、AccessKey 和请求 Secret 不进入普通日志；
 - 手机号精确搜索链路屏蔽 HTTP/RPC 正文日志；
 - 登录失败不暴露账号是否存在；
 - 短信发送具有手机号/IP/日级限流和费用保护；

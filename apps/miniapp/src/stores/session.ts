@@ -5,7 +5,6 @@ import {
   phoneLogin,
   refreshToken as requestTokenRefresh,
   revokeToken,
-  wechatLogin,
 } from "@/api/auth";
 import { configureAuthAdapter } from "@/api/client";
 import type {
@@ -16,7 +15,6 @@ import type {
   TokenResponse,
 } from "@/types/auth";
 import { normalizeAppVariant, resolveAppVariant } from "@/utils/appShell";
-import { getWechatLoginCode } from "@/utils/wechatCode";
 
 const SESSION_STORAGE_KEY = "hospital:session";
 const SESSION_STORAGE_VERSION = 1;
@@ -227,31 +225,6 @@ export function handleUnauthorized(rejectedAccessToken: string): Promise<void> {
   });
 
   return forcedReauthenticationTask;
-}
-
-export async function initializeFromWechat(): Promise<boolean> {
-  if (state.status === "authenticated" && hasUsableAccessToken() && state.principal) {
-    return true;
-  }
-
-  if (tokens?.refreshToken && (await refreshOnce())) {
-    return true;
-  }
-
-  state.status = "authenticating";
-
-  try {
-    const loginCode = await getWechatLoginCode();
-    tokens = tokenPairFromResponse(await wechatLogin(loginCode));
-    state.principal = await getCurrentIdentity(false);
-    state.appVariant = resolveAppVariant(state.principal);
-    state.status = "authenticated";
-    persistSession();
-    return true;
-  } catch {
-    setGuestSession();
-    return false;
-  }
 }
 
 export async function initializeFromPhone(phone: string, verificationCode: string): Promise<boolean> {

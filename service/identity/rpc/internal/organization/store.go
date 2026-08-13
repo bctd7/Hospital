@@ -11,7 +11,7 @@ type Operation struct {
 	Result            Unit
 }
 
-// Change contains the stable facts needed for audit and Outbox records.
+// Change contains the stable facts needed for an organization audit record.
 // Before is nil when a new organization unit is created.
 type Change struct {
 	OperationID       string
@@ -43,7 +43,7 @@ type TxStore interface {
 	CountActiveChildren(ctx context.Context, unitID string) (int64, error)
 	CountActiveDoctors(ctx context.Context, departmentID string) (int64, error)
 
-	// RecordChange writes the audit record and its Outbox event atomically with
-	// the organization mutation. Their SQL details remain in Repository.
+	// RecordChange writes the audit record atomically with the organization
+	// mutation. Organization changes are not currently published as events.
 	RecordChange(ctx context.Context, change Change) error
 }

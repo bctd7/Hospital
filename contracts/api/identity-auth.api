@@ -17,10 +17,6 @@ type (
 		VerificationCode string `json:"verification_code"`
 	}
 
-	WeChatLoginRequest {
-		LoginCode string `json:"login_code"`
-	}
-
 	CurrentIdentityResponse {
 		AccountID            string   `json:"account_id"`
 		AccountType          string   `json:"account_type"`
@@ -31,15 +27,6 @@ type (
 		AuthorizationVersion int64    `json:"authorization_version"`
 	}
 
-	SetPhoneRequest {
-		Phone string `json:"phone"`
-	}
-
-	PhoneBindingResponse {
-		PhoneMasked       string `json:"phone_masked"`
-		VerificationStatus string `json:"verification_status"`
-		VerificationSource string `json:"verification_source"`
-	}
 )
 
 @server (
@@ -53,8 +40,6 @@ service app-api {
 	@handler phoneLogin
 	post /auth/phone/login (PhoneLoginRequest) returns (TokenResponse)
 
-	@handler weChatLogin
-	post /auth/wechat/login (WeChatLoginRequest) returns (TokenResponse)
 }
 
 @server (
@@ -67,6 +52,4 @@ service app-api {
 	@handler currentIdentity
 	get /auth/me returns (CurrentIdentityResponse)
 
-	@handler setMyPhone
-	put /auth/me/phone (SetPhoneRequest) returns (PhoneBindingResponse)
 }

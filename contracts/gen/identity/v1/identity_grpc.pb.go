@@ -21,8 +21,6 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	IdentityService_SendPhoneLoginCode_FullMethodName          = "/hospital.identity.v1.IdentityService/SendPhoneLoginCode"
 	IdentityService_PhoneLogin_FullMethodName                  = "/hospital.identity.v1.IdentityService/PhoneLogin"
-	IdentityService_WeChatLogin_FullMethodName                 = "/hospital.identity.v1.IdentityService/WeChatLogin"
-	IdentityService_SetMyPhone_FullMethodName                  = "/hospital.identity.v1.IdentityService/SetMyPhone"
 	IdentityService_RefreshAccessToken_FullMethodName          = "/hospital.identity.v1.IdentityService/RefreshAccessToken"
 	IdentityService_RevokeRefreshToken_FullMethodName          = "/hospital.identity.v1.IdentityService/RevokeRefreshToken"
 	IdentityService_GetAccountDisplayProfile_FullMethodName    = "/hospital.identity.v1.IdentityService/GetAccountDisplayProfile"
@@ -53,8 +51,6 @@ const (
 type IdentityServiceClient interface {
 	SendPhoneLoginCode(ctx context.Context, in *SendPhoneLoginCodeRequest, opts ...grpc.CallOption) (*SendPhoneLoginCodeResponse, error)
 	PhoneLogin(ctx context.Context, in *PhoneLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
-	WeChatLogin(ctx context.Context, in *WeChatLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
-	SetMyPhone(ctx context.Context, in *SetMyPhoneRequest, opts ...grpc.CallOption) (*PhoneBinding, error)
 	RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*TokenPair, error)
 	RevokeRefreshToken(ctx context.Context, in *RevokeRefreshTokenRequest, opts ...grpc.CallOption) (*RevokeRefreshTokenResponse, error)
 	GetAccountDisplayProfile(ctx context.Context, in *GetAccountDisplayProfileRequest, opts ...grpc.CallOption) (*AccountDisplayProfile, error)
@@ -105,26 +101,6 @@ func (c *identityServiceClient) PhoneLogin(ctx context.Context, in *PhoneLoginRe
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(TokenPair)
 	err := c.cc.Invoke(ctx, IdentityService_PhoneLogin_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *identityServiceClient) WeChatLogin(ctx context.Context, in *WeChatLoginRequest, opts ...grpc.CallOption) (*TokenPair, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(TokenPair)
-	err := c.cc.Invoke(ctx, IdentityService_WeChatLogin_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *identityServiceClient) SetMyPhone(ctx context.Context, in *SetMyPhoneRequest, opts ...grpc.CallOption) (*PhoneBinding, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(PhoneBinding)
-	err := c.cc.Invoke(ctx, IdentityService_SetMyPhone_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -357,8 +333,6 @@ func (c *identityServiceClient) EnableAccount(ctx context.Context, in *AccountMu
 type IdentityServiceServer interface {
 	SendPhoneLoginCode(context.Context, *SendPhoneLoginCodeRequest) (*SendPhoneLoginCodeResponse, error)
 	PhoneLogin(context.Context, *PhoneLoginRequest) (*TokenPair, error)
-	WeChatLogin(context.Context, *WeChatLoginRequest) (*TokenPair, error)
-	SetMyPhone(context.Context, *SetMyPhoneRequest) (*PhoneBinding, error)
 	RefreshAccessToken(context.Context, *RefreshAccessTokenRequest) (*TokenPair, error)
 	RevokeRefreshToken(context.Context, *RevokeRefreshTokenRequest) (*RevokeRefreshTokenResponse, error)
 	GetAccountDisplayProfile(context.Context, *GetAccountDisplayProfileRequest) (*AccountDisplayProfile, error)
@@ -400,12 +374,6 @@ func (UnimplementedIdentityServiceServer) SendPhoneLoginCode(context.Context, *S
 }
 func (UnimplementedIdentityServiceServer) PhoneLogin(context.Context, *PhoneLoginRequest) (*TokenPair, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PhoneLogin not implemented")
-}
-func (UnimplementedIdentityServiceServer) WeChatLogin(context.Context, *WeChatLoginRequest) (*TokenPair, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method WeChatLogin not implemented")
-}
-func (UnimplementedIdentityServiceServer) SetMyPhone(context.Context, *SetMyPhoneRequest) (*PhoneBinding, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetMyPhone not implemented")
 }
 func (UnimplementedIdentityServiceServer) RefreshAccessToken(context.Context, *RefreshAccessTokenRequest) (*TokenPair, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RefreshAccessToken not implemented")
@@ -526,42 +494,6 @@ func _IdentityService_PhoneLogin_Handler(srv interface{}, ctx context.Context, d
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(IdentityServiceServer).PhoneLogin(ctx, req.(*PhoneLoginRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _IdentityService_WeChatLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(WeChatLoginRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(IdentityServiceServer).WeChatLogin(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: IdentityService_WeChatLogin_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IdentityServiceServer).WeChatLogin(ctx, req.(*WeChatLoginRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _IdentityService_SetMyPhone_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetMyPhoneRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(IdentityServiceServer).SetMyPhone(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: IdentityService_SetMyPhone_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IdentityServiceServer).SetMyPhone(ctx, req.(*SetMyPhoneRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -976,14 +908,6 @@ var IdentityService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "PhoneLogin",
 			Handler:    _IdentityService_PhoneLogin_Handler,
-		},
-		{
-			MethodName: "WeChatLogin",
-			Handler:    _IdentityService_WeChatLogin_Handler,
-		},
-		{
-			MethodName: "SetMyPhone",
-			Handler:    _IdentityService_SetMyPhone_Handler,
 		},
 		{
 			MethodName: "RefreshAccessToken",

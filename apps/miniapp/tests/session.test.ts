@@ -5,19 +5,12 @@ const authMocks = vi.hoisted(() => ({
   phoneLogin: vi.fn(),
   refreshToken: vi.fn(),
   revokeToken: vi.fn(),
-  wechatLogin: vi.fn(),
-}));
-
-const codeMocks = vi.hoisted(() => ({
-  getWechatLoginCode: vi.fn(),
 }));
 
 vi.mock("@/api/auth", () => authMocks);
-vi.mock("@/utils/wechatCode", () => codeMocks);
 
 import {
   availableAppVariants,
-  initializeFromWechat,
   initializeFromPhone,
   handleUnauthorized,
   logout,
@@ -65,21 +58,6 @@ describe("session store", () => {
     vi.clearAllMocks();
   });
 
-  it("exchanges the WeChat code for Hospital tokens and a principal", async () => {
-    codeMocks.getWechatLoginCode.mockResolvedValue("one-time-code");
-    authMocks.wechatLogin.mockResolvedValue(tokenResponse);
-    authMocks.getCurrentIdentity.mockResolvedValue(principal);
-
-    await expect(initializeFromWechat()).resolves.toBe(true);
-    expect(authMocks.wechatLogin).toHaveBeenCalledWith("one-time-code");
-    expect(sessionState.status).toBe("authenticated");
-    expect(sessionState.principal).toEqual(principal);
-
-    const persisted = JSON.stringify(storage.get("hospital:session"));
-    expect(persisted).not.toContain("one-time-code");
-    expect(persisted.toLowerCase()).not.toContain("openid");
-  });
-
   it("uses a verified phone code to create the Hospital session", async () => {
     authMocks.phoneLogin.mockResolvedValue(tokenResponse);
     authMocks.getCurrentIdentity.mockResolvedValue(principal);
@@ -91,20 +69,19 @@ describe("session store", () => {
     expect(sessionState.principal).toEqual(principal);
   });
 
-  it("falls back to guest and removes incomplete session data", async () => {
-    codeMocks.getWechatLoginCode.mockRejectedValue(new Error("wechat unavailable"));
+  it("falls back to guest when phone authentication fails", async () => {
+    authMocks.phoneLogin.mockRejectedValue(new Error("invalid verification code"));
 
-    await expect(initializeFromWechat()).resolves.toBe(false);
+    await expect(initializeFromPhone("13800138000", "000000")).resolves.toBe(false);
     expect(sessionState.status).toBe("guest");
     expect(storage.has("hospital:session")).toBe(false);
   });
 
   it("selects the shared staff placeholder for a doctor", async () => {
-    codeMocks.getWechatLoginCode.mockResolvedValue("one-time-code");
-    authMocks.wechatLogin.mockResolvedValue(tokenResponse);
+    authMocks.phoneLogin.mockResolvedValue(tokenResponse);
     authMocks.getCurrentIdentity.mockResolvedValue(doctorPrincipal);
 
-    await initializeFromWechat();
+    await initializeFromPhone("13800138000", "123456");
 
     expect(sessionState.appVariant).toBe("staff");
   });

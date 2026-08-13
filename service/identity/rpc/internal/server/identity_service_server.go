@@ -33,16 +33,6 @@ func (s *IdentityServiceServer) PhoneLogin(ctx context.Context, in *identityv1.P
 	return l.PhoneLogin(in)
 }
 
-func (s *IdentityServiceServer) WeChatLogin(ctx context.Context, in *identityv1.WeChatLoginRequest) (*identityv1.TokenPair, error) {
-	l := logic.NewWeChatLoginLogic(ctx, s.svcCtx)
-	return l.WeChatLogin(in)
-}
-
-func (s *IdentityServiceServer) SetMyPhone(ctx context.Context, in *identityv1.SetMyPhoneRequest) (*identityv1.PhoneBinding, error) {
-	l := logic.NewSetMyPhoneLogic(ctx, s.svcCtx)
-	return l.SetMyPhone(in)
-}
-
 func (s *IdentityServiceServer) RefreshAccessToken(ctx context.Context, in *identityv1.RefreshAccessTokenRequest) (*identityv1.TokenPair, error) {
 	l := logic.NewRefreshAccessTokenLogic(ctx, s.svcCtx)
 	return l.RefreshAccessToken(in)

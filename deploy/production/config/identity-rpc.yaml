@@ -13,8 +13,6 @@ Middlewares:
     IgnoreContentMethods:
       - /hospital.identity.v1.IdentityService/SendPhoneLoginCode
       - /hospital.identity.v1.IdentityService/PhoneLogin
-      - /hospital.identity.v1.IdentityService/WeChatLogin
-      - /hospital.identity.v1.IdentityService/SetMyPhone
       - /hospital.identity.v1.IdentityService/SearchAdminAccountByPhone
       - /hospital.identity.v1.IdentityService/RefreshAccessToken
       - /hospital.identity.v1.IdentityService/RevokeRefreshToken
@@ -45,13 +43,8 @@ Token:
   AccessTTLSeconds: 900
   RefreshTTLSeconds: 2592000
 
-WeChat:
-  AppID: ${WECHAT_MINIAPP_APP_ID}
-  AppSecret: ${WECHAT_MINIAPP_APP_SECRET}
-  Code2SessionURL: ${WECHAT_CODE2SESSION_URL}
-
 PhoneLogin:
-  Enabled: ${ALIYUN_PNVS_ENABLED}
+  Verifier: "${SMS_PROVIDER}"
   AccessKeyID: ${ALIBABA_CLOUD_ACCESS_KEY_ID}
   AccessKeySecret: ${ALIBABA_CLOUD_ACCESS_KEY_SECRET}
   RegionID: cn-shanghai

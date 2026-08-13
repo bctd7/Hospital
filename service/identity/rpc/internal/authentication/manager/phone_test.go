@@ -2,18 +2,19 @@ package manager
 
 import (
 	"context"
+	"crypto/sha256"
 	"errors"
 	"testing"
 
-	"hospital/service/identity/rpc/internal/authentication/provider"
+	"hospital/service/identity/rpc/internal/authentication/sms"
 	"hospital/service/identity/rpc/internal/session"
 )
 
 func TestPhoneLoginVerifiesBeforeCreatingSession(t *testing.T) {
-	phoneProvider := &fakePhoneVerificationProvider{}
+	verifier := &fakeSMSVerifier{}
 	store := &fakePhoneLoginStore{accountID: "account-1"}
 	sessions := &recordingSessionStarter{}
-	manager, err := NewPhoneLoginManager(store, phoneProvider, sessions, make([]byte, 32), 60)
+	manager, err := NewManager(store, verifier, sessions, make([]byte, 32), 60)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -21,10 +22,10 @@ func TestPhoneLoginVerifiesBeforeCreatingSession(t *testing.T) {
 	if _, err := manager.Login(context.Background(), "138-0013-8000", "123456"); err != nil {
 		t.Fatal(err)
 	}
-	if phoneProvider.verifiedPhone != "+8613800138000" || phoneProvider.code != "123456" {
-		t.Fatalf("unexpected provider input: phone=%q code=%q", phoneProvider.verifiedPhone, phoneProvider.code)
+	if verifier.verifiedPhone != "+8613800138000" || verifier.code != "123456" {
+		t.Fatalf("unexpected SMS verifier input: phone=%q code=%q", verifier.verifiedPhone, verifier.code)
 	}
-	if len(store.fingerprint) != sha256Size || store.masked != "138****8000" {
+	if len(store.fingerprint) != sha256.Size || store.masked != "138****8000" {
 		t.Fatalf("unexpected phone binding: fingerprint=%x masked=%q", store.fingerprint, store.masked)
 	}
 	if sessions.accountID != "account-1" {
@@ -33,15 +34,15 @@ func TestPhoneLoginVerifiesBeforeCreatingSession(t *testing.T) {
 }
 
 func TestPhoneLoginDoesNotCreateAccountWhenVerificationFails(t *testing.T) {
-	phoneProvider := &fakePhoneVerificationProvider{verifyErr: provider.ErrInvalidCredential}
+	verifier := &fakeSMSVerifier{verifyErr: sms.ErrInvalidCode}
 	store := &fakePhoneLoginStore{accountID: "account-1"}
-	manager, err := NewPhoneLoginManager(store, phoneProvider, &recordingSessionStarter{}, make([]byte, 32), 60)
+	manager, err := NewManager(store, verifier, &recordingSessionStarter{}, make([]byte, 32), 60)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	_, err = manager.Login(context.Background(), "13800138000", "000000")
-	if !errors.Is(err, provider.ErrInvalidCredential) {
+	if !errors.Is(err, sms.ErrInvalidCode) {
 		t.Fatalf("expected invalid credential, got %v", err)
 	}
 	if store.calls != 0 {
@@ -49,9 +50,25 @@ func TestPhoneLoginDoesNotCreateAccountWhenVerificationFails(t *testing.T) {
 	}
 }
 
+func TestPhoneLoginRejectsNonNumericCodeBeforeSMSVerification(t *testing.T) {
+	verifier := &fakeSMSVerifier{}
+	manager, err := NewManager(&fakePhoneLoginStore{}, verifier, &recordingSessionStarter{}, make([]byte, 32), 60)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = manager.Login(context.Background(), "13800138000", "12ab56")
+	if !errors.Is(err, sms.ErrInvalidCode) {
+		t.Fatalf("expected invalid SMS code, got %v", err)
+	}
+	if verifier.verifiedPhone != "" {
+		t.Fatal("invalid code must not be sent to the SMS verifier")
+	}
+}
+
 func TestSendPhoneLoginCodeUsesNormalizedNumber(t *testing.T) {
-	phoneProvider := &fakePhoneVerificationProvider{}
-	manager, err := NewPhoneLoginManager(&fakePhoneLoginStore{}, phoneProvider, &recordingSessionStarter{}, make([]byte, 32), 75)
+	verifier := &fakeSMSVerifier{}
+	manager, err := NewManager(&fakePhoneLoginStore{}, verifier, &recordingSessionStarter{}, make([]byte, 32), 75)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,24 +77,24 @@ func TestSendPhoneLoginCodeUsesNormalizedNumber(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if phoneProvider.sentPhone != "+8613800138000" || retryAfter != 75 {
-		t.Fatalf("unexpected send result: phone=%q retry=%d", phoneProvider.sentPhone, retryAfter)
+	if verifier.sentPhone != "+8613800138000" || retryAfter != 75 {
+		t.Fatalf("unexpected send result: phone=%q retry=%d", verifier.sentPhone, retryAfter)
 	}
 }
 
-type fakePhoneVerificationProvider struct {
+type fakeSMSVerifier struct {
 	sentPhone     string
 	verifiedPhone string
 	code          string
 	verifyErr     error
 }
 
-func (p *fakePhoneVerificationProvider) SendLoginCode(_ context.Context, phone string) error {
+func (p *fakeSMSVerifier) SendLoginCode(_ context.Context, phone string) error {
 	p.sentPhone = phone
 	return nil
 }
 
-func (p *fakePhoneVerificationProvider) VerifyLoginCode(_ context.Context, phone, code string) error {
+func (p *fakeSMSVerifier) VerifyLoginCode(_ context.Context, phone, code string) error {
 	p.verifiedPhone = phone
 	p.code = code
 	return p.verifyErr

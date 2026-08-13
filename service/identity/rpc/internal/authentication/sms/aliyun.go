@@ -1,4 +1,4 @@
-package provider
+package sms
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 
 const aliyunPNVSEndpoint = "dypnsapi.aliyuncs.com"
 
-type AlibabaPNVSConfig struct {
+type AliyunConfig struct {
 	AccessKeyID     string
 	AccessKeySecret string
 	RegionID        string
@@ -27,15 +27,15 @@ type AlibabaPNVSConfig struct {
 	CodeLength      int64
 }
 
-type aliyunPNVSClient interface {
+type aliyunClient interface {
 	SendSmsVerifyCodeWithContext(context.Context, *dypns.SendSmsVerifyCodeRequest, *dara.RuntimeOptions) (*dypns.SendSmsVerifyCodeResponse, error)
 	CheckSmsVerifyCodeWithContext(context.Context, *dypns.CheckSmsVerifyCodeRequest, *dara.RuntimeOptions) (*dypns.CheckSmsVerifyCodeResponse, error)
 }
 
-// AlibabaPNVS uses the platform-provided signature/template and asks Alibaba
-// Cloud to generate and verify the code. ReturnVerifyCode is always false.
-type AlibabaPNVS struct {
-	client          aliyunPNVSClient
+// AliyunVerifier 使用阿里云号码认证服务生成、发送并校验验证码。
+// ReturnVerifyCode 始终为 false，Identity 不接收生产验证码原文。
+type AliyunVerifier struct {
+	client          aliyunClient
 	signName        string
 	templateCode    string
 	schemeName      string
@@ -44,13 +44,13 @@ type AlibabaPNVS struct {
 	codeLength      int64
 }
 
-func NewAlibabaPNVS(config AlibabaPNVSConfig) (*AlibabaPNVS, error) {
+func NewAliyunVerifier(config AliyunConfig) (*AliyunVerifier, error) {
 	config.AccessKeyID = strings.TrimSpace(config.AccessKeyID)
 	config.AccessKeySecret = strings.TrimSpace(config.AccessKeySecret)
 	config.SignName = strings.TrimSpace(config.SignName)
 	config.TemplateCode = strings.TrimSpace(config.TemplateCode)
 	if config.AccessKeyID == "" || config.AccessKeySecret == "" || config.SignName == "" || config.TemplateCode == "" {
-		return nil, ErrProviderNotConfigured
+		return nil, ErrNotConfigured
 	}
 	if config.RegionID == "" {
 		config.RegionID = "cn-shanghai"
@@ -77,18 +77,18 @@ func NewAlibabaPNVS(config AlibabaPNVSConfig) (*AlibabaPNVS, error) {
 	if err != nil {
 		return nil, fmt.Errorf("create Alibaba Cloud PNVS client: %w", err)
 	}
-	return newAlibabaPNVS(client, config), nil
+	return newAliyunVerifier(client, config), nil
 }
 
-func newAlibabaPNVS(client aliyunPNVSClient, config AlibabaPNVSConfig) *AlibabaPNVS {
-	return &AlibabaPNVS{
+func newAliyunVerifier(client aliyunClient, config AliyunConfig) *AliyunVerifier {
+	return &AliyunVerifier{
 		client: client, signName: config.SignName, templateCode: config.TemplateCode,
 		schemeName: config.SchemeName, validSeconds: config.ValidSeconds,
 		intervalSeconds: config.IntervalSeconds, codeLength: config.CodeLength,
 	}
 }
 
-func (p *AlibabaPNVS) SendLoginCode(ctx context.Context, phoneNumber string) error {
+func (p *AliyunVerifier) SendLoginCode(ctx context.Context, phoneNumber string) error {
 	minutes := (p.validSeconds + 59) / 60
 	templateParam, err := json.Marshal(map[string]string{"code": "##code##", "min": fmt.Sprint(minutes)})
 	if err != nil {
@@ -129,7 +129,7 @@ func (p *AlibabaPNVS) SendLoginCode(ctx context.Context, phoneNumber string) err
 	return nil
 }
 
-func (p *AlibabaPNVS) VerifyLoginCode(ctx context.Context, phoneNumber, code string) error {
+func (p *AliyunVerifier) VerifyLoginCode(ctx context.Context, phoneNumber, code string) error {
 	request := (&dypns.CheckSmsVerifyCodeRequest{}).
 		SetCountryCode("86").
 		SetPhoneNumber(mainlandDigits(phoneNumber)).
@@ -149,7 +149,7 @@ func (p *AlibabaPNVS) VerifyLoginCode(ctx context.Context, phoneNumber, code str
 		return pnvsUnavailable("check verification code", nil)
 	}
 	if response.Body.Model == nil || dara.StringValue(response.Body.Model.VerifyResult) != "PASS" {
-		return ErrInvalidCredential
+		return ErrInvalidCode
 	}
 	return nil
 }
@@ -166,14 +166,13 @@ func isPNVSRateLimitCode(code string) bool {
 		normalized == "ISV.BUSINESS_LIMIT_CONTROL"
 }
 
-// pnvsUnavailable preserves only the provider's machine-readable error code.
-// The client still receives a generic Unavailable response, while server logs
-// remain useful without recording phone numbers, credentials, or response data.
+// pnvsUnavailable 只保留短信平台返回的机器可读错误码。
+// 客户端仍收到统一的不可用错误；服务端日志不会记录手机号、凭据或响应正文。
 func pnvsUnavailable(operation string, cause error) error {
 	if code := pnvsErrorCode(cause); code != "" {
 		return pnvsUnavailableCode(operation, code)
 	}
-	return fmt.Errorf("%w: PNVS %s failed", ErrProviderUnavailable, operation)
+	return fmt.Errorf("%w: PNVS %s failed", ErrUnavailable, operation)
 }
 
 func pnvsErrorCode(cause error) string {
@@ -189,5 +188,5 @@ func pnvsUnavailableCode(operation, code string) error {
 	if code == "" {
 		return pnvsUnavailable(operation, nil)
 	}
-	return fmt.Errorf("%w: PNVS %s failed (code=%s)", ErrProviderUnavailable, operation, code)
+	return fmt.Errorf("%w: PNVS %s failed (code=%s)", ErrUnavailable, operation, code)
 }

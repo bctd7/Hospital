@@ -88,7 +88,7 @@ apps/miniapp/dist/build/mp-weixin
 VITE_API_BASE_URL=http://192.168.x.x:8888
 ```
 
-前端环境文件只保存公开连接信息，不能放 AppSecret、阿里云 AccessKey、JWT 私钥或手机号 HMAC Key。
+前端环境文件只保存公开连接信息，不能放阿里云 AccessKey、JWT 私钥或手机号 HMAC Key。
 本地真机调试只使用 `.env.local`；不要创建 `.env.production.local`。CloudBase 环境或 AnyService 名称变化时，
 必须评审并修改 `release.config.json`，确保本地发包和 GitHub CI 使用相同配置。
 
@@ -109,7 +109,7 @@ GET /api/v1/auth/me
   -> 恢复 Principal 和应用版本
 ```
 
-微信登录接口保留兼容能力，但当前主入口使用手机号认证。接口字段和 Bearer 调试方式统一查看
+当前只提供手机号验证码登录。接口字段和 Bearer 调试方式统一查看
 [`docs/api/README.md`](../../docs/api/README.md)。
 
 ## 验证
@@ -124,7 +124,7 @@ npm run build:mp-weixin
 
 ## 安全约束
 
-- 不记录手机号、验证码、Token 和微信临时 code；
+- 不记录手机号、验证码和 Token；
 - 不在 Storage 保存不必要的医疗敏感数据；
 - 菜单隐藏不是权限校验，后端必须重新授权；
 - 不将开发服务暴露到公网；

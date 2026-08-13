@@ -21,15 +21,15 @@ Manager。Logic 不得直接访问 Repository。
 
 ```text
 internal/
-├─ authentication/             登录凭据验证、账号解析和开始 Session
-│  ├─ manager/                 微信登录、手机号登录和认证校验
-│  └─ provider/                微信、阿里云短信、本地测试 Provider
+├─ authentication/             手机号凭据认证、账号解析和开始 Session
+│  ├─ errors.go / store.go      认证领域错误、账号解析与 Session 启动端口
+│  ├─ manager/                 短信认证流程编排
+│  └─ sms/                     阿里云与本地短信校验实现
 ├─ account/
 │  ├─ model.go / errors.go       账号领域模型与稳定错误
 │  ├─ store.go                   账号持久化端口
 │  └─ manager/                 账号、医生、本人资料的业务操作
 ├─ authorization/
-│  ├─ context/                   有效 Principal 的 Manager 与 Store 端口
 │  └─ version/                   授权版本事件、Consumer 与 Redis 写入端口
 ├─ organization/
 │  ├─ model.go / errors.go       组织领域模型与稳定错误
@@ -39,7 +39,9 @@ internal/
 ├─ messaging/
 │  ├─ kafka/                   只提供 Reader/Writer 传输适配
 │  └─ outbox/                  通用 MySQL Outbox→Kafka Publisher
-├─ repository/                 Redis 与 MySQL 实现
+├─ repository/
+│  ├─ mysqlstore/              MySQL 查询与事务实现
+│  └─ redisstore/              Refresh Session 的 Redis 实现
 ├─ logic/                      一个 RPC 一个 go-zero Logic
 ├─ server/                     gRPC Server 方法
 └─ svc/                        依赖装配
@@ -49,12 +51,12 @@ internal/
 
 ### Authentication、Account 和 Session
 
-- `authentication/manager` 验证微信或手机凭据，找到或创建登录账号；
-- `authentication/provider` 只适配微信、阿里云手机号等外部登录渠道，并把已验证的外部身份交给认证 Manager；
+- `authentication/manager` 编排手机号验证码认证，验证成功后找到或创建登录账号并启动 Session；
+- `authentication/sms` 负责验证码生成、发送和校验的阿里云/本地实现，不创建账号或 Session；
 - `account/manager` 管理账号状态、医生身份、科室和展示资料；
 - `session` 读取最新 Principal，签发/刷新 Token，维护 Refresh Session。
 
-Provider 不创建 Session、不签发 Token，也不负责账号管理。`svc/login_providers.go` 只根据配置选择 Provider，`svc/manager_wiring.go` 负责注入，渠道差异不会进入 RPC Logic。
+短信校验器不创建 Session、不签发 Token，也不负责账号管理。`svc/sms_verifier.go` 只根据配置选择实现，`svc/manager_wiring.go` 负责注入，实现差异不会进入 RPC Logic。
 
 ### Authorization Version Consumer
 
@@ -86,7 +88,7 @@ Redis 写失败时不提交 Offset；Commit 失败时消息可能重放。Redis 
 svc/service_context.go  依赖分组、总装配顺序、关闭顺序
 svc/resources.go        MySQL、Redis 的创建、连通性检查和关闭
 svc/token_components.go JWT、密钥、授权版本 Store/Validator、Refresh Session Store
-svc/login_providers.go  微信、阿里云手机号和本地验证码 Provider
+svc/sms_verifier.go     阿里云和本地短信验证码校验器
 svc/manager_wiring.go   Session 与 RPC 业务 Manager 装配
 svc/messaging.go        Kafka、Outbox、授权版本 Consumer
 ```

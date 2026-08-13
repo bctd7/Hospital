@@ -220,11 +220,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/auth/phone/login",
 				Handler: auth.PhoneLoginHandler(serverCtx),
 			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/auth/wechat/login",
-				Handler: auth.WeChatLoginHandler(serverCtx),
-			},
 		},
 		rest.WithPrefix("/api/v1"),
 	)
@@ -237,11 +232,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodGet,
 					Path:    "/auth/me",
 					Handler: auth.CurrentIdentityHandler(serverCtx),
-				},
-				{
-					Method:  http.MethodPut,
-					Path:    "/auth/me/phone",
-					Handler: auth.SetMyPhoneHandler(serverCtx),
 				},
 			}...,
 		),

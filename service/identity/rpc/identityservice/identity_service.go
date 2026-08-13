@@ -49,18 +49,14 @@ type (
 	SearchAdminAccountByPhoneResponse   = identityv1.SearchAdminAccountByPhoneResponse
 	SendPhoneLoginCodeRequest           = identityv1.SendPhoneLoginCodeRequest
 	SendPhoneLoginCodeResponse          = identityv1.SendPhoneLoginCodeResponse
-	SetMyPhoneRequest                   = identityv1.SetMyPhoneRequest
 	TokenPair                           = identityv1.TokenPair
 	UpdateAccountDisplayProfileRequest  = identityv1.UpdateAccountDisplayProfileRequest
 	UpdateDoctorRequest                 = identityv1.UpdateDoctorRequest
 	UpdateOrganizationUnitRequest       = identityv1.UpdateOrganizationUnitRequest
-	WeChatLoginRequest                  = identityv1.WeChatLoginRequest
 
 	IdentityService interface {
 		SendPhoneLoginCode(ctx context.Context, in *SendPhoneLoginCodeRequest, opts ...grpc.CallOption) (*SendPhoneLoginCodeResponse, error)
 		PhoneLogin(ctx context.Context, in *PhoneLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
-		WeChatLogin(ctx context.Context, in *WeChatLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
-		SetMyPhone(ctx context.Context, in *SetMyPhoneRequest, opts ...grpc.CallOption) (*PhoneBinding, error)
 		RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*TokenPair, error)
 		RevokeRefreshToken(ctx context.Context, in *RevokeRefreshTokenRequest, opts ...grpc.CallOption) (*RevokeRefreshTokenResponse, error)
 		GetAccountDisplayProfile(ctx context.Context, in *GetAccountDisplayProfileRequest, opts ...grpc.CallOption) (*AccountDisplayProfile, error)
@@ -107,16 +103,6 @@ func (m *defaultIdentityService) SendPhoneLoginCode(ctx context.Context, in *Sen
 func (m *defaultIdentityService) PhoneLogin(ctx context.Context, in *PhoneLoginRequest, opts ...grpc.CallOption) (*TokenPair, error) {
 	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
 	return client.PhoneLogin(ctx, in, opts...)
-}
-
-func (m *defaultIdentityService) WeChatLogin(ctx context.Context, in *WeChatLoginRequest, opts ...grpc.CallOption) (*TokenPair, error) {
-	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
-	return client.WeChatLogin(ctx, in, opts...)
-}
-
-func (m *defaultIdentityService) SetMyPhone(ctx context.Context, in *SetMyPhoneRequest, opts ...grpc.CallOption) (*PhoneBinding, error) {
-	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
-	return client.SetMyPhone(ctx, in, opts...)
 }
 
 func (m *defaultIdentityService) RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*TokenPair, error) {

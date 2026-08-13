@@ -7,7 +7,7 @@ import (
 )
 
 // Store 是 Refresh Session 的存储端口。
-// Manager 只依赖这个接口，不直接依赖 Redis；生产环境由 repository.RedisSessionStore 实现，单元测试可使用内存实现。
+// Manager 只依赖这个接口，不直接依赖 Redis；生产环境由 repository/redisstore.SessionStore 实现，单元测试可使用内存实现。
 type Store interface {
 	// Create 在首次登录成功后保存一条新的刷新会话。
 	Create(ctx context.Context, session Session) error

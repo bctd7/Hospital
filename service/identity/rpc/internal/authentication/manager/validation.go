@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+import "hospital/service/identity/rpc/internal/authentication"
+
 var mainlandPhone = regexp.MustCompile(`^1[3-9][0-9]{9}$`)
 
 // normalizePhone 将允许的手机号输入统一为 +86 E.164 形式。
@@ -15,7 +17,7 @@ func normalizePhone(value string) (string, error) {
 	value = strings.NewReplacer(" ", "", "-", "").Replace(value)
 	value = strings.TrimPrefix(value, "+86")
 	if !mainlandPhone.MatchString(value) {
-		return "", ErrInvalidPhone
+		return "", authentication.ErrInvalidPhone
 	}
 	return "+86" + value, nil
 }

@@ -1,6 +1,6 @@
 # Identity 数据库
 
-`hospital_identity` 是 Identity 的业务事实库。当前尚未发布且没有需要保留的正式业务数据，迁移已压平为单一最新初始版本 `000001`，共包含 13 张表；账号、登录、
+`hospital_identity` 是 Identity 的业务事实库。当前尚未发布且没有需要保留的正式业务数据，迁移已压平为单一最新初始版本 `000001`，共包含 12 张表；账号、登录、
 组织、RBAC、审计和 Outbox 分开保存，但只有 `identity_accounts` 是账号主表。
 
 ## 当前表
@@ -10,7 +10,6 @@
 | 账号 | `identity_accounts` | 账号类型、状态、授权版本和管理版本 |
 | 账号 | `identity_account_profiles` | 用户本人维护的可选展示昵称 |
 | 登录 | `identity_account_phones` | 手机号 HMAC 指纹、脱敏值和验证状态 |
-| 登录 | `identity_external_identities` | 微信等兼容外部身份映射 |
 | 组织 | `identity_organization_units` | 医院、院区、科室与组织乐观锁版本 |
 | 医生 | `identity_staff_profiles` | 当前科室、工号、公开资料和医生状态 |
 | RBAC | `identity_roles` | 角色定义 |
@@ -25,7 +24,6 @@
 identity_accounts
 ├── identity_account_profiles
 ├── identity_account_phones
-├── identity_external_identities
 ├── identity_staff_profiles -> identity_organization_units(department)
 └── identity_account_roles -> identity_roles -> identity_role_permissions -> identity_permissions
 
@@ -40,7 +38,7 @@ identity_outbox_events
 
 ## 当前初始迁移
 
-`000001_identity_initial_schema` 直接创建当前代码需要的最终结构，包括统一组织单元、账号管理版本、展示昵称、完整医生资料、手机号与外部身份、RBAC、审计和 Outbox，不再创建旧 `identity_departments` 后再执行重命名和字段回填。
+`000001_identity_initial_schema` 直接创建当前代码需要的最终结构，包括统一组织单元、账号管理版本、展示昵称、完整医生资料、已验证手机号、RBAC、审计和 Outbox，不再创建旧 `identity_departments` 后再执行重命名和字段回填。
 
 ## 修改要求
 
@@ -48,6 +46,6 @@ identity_outbox_events
 - Repository、Manager 集成测试和本 README 同步更新；
 - 外键只能表达引用存在性，`department_id` 必须指向 department 等类型约束由 Manager 校验；
 - `operation_id` 唯一约束和资源版本字段不得绕开；
-- 审计、Outbox 和主数据在同一 MySQL 事务中写入；
+- 主数据和对应审计在同一 MySQL 事务中写入；授权发生变化时，授权 Outbox 也进入同一事务；组织变化当前不写 Outbox；
 - 空库必须完成 `up`，测试环境验证需要时执行 `down → up`。
 - 正式发布后不得修改已执行迁移，必须新增版本。

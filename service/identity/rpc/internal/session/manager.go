@@ -47,7 +47,7 @@ func NewManager(
 	}, nil
 }
 
-// Start 在微信或短信等登录方式已经确认账号身份后，首次签发 Access Token 和 Refresh Token。
+// Start 在短信验证码已经确认账号身份后，首次签发 Access Token 和 Refresh Token。
 // 它只供 Identity 内部登录逻辑调用，不开放“传账号 ID 直接领 Token”的公共 RPC。
 func (m *Manager) Start(ctx context.Context, accountID string) (TokenPair, error) {
 	principal, err := m.principals.GetPrincipal(ctx, accountID)

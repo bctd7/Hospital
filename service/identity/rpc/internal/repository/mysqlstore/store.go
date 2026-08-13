@@ -10,8 +10,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// Store owns the shared Identity database connection pool. Domain-specific
-// Store implementations are grouped in mysql_<domain>_store.go files.
+// Store owns the shared Identity database connection pool. Its methods are
+// grouped by responsibility across the other files in this package.
 type Store struct {
 	db *sql.DB
 }

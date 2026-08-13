@@ -523,10 +523,6 @@ type SetItemWeeklyWindowAPIRequest struct {
 	OperationID       string `json:"operation_id"`
 }
 
-type SetPhoneRequest struct {
-	Phone string `json:"phone"`
-}
-
 type SetRoomWeeklyWindowAPIRequest struct {
 	RoomID          string `path:"roomId"`
 	WindowID        string `json:"window_id,optional"`
@@ -584,10 +580,6 @@ type UpdateOrganizationUnitRequest struct {
 	ParentID    *string `json:"parent_id,optional"`
 	Version     int64   `json:"version"`
 	OperationID string  `json:"operation_id"`
-}
-
-type WeChatLoginRequest struct {
-	LoginCode string `json:"login_code"`
 }
 
 type WeeklyWindowsPathRequest struct {

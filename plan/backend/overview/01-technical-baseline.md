@@ -74,11 +74,11 @@ tools/                        # 部署或受控维护工具
 
 ## 5. 身份与安全
 
-当前主认证使用手机号 + 阿里云 PNVS 验证码。微信登录作为兼容接口保留，不是小程序主入口。
+当前唯一认证方式是手机号 + 阿里云 PNVS 验证码。
 Identity 签发短期 Access Token 和轮换 Refresh Token；App API 与业务服务本地验证 Access Token。
 
-- 密码、AccessKey、HMAC Key、JWT 私钥、AppSecret 不进入 Git；
-- 验证码、完整手机号、Token、OpenID 和患者敏感信息不写普通日志；
+- 密码、AccessKey、HMAC Key、JWT 私钥不进入 Git；
+- 验证码、完整手机号、Token 和患者敏感信息不写普通日志；
 - 短信接口必须有手机号/IP/日级限流；
 - 业务服务按角色、permissions、部门范围、资源归属和业务状态共同授权；
 - 前端隐藏入口不是授权；

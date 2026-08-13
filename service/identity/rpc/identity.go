@@ -46,7 +46,6 @@ func main() {
 		svcCtx.Security.AuthorizationVersion,
 		identityv1.IdentityService_SendPhoneLoginCode_FullMethodName,
 		identityv1.IdentityService_PhoneLogin_FullMethodName,
-		identityv1.IdentityService_WeChatLogin_FullMethodName,
 		identityv1.IdentityService_RefreshAccessToken_FullMethodName,
 		identityv1.IdentityService_RevokeRefreshToken_FullMethodName,
 		identityv1.IdentityService_GetOrganizationContext_FullMethodName,
