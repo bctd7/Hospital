@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import { patientAppointmentMockAdapter } from "@/mocks/appointmentBooking";
@@ -26,5 +28,27 @@ describe("appointment management view rules", () => {
     const serialized = JSON.stringify(departments);
     expect(serialized).not.toContain("doctor");
     expect(departments[0]?.items[0]?.rooms.length).toBeGreaterThan(0);
+  });
+
+  it("keeps the admin resource workspace progressive and free of removed actions", () => {
+    const source = readFileSync(
+      new URL("../src/pages/admin/appointment/index.vue", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).toContain("workspace-track--room-items");
+    expect(source).toContain("width: 150%");
+    expect(source).toContain("translateX(-33.333333%)");
+    expect(source).toContain("返回科室");
+    expect(source).toContain("园区：");
+    expect(source).toContain("楼栋：");
+    expect(source).toContain("楼层：");
+    expect(source).toContain("房间号：");
+    expect(source).toContain("prefers-reduced-motion");
+    expect(source).not.toContain("管理当前房间");
+    expect(source).not.toContain("查看停用资源");
+    expect(source).not.toContain("停用房间");
+    expect(source).not.toContain("恢复房间");
+    expect(source).not.toContain("grid-template-columns: 190rpx 220rpx");
   });
 });

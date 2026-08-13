@@ -47,6 +47,7 @@ const error = ref("");
 const roomError = ref("");
 const relationError = ref("");
 const navigationPending = ref(false);
+const showingRoomItems = ref(false);
 let roomGeneration = 0;
 let relationGeneration = 0;
 let loadedOnce = false;
@@ -74,6 +75,9 @@ const filteredDepartments = computed(() => {
   );
 });
 const canLoadMore = computed(() => rooms.value.length < totalRooms.value);
+const workspaceClass = computed(() => ({
+  "workspace-track--room-items": showingRoomItems.value,
+}));
 
 onShow(() => {
   navigationPending.value = false;
@@ -159,6 +163,7 @@ async function loadRooms(force = false) {
       ?? rooms.value[0];
     selectedRoomId.value = nextRoom?.roomId ?? "";
     rememberedRoomId = selectedRoomId.value;
+    if (!nextRoom) showingRoomItems.value = false;
     await loadRelations(force);
   } catch (cause) {
     if (generation === roomGeneration) {
@@ -202,6 +207,7 @@ function switchCampus() {
       selectedDepartmentId.value = "";
       rememberedDepartmentId = "";
       departmentSearch.value = "";
+      showingRoomItems.value = false;
       void changeCampus();
     },
   });
@@ -223,6 +229,7 @@ async function changeCampus() {
 
 function chooseDepartment(department: DepartmentSummary) {
   if (department.departmentId === selectedDepartmentId.value) return;
+  showingRoomItems.value = false;
   selectedDepartmentId.value = department.departmentId;
   rememberedDepartmentId = department.departmentId;
   rememberedRoomId = "";
@@ -230,10 +237,26 @@ function chooseDepartment(department: DepartmentSummary) {
 }
 
 function chooseRoom(room: AppointmentRoom) {
-  if (room.roomId === selectedRoomId.value) return;
-  selectedRoomId.value = room.roomId;
-  rememberedRoomId = room.roomId;
-  void loadRelations(false);
+  if (room.roomId !== selectedRoomId.value) {
+    selectedRoomId.value = room.roomId;
+    rememberedRoomId = room.roomId;
+    void loadRelations(false);
+  }
+  showingRoomItems.value = true;
+}
+
+function returnToDepartments() {
+  showingRoomItems.value = false;
+}
+
+function roomCampusName(room: AppointmentRoom) {
+  return campuses.value.find((campus) => campus.campusId === room.campusId)?.name
+    ?? currentCampus.value?.name
+    ?? "未知园区";
+}
+
+function floorLabel(floor: number) {
+  return floor < 0 ? `B${Math.abs(floor)}层` : `${floor}层`;
 }
 
 function updateSearch(event: Event) {
@@ -309,107 +332,123 @@ function navigate(url: string) {
       </button>
     </view>
 
+    <view
+      class="hierarchy-bar"
+      :class="{ 'hierarchy-bar--visible': showingRoomItems }"
+    >
+      <button class="hierarchy-bar__back" @tap="returnToDepartments">‹ 返回科室</button>
+      <view class="hierarchy-bar__breadcrumb">
+        <text>{{ selectedDepartment?.name || "所属科室" }}</text>
+        <text class="hierarchy-bar__separator">/</text>
+        <text>{{ selectedRoom ? `${selectedRoom.roomNumber}室` : "所选房间" }}</text>
+      </view>
+    </view>
+
     <view v-if="error" class="page-state page-state--error">
       <text>{{ error }}</text>
       <button @tap="initialize(true)">重新加载</button>
     </view>
 
     <view v-else class="workspace">
-      <view class="workspace-column workspace-column--departments">
-        <view class="column-heading">
-          <text class="column-heading__title">科室</text>
-          <text class="column-heading__count">{{ filteredDepartments.length }}</text>
-        </view>
-        <scroll-view scroll-y class="column-body">
-          <button
-            v-for="department in filteredDepartments"
-            :key="department.departmentId"
-            class="department-row"
-            :class="{ 'department-row--active': department.departmentId === selectedDepartmentId }"
-            @tap="chooseDepartment(department)"
-          >
-            <text class="department-row__name">{{ department.name }}</text>
-            <text class="department-row__minor">{{ department.doctorCount }} 位医生</text>
-          </button>
-          <text v-if="!loading && !filteredDepartments.length" class="column-empty">
-            {{ departmentSearch ? "没有匹配科室" : "当前院区暂无科室" }}
-          </text>
-        </scroll-view>
-      </view>
-
-      <view class="workspace-column workspace-column--rooms">
-        <view class="column-heading">
-          <view>
-            <text class="column-heading__title">房间</text>
-            <text class="column-heading__count">{{ rooms.length }}</text>
+      <view class="workspace-track" :class="workspaceClass">
+        <view class="workspace-column workspace-column--departments">
+          <view class="column-heading">
+            <text class="column-heading__title">科室</text>
+            <text class="column-heading__count">{{ filteredDepartments.length }}</text>
           </view>
-          <button v-if="canCreate && selectedDepartmentId" class="column-add" @tap="openRoom()">新增</button>
-        </view>
-        <scroll-view scroll-y class="column-body">
-          <text v-if="loadingRooms" class="column-empty">加载中...</text>
-          <view
-            v-for="room in rooms"
-            :key="room.roomId"
-            class="resource-row"
-            :class="{ 'resource-row--active': room.roomId === selectedRoomId }"
-            @tap="chooseRoom(room)"
-          >
-            <view class="resource-row__copy">
-              <text class="resource-row__name">{{ room.displayName }}</text>
-              <text class="resource-row__minor">{{ room.building }} · {{ room.floorNumber }} 层</text>
-            </view>
-            <button class="resource-row__detail" @tap.stop="openRoom(room)">编辑 ›</button>
-          </view>
-          <button
-            v-if="canLoadMore"
-            class="column-action"
-            :disabled="loadingMore"
-            @tap="loadMoreRooms"
-          >
-            {{ loadingMore ? "加载中..." : "更多房间" }}
-          </button>
-          <text v-if="roomError && !rooms.length" class="column-empty column-empty--error">
-            {{ roomError }}
-          </text>
-          <view v-else-if="!loadingRooms && !rooms.length" class="empty-state">
-            <text class="column-empty">当前部门暂无房间</text>
-            <button v-if="canCreate" class="empty-state__action" @tap="openRoom()">
-              新增房间
+          <scroll-view scroll-y class="column-body">
+            <button
+              v-for="department in filteredDepartments"
+              :key="department.departmentId"
+              class="department-row"
+              :class="{ 'department-row--active': department.departmentId === selectedDepartmentId }"
+              @tap="chooseDepartment(department)"
+            >
+              <text class="department-row__name">{{ department.name }}</text>
+              <text class="department-row__minor">{{ department.doctorCount }} 位医生</text>
             </button>
-          </view>
-        </scroll-view>
-      </view>
-
-      <view class="workspace-column workspace-column--items">
-        <view class="column-heading">
-          <view>
-            <text class="column-heading__title">项目</text>
-            <text class="column-heading__count">{{ relations.length }}</text>
-          </view>
-          <button v-if="canCreate && selectedDepartmentId" class="column-add" @tap="openItem()">新增</button>
+            <text v-if="!loading && !filteredDepartments.length" class="column-empty">
+              {{ departmentSearch ? "没有匹配科室" : "当前院区暂无科室" }}
+            </text>
+          </scroll-view>
         </view>
-        <scroll-view scroll-y class="column-body">
-          <text v-if="loadingRelations" class="column-empty">加载中...</text>
-          <button
-            v-for="relation in relations"
-            :key="relation.relationId"
-            class="resource-row"
-            @tap="openItem(relation)"
-          >
-            <view class="resource-row__copy">
-              <text class="resource-row__name">{{ relation.itemName }}</text>
-              <text class="resource-row__minor">当前房间可执行</text>
+
+        <view class="workspace-column workspace-column--rooms">
+          <view class="column-heading">
+            <view>
+              <text class="column-heading__title">房间</text>
+              <text class="column-heading__count">{{ rooms.length }}</text>
             </view>
-            <text class="resource-row__detail">编辑 ›</text>
-          </button>
-          <text v-if="relationError" class="column-empty column-empty--error">{{ relationError }}</text>
-          <text v-else-if="selectedRoom && !loadingRelations && !relations.length" class="column-empty">
-            当前房间尚未配置项目
-          </text>
-          <text v-else-if="!selectedRoom && !loadingRooms" class="column-empty">
-            {{ roomError ? "房间加载成功后显示项目" : "新增房间后配置项目" }}
-          </text>
-        </scroll-view>
+            <button v-if="canCreate && selectedDepartmentId" class="column-add" @tap="openRoom()">新增</button>
+          </view>
+          <scroll-view scroll-y class="column-body">
+            <text v-if="loadingRooms" class="column-empty">加载中...</text>
+            <view
+              v-for="room in rooms"
+              :key="room.roomId"
+              class="resource-row"
+              :class="{ 'resource-row--active': room.roomId === selectedRoomId }"
+              @tap="chooseRoom(room)"
+            >
+              <view class="resource-row__copy">
+                <text class="room-card__number">{{ room.roomNumber }}室</text>
+                <text class="room-card__address">园区：{{ roomCampusName(room) }}</text>
+                <text class="room-card__address">楼栋：{{ room.building }}</text>
+                <text class="room-card__address">楼层：{{ floorLabel(room.floorNumber) }}</text>
+                <text class="room-card__address">房间号：{{ room.roomNumber }}</text>
+              </view>
+              <button class="resource-row__detail" @tap.stop="openRoom(room)">编辑 ›</button>
+            </view>
+            <button
+              v-if="canLoadMore"
+              class="column-action"
+              :disabled="loadingMore"
+              @tap="loadMoreRooms"
+            >
+              {{ loadingMore ? "加载中..." : "更多房间" }}
+            </button>
+            <text v-if="roomError && !rooms.length" class="column-empty column-empty--error">
+              {{ roomError }}
+            </text>
+            <view v-else-if="!loadingRooms && !rooms.length" class="empty-state">
+              <text class="column-empty">当前部门暂无房间</text>
+              <button v-if="canCreate" class="empty-state__action" @tap="openRoom()">
+                新增房间
+              </button>
+            </view>
+          </scroll-view>
+        </view>
+
+        <view class="workspace-column workspace-column--items">
+          <view class="column-heading">
+            <view>
+              <text class="column-heading__title">检查项目</text>
+              <text class="column-heading__count">{{ relations.length }}</text>
+            </view>
+            <button v-if="canCreate && selectedDepartmentId" class="column-add" @tap="openItem()">新增</button>
+          </view>
+          <scroll-view scroll-y class="column-body">
+            <text v-if="loadingRelations" class="column-empty">加载中...</text>
+            <button
+              v-for="relation in relations"
+              :key="relation.relationId"
+              class="resource-row"
+              @tap="openItem(relation)"
+            >
+              <view class="resource-row__copy">
+                <text class="resource-row__name">{{ relation.itemName }}</text>
+              </view>
+              <text class="resource-row__detail">编辑 ›</text>
+            </button>
+            <text v-if="relationError" class="column-empty column-empty--error">{{ relationError }}</text>
+            <text v-else-if="selectedRoom && !loadingRelations && !relations.length" class="column-empty">
+              当前房间尚未配置项目
+            </text>
+            <text v-else-if="!selectedRoom && !loadingRooms" class="column-empty">
+              {{ roomError ? "房间加载成功后显示项目" : "新增房间后配置项目" }}
+            </text>
+          </scroll-view>
+        </view>
       </view>
     </view>
   </view>
@@ -431,39 +470,54 @@ button::after { display: none; }
 .campus-bar__name { margin-top: 4rpx; color: #202c3f; font-size: 28rpx; font-weight: 700; }
 .campus-bar__hospital { margin-top: 3rpx; color: #8a95a5; font-size: 18rpx; }
 .campus-bar__switch { flex: 0 0 auto; margin: 0; padding: 0 18rpx; color: #177dbb; font-size: 20rpx; line-height: 52rpx; background: #edf6fb; border-radius: 26rpx; }
-.workspace { display: grid; min-height: 0; flex: 1; grid-template-columns: 190rpx 220rpx minmax(0,1fr); margin-top: 16rpx; overflow: hidden; background: #fff; border: 1rpx solid #dfe5ec; border-radius: 20rpx; box-shadow: 0 8rpx 24rpx rgba(32,45,64,.045); }
-.workspace-column { display: flex; min-width: 0; min-height: 0; flex-direction: column; border-right: 1rpx solid #e7ebf0; }
-.workspace-column:last-child { border-right: 0; }
-.workspace-column--departments { background: #f6f8fa; }
-.column-heading { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; min-height: 68rpx; padding: 0 16rpx; box-sizing: border-box; background: rgba(255,255,255,.94); border-bottom: 1rpx solid #e7ebf0; }
-.column-heading__title { color: #46546a; font-size: 21rpx; font-weight: 700; }
-.column-heading__count { margin-left: 8rpx; color: #98a3b2; font-size: 18rpx; }
-.column-add { display: flex; align-items: center; justify-content: center; min-width: 48rpx; height: 40rpx; margin: 0; padding: 0 9rpx; color: #167fc0; font-size: 17rpx; line-height: 40rpx; background: #edf6fb; border-radius: 12rpx; }
+.hierarchy-bar { display: flex; max-height: 0; flex: 0 0 auto; align-items: center; gap: 18rpx; margin-top: 0; padding: 0 4rpx; overflow: hidden; box-sizing: border-box; opacity: 0; pointer-events: none; transition: max-height 260ms ease, margin-top 260ms ease, opacity 180ms ease; }
+.hierarchy-bar--visible { max-height: 58rpx; margin-top: 12rpx; opacity: 1; pointer-events: auto; }
+.hierarchy-bar__back { flex: 0 0 auto; margin: 0; padding: 0; color: #177dbb; font-size: 20rpx; line-height: 50rpx; background: transparent; }
+.hierarchy-bar__breadcrumb { display: flex; min-width: 0; align-items: center; gap: 12rpx; color: #35435a; font-size: 21rpx; font-weight: 650; }
+.hierarchy-bar__breadcrumb text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hierarchy-bar__separator { flex: 0 0 auto; color: #9aa4b2; font-weight: 400; }
+.workspace { min-height: 0; flex: 1; margin-top: 16rpx; overflow: hidden; background: #fff; border: 1rpx solid #dfe5ec; border-radius: 20rpx; }
+.workspace-track { display: grid; width: 150%; height: 100%; grid-template-columns: repeat(3,minmax(0,1fr)); transform: translateX(0); transition: transform 260ms cubic-bezier(.2,0,0,1); }
+.workspace-track--room-items { transform: translateX(-33.333333%); }
+.workspace-column { display: flex; min-width: 0; min-height: 0; flex-direction: column; box-sizing: border-box; background: #fbfcfd; border-right: 1rpx solid #e3e8ee; transition: opacity 200ms ease, transform 260ms cubic-bezier(.2,0,0,1); }
+.workspace-column--departments { background: #f6f8fa; opacity: 1; }
+.workspace-column--items { border-right: 0; opacity: 0; transform: translateX(18rpx); }
+.workspace-track--room-items .workspace-column--departments { opacity: 0; transform: translateX(-18rpx); }
+.workspace-track--room-items .workspace-column--items { opacity: 1; transform: translateX(0); }
+.column-heading { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; min-height: 76rpx; padding: 0 20rpx; box-sizing: border-box; background: #fff; border-bottom: 1rpx solid #e4e9ef; }
+.column-heading__title { color: #405069; font-size: 23rpx; font-weight: 700; }
+.column-heading__count { margin-left: 9rpx; padding: 1rpx 8rpx; color: #718097; font-size: 18rpx; background: #f0f3f6; border-radius: 9rpx; }
+.column-add { display: flex; align-items: center; justify-content: center; min-width: 56rpx; height: 42rpx; margin: 0; padding: 0 11rpx; color: #167fc0; font-size: 18rpx; line-height: 42rpx; background: #edf6fb; border-radius: 12rpx; }
 .column-body { flex: 1; height: 0; }
-.department-row,.resource-row { width: 100%; margin: 0; padding: 17rpx 16rpx; box-sizing: border-box; color: inherit; text-align: left; background: transparent; border-bottom: 1rpx solid #e9edf2; border-radius: 0; }
-.department-row { position: relative; min-height: 84rpx; }
-.department-row--active { background: #fff; }
-.department-row--active::before { position: absolute; top: 0; bottom: 0; left: 0; width: 6rpx; content: ""; background: #2188c7; }
+.department-row,.resource-row { width: calc(100% - 24rpx); margin: 12rpx 12rpx 0; padding: 20rpx; box-sizing: border-box; color: inherit; text-align: left; background: #fff; border: 1rpx solid #e3e8ee; border-radius: 16rpx; }
+.department-row { position: relative; min-height: 96rpx; }
+.department-row--active { background: #eef7fc; border-color: #b9dcec; }
+.department-row--active::before { position: absolute; top: 12rpx; bottom: 12rpx; left: 0; width: 6rpx; content: ""; background: #2188c7; border-radius: 0 5rpx 5rpx 0; }
 .department-row--active .department-row__name { color: #177dbb; }
-.department-row__name,.department-row__minor,.resource-row__name,.resource-row__minor { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.department-row__name,.resource-row__name { color: #2c384b; font-size: 21rpx; font-weight: 620; }
-.department-row__minor,.resource-row__minor { margin-top: 6rpx; color: #939eae; font-size: 17rpx; font-weight: 400; }
-.resource-row { position: relative; display: flex; min-height: 86rpx; align-items: center; gap: 8rpx; background: #fff; }
+.department-row__name,.department-row__minor,.resource-row__name,.room-card__number { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.department-row__name,.resource-row__name,.room-card__number { color: #29374c; font-size: 23rpx; font-weight: 650; }
+.department-row__minor { margin-top: 8rpx; color: #77859a; font-size: 19rpx; font-weight: 400; }
+.resource-row { position: relative; display: flex; min-height: 104rpx; align-items: center; gap: 14rpx; }
+.workspace-column--rooms .resource-row { min-height: 210rpx; align-items: flex-start; }
 .resource-row:active { background: #f5faff; }
-.resource-row--active { background: #edf7fc; }
-.resource-row--active::before { position: absolute; top: 0; bottom: 0; left: 0; width: 5rpx; content: ""; background: #2188c7; }
-.resource-row--active .resource-row__name { color: #177dbb; }
+.resource-row--active { background: #eef7fc; border-color: #9fcfe5; }
+.resource-row--active::before { position: absolute; top: 14rpx; bottom: 14rpx; left: 0; width: 6rpx; content: ""; background: #2188c7; border-radius: 0 5rpx 5rpx 0; }
+.resource-row--active .resource-row__name,.resource-row--active .room-card__number { color: #177dbb; }
 .resource-row__copy { min-width: 0; flex: 1; }
-.resource-row__detail { flex: 0 0 auto; padding: 0; margin: 0; color: #2188c7; font-size: 16rpx; line-height: 40rpx; background: transparent; }
-.resource-row__title-line { display: flex; align-items: center; gap: 7rpx; min-width: 0; }
-.status-tag { flex: 0 0 auto; padding: 2rpx 7rpx; color: #a05d67; font-size: 14rpx; line-height: 1.4; background: #f8e9ec; border-radius: 8rpx; }
-.column-action { width: calc(100% - 20rpx); margin: 12rpx 10rpx 0; padding: 0 8rpx; color: #177dbb; font-size: 18rpx; line-height: 54rpx; background: #edf6fb; border-radius: 12rpx; }
-.column-empty { display: block; padding: 28rpx 12rpx; color: #929dad; font-size: 18rpx; line-height: 1.5; text-align: center; }
+.resource-row__detail { flex: 0 0 auto; padding: 0; margin: 0; color: #177dbb; font-size: 18rpx; line-height: 44rpx; background: transparent; }
+.room-card__number { margin-bottom: 12rpx; }
+.room-card__address { display: block; margin-top: 5rpx; color: #5e6d82; font-size: 19rpx; line-height: 1.45; white-space: normal; word-break: break-all; }
+.workspace-column--items .resource-row__name { white-space: normal; word-break: break-all; }
+.column-action { width: calc(100% - 24rpx); margin: 12rpx; padding: 0 10rpx; color: #177dbb; font-size: 19rpx; line-height: 58rpx; background: #edf6fb; border-radius: 14rpx; }
+.column-empty { display: block; padding: 32rpx 18rpx; color: #7f8b9d; font-size: 20rpx; line-height: 1.55; text-align: center; }
 .column-empty--error { color: #bf5363; }
-.empty-state { padding: 20rpx 12rpx; text-align: center; }
+.empty-state { padding: 20rpx 16rpx; text-align: center; }
 .empty-state .column-empty { padding: 8rpx 0 18rpx; }
-.empty-state__action { width: 100%; margin: 0; padding: 0 8rpx; color: #fff; font-size: 18rpx; line-height: 54rpx; background: #2188c7; border-radius: 12rpx; }
+.empty-state__action { width: 100%; margin: 0; padding: 0 8rpx; color: #fff; font-size: 19rpx; line-height: 58rpx; background: #2188c7; border-radius: 14rpx; }
 .page-state { display: flex; min-height: 0; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: 20rpx; margin-top: 16rpx; color: #8793a4; font-size: 22rpx; background: #fff; border: 1rpx solid #e1e6ed; border-radius: 20rpx; }
 .page-state--error { color: #bf5363; }
 .page-state button { margin: 0; padding: 0 22rpx; color: #167fc0; font-size: 20rpx; line-height: 54rpx; background: #edf6fb; border-radius: 27rpx; }
+@media (prefers-reduced-motion: reduce) {
+  .workspace-track,.workspace-column,.hierarchy-bar { transition-duration: 1ms; }
+}
 </style>
