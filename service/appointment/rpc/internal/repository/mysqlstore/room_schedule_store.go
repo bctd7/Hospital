@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"hospital/service/appointment/rpc/internal/resource"
+	appointmentmanager "hospital/service/appointment/rpc/internal/manager"
 )
 
 const roomSelect = `SELECT id, department_id, campus_id, building, floor_number, room_number, retired_at, version, created_at, updated_at FROM appointment_rooms`
@@ -27,18 +27,18 @@ SELECT id, item_id, weekday, session, TIME_FORMAT(start_time, '%H:%i'),
        status, version, created_at, updated_at
 FROM appointment_item_weekly_windows`
 
-func (s *Store) GetRoom(ctx context.Context, roomID string) (resource.Room, error) {
+func (s *Store) GetRoom(ctx context.Context, roomID string) (appointmentmanager.Room, error) {
 	value, err := scanRoom(s.db.QueryRowContext(ctx, roomSelect+" WHERE id = ?", roomID))
 	if errors.Is(err, sql.ErrNoRows) {
-		return resource.Room{}, resource.ErrNotFound
+		return appointmentmanager.Room{}, appointmentmanager.ErrNotFound
 	}
 	if err != nil {
-		return resource.Room{}, fmt.Errorf("get appointment room: %w", err)
+		return appointmentmanager.Room{}, fmt.Errorf("get appointment room: %w", err)
 	}
 	return value, nil
 }
 
-func (s *Store) ListRooms(ctx context.Context, departmentID string, offset, limit int64) ([]resource.Room, int64, error) {
+func (s *Store) ListRooms(ctx context.Context, departmentID string, offset, limit int64) ([]appointmentmanager.Room, int64, error) {
 	where, args := " WHERE department_id = ? AND retired_at IS NULL", []any{departmentID}
 	var total int64
 	if err := s.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM appointment_rooms"+where, args...).Scan(&total); err != nil {
@@ -49,7 +49,7 @@ func (s *Store) ListRooms(ctx context.Context, departmentID string, offset, limi
 		return nil, 0, fmt.Errorf("list appointment rooms: %w", err)
 	}
 	defer rows.Close()
-	values := make([]resource.Room, 0)
+	values := make([]appointmentmanager.Room, 0)
 	for rows.Next() {
 		value, e := scanRoom(rows)
 		if e != nil {
@@ -60,19 +60,19 @@ func (s *Store) ListRooms(ctx context.Context, departmentID string, offset, limi
 	return values, total, rows.Err()
 }
 
-func (s *Store) GetItemSummary(ctx context.Context, itemID string) (resource.ItemSummary, error) {
-	var value resource.ItemSummary
+func (s *Store) GetItemSummary(ctx context.Context, itemID string) (appointmentmanager.ItemSummary, error) {
+	var value appointmentmanager.ItemSummary
 	err := s.db.QueryRowContext(ctx, `SELECT id, owner_department_id, name, status, version FROM appointment_examination_items WHERE id = ?`, itemID).Scan(&value.ItemID, &value.DepartmentID, &value.Name, &value.Status, &value.Version)
 	if errors.Is(err, sql.ErrNoRows) {
-		return resource.ItemSummary{}, resource.ErrNotFound
+		return appointmentmanager.ItemSummary{}, appointmentmanager.ErrNotFound
 	}
 	if err != nil {
-		return resource.ItemSummary{}, fmt.Errorf("get examination item summary: %w", err)
+		return appointmentmanager.ItemSummary{}, fmt.Errorf("get examination item summary: %w", err)
 	}
 	return value, nil
 }
 
-func (s *Store) ListRoomItems(ctx context.Context, roomID string, status resource.Status, offset, limit int64) ([]resource.RoomItem, int64, error) {
+func (s *Store) ListRoomItems(ctx context.Context, roomID string, status appointmentmanager.Status, offset, limit int64) ([]appointmentmanager.RoomItem, int64, error) {
 	where, args := " WHERE r.room_id = ?", []any{roomID}
 	if status != "" {
 		where += " AND r.status = ?"
@@ -91,7 +91,7 @@ func (s *Store) ListRoomItems(ctx context.Context, roomID string, status resourc
 	return values, total, err
 }
 
-func (s *Store) ListItemRooms(ctx context.Context, itemID string, activeOnly bool) ([]resource.RoomItem, error) {
+func (s *Store) ListItemRooms(ctx context.Context, itemID string, activeOnly bool) ([]appointmentmanager.RoomItem, error) {
 	where, args := " WHERE r.item_id = ?", []any{itemID}
 	if activeOnly {
 		where += " AND r.status = 'active' AND room.retired_at IS NULL"
@@ -104,7 +104,7 @@ func (s *Store) ListItemRooms(ctx context.Context, itemID string, activeOnly boo
 	return scanRelations(rows)
 }
 
-func (s *Store) ListRoomWindows(ctx context.Context, roomID string, activeOnly bool) ([]resource.RoomWeeklyWindow, error) {
+func (s *Store) ListRoomWindows(ctx context.Context, roomID string, activeOnly bool) ([]appointmentmanager.RoomWeeklyWindow, error) {
 	where := " WHERE room_id = ?"
 	if activeOnly {
 		where += " AND status = 'active'"
@@ -116,7 +116,7 @@ func (s *Store) ListRoomWindows(ctx context.Context, roomID string, activeOnly b
 	defer rows.Close()
 	return scanRoomWindows(rows)
 }
-func (s *Store) ListItemWindows(ctx context.Context, itemID string, activeOnly bool) ([]resource.ItemWeeklyWindow, error) {
+func (s *Store) ListItemWindows(ctx context.Context, itemID string, activeOnly bool) ([]appointmentmanager.ItemWeeklyWindow, error) {
 	where := " WHERE item_id = ?"
 	if activeOnly {
 		where += " AND status = 'active'"
@@ -129,54 +129,54 @@ func (s *Store) ListItemWindows(ctx context.Context, itemID string, activeOnly b
 	return scanItemWindows(rows)
 }
 
-func (s *Store) WithinResourceTransaction(ctx context.Context, fn func(resource.TxStore) error) error {
+func (s *Store) WithinRoomScheduleTransaction(ctx context.Context, fn func(appointmentmanager.RoomScheduleTxStore) error) error {
 	if fn == nil {
-		return errors.New("resource transaction callback is required")
+		return errors.New("room and schedule transaction callback is required")
 	}
 	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 	if err != nil {
-		return fmt.Errorf("begin resource transaction: %w", err)
+		return fmt.Errorf("begin room and schedule transaction: %w", err)
 	}
-	if err = fn(&resourceTxStore{tx: tx}); err != nil {
+	if err = fn(&roomScheduleTxStore{tx: tx}); err != nil {
 		if rb := tx.Rollback(); rb != nil && !errors.Is(rb, sql.ErrTxDone) {
 			return errors.Join(err, rb)
 		}
 		return err
 	}
 	if err = tx.Commit(); err != nil {
-		return fmt.Errorf("commit resource transaction: %w", err)
+		return fmt.Errorf("commit room and schedule transaction: %w", err)
 	}
 	return nil
 }
 
-var _ resource.Store = (*Store)(nil)
+var _ appointmentmanager.RoomScheduleStore = (*Store)(nil)
 
 type rowScanner interface{ Scan(...any) error }
 
-func scanRoom(s rowScanner) (resource.Room, error) {
-	var v resource.Room
+func scanRoom(s rowScanner) (appointmentmanager.Room, error) {
+	var v appointmentmanager.Room
 	err := s.Scan(&v.RoomID, &v.DepartmentID, &v.CampusID, &v.Building, &v.FloorNumber, &v.RoomNumber, &v.RetiredAt, &v.Version, &v.CreatedAt, &v.UpdatedAt)
-	v.DisplayName = resource.FormatRoomDisplayName(v.Building, v.FloorNumber, v.RoomNumber)
+	v.DisplayName = appointmentmanager.FormatRoomDisplayName(v.Building, v.FloorNumber, v.RoomNumber)
 	return v, err
 }
-func scanRelation(s rowScanner) (resource.RoomItem, error) {
-	var v resource.RoomItem
+func scanRelation(s rowScanner) (appointmentmanager.RoomItem, error) {
+	var v appointmentmanager.RoomItem
 	err := s.Scan(&v.RelationID, &v.RoomID, &v.ItemID, &v.CampusID, &v.Building, &v.FloorNumber, &v.RoomNumber, &v.ItemName, &v.Status, &v.Version, &v.CreatedAt, &v.UpdatedAt)
-	v.RoomDisplayName = resource.FormatRoomDisplayName(v.Building, v.FloorNumber, v.RoomNumber)
+	v.RoomDisplayName = appointmentmanager.FormatRoomDisplayName(v.Building, v.FloorNumber, v.RoomNumber)
 	return v, err
 }
-func scanRoomWindow(s rowScanner) (resource.RoomWeeklyWindow, error) {
-	var v resource.RoomWeeklyWindow
+func scanRoomWindow(s rowScanner) (appointmentmanager.RoomWeeklyWindow, error) {
+	var v appointmentmanager.RoomWeeklyWindow
 	err := s.Scan(&v.WindowID, &v.RoomID, &v.Weekday, &v.Session, &v.OpenTime, &v.CloseTime, &v.ActiveCapacity, &v.Status, &v.Version, &v.CreatedAt, &v.UpdatedAt)
 	return v, err
 }
-func scanItemWindow(s rowScanner) (resource.ItemWeeklyWindow, error) {
-	var v resource.ItemWeeklyWindow
+func scanItemWindow(s rowScanner) (appointmentmanager.ItemWeeklyWindow, error) {
+	var v appointmentmanager.ItemWeeklyWindow
 	err := s.Scan(&v.WindowID, &v.ItemID, &v.Weekday, &v.Session, &v.StartTime, &v.BookingCutoffTime, &v.EndTime, &v.Status, &v.Version, &v.CreatedAt, &v.UpdatedAt)
 	return v, err
 }
-func scanRelations(rows *sql.Rows) ([]resource.RoomItem, error) {
-	values := make([]resource.RoomItem, 0)
+func scanRelations(rows *sql.Rows) ([]appointmentmanager.RoomItem, error) {
+	values := make([]appointmentmanager.RoomItem, 0)
 	for rows.Next() {
 		v, err := scanRelation(rows)
 		if err != nil {
@@ -186,8 +186,8 @@ func scanRelations(rows *sql.Rows) ([]resource.RoomItem, error) {
 	}
 	return values, rows.Err()
 }
-func scanRoomWindows(rows *sql.Rows) ([]resource.RoomWeeklyWindow, error) {
-	values := make([]resource.RoomWeeklyWindow, 0)
+func scanRoomWindows(rows *sql.Rows) ([]appointmentmanager.RoomWeeklyWindow, error) {
+	values := make([]appointmentmanager.RoomWeeklyWindow, 0)
 	for rows.Next() {
 		v, err := scanRoomWindow(rows)
 		if err != nil {
@@ -197,8 +197,8 @@ func scanRoomWindows(rows *sql.Rows) ([]resource.RoomWeeklyWindow, error) {
 	}
 	return values, rows.Err()
 }
-func scanItemWindows(rows *sql.Rows) ([]resource.ItemWeeklyWindow, error) {
-	values := make([]resource.ItemWeeklyWindow, 0)
+func scanItemWindows(rows *sql.Rows) ([]appointmentmanager.ItemWeeklyWindow, error) {
+	values := make([]appointmentmanager.ItemWeeklyWindow, 0)
 	for rows.Next() {
 		v, err := scanItemWindow(rows)
 		if err != nil {
@@ -209,7 +209,7 @@ func scanItemWindows(rows *sql.Rows) ([]resource.ItemWeeklyWindow, error) {
 	return values, rows.Err()
 }
 
-func statusWhere(alias string, status resource.Status) (string, []any) {
+func statusWhere(alias string, status appointmentmanager.Status) (string, []any) {
 	if status == "" {
 		return "", nil
 	}

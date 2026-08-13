@@ -1,9 +1,9 @@
-package catalog
+package manager
 
 // Commands describe manager use-case input. They are separate from the domain
 // model because callers do not control generated IDs, status, versions, or
 // timestamps.
-type CreateCommand struct {
+type CreateProjectCommand struct {
 	OwnerDepartmentID string
 	Name              string
 	Description       string
@@ -11,7 +11,7 @@ type CreateCommand struct {
 	RequestID         string
 }
 
-type UpdateCommand struct {
+type UpdateProjectCommand struct {
 	ItemID          string
 	Name            *string
 	Description     *string
@@ -20,14 +20,14 @@ type UpdateCommand struct {
 	RequestID       string
 }
 
-type ChangeStatusCommand struct {
+type ChangeProjectStatusCommand struct {
 	ItemID          string
 	ExpectedVersion int64
 	OperationID     string
 	RequestID       string
 }
 
-type ListQuery struct {
+type ListProjectsQuery struct {
 	OwnerDepartmentID string
 	Status            Status
 	Page              int64
@@ -35,7 +35,7 @@ type ListQuery struct {
 	RequestID         string
 }
 
-type ListResult struct {
+type ListProjectsResult struct {
 	Items    []ExaminationItem
 	Page     int64
 	PageSize int64

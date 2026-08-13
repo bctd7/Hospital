@@ -9,12 +9,12 @@ import (
 
 	"hospital/common/authn"
 	appointmentv1 "hospital/contracts/gen/appointment/v1"
-	"hospital/service/appointment/rpc/internal/catalog"
+	"hospital/service/appointment/rpc/internal/manager"
 )
 
 const timeLayout = "2006-01-02T15:04:05.000Z07:00"
 
-func catalogPrincipal(ctx context.Context) (authn.Principal, error) {
+func appointmentPrincipal(ctx context.Context) (authn.Principal, error) {
 	principal, err := authn.PrincipalFromContext(ctx)
 	if err != nil {
 		return authn.Principal{}, status.Error(codes.Unauthenticated, "authentication required")
@@ -22,30 +22,30 @@ func catalogPrincipal(ctx context.Context) (authn.Principal, error) {
 	return principal, nil
 }
 
-func catalogRPCError(err error) error {
+func projectRPCError(err error) error {
 	switch {
 	case err == nil:
 		return nil
-	case errors.Is(err, catalog.ErrInvalid):
-		return status.Error(codes.InvalidArgument, "invalid examination catalog request")
-	case errors.Is(err, catalog.ErrForbidden):
+	case errors.Is(err, manager.ErrInvalid):
+		return status.Error(codes.InvalidArgument, "invalid examination project request")
+	case errors.Is(err, manager.ErrForbidden):
 		return status.Error(codes.PermissionDenied, "permission denied")
-	case errors.Is(err, catalog.ErrNotFound):
+	case errors.Is(err, manager.ErrNotFound):
 		return status.Error(codes.NotFound, "examination item not found")
-	case errors.Is(err, catalog.ErrConflict):
+	case errors.Is(err, manager.ErrConflict):
 		return status.Error(codes.AlreadyExists, "examination item conflict")
-	case errors.Is(err, catalog.ErrVersionConflict):
+	case errors.Is(err, manager.ErrVersionConflict):
 		return status.Error(codes.Aborted, "examination item conflict")
-	case errors.Is(err, catalog.ErrInvalidState):
+	case errors.Is(err, manager.ErrInvalidState):
 		return status.Error(codes.FailedPrecondition, "examination item state does not allow the operation")
-	case errors.Is(err, catalog.ErrNotImplemented):
-		return status.Error(codes.Unimplemented, "examination catalog operation is not implemented")
+	case errors.Is(err, manager.ErrNotImplemented):
+		return status.Error(codes.Unimplemented, "examination project operation is not implemented")
 	default:
 		return status.Error(codes.Internal, "internal server error")
 	}
 }
 
-func examinationItemResponse(item catalog.ExaminationItem) *appointmentv1.ExaminationItem {
+func examinationItemResponse(item manager.ExaminationItem) *appointmentv1.ExaminationItem {
 	return &appointmentv1.ExaminationItem{
 		ItemId:            item.ItemID,
 		OwnerDepartmentId: item.OwnerDepartmentID,
@@ -58,8 +58,8 @@ func examinationItemResponse(item catalog.ExaminationItem) *appointmentv1.Examin
 	}
 }
 
-func changeStatusCommand(in *appointmentv1.ChangeExaminationItemStatusRequest) catalog.ChangeStatusCommand {
-	return catalog.ChangeStatusCommand{
+func changeStatusCommand(in *appointmentv1.ChangeExaminationItemStatusRequest) manager.ChangeProjectStatusCommand {
+	return manager.ChangeProjectStatusCommand{
 		ItemID:          in.ItemId,
 		ExpectedVersion: in.ExpectedVersion,
 		OperationID:     in.OperationId,

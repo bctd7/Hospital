@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"hospital/contracts/gen/appointment/v1"
-	"hospital/service/appointment/rpc/internal/catalog"
+	"hospital/service/appointment/rpc/internal/manager"
 	"hospital/service/appointment/rpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -25,22 +25,22 @@ func NewListExaminationItemsLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 func (l *ListExaminationItemsLogic) ListExaminationItems(in *appointmentv1.ListExaminationItemsRequest) (*appointmentv1.ListExaminationItemsResponse, error) {
-	principal, err := catalogPrincipal(l.ctx)
+	principal, err := appointmentPrincipal(l.ctx)
 	if err != nil {
 		return nil, err
 	}
 	if in == nil {
-		return nil, catalogRPCError(catalog.ErrInvalid)
+		return nil, projectRPCError(manager.ErrInvalid)
 	}
-	result, err := l.svcCtx.CatalogManager.List(l.ctx, principal, catalog.ListQuery{
+	result, err := l.svcCtx.StaffManager.ListProjects(l.ctx, principal, manager.ListProjectsQuery{
 		OwnerDepartmentID: in.OwnerDepartmentId,
-		Status:            catalog.Status(in.Status),
+		Status:            manager.Status(in.Status),
 		Page:              in.Page,
 		PageSize:          in.PageSize,
 		RequestID:         in.RequestId,
 	})
 	if err != nil {
-		return nil, catalogRPCError(err)
+		return nil, projectRPCError(err)
 	}
 	items := make([]*appointmentv1.ExaminationItem, 0, len(result.Items))
 	for _, item := range result.Items {

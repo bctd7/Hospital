@@ -1,4 +1,4 @@
-package resource
+package manager
 
 type OperationMeta struct {
 	OperationID string

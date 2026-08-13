@@ -1,4 +1,4 @@
-package catalog
+package manager
 
 import (
 	"errors"
@@ -13,7 +13,7 @@ const (
 )
 
 func TestNormalizedCreateCommand(t *testing.T) {
-	command, err := normalizedCreateCommand(CreateCommand{
+	command, err := normalizedCreateProjectCommand(CreateProjectCommand{
 		OwnerDepartmentID: "  " + validationDepartmentID + "  ",
 		Name:              "  腹部 CT  ",
 		Description:       "  检查前禁食。\n可少量饮水。  ",
@@ -56,7 +56,7 @@ func TestNormalizedCatalogDescriptionRejectsOversizedValue(t *testing.T) {
 
 func TestNormalizedUpdateCommandPreservesAbsentFields(t *testing.T) {
 	description := "  无特殊准备  "
-	command, err := normalizedUpdateCommand(UpdateCommand{
+	command, err := normalizedUpdateProjectCommand(UpdateProjectCommand{
 		ItemID:          validationItemID,
 		Description:     &description,
 		ExpectedVersion: 2,
@@ -71,7 +71,7 @@ func TestNormalizedUpdateCommandPreservesAbsentFields(t *testing.T) {
 }
 
 func TestNormalizedUpdateCommandRequiresAChange(t *testing.T) {
-	_, err := normalizedUpdateCommand(UpdateCommand{
+	_, err := normalizedUpdateProjectCommand(UpdateProjectCommand{
 		ItemID: validationItemID, ExpectedVersion: 1, OperationID: validationOperationID,
 	})
 	if !errors.Is(err, ErrInvalid) {
@@ -80,22 +80,22 @@ func TestNormalizedUpdateCommandRequiresAChange(t *testing.T) {
 }
 
 func TestNormalizedListQueryAppliesPageDefaults(t *testing.T) {
-	query, err := normalizedListQuery(ListQuery{Status: StatusActive})
+	query, err := normalizedListProjectsQuery(ListProjectsQuery{Status: StatusActive})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if query.Page != defaultPage || query.PageSize != defaultPageSize || query.Status != StatusActive {
+	if query.Page != defaultProjectPage || query.PageSize != defaultProjectPageSize || query.Status != StatusActive {
 		t.Fatalf("unexpected normalized query: %#v", query)
 	}
 }
 
 func TestNormalizedListQueryRejectsInvalidStatusAndPage(t *testing.T) {
-	for _, query := range []ListQuery{
+	for _, query := range []ListProjectsQuery{
 		{Status: "deleted"},
 		{Page: -1, PageSize: 20},
-		{Page: 1, PageSize: maxPageSize + 1},
+		{Page: 1, PageSize: maxProjectPageSize + 1},
 	} {
-		if _, err := normalizedListQuery(query); !errors.Is(err, ErrInvalid) {
+		if _, err := normalizedListProjectsQuery(query); !errors.Is(err, ErrInvalid) {
 			t.Fatalf("query %#v error = %v, want ErrInvalid", query, err)
 		}
 	}

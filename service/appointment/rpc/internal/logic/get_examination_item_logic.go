@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"hospital/contracts/gen/appointment/v1"
-	"hospital/service/appointment/rpc/internal/catalog"
+	"hospital/service/appointment/rpc/internal/manager"
 	"hospital/service/appointment/rpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -25,16 +25,16 @@ func NewGetExaminationItemLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *GetExaminationItemLogic) GetExaminationItem(in *appointmentv1.GetExaminationItemRequest) (*appointmentv1.ExaminationItem, error) {
-	principal, err := catalogPrincipal(l.ctx)
+	principal, err := appointmentPrincipal(l.ctx)
 	if err != nil {
 		return nil, err
 	}
 	if in == nil {
-		return nil, catalogRPCError(catalog.ErrInvalid)
+		return nil, projectRPCError(manager.ErrInvalid)
 	}
-	item, err := l.svcCtx.CatalogManager.Get(l.ctx, principal, in.ItemId)
+	item, err := l.svcCtx.StaffManager.GetProject(l.ctx, principal, in.ItemId)
 	if err != nil {
-		return nil, catalogRPCError(err)
+		return nil, projectRPCError(err)
 	}
 	return examinationItemResponse(item), nil
 }

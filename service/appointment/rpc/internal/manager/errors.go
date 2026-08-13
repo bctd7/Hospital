@@ -1,0 +1,14 @@
+package manager
+
+import "errors"
+
+var (
+	ErrInvalid         = errors.New("invalid appointment request")
+	ErrForbidden       = errors.New("appointment operation is forbidden")
+	ErrNotFound        = errors.New("appointment data not found")
+	ErrConflict        = errors.New("appointment data conflicts with existing data")
+	ErrVersionConflict = errors.New("appointment data version conflict")
+	ErrInvalidState    = errors.New("appointment state does not allow the operation")
+	ErrWindowConflict  = errors.New("item window is not fully contained by room window")
+	ErrNotImplemented  = errors.New("appointment operation is not implemented")
+)

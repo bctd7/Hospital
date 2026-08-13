@@ -1,4 +1,4 @@
-package catalog
+package manager
 
 import (
 	"context"
@@ -18,31 +18,35 @@ func (stubStore) GetItem(context.Context, string) (ExaminationItem, error) {
 	return ExaminationItem{}, ErrNotImplemented
 }
 
-func (stubStore) ListItems(context.Context, ListFilter) ([]ExaminationItem, int64, error) {
+func (stubStore) ListItems(context.Context, ProjectListFilter) ([]ExaminationItem, int64, error) {
 	return nil, 0, ErrNotImplemented
 }
 
-func (stubStore) WithinCatalogTransaction(context.Context, func(TxStore) error) error {
+func (stubStore) WithinProjectTransaction(context.Context, func(ProjectTxStore) error) error {
 	return ErrNotImplemented
 }
 
-func TestNewManagerRequiresStore(t *testing.T) {
-	if _, err := NewManager(nil); err == nil {
-		t.Fatal("expected nil store to be rejected")
+func TestStaffManagerRequiresProjectStore(t *testing.T) {
+	if _, err := NewStaffManager(nil, nil, nil); err == nil {
+		t.Fatal("expected nil project store to be rejected")
 	}
-	if manager, err := NewManager(stubStore{}); err != nil || manager == nil {
-		t.Fatalf("expected manager scaffold, manager=%v err=%v", manager, err)
+	if manager, _ := projectTestManager(stubStore{}); manager == nil {
+		t.Fatal("expected staff manager")
 	}
+}
+
+func projectTestManager(store ProjectStore) (*StaffManager, error) {
+	return &StaffManager{projectStore: store}, nil
 }
 
 func TestCreatePersistsActiveItemAndAudit(t *testing.T) {
 	store := newMemoryCatalogStore()
-	manager, err := NewManager(store)
+	manager, err := projectTestManager(store)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	created, err := manager.Create(context.Background(), catalogOperator(), CreateCommand{
+	created, err := manager.CreateProject(context.Background(), catalogOperator(), CreateProjectCommand{
 		OwnerDepartmentID: " " + validationDepartmentID + " ",
 		Name:              " 腹部 CT ",
 		Description:       " 检查前禁食。\n可少量饮水。 ",
@@ -69,14 +73,14 @@ func TestCreatePersistsActiveItemAndAudit(t *testing.T) {
 
 func TestCreateReplaysSameOperation(t *testing.T) {
 	store := newMemoryCatalogStore()
-	manager, _ := NewManager(store)
+	manager, _ := projectTestManager(store)
 	command := validCreateCommand()
 
-	created, err := manager.Create(context.Background(), catalogOperator(), command)
+	created, err := manager.CreateProject(context.Background(), catalogOperator(), command)
 	if err != nil {
 		t.Fatal(err)
 	}
-	replayed, err := manager.Create(context.Background(), catalogOperator(), command)
+	replayed, err := manager.CreateProject(context.Background(), catalogOperator(), command)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -87,13 +91,13 @@ func TestCreateReplaysSameOperation(t *testing.T) {
 
 func TestCreateRejectsOperationReuseWithDifferentRequest(t *testing.T) {
 	store := newMemoryCatalogStore()
-	manager, _ := NewManager(store)
+	manager, _ := projectTestManager(store)
 	command := validCreateCommand()
-	if _, err := manager.Create(context.Background(), catalogOperator(), command); err != nil {
+	if _, err := manager.CreateProject(context.Background(), catalogOperator(), command); err != nil {
 		t.Fatal(err)
 	}
 	command.Description = "不同描述"
-	if _, err := manager.Create(context.Background(), catalogOperator(), command); !errors.Is(err, ErrConflict) {
+	if _, err := manager.CreateProject(context.Background(), catalogOperator(), command); !errors.Is(err, ErrConflict) {
 		t.Fatalf("error = %v, want ErrConflict", err)
 	}
 	if store.createCalls != 1 {
@@ -103,11 +107,11 @@ func TestCreateRejectsOperationReuseWithDifferentRequest(t *testing.T) {
 
 func TestCreateRejectsCrossDepartmentOperator(t *testing.T) {
 	store := newMemoryCatalogStore()
-	manager, _ := NewManager(store)
+	manager, _ := projectTestManager(store)
 	operator := catalogOperator()
 	operator.DepartmentID = validationItemID
 
-	if _, err := manager.Create(context.Background(), operator, validCreateCommand()); !errors.Is(err, ErrForbidden) {
+	if _, err := manager.CreateProject(context.Background(), operator, validCreateCommand()); !errors.Is(err, ErrForbidden) {
 		t.Fatalf("error = %v, want ErrForbidden", err)
 	}
 	if store.transactionCalls != 0 {
@@ -117,7 +121,7 @@ func TestCreateRejectsCrossDepartmentOperator(t *testing.T) {
 
 func TestCatalogCRUDLifecycle(t *testing.T) {
 	store := newMemoryCatalogStore()
-	manager, _ := NewManager(store)
+	manager, _ := projectTestManager(store)
 	operator := catalogOperator()
 	operator.Permissions = []string{
 		contractauthz.PermissionAppointmentCreate,
@@ -126,22 +130,22 @@ func TestCatalogCRUDLifecycle(t *testing.T) {
 	}
 	ctx := context.Background()
 
-	created, err := manager.Create(ctx, operator, validCreateCommand())
+	created, err := manager.CreateProject(ctx, operator, validCreateCommand())
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := manager.Get(ctx, operator, created.ItemID)
+	got, err := manager.GetProject(ctx, operator, created.ItemID)
 	if err != nil || got.ItemID != created.ItemID {
 		t.Fatalf("get item=%#v err=%v", got, err)
 	}
-	page, err := manager.List(ctx, operator, ListQuery{Page: 1, PageSize: 10})
+	page, err := manager.ListProjects(ctx, operator, ListProjectsQuery{Page: 1, PageSize: 10})
 	if err != nil || page.Total != 1 || len(page.Items) != 1 || page.Items[0].ItemID != created.ItemID {
 		t.Fatalf("list result=%#v err=%v", page, err)
 	}
 
 	name := "Updated examination item"
 	description := "Updated preparation description"
-	updated, err := manager.Update(ctx, operator, UpdateCommand{
+	updated, err := manager.UpdateProject(ctx, operator, UpdateProjectCommand{
 		ItemID: created.ItemID, Name: &name, Description: &description,
 		ExpectedVersion: 1, OperationID: "00000000-0000-0000-0000-000000000021",
 	})
@@ -152,7 +156,7 @@ func TestCatalogCRUDLifecycle(t *testing.T) {
 		t.Fatalf("unexpected updated item: %#v", updated)
 	}
 
-	disabled, err := manager.Disable(ctx, operator, ChangeStatusCommand{
+	disabled, err := manager.DisableProject(ctx, operator, ChangeProjectStatusCommand{
 		ItemID: created.ItemID, ExpectedVersion: 2,
 		OperationID: "00000000-0000-0000-0000-000000000022",
 	})
@@ -164,7 +168,7 @@ func TestCatalogCRUDLifecycle(t *testing.T) {
 	}
 
 	blockedDescription := "must not be written"
-	_, err = manager.Update(ctx, operator, UpdateCommand{
+	_, err = manager.UpdateProject(ctx, operator, UpdateProjectCommand{
 		ItemID: created.ItemID, Description: &blockedDescription,
 		ExpectedVersion: 3, OperationID: "00000000-0000-0000-0000-000000000023",
 	})
@@ -172,15 +176,15 @@ func TestCatalogCRUDLifecycle(t *testing.T) {
 		t.Fatalf("disabled update error=%v, want ErrInvalidState", err)
 	}
 
-	enabledCommand := ChangeStatusCommand{
+	enabledCommand := ChangeProjectStatusCommand{
 		ItemID: created.ItemID, ExpectedVersion: 3,
 		OperationID: "00000000-0000-0000-0000-000000000024",
 	}
-	enabled, err := manager.Enable(ctx, operator, enabledCommand)
+	enabled, err := manager.EnableProject(ctx, operator, enabledCommand)
 	if err != nil {
 		t.Fatal(err)
 	}
-	replayed, err := manager.Enable(ctx, operator, enabledCommand)
+	replayed, err := manager.EnableProject(ctx, operator, enabledCommand)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -194,15 +198,15 @@ func TestCatalogCRUDLifecycle(t *testing.T) {
 
 func TestCatalogRejectsStaleVersion(t *testing.T) {
 	store := newMemoryCatalogStore()
-	manager, _ := NewManager(store)
+	manager, _ := projectTestManager(store)
 	operator := catalogOperator()
 	operator.Permissions = append(operator.Permissions, contractauthz.PermissionAppointmentUpdate)
-	created, err := manager.Create(context.Background(), operator, validCreateCommand())
+	created, err := manager.CreateProject(context.Background(), operator, validCreateCommand())
 	if err != nil {
 		t.Fatal(err)
 	}
 	name := "stale update"
-	_, err = manager.Update(context.Background(), operator, UpdateCommand{
+	_, err = manager.UpdateProject(context.Background(), operator, UpdateProjectCommand{
 		ItemID: created.ItemID, Name: &name, ExpectedVersion: 99,
 		OperationID: "00000000-0000-0000-0000-000000000025",
 	})
@@ -211,8 +215,8 @@ func TestCatalogRejectsStaleVersion(t *testing.T) {
 	}
 }
 
-func validCreateCommand() CreateCommand {
-	return CreateCommand{
+func validCreateCommand() CreateProjectCommand {
+	return CreateProjectCommand{
 		OwnerDepartmentID: validationDepartmentID,
 		Name:              "腹部 CT",
 		Description:       "检查前禁食",
@@ -233,10 +237,10 @@ func catalogOperator() authn.Principal {
 }
 
 type memoryCatalogStore struct {
-	operations       map[string]Operation
+	operations       map[string]ProjectOperation
 	items            map[string]ExaminationItem
 	item             ExaminationItem
-	change           *Change
+	change           *ProjectChange
 	createCalls      int
 	updateCalls      int
 	statusCalls      int
@@ -245,7 +249,7 @@ type memoryCatalogStore struct {
 
 func newMemoryCatalogStore() *memoryCatalogStore {
 	return &memoryCatalogStore{
-		operations: make(map[string]Operation),
+		operations: make(map[string]ProjectOperation),
 		items:      make(map[string]ExaminationItem),
 	}
 }
@@ -258,7 +262,7 @@ func (s *memoryCatalogStore) GetItem(_ context.Context, itemID string) (Examinat
 	return item, nil
 }
 
-func (s *memoryCatalogStore) ListItems(_ context.Context, filter ListFilter) ([]ExaminationItem, int64, error) {
+func (s *memoryCatalogStore) ListItems(_ context.Context, filter ProjectListFilter) ([]ExaminationItem, int64, error) {
 	items := make([]ExaminationItem, 0)
 	for _, item := range s.items {
 		if filter.OwnerDepartmentID != "" && item.OwnerDepartmentID != filter.OwnerDepartmentID {
@@ -287,12 +291,12 @@ func (s *memoryCatalogStore) ListItems(_ context.Context, filter ListFilter) ([]
 	return items[int(start):int(end)], total, nil
 }
 
-func (s *memoryCatalogStore) WithinCatalogTransaction(ctx context.Context, fn func(TxStore) error) error {
+func (s *memoryCatalogStore) WithinProjectTransaction(ctx context.Context, fn func(ProjectTxStore) error) error {
 	s.transactionCalls++
 	return fn(s)
 }
 
-func (s *memoryCatalogStore) FindOperation(_ context.Context, operationID string) (Operation, bool, error) {
+func (s *memoryCatalogStore) FindOperation(_ context.Context, operationID string) (ProjectOperation, bool, error) {
 	operation, exists := s.operations[operationID]
 	return operation, exists, nil
 }
@@ -334,9 +338,9 @@ func (s *memoryCatalogStore) SetItemStatus(_ context.Context, item ExaminationIt
 	return nil
 }
 
-func (s *memoryCatalogStore) RecordChange(_ context.Context, change Change) error {
+func (s *memoryCatalogStore) RecordChange(_ context.Context, change ProjectChange) error {
 	s.change = &change
-	s.operations[change.OperationID] = Operation{
+	s.operations[change.OperationID] = ProjectOperation{
 		OperatorAccountID:  change.OperatorAccountID,
 		ItemID:             change.ItemID,
 		Action:             change.Action,

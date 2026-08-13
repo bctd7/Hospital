@@ -1,11 +1,10 @@
-package catalog
+package manager
 
 import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -24,22 +23,13 @@ const (
 	ActionExaminationItemEnabled  = "appointment.catalog.examination_item.enabled"
 )
 
-type Manager struct {
-	store Store
-}
-
-func NewManager(store Store) (*Manager, error) {
-	if store == nil {
-		return nil, errors.New("examination catalog store is required")
-	}
-	return &Manager{store: store}, nil
-}
-
-func (m *Manager) Create(ctx context.Context, operator authn.Principal, command CreateCommand) (ExaminationItem, error) {
+// Service implements project-domain rules and persistence coordination.
+// Actor-facing use cases are exposed by internal/manager instead of this type.
+func (m *StaffManager) CreateProject(ctx context.Context, operator authn.Principal, command CreateProjectCommand) (ExaminationItem, error) {
 	if err := requireCatalogPermission(operator, contractauthz.PermissionAppointmentCreate); err != nil {
 		return ExaminationItem{}, err
 	}
-	command, err := normalizedCreateCommand(command)
+	command, err := normalizedCreateProjectCommand(command)
 	if err != nil {
 		return ExaminationItem{}, err
 	}
@@ -53,7 +43,7 @@ func (m *Manager) Create(ctx context.Context, operator authn.Principal, command 
 	}{command.OwnerDepartmentID, command.Name, command.Description})
 
 	var result ExaminationItem
-	err = m.store.WithinCatalogTransaction(ctx, func(tx TxStore) error {
+	err = m.projectStore.WithinProjectTransaction(ctx, func(tx ProjectTxStore) error {
 		operation, exists, err := tx.FindOperation(ctx, command.OperationID)
 		if err != nil {
 			return err
@@ -83,7 +73,7 @@ func (m *Manager) Create(ctx context.Context, operator authn.Principal, command 
 		if err := tx.CreateItem(ctx, result); err != nil {
 			return err
 		}
-		return tx.RecordChange(ctx, Change{
+		return tx.RecordChange(ctx, ProjectChange{
 			OperationID:        command.OperationID,
 			OperatorAccountID:  operator.AccountID,
 			ItemID:             result.ItemID,
@@ -99,7 +89,7 @@ func (m *Manager) Create(ctx context.Context, operator authn.Principal, command 
 	return result, nil
 }
 
-func (m *Manager) Get(ctx context.Context, operator authn.Principal, itemID string) (ExaminationItem, error) {
+func (m *StaffManager) GetProject(ctx context.Context, operator authn.Principal, itemID string) (ExaminationItem, error) {
 	if err := requireCatalogPermission(operator, contractauthz.PermissionAppointmentRead); err != nil {
 		return ExaminationItem{}, err
 	}
@@ -107,7 +97,7 @@ func (m *Manager) Get(ctx context.Context, operator authn.Principal, itemID stri
 	if err != nil {
 		return ExaminationItem{}, err
 	}
-	item, err := m.store.GetItem(ctx, itemID)
+	item, err := m.projectStore.GetItem(ctx, itemID)
 	if err != nil {
 		return ExaminationItem{}, err
 	}
@@ -117,39 +107,39 @@ func (m *Manager) Get(ctx context.Context, operator authn.Principal, itemID stri
 	return item, nil
 }
 
-func (m *Manager) List(ctx context.Context, operator authn.Principal, query ListQuery) (ListResult, error) {
+func (m *StaffManager) ListProjects(ctx context.Context, operator authn.Principal, query ListProjectsQuery) (ListProjectsResult, error) {
 	if err := requireCatalogPermission(operator, contractauthz.PermissionAppointmentRead); err != nil {
-		return ListResult{}, err
+		return ListProjectsResult{}, err
 	}
-	query, err := normalizedListQuery(query)
+	query, err := normalizedListProjectsQuery(query)
 	if err != nil {
-		return ListResult{}, err
+		return ListProjectsResult{}, err
 	}
 	query.OwnerDepartmentID, err = scopedListDepartment(operator, query.OwnerDepartmentID)
 	if err != nil {
-		return ListResult{}, err
+		return ListProjectsResult{}, err
 	}
 	offset, err := pageOffset(query.Page, query.PageSize)
 	if err != nil {
-		return ListResult{}, err
+		return ListProjectsResult{}, err
 	}
-	items, total, err := m.store.ListItems(ctx, ListFilter{
+	items, total, err := m.projectStore.ListItems(ctx, ProjectListFilter{
 		OwnerDepartmentID: query.OwnerDepartmentID,
 		Status:            query.Status,
 		Offset:            offset,
 		Limit:             query.PageSize,
 	})
 	if err != nil {
-		return ListResult{}, err
+		return ListProjectsResult{}, err
 	}
-	return ListResult{Items: items, Page: query.Page, PageSize: query.PageSize, Total: total}, nil
+	return ListProjectsResult{Items: items, Page: query.Page, PageSize: query.PageSize, Total: total}, nil
 }
 
-func (m *Manager) Update(ctx context.Context, operator authn.Principal, command UpdateCommand) (ExaminationItem, error) {
+func (m *StaffManager) UpdateProject(ctx context.Context, operator authn.Principal, command UpdateProjectCommand) (ExaminationItem, error) {
 	if err := requireCatalogPermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
 		return ExaminationItem{}, err
 	}
-	command, err := normalizedUpdateCommand(command)
+	command, err := normalizedUpdateProjectCommand(command)
 	if err != nil {
 		return ExaminationItem{}, err
 	}
@@ -161,7 +151,7 @@ func (m *Manager) Update(ctx context.Context, operator authn.Principal, command 
 	}{command.ItemID, command.Name, command.Description, command.ExpectedVersion})
 
 	var result ExaminationItem
-	err = m.store.WithinCatalogTransaction(ctx, func(tx TxStore) error {
+	err = m.projectStore.WithinProjectTransaction(ctx, func(tx ProjectTxStore) error {
 		operation, exists, err := tx.FindOperation(ctx, command.OperationID)
 		if err != nil {
 			return err
@@ -203,7 +193,7 @@ func (m *Manager) Update(ctx context.Context, operator authn.Principal, command 
 		if err := tx.UpdateItem(ctx, after, command.ExpectedVersion); err != nil {
 			return err
 		}
-		if err := tx.RecordChange(ctx, Change{
+		if err := tx.RecordChange(ctx, ProjectChange{
 			OperationID:        command.OperationID,
 			OperatorAccountID:  operator.AccountID,
 			ItemID:             command.ItemID,
@@ -224,25 +214,25 @@ func (m *Manager) Update(ctx context.Context, operator authn.Principal, command 
 	return result, nil
 }
 
-func (m *Manager) Disable(ctx context.Context, operator authn.Principal, command ChangeStatusCommand) (ExaminationItem, error) {
-	return m.changeStatus(ctx, operator, command, StatusDisabled, ActionExaminationItemDisabled)
+func (m *StaffManager) DisableProject(ctx context.Context, operator authn.Principal, command ChangeProjectStatusCommand) (ExaminationItem, error) {
+	return m.changeProjectStatus(ctx, operator, command, StatusDisabled, ActionExaminationItemDisabled)
 }
 
-func (m *Manager) Enable(ctx context.Context, operator authn.Principal, command ChangeStatusCommand) (ExaminationItem, error) {
-	return m.changeStatus(ctx, operator, command, StatusActive, ActionExaminationItemEnabled)
+func (m *StaffManager) EnableProject(ctx context.Context, operator authn.Principal, command ChangeProjectStatusCommand) (ExaminationItem, error) {
+	return m.changeProjectStatus(ctx, operator, command, StatusActive, ActionExaminationItemEnabled)
 }
 
-func (m *Manager) changeStatus(
+func (m *StaffManager) changeProjectStatus(
 	ctx context.Context,
 	operator authn.Principal,
-	command ChangeStatusCommand,
+	command ChangeProjectStatusCommand,
 	target Status,
 	action string,
 ) (ExaminationItem, error) {
 	if err := requireCatalogPermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
 		return ExaminationItem{}, err
 	}
-	command, err := normalizedChangeStatusCommand(command)
+	command, err := normalizedChangeProjectStatusCommand(command)
 	if err != nil {
 		return ExaminationItem{}, err
 	}
@@ -252,7 +242,7 @@ func (m *Manager) changeStatus(
 	}{command.ItemID, command.ExpectedVersion})
 
 	var result ExaminationItem
-	err = m.store.WithinCatalogTransaction(ctx, func(tx TxStore) error {
+	err = m.projectStore.WithinProjectTransaction(ctx, func(tx ProjectTxStore) error {
 		operation, exists, err := tx.FindOperation(ctx, command.OperationID)
 		if err != nil {
 			return err
@@ -288,7 +278,7 @@ func (m *Manager) changeStatus(
 				return err
 			}
 		}
-		if err := tx.RecordChange(ctx, Change{
+		if err := tx.RecordChange(ctx, ProjectChange{
 			OperationID:        command.OperationID,
 			OperatorAccountID:  operator.AccountID,
 			ItemID:             command.ItemID,
@@ -345,12 +335,12 @@ func scopedListDepartment(operator authn.Principal, requested string) (string, e
 		return "", fmt.Errorf("%w: invalid operator department", ErrForbidden)
 	}
 	if requested != "" && requested != departmentID {
-		return "", fmt.Errorf("%w: examination catalog belongs to another department", ErrForbidden)
+		return "", fmt.Errorf("%w: examination project belongs to another department", ErrForbidden)
 	}
 	return departmentID, nil
 }
 
-func matchingOperation(operation Operation, operatorAccountID, itemID, action, fingerprint string) error {
+func matchingOperation(operation ProjectOperation, operatorAccountID, itemID, action, fingerprint string) error {
 	if operation.OperatorAccountID != operatorAccountID ||
 		operation.Action != action ||
 		operation.RequestFingerprint != fingerprint ||
@@ -368,12 +358,12 @@ func operationFingerprint(action string, payload any) string {
 		Payload any
 	}{action, payload})
 	if err != nil {
-		panic(fmt.Sprintf("marshal catalog operation fingerprint: %v", err))
+		panic(fmt.Sprintf("marshal project operation fingerprint: %v", err))
 	}
 	sum := sha256.Sum256(data)
 	return hex.EncodeToString(sum[:])
 }
 
 func operationConflict() error {
-	return fmt.Errorf("%w: operation_id was already used for a different examination catalog change", ErrConflict)
+	return fmt.Errorf("%w: operation_id was already used for a different examination project change", ErrConflict)
 }

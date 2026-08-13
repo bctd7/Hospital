@@ -1,6 +1,9 @@
-package resource
+package manager
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Status string
 
@@ -19,6 +22,17 @@ const (
 )
 
 func (s Session) Valid() bool { return s == SessionMorning || s == SessionAfternoon }
+
+type ExaminationItem struct {
+	ItemID            string
+	OwnerDepartmentID string
+	Name              string
+	Description       string
+	Status            Status
+	Version           int64
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+}
 
 type Room struct {
 	RoomID       string     `json:"room_id"`
@@ -91,4 +105,12 @@ type Page[T any] struct {
 	Page     int64 `json:"page"`
 	PageSize int64 `json:"page_size"`
 	Total    int64 `json:"total"`
+}
+
+func FormatRoomDisplayName(building string, floorNumber int32, roomNumber string) string {
+	floor := fmt.Sprintf("%d层", floorNumber)
+	if floorNumber < 0 {
+		floor = fmt.Sprintf("B%d层", -floorNumber)
+	}
+	return fmt.Sprintf("%s · %s · %s室", building, floor, roomNumber)
 }

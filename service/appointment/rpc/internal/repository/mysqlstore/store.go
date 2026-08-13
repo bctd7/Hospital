@@ -10,7 +10,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"hospital/service/appointment/rpc/internal/catalog"
+	appointmentmanager "hospital/service/appointment/rpc/internal/manager"
 )
 
 // Store owns the Appointment database connection pool and will provide the
@@ -48,18 +48,18 @@ const examinationItemSelect = `
 SELECT id, owner_department_id, name, description, status, version, created_at, updated_at
 FROM appointment_examination_items`
 
-func (s *Store) GetItem(ctx context.Context, itemID string) (catalog.ExaminationItem, error) {
+func (s *Store) GetItem(ctx context.Context, itemID string) (appointmentmanager.ExaminationItem, error) {
 	item, err := scanExaminationItem(s.db.QueryRowContext(ctx, examinationItemSelect+" WHERE id = ?", itemID))
 	if errors.Is(err, sql.ErrNoRows) {
-		return catalog.ExaminationItem{}, catalog.ErrNotFound
+		return appointmentmanager.ExaminationItem{}, appointmentmanager.ErrNotFound
 	}
 	if err != nil {
-		return catalog.ExaminationItem{}, fmt.Errorf("get examination item: %w", err)
+		return appointmentmanager.ExaminationItem{}, fmt.Errorf("get examination item: %w", err)
 	}
 	return item, nil
 }
 
-func (s *Store) ListItems(ctx context.Context, filter catalog.ListFilter) ([]catalog.ExaminationItem, int64, error) {
+func (s *Store) ListItems(ctx context.Context, filter appointmentmanager.ProjectListFilter) ([]appointmentmanager.ExaminationItem, int64, error) {
 	conditions := make([]string, 0, 2)
 	args := make([]any, 0, 4)
 	if filter.OwnerDepartmentID != "" {
@@ -90,7 +90,7 @@ func (s *Store) ListItems(ctx context.Context, filter catalog.ListFilter) ([]cat
 	}
 	defer rows.Close()
 
-	items := make([]catalog.ExaminationItem, 0)
+	items := make([]appointmentmanager.ExaminationItem, 0)
 	for rows.Next() {
 		item, err := scanExaminationItem(rows)
 		if err != nil {
@@ -104,35 +104,35 @@ func (s *Store) ListItems(ctx context.Context, filter catalog.ListFilter) ([]cat
 	return items, total, nil
 }
 
-func (s *Store) WithinCatalogTransaction(ctx context.Context, fn func(catalog.TxStore) error) error {
+func (s *Store) WithinProjectTransaction(ctx context.Context, fn func(appointmentmanager.ProjectTxStore) error) error {
 	if fn == nil {
-		return errors.New("catalog transaction callback is required")
+		return errors.New("project transaction callback is required")
 	}
 	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 	if err != nil {
-		return fmt.Errorf("begin catalog transaction: %w", err)
+		return fmt.Errorf("begin project transaction: %w", err)
 	}
-	txStore := &catalogTxStore{tx: tx}
+	txStore := &projectTxStore{tx: tx}
 	if err := fn(txStore); err != nil {
 		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
-			return errors.Join(err, fmt.Errorf("rollback catalog transaction: %w", rollbackErr))
+			return errors.Join(err, fmt.Errorf("rollback project transaction: %w", rollbackErr))
 		}
 		return err
 	}
 	if err := tx.Commit(); err != nil {
-		return fmt.Errorf("commit catalog transaction: %w", err)
+		return fmt.Errorf("commit project transaction: %w", err)
 	}
 	return nil
 }
 
-var _ catalog.Store = (*Store)(nil)
+var _ appointmentmanager.ProjectStore = (*Store)(nil)
 
 type examinationItemScanner interface {
 	Scan(dest ...any) error
 }
 
-func scanExaminationItem(scanner examinationItemScanner) (catalog.ExaminationItem, error) {
-	var item catalog.ExaminationItem
+func scanExaminationItem(scanner examinationItemScanner) (appointmentmanager.ExaminationItem, error) {
+	var item appointmentmanager.ExaminationItem
 	err := scanner.Scan(
 		&item.ItemID,
 		&item.OwnerDepartmentID,

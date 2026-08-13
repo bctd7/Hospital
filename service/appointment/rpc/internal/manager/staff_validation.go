@@ -1,4 +1,4 @@
-package resource
+package manager
 
 import (
 	"fmt"
@@ -60,14 +60,6 @@ func normalizeRoomLocation(campusID, building string, floorNumber int32, roomNum
 		}
 	}
 	return campusID, building, floorNumber, roomNumber, FormatRoomDisplayName(building, floorNumber, roomNumber), nil
-}
-
-func FormatRoomDisplayName(building string, floorNumber int32, roomNumber string) string {
-	floor := fmt.Sprintf("%d层", floorNumber)
-	if floorNumber < 0 {
-		floor = fmt.Sprintf("B%d层", -floorNumber)
-	}
-	return fmt.Sprintf("%s · %s · %s室", building, floor, roomNumber)
 }
 
 func normalizeOperation(meta OperationMeta) (OperationMeta, error) {

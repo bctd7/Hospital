@@ -10,16 +10,15 @@ import (
 
 	"hospital/common/authn"
 	"hospital/common/authn/versionredis"
-	"hospital/service/appointment/rpc/internal/catalog"
 	"hospital/service/appointment/rpc/internal/config"
+	"hospital/service/appointment/rpc/internal/manager"
 	"hospital/service/appointment/rpc/internal/repository/mysqlstore"
-	"hospital/service/appointment/rpc/internal/resource"
 )
 
 type ServiceContext struct {
 	Config                        config.Config
-	CatalogManager                *catalog.Manager
-	ResourceManager               *resource.Manager
+	StaffManager                  *manager.StaffManager
+	PatientManager                *manager.PatientManager
 	TokenManager                  *authn.TokenManager
 	AuthorizationVersionValidator *authn.AuthorizationVersionValidator
 	AppointmentRedis              *redis.Client
@@ -86,32 +85,32 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		return nil, fmt.Errorf("create appointment token manager: %w", err)
 	}
 
-	catalogManager, err := catalog.NewManager(store)
+	appointmentCache, err := manager.NewRedisCache(appointmentRedisClient, c.AppointmentRedis.Prefix)
 	if err != nil {
 		appointmentRedisClient.Close()
 		authorizationRedisClient.Close()
 		store.Close()
-		return nil, fmt.Errorf("create examination catalog manager: %w", err)
+		return nil, fmt.Errorf("create appointment query cache: %w", err)
 	}
-	resourceCache, err := resource.NewRedisCache(appointmentRedisClient, c.AppointmentRedis.Prefix)
+	staffManager, err := manager.NewStaffManager(store, store, appointmentCache)
 	if err != nil {
 		appointmentRedisClient.Close()
 		authorizationRedisClient.Close()
 		store.Close()
-		return nil, fmt.Errorf("create appointment resource cache: %w", err)
+		return nil, fmt.Errorf("create staff appointment manager: %w", err)
 	}
-	resourceManager, err := resource.NewManager(store, resourceCache)
+	patientManager, err := manager.NewPatientManager(store, appointmentCache)
 	if err != nil {
 		appointmentRedisClient.Close()
 		authorizationRedisClient.Close()
 		store.Close()
-		return nil, fmt.Errorf("create appointment resource manager: %w", err)
+		return nil, fmt.Errorf("create patient appointment manager: %w", err)
 	}
 
 	return &ServiceContext{
 		Config:                        c,
-		CatalogManager:                catalogManager,
-		ResourceManager:               resourceManager,
+		StaffManager:                  staffManager,
+		PatientManager:                patientManager,
 		TokenManager:                  tokenManager,
 		AuthorizationVersionValidator: authorizationVersionValidator,
 		AppointmentRedis:              appointmentRedisClient,

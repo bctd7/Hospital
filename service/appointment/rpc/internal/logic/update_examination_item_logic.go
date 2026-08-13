@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"hospital/contracts/gen/appointment/v1"
-	"hospital/service/appointment/rpc/internal/catalog"
+	"hospital/service/appointment/rpc/internal/manager"
 	"hospital/service/appointment/rpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -25,14 +25,14 @@ func NewUpdateExaminationItemLogic(ctx context.Context, svcCtx *svc.ServiceConte
 }
 
 func (l *UpdateExaminationItemLogic) UpdateExaminationItem(in *appointmentv1.UpdateExaminationItemRequest) (*appointmentv1.ExaminationItem, error) {
-	principal, err := catalogPrincipal(l.ctx)
+	principal, err := appointmentPrincipal(l.ctx)
 	if err != nil {
 		return nil, err
 	}
 	if in == nil {
-		return nil, catalogRPCError(catalog.ErrInvalid)
+		return nil, projectRPCError(manager.ErrInvalid)
 	}
-	item, err := l.svcCtx.CatalogManager.Update(l.ctx, principal, catalog.UpdateCommand{
+	item, err := l.svcCtx.StaffManager.UpdateProject(l.ctx, principal, manager.UpdateProjectCommand{
 		ItemID:          in.ItemId,
 		Name:            in.Name,
 		Description:     in.Description,
@@ -41,8 +41,8 @@ func (l *UpdateExaminationItemLogic) UpdateExaminationItem(in *appointmentv1.Upd
 		RequestID:       in.RequestId,
 	})
 	if err != nil {
-		return nil, catalogRPCError(err)
+		return nil, projectRPCError(err)
 	}
-	l.svcCtx.ResourceManager.InvalidateItem(l.ctx, item.OwnerDepartmentID, item.ItemID)
+	l.svcCtx.StaffManager.InvalidateItem(l.ctx, item.OwnerDepartmentID, item.ItemID)
 	return examinationItemResponse(item), nil
 }

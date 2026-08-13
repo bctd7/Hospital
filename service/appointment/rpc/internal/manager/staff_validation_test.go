@@ -1,4 +1,4 @@
-package resource
+package manager
 
 import (
 	"context"
@@ -169,8 +169,8 @@ func TestJitteredTTLStaysWithinTwentyPercent(t *testing.T) {
 	}
 }
 
-func TestPatientReadDoesNotRequireStaffRole(t *testing.T) {
-	err := requirePatientReadOrPermission(authn.Principal{AccountID: uuid.NewString(), AccountType: authn.AccountTypePatient})
+func TestPatientManagerAcceptsPatientIdentityWithoutStaffRole(t *testing.T) {
+	err := requirePatient(authn.Principal{AccountID: uuid.NewString(), AccountType: authn.AccountTypePatient})
 	if err != nil {
 		t.Fatalf("patient read rejected: %v", err)
 	}

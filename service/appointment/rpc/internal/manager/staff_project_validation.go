@@ -1,4 +1,4 @@
-package catalog
+package manager
 
 import (
 	"fmt"
@@ -13,31 +13,31 @@ const (
 	maxCatalogNameRunes        = 128
 	maxCatalogDescriptionRunes = 8192
 	maxRequestIDBytes          = 64
-	defaultPage                = 1
-	defaultPageSize            = 20
-	maxPageSize                = 100
+	defaultProjectPage         = 1
+	defaultProjectPageSize     = 20
+	maxProjectPageSize         = 100
 )
 
 // normalizedCreateCommand validates and canonicalizes every caller-controlled
 // field used by Create. Generated state such as item ID, status, version, and
 // timestamps is intentionally not part of the command.
-func normalizedCreateCommand(command CreateCommand) (CreateCommand, error) {
+func normalizedCreateProjectCommand(command CreateProjectCommand) (CreateProjectCommand, error) {
 	var err error
 	command.OwnerDepartmentID, err = normalizedUUID(command.OwnerDepartmentID, "owner_department_id")
 	if err != nil {
-		return CreateCommand{}, err
+		return CreateProjectCommand{}, err
 	}
 	command.Name, err = normalizedCatalogName(command.Name)
 	if err != nil {
-		return CreateCommand{}, err
+		return CreateProjectCommand{}, err
 	}
 	command.Description, err = normalizedCatalogDescription(command.Description)
 	if err != nil {
-		return CreateCommand{}, err
+		return CreateProjectCommand{}, err
 	}
 	command.OperationID, command.RequestID, err = normalizedOperation(command.OperationID, command.RequestID)
 	if err != nil {
-		return CreateCommand{}, err
+		return CreateProjectCommand{}, err
 	}
 	return command, nil
 }
@@ -45,74 +45,74 @@ func normalizedCreateCommand(command CreateCommand) (CreateCommand, error) {
 // normalizedUpdateCommand preserves nil optional fields. A non-nil pointer
 // means that the caller intends to replace that field, including validation of
 // the replacement value.
-func normalizedUpdateCommand(command UpdateCommand) (UpdateCommand, error) {
+func normalizedUpdateProjectCommand(command UpdateProjectCommand) (UpdateProjectCommand, error) {
 	var err error
 	command.ItemID, err = normalizedUUID(command.ItemID, "item_id")
 	if err != nil {
-		return UpdateCommand{}, err
+		return UpdateProjectCommand{}, err
 	}
 	if command.ExpectedVersion <= 0 {
-		return UpdateCommand{}, fmt.Errorf("%w: expected_version must be positive", ErrInvalid)
+		return UpdateProjectCommand{}, fmt.Errorf("%w: expected_version must be positive", ErrInvalid)
 	}
 	if command.Name == nil && command.Description == nil {
-		return UpdateCommand{}, fmt.Errorf("%w: name or description is required", ErrInvalid)
+		return UpdateProjectCommand{}, fmt.Errorf("%w: name or description is required", ErrInvalid)
 	}
 	if command.Name != nil {
 		value, valueErr := normalizedCatalogName(*command.Name)
 		if valueErr != nil {
-			return UpdateCommand{}, valueErr
+			return UpdateProjectCommand{}, valueErr
 		}
 		command.Name = &value
 	}
 	if command.Description != nil {
 		value, valueErr := normalizedCatalogDescription(*command.Description)
 		if valueErr != nil {
-			return UpdateCommand{}, valueErr
+			return UpdateProjectCommand{}, valueErr
 		}
 		command.Description = &value
 	}
 	command.OperationID, command.RequestID, err = normalizedOperation(command.OperationID, command.RequestID)
 	if err != nil {
-		return UpdateCommand{}, err
+		return UpdateProjectCommand{}, err
 	}
 	return command, nil
 }
 
-func normalizedChangeStatusCommand(command ChangeStatusCommand) (ChangeStatusCommand, error) {
+func normalizedChangeProjectStatusCommand(command ChangeProjectStatusCommand) (ChangeProjectStatusCommand, error) {
 	var err error
 	command.ItemID, err = normalizedUUID(command.ItemID, "item_id")
 	if err != nil {
-		return ChangeStatusCommand{}, err
+		return ChangeProjectStatusCommand{}, err
 	}
 	if command.ExpectedVersion <= 0 {
-		return ChangeStatusCommand{}, fmt.Errorf("%w: expected_version must be positive", ErrInvalid)
+		return ChangeProjectStatusCommand{}, fmt.Errorf("%w: expected_version must be positive", ErrInvalid)
 	}
 	command.OperationID, command.RequestID, err = normalizedOperation(command.OperationID, command.RequestID)
 	if err != nil {
-		return ChangeStatusCommand{}, err
+		return ChangeProjectStatusCommand{}, err
 	}
 	return command, nil
 }
 
-func normalizedListQuery(query ListQuery) (ListQuery, error) {
+func normalizedListProjectsQuery(query ListProjectsQuery) (ListProjectsQuery, error) {
 	var err error
 	if strings.TrimSpace(query.OwnerDepartmentID) != "" {
 		query.OwnerDepartmentID, err = normalizedUUID(query.OwnerDepartmentID, "owner_department_id")
 		if err != nil {
-			return ListQuery{}, err
+			return ListProjectsQuery{}, err
 		}
 	}
 	query.Status, err = normalizedOptionalStatus(query.Status)
 	if err != nil {
-		return ListQuery{}, err
+		return ListProjectsQuery{}, err
 	}
 	query.Page, query.PageSize, err = normalizedPage(query.Page, query.PageSize)
 	if err != nil {
-		return ListQuery{}, err
+		return ListProjectsQuery{}, err
 	}
 	query.RequestID, err = normalizedRequestID(query.RequestID)
 	if err != nil {
-		return ListQuery{}, err
+		return ListProjectsQuery{}, err
 	}
 	return query, nil
 }
@@ -153,7 +153,7 @@ func normalizedCatalogName(value string) (string, error) {
 }
 
 // normalizedCatalogDescription keeps meaningful line breaks and tabs because
-// the first catalog version stores patient-facing preparation rules as natural
+// the first project version stores patient-facing preparation rules as natural
 // language. Other control characters are rejected.
 func normalizedCatalogDescription(value string) (string, error) {
 	value = strings.TrimSpace(value)
@@ -200,16 +200,16 @@ func normalizedOptionalStatus(value Status) (Status, error) {
 
 func normalizedPage(page, pageSize int64) (int64, int64, error) {
 	if page == 0 {
-		page = defaultPage
+		page = defaultProjectPage
 	}
 	if pageSize == 0 {
-		pageSize = defaultPageSize
+		pageSize = defaultProjectPageSize
 	}
-	if page < 1 || pageSize < 1 || pageSize > maxPageSize {
+	if page < 1 || pageSize < 1 || pageSize > maxProjectPageSize {
 		return 0, 0, fmt.Errorf(
 			"%w: page must be positive and page_size must be between 1 and %d",
 			ErrInvalid,
-			maxPageSize,
+			maxProjectPageSize,
 		)
 	}
 	return page, pageSize, nil

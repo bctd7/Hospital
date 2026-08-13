@@ -9,7 +9,7 @@ import (
 
 	"hospital/common/authn"
 	contractauthz "hospital/contracts/authz"
-	"hospital/service/appointment/rpc/internal/catalog"
+	appointmentmanager "hospital/service/appointment/rpc/internal/manager"
 )
 
 const (
@@ -36,7 +36,7 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 	cleanupCatalogIntegrationData(t, store, ctx)
 	defer cleanupCatalogIntegrationData(t, store, ctx)
 
-	manager, err := catalog.NewManager(store)
+	manager, err := appointmentmanager.NewStaffManager(store, store, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,7 +51,7 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 			contractauthz.PermissionAppointmentUpdate,
 		},
 	}
-	command := catalog.CreateCommand{
+	command := appointmentmanager.CreateProjectCommand{
 		OwnerDepartmentID: catalogIntegrationDepartment,
 		Name:              "Integration Examination Item",
 		Description:       "Integration preparation description",
@@ -59,15 +59,15 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 		RequestID:         "catalog-integration-create",
 	}
 
-	created, err := manager.Create(ctx, operator, command)
+	created, err := manager.CreateProject(ctx, operator, command)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if created.ItemID == "" || created.Status != catalog.StatusActive || created.Version != 1 {
+	if created.ItemID == "" || created.Status != appointmentmanager.StatusActive || created.Version != 1 {
 		t.Fatalf("unexpected created item: %#v", created)
 	}
 
-	replayed, err := manager.Create(ctx, operator, command)
+	replayed, err := manager.CreateProject(ctx, operator, command)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,16 +76,16 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 	}
 
 	command.Description = "Different preparation description"
-	if _, err := manager.Create(ctx, operator, command); !errors.Is(err, catalog.ErrConflict) {
+	if _, err := manager.CreateProject(ctx, operator, command); !errors.Is(err, appointmentmanager.ErrConflict) {
 		t.Fatalf("operation reuse error = %v, want ErrConflict", err)
 	}
-	got, err := manager.Get(ctx, operator, created.ItemID)
+	got, err := manager.GetProject(ctx, operator, created.ItemID)
 	if err != nil || got.ItemID != created.ItemID {
 		t.Fatalf("get item=%#v err=%v", got, err)
 	}
-	page, err := manager.List(ctx, operator, catalog.ListQuery{
+	page, err := manager.ListProjects(ctx, operator, appointmentmanager.ListProjectsQuery{
 		OwnerDepartmentID: catalogIntegrationDepartment,
-		Status:            catalog.StatusActive,
+		Status:            appointmentmanager.StatusActive,
 		Page:              1,
 		PageSize:          10,
 	})
@@ -95,7 +95,7 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 
 	name := "Updated Integration Examination Item"
 	description := "Updated integration preparation description"
-	updated, err := manager.Update(ctx, operator, catalog.UpdateCommand{
+	updated, err := manager.UpdateProject(ctx, operator, appointmentmanager.UpdateProjectCommand{
 		ItemID: created.ItemID, Name: &name, Description: &description,
 		ExpectedVersion: 1, OperationID: catalogIntegrationUpdateOperation,
 		RequestID: "catalog-integration-update",
@@ -107,22 +107,22 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 		t.Fatalf("unexpected updated item: %#v", updated)
 	}
 
-	disabled, err := manager.Disable(ctx, operator, catalog.ChangeStatusCommand{
+	disabled, err := manager.DisableProject(ctx, operator, appointmentmanager.ChangeProjectStatusCommand{
 		ItemID: created.ItemID, ExpectedVersion: 2,
 		OperationID: catalogIntegrationDisableOperation,
 	})
-	if err != nil || disabled.Status != catalog.StatusDisabled || disabled.Version != 3 {
+	if err != nil || disabled.Status != appointmentmanager.StatusDisabled || disabled.Version != 3 {
 		t.Fatalf("disabled item=%#v err=%v", disabled, err)
 	}
-	enabledCommand := catalog.ChangeStatusCommand{
+	enabledCommand := appointmentmanager.ChangeProjectStatusCommand{
 		ItemID: created.ItemID, ExpectedVersion: 3,
 		OperationID: catalogIntegrationEnableOperation,
 	}
-	enabled, err := manager.Enable(ctx, operator, enabledCommand)
-	if err != nil || enabled.Status != catalog.StatusActive || enabled.Version != 4 {
+	enabled, err := manager.EnableProject(ctx, operator, enabledCommand)
+	if err != nil || enabled.Status != appointmentmanager.StatusActive || enabled.Version != 4 {
 		t.Fatalf("enabled item=%#v err=%v", enabled, err)
 	}
-	replayedEnable, err := manager.Enable(ctx, operator, enabledCommand)
+	replayedEnable, err := manager.EnableProject(ctx, operator, enabledCommand)
 	if err != nil || replayedEnable.Version != enabled.Version {
 		t.Fatalf("replayed enable=%#v err=%v", replayedEnable, err)
 	}

@@ -1,4 +1,4 @@
-package resource
+package manager
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	resourceCacheTTL = 5 * time.Minute
+	hotReadCacheTTL = 5 * time.Minute
 	queryCacheTTL    = 30 * time.Second
 	negativeCacheTTL = 10 * time.Second
 )
@@ -33,12 +33,12 @@ type RedisCache struct {
 
 func NewRedisCache(client *redis.Client, prefix string) (*RedisCache, error) {
 	if client == nil {
-		return nil, fmt.Errorf("appointment resource redis client is required")
+		return nil, fmt.Errorf("appointment query redis client is required")
 	}
 	if prefix == "" {
 		prefix = "appointment:"
 	}
-	return &RedisCache{client: client, prefix: prefix + "resource:"}, nil
+	return &RedisCache{client: client, prefix: prefix + "query:"}, nil
 }
 
 func (c *RedisCache) key(value string) string { return c.prefix + value }
