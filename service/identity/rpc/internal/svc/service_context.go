@@ -1,10 +1,6 @@
 package svc
 
 import (
-	"errors"
-
-	redis "github.com/redis/go-redis/v9"
-
 	"hospital/common/authn"
 	commonauthversion "hospital/common/authz/version"
 	accountmanager "hospital/service/identity/rpc/internal/account/manager"
@@ -15,12 +11,11 @@ import (
 	"hospital/service/identity/rpc/internal/messaging/kafka"
 	"hospital/service/identity/rpc/internal/messaging/outbox"
 	organizationmanager "hospital/service/identity/rpc/internal/organization/manager"
-	"hospital/service/identity/rpc/internal/repository/mysqlstore"
 	"hospital/service/identity/rpc/internal/session"
 )
 
-// Managers groups business entry points exposed to RPC Logic. ServiceContext
-// owns their lifetime but contains no account, authorization, or session rules.
+// Managers 是 RPC Logic 可以调用的业务入口集合。
+// ServiceContext 只保存这些入口，不在这里实现账号、授权或会话规则。
 type Managers struct {
 	Authentication        *authentication.Manager
 	PhoneLogin            *authentication.PhoneLoginManager
@@ -31,63 +26,79 @@ type Managers struct {
 	OrganizationDirectory *organizationmanager.DirectoryManager
 }
 
-// Security groups token verification and runtime authorization-version checks.
+// Security 是拦截器所需的安全组件，不向 Logic 暴露 Redis 等实现细节。
 type Security struct {
 	Token                *authn.TokenManager
 	AuthorizationVersion *commonauthversion.Validator
 }
 
-// Workers groups optional background message processors.
+// Workers 是可选的后台消息任务；Kafka 未启用时对应字段为 nil。
 type Workers struct {
 	OutboxPublisher              *outbox.Publisher
 	AuthorizationVersionConsumer *identityauthversion.Consumer
 }
 
-// ServiceContext is the Identity composition root shared by generated Logic.
-// Construction details are split into security.go, managers.go, and messaging.go.
+// ServiceContext 是 Identity 的唯一依赖装配入口，由所有生成的 Logic 共享。
+// 各类组件分别在 resources.go、token_components.go、login_providers.go、
+// manager_wiring.go 和 messaging.go 中创建，这里只定义总装配和关闭顺序。
 type ServiceContext struct {
-	Config        config.Config
-	Managers      Managers
-	Security      Security
-	Workers       Workers
-	identityStore *mysqlstore.Store
-	redisClient   *redis.Client
-	kafkaWriter   *kafka.Writer
-	kafkaReader   *kafka.Reader
+	Config      config.Config
+	Managers    Managers
+	Security    Security
+	Workers     Workers
+	resources   serviceResources
+	kafkaWriter *kafka.Writer
+	kafkaReader *kafka.Reader
 }
 
+// NewServiceContext 按“基础资源 → Token 组件 → 登录 Provider → 业务 Manager → 消息任务”
+// 的顺序完成装配。任一步失败都会关闭此前已经创建的基础资源。
 func NewServiceContext(c config.Config) (*ServiceContext, error) {
-	store, err := mysqlstore.New(c.MySQL.DataSource)
+	resourceSet, err := openResources(c)
 	if err != nil {
 		return nil, err
 	}
+	assembled := false
+	defer func() {
+		if !assembled {
+			resourceSet.Close()
+		}
+	}()
 
-	securityRuntime, err := buildSecurity(c, store)
+	tokens, err := buildTokenComponents(c, resourceSet)
 	if err != nil {
-		store.Close()
 		return nil, err
 	}
-	managers, err := buildManagers(c, store, securityRuntime.sessions, securityRuntime.phoneLookupKey)
+	providers, err := buildLoginProviders(c)
 	if err != nil {
-		securityRuntime.redis.Close()
-		store.Close()
 		return nil, err
 	}
-	messagingRuntime, err := buildMessaging(c, store, securityRuntime.versions)
+	managers, err := wireManagers(c, resourceSet, tokens, providers)
 	if err != nil {
-		securityRuntime.redis.Close()
-		store.Close()
 		return nil, err
 	}
+	messagingRuntime, err := buildMessaging(c, resourceSet.identityStore, tokens.authorizationVersions)
+	if err != nil {
+		return nil, err
+	}
+	assembled = true
 
 	return &ServiceContext{
-		Config: c, Managers: managers, Security: securityRuntime.security,
-		Workers: messagingRuntime.workers, identityStore: store,
-		redisClient: securityRuntime.redis, kafkaWriter: messagingRuntime.writer,
+		Config:   c,
+		Managers: managers,
+		Security: Security{
+			Token:                tokens.tokenManager,
+			AuthorizationVersion: tokens.authorizationVersionValidator,
+		},
+		Workers:     messagingRuntime.workers,
+		resources:   resourceSet,
+		kafkaWriter: messagingRuntime.writer,
 		kafkaReader: messagingRuntime.reader,
 	}, nil
 }
 
+// Close 先停止 Kafka 传输，再关闭 Redis 和 MySQL。
+// 后台 Worker 必须由 main 在调用 Close 前先取消并等待退出。
 func (s *ServiceContext) Close() error {
 	if s.kafkaReader != nil {
 		s.kafkaReader.Close()
@@ -95,5 +106,5 @@ func (s *ServiceContext) Close() error {
 	if s.kafkaWriter != nil {
 		s.kafkaWriter.Close()
 	}
-	return errors.Join(s.identityStore.Close(), s.redisClient.Close())
+	return s.resources.Close()
 }

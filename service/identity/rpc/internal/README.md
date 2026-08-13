@@ -45,7 +45,7 @@ internal/
 - `account/manager` 管理账号状态、医生身份、科室和展示资料；
 - `session` 读取最新 Principal，签发/刷新 Token，维护 Refresh Session。
 
-Provider 不创建 Session、不签发 Token，也不负责账号管理。`svc/managers.go` 只根据配置选择并注入 Provider，渠道差异不会进入 RPC Logic。
+Provider 不创建 Session、不签发 Token，也不负责账号管理。`svc/login_providers.go` 只根据配置选择 Provider，`svc/manager_wiring.go` 负责注入，渠道差异不会进入 RPC Logic。
 
 ### Authorization Manager 和 Version Consumer
 
@@ -75,9 +75,11 @@ Redis 写失败时不提交 Offset；Commit 失败时消息可能重放。Redis 
 ## ServiceContext
 
 ```text
-svc/service_context.go  依赖分组、总装配顺序、资源关闭
-svc/security.go         JWT、Redis、授权版本校验、Session
-svc/managers.go         业务 Manager 和登录 Provider
+svc/service_context.go  依赖分组、总装配顺序、关闭顺序
+svc/resources.go        MySQL、Redis 的创建、连通性检查和关闭
+svc/token_components.go JWT、密钥、授权版本 Store/Validator、Refresh Session Store
+svc/login_providers.go  微信、阿里云手机号和本地验证码 Provider
+svc/manager_wiring.go   Session 与 RPC 业务 Manager 装配
 svc/messaging.go        Kafka、Outbox、授权版本 Consumer
 ```
 

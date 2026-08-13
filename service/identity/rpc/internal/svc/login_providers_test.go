@@ -3,7 +3,7 @@ package svc
 import (
 	"testing"
 
-	login "hospital/service/identity/rpc/internal/authentication/provider"
+	authprovider "hospital/service/identity/rpc/internal/authentication/provider"
 	"hospital/service/identity/rpc/internal/config"
 )
 
@@ -13,12 +13,12 @@ func TestPhoneVerificationProviderAllowsLocalOnlyInSafeEnvironments(t *testing.T
 		value.Environment = environment
 		value.PhoneLogin.Provider = "local"
 		value.PhoneLogin.LocalCode = "246810"
-		provider, err := phoneVerificationProvider(value)
+		phoneProvider, err := phoneVerificationProvider(value)
 		if err != nil {
 			t.Fatalf("environment %s: %v", environment, err)
 		}
-		if _, ok := provider.(*login.LocalPhoneVerificationProvider); !ok {
-			t.Fatalf("environment %s returned %T", environment, provider)
+		if _, ok := phoneProvider.(*authprovider.LocalPhoneVerificationProvider); !ok {
+			t.Fatalf("environment %s returned %T", environment, phoneProvider)
 		}
 	}
 }
@@ -35,11 +35,11 @@ func TestPhoneVerificationProviderRejectsLocalInProduction(t *testing.T) {
 
 func TestPhoneVerificationProviderKeepsDisabledDefault(t *testing.T) {
 	var value config.Config
-	provider, err := phoneVerificationProvider(value)
+	phoneProvider, err := phoneVerificationProvider(value)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, ok := provider.(login.UnconfiguredPhoneVerificationProvider); !ok {
-		t.Fatalf("expected disabled provider, got %T", provider)
+	if _, ok := phoneProvider.(authprovider.UnconfiguredPhoneVerificationProvider); !ok {
+		t.Fatalf("expected disabled provider, got %T", phoneProvider)
 	}
 }

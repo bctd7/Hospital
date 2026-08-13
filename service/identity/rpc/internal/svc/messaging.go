@@ -21,6 +21,8 @@ type messagingRuntime struct {
 	reader  *kafka.Reader
 }
 
+// buildMessaging 组装 MySQL Outbox → Kafka → Redis 授权版本同步链路。
+// Kafka 关闭时返回空 Workers；开启时，Writer、Reader 和两个后台任务必须同时装配成功。
 func buildMessaging(c config.Config, store *mysqlstore.Store, versions commonauthversion.AuthorizationVersionAdvancer) (messagingRuntime, error) {
 	if !c.Kafka.Enabled {
 		return messagingRuntime{}, nil
