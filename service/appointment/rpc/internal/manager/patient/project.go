@@ -1,4 +1,4 @@
-package manager
+package patient
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 // ListAvailableRooms returns the rooms a patient may choose for a project.
 // The selected room remains a patient choice and is not assigned by staff.
-func (m *PatientManager) ListAvailableRooms(ctx context.Context, patient authn.Principal, itemID string) ([]RoomItem, error) {
+func (m *Manager) ListAvailableRooms(ctx context.Context, patient authn.Principal, itemID string) ([]RoomItem, error) {
 	if err := requirePatient(patient); err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func (m *PatientManager) ListAvailableRooms(ctx context.Context, patient authn.P
 }
 
 // ListProjectWindows exposes only active project windows to patients.
-func (m *PatientManager) ListProjectWindows(ctx context.Context, patient authn.Principal, itemID string) ([]ItemWeeklyWindow, error) {
+func (m *Manager) ListProjectWindows(ctx context.Context, patient authn.Principal, itemID string) ([]ItemWeeklyWindow, error) {
 	if err := requirePatient(patient); err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func requirePatient(principal authn.Principal) error {
 	return nil
 }
 
-func (m *PatientManager) generation(ctx context.Context, departmentID string) string {
+func (m *Manager) generation(ctx context.Context, departmentID string) string {
 	if m.cache == nil {
 		return "0"
 	}
@@ -72,7 +72,7 @@ func (m *PatientManager) generation(ctx context.Context, departmentID string) st
 	return value
 }
 
-func (m *PatientManager) getItemSummary(ctx context.Context, itemID string) (ItemSummary, error) {
+func (m *Manager) getItemSummary(ctx context.Context, itemID string) (ItemSummary, error) {
 	value, found, err := loadCached(ctx, m.cache, &m.flights, "item-summary:"+itemID, hotReadCacheTTL, func() (ItemSummary, bool, error) {
 		item, loadErr := m.store.GetItemSummary(ctx, itemID)
 		if errors.Is(loadErr, ErrNotFound) {

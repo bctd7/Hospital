@@ -1,4 +1,4 @@
-package manager
+package staff
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	contractauthz "hospital/contracts/authz"
 )
 
-func (m *StaffManager) SetRoomWindow(ctx context.Context, operator authn.Principal, command SetRoomWindowCommand) (RoomWeeklyWindow, error) {
+func (m *Manager) SetRoomWindow(ctx context.Context, operator authn.Principal, command SetRoomWindowCommand) (RoomWeeklyWindow, error) {
 	if err := requirePermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
 		return RoomWeeklyWindow{}, err
 	}
@@ -112,7 +112,7 @@ func (m *StaffManager) SetRoomWindow(ctx context.Context, operator authn.Princip
 	return result, err
 }
 
-func (m *StaffManager) DisableRoomWindow(ctx context.Context, operator authn.Principal, command ChangeStatusCommand) (RoomWeeklyWindow, error) {
+func (m *Manager) DisableRoomWindow(ctx context.Context, operator authn.Principal, command ChangeStatusCommand) (RoomWeeklyWindow, error) {
 	value, err := m.disableWindow(ctx, operator, command, true)
 	if err != nil {
 		return RoomWeeklyWindow{}, err
@@ -120,7 +120,7 @@ func (m *StaffManager) DisableRoomWindow(ctx context.Context, operator authn.Pri
 	return value.(RoomWeeklyWindow), nil
 }
 
-func (m *StaffManager) SetItemWindow(ctx context.Context, operator authn.Principal, command SetItemWindowCommand) (ItemWeeklyWindow, error) {
+func (m *Manager) SetItemWindow(ctx context.Context, operator authn.Principal, command SetItemWindowCommand) (ItemWeeklyWindow, error) {
 	if err := requirePermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
 		return ItemWeeklyWindow{}, err
 	}
@@ -224,7 +224,7 @@ func (m *StaffManager) SetItemWindow(ctx context.Context, operator authn.Princip
 	return result, err
 }
 
-func (m *StaffManager) DisableItemWindow(ctx context.Context, operator authn.Principal, command ChangeStatusCommand) (ItemWeeklyWindow, error) {
+func (m *Manager) DisableItemWindow(ctx context.Context, operator authn.Principal, command ChangeStatusCommand) (ItemWeeklyWindow, error) {
 	value, err := m.disableWindow(ctx, operator, command, false)
 	if err != nil {
 		return ItemWeeklyWindow{}, err
@@ -232,7 +232,7 @@ func (m *StaffManager) DisableItemWindow(ctx context.Context, operator authn.Pri
 	return value.(ItemWeeklyWindow), nil
 }
 
-func (m *StaffManager) disableWindow(ctx context.Context, operator authn.Principal, command ChangeStatusCommand, roomWindow bool) (any, error) {
+func (m *Manager) disableWindow(ctx context.Context, operator authn.Principal, command ChangeStatusCommand, roomWindow bool) (any, error) {
 	if err := requirePermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
 		return nil, err
 	}
@@ -337,7 +337,7 @@ func (m *StaffManager) disableWindow(ctx context.Context, operator authn.Princip
 	return result, err
 }
 
-func (m *StaffManager) ListRoomWindows(ctx context.Context, operator authn.Principal, roomID string, activeOnly bool) ([]RoomWeeklyWindow, error) {
+func (m *Manager) ListRoomWindows(ctx context.Context, operator authn.Principal, roomID string, activeOnly bool) ([]RoomWeeklyWindow, error) {
 	room, err := m.GetRoom(ctx, operator, roomID)
 	if err != nil {
 		return nil, err
@@ -350,7 +350,7 @@ func (m *StaffManager) ListRoomWindows(ctx context.Context, operator authn.Princ
 	return result, err
 }
 
-func (m *StaffManager) ListItemWindows(ctx context.Context, operator authn.Principal, itemID string, activeOnly bool) ([]ItemWeeklyWindow, error) {
+func (m *Manager) ListItemWindows(ctx context.Context, operator authn.Principal, itemID string, activeOnly bool) ([]ItemWeeklyWindow, error) {
 	if err := requirePermission(operator, contractauthz.PermissionAppointmentRead); err != nil {
 		return nil, err
 	}

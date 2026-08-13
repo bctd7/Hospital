@@ -5,6 +5,7 @@ import (
 
 	"hospital/contracts/gen/appointment/v1"
 	"hospital/service/appointment/rpc/internal/manager"
+	staffmanager "hospital/service/appointment/rpc/internal/manager/staff"
 	"hospital/service/appointment/rpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -36,7 +37,7 @@ func (l *CreateExaminationItemLogic) CreateExaminationItem(in *appointmentv1.Cre
 	if itemInput == nil {
 		return nil, projectRPCError(manager.ErrInvalid)
 	}
-	item, err := l.svcCtx.StaffManager.CreateProject(l.ctx, principal, manager.CreateProjectCommand{
+	item, err := l.svcCtx.StaffManager.CreateProject(l.ctx, principal, staffmanager.CreateProjectCommand{
 		OwnerDepartmentID: itemInput.OwnerDepartmentId,
 		Name:              itemInput.Name,
 		Description:       itemInput.Description,

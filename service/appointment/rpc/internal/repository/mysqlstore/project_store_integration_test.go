@@ -10,6 +10,7 @@ import (
 	"hospital/common/authn"
 	contractauthz "hospital/contracts/authz"
 	appointmentmanager "hospital/service/appointment/rpc/internal/manager"
+	staffmanager "hospital/service/appointment/rpc/internal/manager/staff"
 )
 
 const (
@@ -36,7 +37,7 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 	cleanupCatalogIntegrationData(t, store, ctx)
 	defer cleanupCatalogIntegrationData(t, store, ctx)
 
-	manager, err := appointmentmanager.NewStaffManager(store, store, nil)
+	manager, err := staffmanager.NewManager(store, store, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,7 +52,7 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 			contractauthz.PermissionAppointmentUpdate,
 		},
 	}
-	command := appointmentmanager.CreateProjectCommand{
+	command := staffmanager.CreateProjectCommand{
 		OwnerDepartmentID: catalogIntegrationDepartment,
 		Name:              "Integration Examination Item",
 		Description:       "Integration preparation description",
@@ -83,7 +84,7 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 	if err != nil || got.ItemID != created.ItemID {
 		t.Fatalf("get item=%#v err=%v", got, err)
 	}
-	page, err := manager.ListProjects(ctx, operator, appointmentmanager.ListProjectsQuery{
+	page, err := manager.ListProjects(ctx, operator, staffmanager.ListProjectsQuery{
 		OwnerDepartmentID: catalogIntegrationDepartment,
 		Status:            appointmentmanager.StatusActive,
 		Page:              1,
@@ -95,7 +96,7 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 
 	name := "Updated Integration Examination Item"
 	description := "Updated integration preparation description"
-	updated, err := manager.UpdateProject(ctx, operator, appointmentmanager.UpdateProjectCommand{
+	updated, err := manager.UpdateProject(ctx, operator, staffmanager.UpdateProjectCommand{
 		ItemID: created.ItemID, Name: &name, Description: &description,
 		ExpectedVersion: 1, OperationID: catalogIntegrationUpdateOperation,
 		RequestID: "catalog-integration-update",
@@ -107,14 +108,14 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 		t.Fatalf("unexpected updated item: %#v", updated)
 	}
 
-	disabled, err := manager.DisableProject(ctx, operator, appointmentmanager.ChangeProjectStatusCommand{
+	disabled, err := manager.DisableProject(ctx, operator, staffmanager.ChangeProjectStatusCommand{
 		ItemID: created.ItemID, ExpectedVersion: 2,
 		OperationID: catalogIntegrationDisableOperation,
 	})
 	if err != nil || disabled.Status != appointmentmanager.StatusDisabled || disabled.Version != 3 {
 		t.Fatalf("disabled item=%#v err=%v", disabled, err)
 	}
-	enabledCommand := appointmentmanager.ChangeProjectStatusCommand{
+	enabledCommand := staffmanager.ChangeProjectStatusCommand{
 		ItemID: created.ItemID, ExpectedVersion: 3,
 		OperationID: catalogIntegrationEnableOperation,
 	}

@@ -1,4 +1,4 @@
-package manager
+package staff
 
 import (
 	"context"
@@ -26,8 +26,8 @@ func (stubStore) WithinProjectTransaction(context.Context, func(ProjectTxStore) 
 	return ErrNotImplemented
 }
 
-func TestStaffManagerRequiresProjectStore(t *testing.T) {
-	if _, err := NewStaffManager(nil, nil, nil); err == nil {
+func TestManagerRequiresProjectStore(t *testing.T) {
+	if _, err := NewManager(nil, nil, nil); err == nil {
 		t.Fatal("expected nil project store to be rejected")
 	}
 	if manager, _ := projectTestManager(stubStore{}); manager == nil {
@@ -35,8 +35,8 @@ func TestStaffManagerRequiresProjectStore(t *testing.T) {
 	}
 }
 
-func projectTestManager(store ProjectStore) (*StaffManager, error) {
-	return &StaffManager{projectStore: store}, nil
+func projectTestManager(store ProjectStore) (*Manager, error) {
+	return &Manager{projectStore: store}, nil
 }
 
 func TestCreatePersistsActiveItemAndAudit(t *testing.T) {

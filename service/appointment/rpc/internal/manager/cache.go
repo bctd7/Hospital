@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	hotReadCacheTTL = 5 * time.Minute
-	queryCacheTTL    = 30 * time.Second
+	HotReadCacheTTL  = 5 * time.Minute
+	QueryCacheTTL    = 30 * time.Second
 	negativeCacheTTL = 10 * time.Second
 )
 
@@ -55,7 +55,7 @@ func (c *RedisCache) Get(ctx context.Context, key string) ([]byte, bool, error) 
 }
 
 func (c *RedisCache) Set(ctx context.Context, key string, value []byte, ttl time.Duration) error {
-	return c.client.Set(ctx, c.key(key), value, jitteredTTL(ttl)).Err()
+	return c.client.Set(ctx, c.key(key), value, JitteredTTL(ttl)).Err()
 }
 
 func (c *RedisCache) Delete(ctx context.Context, keys ...string) error {
@@ -85,7 +85,7 @@ func (c *RedisCache) BumpDepartment(ctx context.Context, departmentID string) er
 	return c.client.Incr(ctx, c.key("department:"+departmentID+":generation")).Err()
 }
 
-func jitteredTTL(base time.Duration) time.Duration {
+func JitteredTTL(base time.Duration) time.Duration {
 	if base <= 0 {
 		return base
 	}
@@ -103,12 +103,12 @@ type flightCall struct {
 	err   error
 }
 
-type flightGroup struct {
+type FlightGroup struct {
 	mu    sync.Mutex
 	calls map[string]*flightCall
 }
 
-func (g *flightGroup) do(key string, fn func() (any, error)) (any, error) {
+func (g *FlightGroup) do(key string, fn func() (any, error)) (any, error) {
 	g.mu.Lock()
 	if g.calls == nil {
 		g.calls = make(map[string]*flightCall)
@@ -135,10 +135,10 @@ type cachedValue[T any] struct {
 	Value T    `json:"value"`
 }
 
-func loadCached[T any](
+func LoadCached[T any](
 	ctx context.Context,
 	cache Cache,
-	flights *flightGroup,
+	flights *FlightGroup,
 	key string,
 	ttl time.Duration,
 	loader func() (T, bool, error),

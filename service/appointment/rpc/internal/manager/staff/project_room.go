@@ -1,4 +1,4 @@
-package manager
+package staff
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	contractauthz "hospital/contracts/authz"
 )
 
-func (m *StaffManager) AddRoomItem(ctx context.Context, operator authn.Principal, command AddRoomItemCommand) (RoomItem, error) {
+func (m *Manager) AddRoomItem(ctx context.Context, operator authn.Principal, command AddRoomItemCommand) (RoomItem, error) {
 	if err := requirePermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
 		return RoomItem{}, err
 	}
@@ -71,14 +71,14 @@ func (m *StaffManager) AddRoomItem(ctx context.Context, operator authn.Principal
 	return result, err
 }
 
-func (m *StaffManager) DisableRoomItem(ctx context.Context, operator authn.Principal, command ChangeStatusCommand) (RoomItem, error) {
+func (m *Manager) DisableRoomItem(ctx context.Context, operator authn.Principal, command ChangeStatusCommand) (RoomItem, error) {
 	return m.changeRelationStatus(ctx, operator, command, StatusDisabled, actionRelationDisabled)
 }
-func (m *StaffManager) EnableRoomItem(ctx context.Context, operator authn.Principal, command ChangeStatusCommand) (RoomItem, error) {
+func (m *Manager) EnableRoomItem(ctx context.Context, operator authn.Principal, command ChangeStatusCommand) (RoomItem, error) {
 	return m.changeRelationStatus(ctx, operator, command, StatusActive, actionRelationEnabled)
 }
 
-func (m *StaffManager) changeRelationStatus(ctx context.Context, operator authn.Principal, command ChangeStatusCommand, target Status, action string) (RoomItem, error) {
+func (m *Manager) changeRelationStatus(ctx context.Context, operator authn.Principal, command ChangeStatusCommand, target Status, action string) (RoomItem, error) {
 	if err := requirePermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
 		return RoomItem{}, err
 	}
@@ -141,7 +141,7 @@ func (m *StaffManager) changeRelationStatus(ctx context.Context, operator authn.
 	return result, err
 }
 
-func (m *StaffManager) ListRoomItems(ctx context.Context, operator authn.Principal, roomID string, query ListRelationsQuery) (Page[RoomItem], error) {
+func (m *Manager) ListRoomItems(ctx context.Context, operator authn.Principal, roomID string, query ListRelationsQuery) (Page[RoomItem], error) {
 	room, err := m.GetRoom(ctx, operator, roomID)
 	if err != nil {
 		return Page[RoomItem]{}, err

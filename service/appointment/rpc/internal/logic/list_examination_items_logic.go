@@ -5,6 +5,7 @@ import (
 
 	"hospital/contracts/gen/appointment/v1"
 	"hospital/service/appointment/rpc/internal/manager"
+	staffmanager "hospital/service/appointment/rpc/internal/manager/staff"
 	"hospital/service/appointment/rpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -32,7 +33,7 @@ func (l *ListExaminationItemsLogic) ListExaminationItems(in *appointmentv1.ListE
 	if in == nil {
 		return nil, projectRPCError(manager.ErrInvalid)
 	}
-	result, err := l.svcCtx.StaffManager.ListProjects(l.ctx, principal, manager.ListProjectsQuery{
+	result, err := l.svcCtx.StaffManager.ListProjects(l.ctx, principal, staffmanager.ListProjectsQuery{
 		OwnerDepartmentID: in.OwnerDepartmentId,
 		Status:            manager.Status(in.Status),
 		Page:              in.Page,

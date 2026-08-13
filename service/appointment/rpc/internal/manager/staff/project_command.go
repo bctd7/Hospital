@@ -1,4 +1,4 @@
-package manager
+package staff
 
 // Commands describe manager use-case input. They are separate from the domain
 // model because callers do not control generated IDs, status, versions, or

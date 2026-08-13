@@ -1,4 +1,4 @@
-package manager
+package staff
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 	contractauthz "hospital/contracts/authz"
 )
 
-func (m *StaffManager) CreateRoom(ctx context.Context, operator authn.Principal, command CreateRoomCommand) (Room, error) {
+func (m *Manager) CreateRoom(ctx context.Context, operator authn.Principal, command CreateRoomCommand) (Room, error) {
 	if err := requirePermission(operator, contractauthz.PermissionAppointmentCreate); err != nil {
 		return Room{}, err
 	}
@@ -48,7 +48,7 @@ func (m *StaffManager) CreateRoom(ctx context.Context, operator authn.Principal,
 	return result, err
 }
 
-func (m *StaffManager) GetRoom(ctx context.Context, operator authn.Principal, roomID string) (Room, error) {
+func (m *Manager) GetRoom(ctx context.Context, operator authn.Principal, roomID string) (Room, error) {
 	if err := requirePermission(operator, contractauthz.PermissionAppointmentRead); err != nil {
 		return Room{}, err
 	}
@@ -75,7 +75,7 @@ func (m *StaffManager) GetRoom(ctx context.Context, operator authn.Principal, ro
 	return room, nil
 }
 
-func (m *StaffManager) ListRooms(ctx context.Context, operator authn.Principal, query ListRoomsQuery) (Page[Room], error) {
+func (m *Manager) ListRooms(ctx context.Context, operator authn.Principal, query ListRoomsQuery) (Page[Room], error) {
 	if err := requirePermission(operator, contractauthz.PermissionAppointmentRead); err != nil {
 		return Page[Room]{}, err
 	}
@@ -101,7 +101,7 @@ func (m *StaffManager) ListRooms(ctx context.Context, operator authn.Principal, 
 	return result, err
 }
 
-func (m *StaffManager) UpdateRoom(ctx context.Context, operator authn.Principal, command UpdateRoomCommand) (Room, error) {
+func (m *Manager) UpdateRoom(ctx context.Context, operator authn.Principal, command UpdateRoomCommand) (Room, error) {
 	if err := requirePermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
 		return Room{}, err
 	}
@@ -160,7 +160,7 @@ func (m *StaffManager) UpdateRoom(ctx context.Context, operator authn.Principal,
 	return result, err
 }
 
-func (m *StaffManager) RetireRoom(ctx context.Context, operator authn.Principal, command RetireRoomCommand) (Room, error) {
+func (m *Manager) RetireRoom(ctx context.Context, operator authn.Principal, command RetireRoomCommand) (Room, error) {
 	if err := requirePermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
 		return Room{}, err
 	}

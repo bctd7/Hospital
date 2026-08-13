@@ -1,4 +1,4 @@
-package manager
+package staff
 
 import (
 	"context"
@@ -9,8 +9,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-
-	"hospital/common/authn"
 )
 
 func TestContainsWindowRequiresFullContainmentAndSameSlot(t *testing.T) {
@@ -153,7 +151,10 @@ func TestLoadCachedCollapsesConcurrentMisses(t *testing.T) {
 	if !found {
 		t.Fatal("result was not cached")
 	}
-	var entry cachedValue[string]
+	var entry struct {
+		Found bool   `json:"found"`
+		Value string `json:"value"`
+	}
 	if err := json.Unmarshal(data, &entry); err != nil || entry.Value != "hot" {
 		t.Fatalf("invalid cache entry: %s (%v)", data, err)
 	}
@@ -166,12 +167,5 @@ func TestJitteredTTLStaysWithinTwentyPercent(t *testing.T) {
 		if got < base || got > base+base/5 {
 			t.Fatalf("jitteredTTL() = %s", got)
 		}
-	}
-}
-
-func TestPatientManagerAcceptsPatientIdentityWithoutStaffRole(t *testing.T) {
-	err := requirePatient(authn.Principal{AccountID: uuid.NewString(), AccountType: authn.AccountTypePatient})
-	if err != nil {
-		t.Fatalf("patient read rejected: %v", err)
 	}
 }

@@ -10,6 +10,7 @@ import (
 	"hospital/common/authn"
 	appointmentv1 "hospital/contracts/gen/appointment/v1"
 	"hospital/service/appointment/rpc/internal/manager"
+	staffmanager "hospital/service/appointment/rpc/internal/manager/staff"
 )
 
 const timeLayout = "2006-01-02T15:04:05.000Z07:00"
@@ -58,8 +59,8 @@ func examinationItemResponse(item manager.ExaminationItem) *appointmentv1.Examin
 	}
 }
 
-func changeStatusCommand(in *appointmentv1.ChangeExaminationItemStatusRequest) manager.ChangeProjectStatusCommand {
-	return manager.ChangeProjectStatusCommand{
+func changeStatusCommand(in *appointmentv1.ChangeExaminationItemStatusRequest) staffmanager.ChangeProjectStatusCommand {
+	return staffmanager.ChangeProjectStatusCommand{
 		ItemID:          in.ItemId,
 		ExpectedVersion: in.ExpectedVersion,
 		OperationID:     in.OperationId,

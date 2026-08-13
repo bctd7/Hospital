@@ -10,6 +10,7 @@ import (
 	"hospital/common/authn"
 	appointmentv1 "hospital/contracts/gen/appointment/v1"
 	"hospital/service/appointment/rpc/internal/manager"
+	staffmanager "hospital/service/appointment/rpc/internal/manager/staff"
 	"hospital/service/appointment/rpc/internal/svc"
 )
 
@@ -36,11 +37,11 @@ func roomScheduleRPCError(err error) error {
 	}
 }
 
-func operationMeta(operationID, requestID string) manager.OperationMeta {
-	return manager.OperationMeta{OperationID: operationID, RequestID: requestID}
+func operationMeta(operationID, requestID string) staffmanager.OperationMeta {
+	return staffmanager.OperationMeta{OperationID: operationID, RequestID: requestID}
 }
-func statusCommand(in *appointmentv1.ChangeResourceStatusRequest) manager.ChangeStatusCommand {
-	return manager.ChangeStatusCommand{ResourceID: in.ResourceId, ExpectedVersion: in.ExpectedVersion, OperationMeta: operationMeta(in.OperationId, in.RequestId)}
+func statusCommand(in *appointmentv1.ChangeResourceStatusRequest) staffmanager.ChangeStatusCommand {
+	return staffmanager.ChangeStatusCommand{ResourceID: in.ResourceId, ExpectedVersion: in.ExpectedVersion, OperationMeta: operationMeta(in.OperationId, in.RequestId)}
 }
 
 func roomResponse(v manager.Room) *appointmentv1.Room {
@@ -61,7 +62,7 @@ func createRoom(ctx context.Context, svcCtx *svc.ServiceContext, in *appointment
 	if err != nil {
 		return nil, err
 	}
-	v, err := svcCtx.StaffManager.CreateRoom(ctx, p, manager.CreateRoomCommand{DepartmentID: in.DepartmentId, CampusID: in.CampusId, Building: in.Building, FloorNumber: in.FloorNumber, RoomNumber: in.RoomNumber, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
+	v, err := svcCtx.StaffManager.CreateRoom(ctx, p, staffmanager.CreateRoomCommand{DepartmentID: in.DepartmentId, CampusID: in.CampusId, Building: in.Building, FloorNumber: in.FloorNumber, RoomNumber: in.RoomNumber, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
 	if err != nil {
 		return nil, roomScheduleRPCError(err)
 	}
@@ -83,7 +84,7 @@ func listRooms(ctx context.Context, svcCtx *svc.ServiceContext, in *appointmentv
 	if err != nil {
 		return nil, err
 	}
-	v, err := svcCtx.StaffManager.ListRooms(ctx, p, manager.ListRoomsQuery{DepartmentID: in.DepartmentId, Page: in.Page, PageSize: in.PageSize})
+	v, err := svcCtx.StaffManager.ListRooms(ctx, p, staffmanager.ListRoomsQuery{DepartmentID: in.DepartmentId, Page: in.Page, PageSize: in.PageSize})
 	if err != nil {
 		return nil, roomScheduleRPCError(err)
 	}
@@ -98,7 +99,7 @@ func updateRoom(ctx context.Context, svcCtx *svc.ServiceContext, in *appointment
 	if err != nil {
 		return nil, err
 	}
-	v, err := svcCtx.StaffManager.UpdateRoom(ctx, p, manager.UpdateRoomCommand{RoomID: in.RoomId, CampusID: in.CampusId, Building: in.Building, FloorNumber: in.FloorNumber, RoomNumber: in.RoomNumber, ExpectedVersion: in.ExpectedVersion, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
+	v, err := svcCtx.StaffManager.UpdateRoom(ctx, p, staffmanager.UpdateRoomCommand{RoomID: in.RoomId, CampusID: in.CampusId, Building: in.Building, FloorNumber: in.FloorNumber, RoomNumber: in.RoomNumber, ExpectedVersion: in.ExpectedVersion, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
 	if err != nil {
 		return nil, roomScheduleRPCError(err)
 	}
@@ -109,7 +110,7 @@ func retireRoom(ctx context.Context, svcCtx *svc.ServiceContext, in *appointment
 	if err != nil {
 		return nil, err
 	}
-	v, err := svcCtx.StaffManager.RetireRoom(ctx, p, manager.RetireRoomCommand{RoomID: in.RoomId, ExpectedVersion: in.ExpectedVersion, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
+	v, err := svcCtx.StaffManager.RetireRoom(ctx, p, staffmanager.RetireRoomCommand{RoomID: in.RoomId, ExpectedVersion: in.ExpectedVersion, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
 	if err != nil {
 		return nil, roomScheduleRPCError(err)
 	}
@@ -120,7 +121,7 @@ func addRoomItem(ctx context.Context, svcCtx *svc.ServiceContext, in *appointmen
 	if err != nil {
 		return nil, err
 	}
-	v, err := svcCtx.StaffManager.AddRoomItem(ctx, p, manager.AddRoomItemCommand{RoomID: in.RoomId, ItemID: in.ItemId, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
+	v, err := svcCtx.StaffManager.AddRoomItem(ctx, p, staffmanager.AddRoomItemCommand{RoomID: in.RoomId, ItemID: in.ItemId, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
 	if err != nil {
 		return nil, roomScheduleRPCError(err)
 	}
@@ -147,7 +148,7 @@ func listRoomItems(ctx context.Context, svcCtx *svc.ServiceContext, in *appointm
 	if err != nil {
 		return nil, err
 	}
-	v, err := svcCtx.StaffManager.ListRoomItems(ctx, p, in.RoomId, manager.ListRelationsQuery{Status: manager.Status(in.Status), Page: in.Page, PageSize: in.PageSize})
+	v, err := svcCtx.StaffManager.ListRoomItems(ctx, p, in.RoomId, staffmanager.ListRelationsQuery{Status: manager.Status(in.Status), Page: in.Page, PageSize: in.PageSize})
 	if err != nil {
 		return nil, roomScheduleRPCError(err)
 	}
@@ -177,7 +178,7 @@ func setRoomWindow(ctx context.Context, svcCtx *svc.ServiceContext, in *appointm
 	if err != nil {
 		return nil, err
 	}
-	v, err := svcCtx.StaffManager.SetRoomWindow(ctx, p, manager.SetRoomWindowCommand{WindowID: in.WindowId, RoomID: in.RoomId, Weekday: in.Weekday, Session: manager.Session(in.Session), OpenTime: in.OpenTime, CloseTime: in.CloseTime, ActiveCapacity: in.ActiveCapacity, ExpectedVersion: in.ExpectedVersion, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
+	v, err := svcCtx.StaffManager.SetRoomWindow(ctx, p, staffmanager.SetRoomWindowCommand{WindowID: in.WindowId, RoomID: in.RoomId, Weekday: in.Weekday, Session: manager.Session(in.Session), OpenTime: in.OpenTime, CloseTime: in.CloseTime, ActiveCapacity: in.ActiveCapacity, ExpectedVersion: in.ExpectedVersion, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
 	if err != nil {
 		return nil, roomScheduleRPCError(err)
 	}
@@ -214,7 +215,7 @@ func setItemWindow(ctx context.Context, svcCtx *svc.ServiceContext, in *appointm
 	if err != nil {
 		return nil, err
 	}
-	v, err := svcCtx.StaffManager.SetItemWindow(ctx, p, manager.SetItemWindowCommand{WindowID: in.WindowId, ItemID: in.ItemId, Weekday: in.Weekday, Session: manager.Session(in.Session), StartTime: in.StartTime, BookingCutoffTime: in.BookingCutoffTime, EndTime: in.EndTime, ExpectedVersion: in.ExpectedVersion, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
+	v, err := svcCtx.StaffManager.SetItemWindow(ctx, p, staffmanager.SetItemWindowCommand{WindowID: in.WindowId, ItemID: in.ItemId, Weekday: in.Weekday, Session: manager.Session(in.Session), StartTime: in.StartTime, BookingCutoffTime: in.BookingCutoffTime, EndTime: in.EndTime, ExpectedVersion: in.ExpectedVersion, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
 	if err != nil {
 		return nil, roomScheduleRPCError(err)
 	}

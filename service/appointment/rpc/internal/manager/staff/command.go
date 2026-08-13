@@ -1,4 +1,4 @@
-package manager
+package staff
 
 type OperationMeta struct {
 	OperationID string

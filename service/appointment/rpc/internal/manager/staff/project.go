@@ -1,4 +1,4 @@
-package manager
+package staff
 
 import (
 	"context"
@@ -25,7 +25,7 @@ const (
 
 // Service implements project-domain rules and persistence coordination.
 // Actor-facing use cases are exposed by internal/manager instead of this type.
-func (m *StaffManager) CreateProject(ctx context.Context, operator authn.Principal, command CreateProjectCommand) (ExaminationItem, error) {
+func (m *Manager) CreateProject(ctx context.Context, operator authn.Principal, command CreateProjectCommand) (ExaminationItem, error) {
 	if err := requireCatalogPermission(operator, contractauthz.PermissionAppointmentCreate); err != nil {
 		return ExaminationItem{}, err
 	}
@@ -89,7 +89,7 @@ func (m *StaffManager) CreateProject(ctx context.Context, operator authn.Princip
 	return result, nil
 }
 
-func (m *StaffManager) GetProject(ctx context.Context, operator authn.Principal, itemID string) (ExaminationItem, error) {
+func (m *Manager) GetProject(ctx context.Context, operator authn.Principal, itemID string) (ExaminationItem, error) {
 	if err := requireCatalogPermission(operator, contractauthz.PermissionAppointmentRead); err != nil {
 		return ExaminationItem{}, err
 	}
@@ -107,7 +107,7 @@ func (m *StaffManager) GetProject(ctx context.Context, operator authn.Principal,
 	return item, nil
 }
 
-func (m *StaffManager) ListProjects(ctx context.Context, operator authn.Principal, query ListProjectsQuery) (ListProjectsResult, error) {
+func (m *Manager) ListProjects(ctx context.Context, operator authn.Principal, query ListProjectsQuery) (ListProjectsResult, error) {
 	if err := requireCatalogPermission(operator, contractauthz.PermissionAppointmentRead); err != nil {
 		return ListProjectsResult{}, err
 	}
@@ -135,7 +135,7 @@ func (m *StaffManager) ListProjects(ctx context.Context, operator authn.Principa
 	return ListProjectsResult{Items: items, Page: query.Page, PageSize: query.PageSize, Total: total}, nil
 }
 
-func (m *StaffManager) UpdateProject(ctx context.Context, operator authn.Principal, command UpdateProjectCommand) (ExaminationItem, error) {
+func (m *Manager) UpdateProject(ctx context.Context, operator authn.Principal, command UpdateProjectCommand) (ExaminationItem, error) {
 	if err := requireCatalogPermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
 		return ExaminationItem{}, err
 	}
@@ -214,15 +214,15 @@ func (m *StaffManager) UpdateProject(ctx context.Context, operator authn.Princip
 	return result, nil
 }
 
-func (m *StaffManager) DisableProject(ctx context.Context, operator authn.Principal, command ChangeProjectStatusCommand) (ExaminationItem, error) {
+func (m *Manager) DisableProject(ctx context.Context, operator authn.Principal, command ChangeProjectStatusCommand) (ExaminationItem, error) {
 	return m.changeProjectStatus(ctx, operator, command, StatusDisabled, ActionExaminationItemDisabled)
 }
 
-func (m *StaffManager) EnableProject(ctx context.Context, operator authn.Principal, command ChangeProjectStatusCommand) (ExaminationItem, error) {
+func (m *Manager) EnableProject(ctx context.Context, operator authn.Principal, command ChangeProjectStatusCommand) (ExaminationItem, error) {
 	return m.changeProjectStatus(ctx, operator, command, StatusActive, ActionExaminationItemEnabled)
 }
 
-func (m *StaffManager) changeProjectStatus(
+func (m *Manager) changeProjectStatus(
 	ctx context.Context,
 	operator authn.Principal,
 	command ChangeProjectStatusCommand,

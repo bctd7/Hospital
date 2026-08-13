@@ -1,4 +1,4 @@
-package manager
+package staff
 
 import (
 	"context"
@@ -108,7 +108,7 @@ func replaceItemWindow(values []ItemWeeklyWindow, value ItemWeeklyWindow) []Item
 	return append(values, value)
 }
 
-func (m *StaffManager) mutate(ctx context.Context, operator authn.Principal, meta OperationMeta, resourceType, resourceID, action string, payload any, departmentID func() string, apply func(RoomScheduleTxStore) (any, string, error), replay func([]byte) error) error {
+func (m *Manager) mutate(ctx context.Context, operator authn.Principal, meta OperationMeta, resourceType, resourceID, action string, payload any, departmentID func() string, apply func(RoomScheduleTxStore) (any, string, error), replay func([]byte) error) error {
 	fingerprint := fingerprint(action, payload)
 	return m.store.WithinRoomScheduleTransaction(ctx, func(tx RoomScheduleTxStore) error {
 		operation, exists, err := tx.FindOperation(ctx, meta.OperationID)
@@ -218,7 +218,7 @@ func scopedDepartment(operator authn.Principal, requested string) (string, error
 	}
 	return own, nil
 }
-func (m *StaffManager) generation(ctx context.Context, departmentID string) string {
+func (m *Manager) generation(ctx context.Context, departmentID string) string {
 	if m.cache == nil {
 		return "0"
 	}
@@ -229,7 +229,7 @@ func (m *StaffManager) generation(ctx context.Context, departmentID string) stri
 	return value
 }
 
-func (m *StaffManager) getItemSummary(ctx context.Context, itemID string) (ItemSummary, error) {
+func (m *Manager) getItemSummary(ctx context.Context, itemID string) (ItemSummary, error) {
 	value, found, err := loadCached(ctx, m.cache, &m.flights, "item-summary:"+itemID, hotReadCacheTTL, func() (ItemSummary, bool, error) {
 		item, loadErr := m.store.GetItemSummary(ctx, itemID)
 		if errors.Is(loadErr, ErrNotFound) {
@@ -248,10 +248,10 @@ func (m *StaffManager) getItemSummary(ctx context.Context, itemID string) (ItemS
 
 // InvalidateItem is called after a project transaction commits so patient-facing
 // item summaries and all department-scoped projections switch generations.
-func (m *StaffManager) InvalidateItem(ctx context.Context, departmentID, itemID string) {
+func (m *Manager) InvalidateItem(ctx context.Context, departmentID, itemID string) {
 	m.invalidate(ctx, departmentID, "item-summary:"+itemID)
 }
-func (m *StaffManager) invalidate(ctx context.Context, departmentID string, keys ...string) {
+func (m *Manager) invalidate(ctx context.Context, departmentID string, keys ...string) {
 	if m.cache == nil {
 		return
 	}

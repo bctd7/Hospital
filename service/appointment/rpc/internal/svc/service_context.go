@@ -11,14 +11,16 @@ import (
 	"hospital/common/authn"
 	"hospital/common/authn/versionredis"
 	"hospital/service/appointment/rpc/internal/config"
-	"hospital/service/appointment/rpc/internal/manager"
+	appointmentmanager "hospital/service/appointment/rpc/internal/manager"
+	patientmanager "hospital/service/appointment/rpc/internal/manager/patient"
+	staffmanager "hospital/service/appointment/rpc/internal/manager/staff"
 	"hospital/service/appointment/rpc/internal/repository/mysqlstore"
 )
 
 type ServiceContext struct {
 	Config                        config.Config
-	StaffManager                  *manager.StaffManager
-	PatientManager                *manager.PatientManager
+	StaffManager                  *staffmanager.Manager
+	PatientManager                *patientmanager.Manager
 	TokenManager                  *authn.TokenManager
 	AuthorizationVersionValidator *authn.AuthorizationVersionValidator
 	AppointmentRedis              *redis.Client
@@ -85,21 +87,21 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		return nil, fmt.Errorf("create appointment token manager: %w", err)
 	}
 
-	appointmentCache, err := manager.NewRedisCache(appointmentRedisClient, c.AppointmentRedis.Prefix)
+	appointmentCache, err := appointmentmanager.NewRedisCache(appointmentRedisClient, c.AppointmentRedis.Prefix)
 	if err != nil {
 		appointmentRedisClient.Close()
 		authorizationRedisClient.Close()
 		store.Close()
 		return nil, fmt.Errorf("create appointment query cache: %w", err)
 	}
-	staffManager, err := manager.NewStaffManager(store, store, appointmentCache)
+	staffManager, err := staffmanager.NewManager(store, store, appointmentCache)
 	if err != nil {
 		appointmentRedisClient.Close()
 		authorizationRedisClient.Close()
 		store.Close()
 		return nil, fmt.Errorf("create staff appointment manager: %w", err)
 	}
-	patientManager, err := manager.NewPatientManager(store, appointmentCache)
+	patientManager, err := patientmanager.NewManager(store, appointmentCache)
 	if err != nil {
 		appointmentRedisClient.Close()
 		authorizationRedisClient.Close()
