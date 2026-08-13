@@ -35,7 +35,7 @@ func (l *ListPatientExaminationItemsLogic) ListPatientExaminationItems(req *type
 	}
 	value, err := l.svcCtx.Appointment.ListExaminationItems(ctx, &appointmentv1.ListExaminationItemsRequest{
 		OwnerDepartmentId: req.OwnerDepartmentID, Status: "active", Page: req.Page,
-		PageSize: req.PageSize, RequestId: logging.RequestIDFromContext(l.ctx),
+		PageSize: req.PageSize, RequestId: logging.RequestIDFromContext(l.ctx), Audience: "patient",
 	})
 	if err != nil {
 		return nil, err

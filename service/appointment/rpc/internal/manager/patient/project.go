@@ -52,7 +52,13 @@ func (m *Manager) ListProjectWindows(ctx context.Context, patient authn.Principa
 }
 
 func requirePatient(principal authn.Principal) error {
-	if principal.AccountType != authn.AccountTypePatient || principal.AccountID == "" {
+	if principal.AccountID == "" || principal.Status != authn.AccountStatusActive {
+		return ErrForbidden
+	}
+	allowed := principal.AccountType == authn.AccountTypePatient ||
+		(principal.AccountType == authn.AccountTypeStaff &&
+			(principal.HasRole(authn.RoleDepartmentDoctor) || principal.HasRole(authn.RoleSuperAdmin)))
+	if !allowed {
 		return ErrForbidden
 	}
 	if _, err := normalizeUUID(principal.AccountID, "patient account_id"); err != nil {

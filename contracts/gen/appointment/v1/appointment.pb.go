@@ -203,6 +203,7 @@ type ListExaminationItemsRequest struct {
 	Page              int64                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize          int64                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
 	RequestId         string                 `protobuf:"bytes,5,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	Audience          string                 `protobuf:"bytes,6,opt,name=audience,proto3" json:"audience,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -268,6 +269,13 @@ func (x *ListExaminationItemsRequest) GetPageSize() int64 {
 func (x *ListExaminationItemsRequest) GetRequestId() string {
 	if x != nil {
 		return x.RequestId
+	}
+	return ""
+}
+
+func (x *ListExaminationItemsRequest) GetAudience() string {
+	if x != nil {
+		return x.Audience
 	}
 	return ""
 }
@@ -3321,14 +3329,15 @@ const file_contracts_proto_appointment_v1_appointment_proto_rawDesc = "" +
 	"\x19GetExaminationItemRequest\x12\x17\n" +
 	"\aitem_id\x18\x01 \x01(\tR\x06itemId\x12\x1d\n" +
 	"\n" +
-	"request_id\x18\x02 \x01(\tR\trequestId\"\xb5\x01\n" +
+	"request_id\x18\x02 \x01(\tR\trequestId\"\xd1\x01\n" +
 	"\x1bListExaminationItemsRequest\x12.\n" +
 	"\x13owner_department_id\x18\x01 \x01(\tR\x11ownerDepartmentId\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x03R\x04page\x12\x1b\n" +
 	"\tpage_size\x18\x04 \x01(\x03R\bpageSize\x12\x1d\n" +
 	"\n" +
-	"request_id\x18\x05 \x01(\tR\trequestId\"\xa5\x01\n" +
+	"request_id\x18\x05 \x01(\tR\trequestId\x12\x1a\n" +
+	"\baudience\x18\x06 \x01(\tR\baudience\"\xa5\x01\n" +
 	"\x1cListExaminationItemsResponse\x12>\n" +
 	"\x05items\x18\x01 \x03(\v2(.hospital.appointment.v1.ExaminationItemR\x05items\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x03R\x04page\x12\x1b\n" +

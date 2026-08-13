@@ -68,6 +68,7 @@ message ListExaminationItemsRequest {
   int64 page = 3;
   int64 page_size = 4;
   string request_id = 5;
+  string audience = 6;
 }
 
 message ListExaminationItemsResponse {

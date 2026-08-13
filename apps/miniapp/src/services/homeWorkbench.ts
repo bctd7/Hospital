@@ -5,6 +5,8 @@ import type {
   HomeWorkbenchView,
 } from "@/types/homeWorkbench";
 
+// 首页结构是静态编排；检查项目和预约数据由目标页面通过真实 API 加载。
+
 function patientHome(): HomeWorkbenchView {
   return {
     variant: "patient",
@@ -17,7 +19,7 @@ function patientHome(): HomeWorkbenchView {
       description: "查看项目说明、可检查房间和本周时间",
       symbol: "检",
       tone: "cyan",
-      badge: "Mock 预览",
+      badge: "真实数据",
       target: { type: "navigate", url: "/pages/appointment/create/index" },
     },
     secondaryAction: {
@@ -130,8 +132,8 @@ function patientHome(): HomeWorkbenchView {
     ],
     metrics: [],
     managementActions: [],
-    notice: "本页预约流程为前端 Mock 演示，不会提交真实预约。",
-    mock: true,
+    notice: "检查项目、本周可约房间和预约提交均已接入真实 Appointment 数据。",
+    mock: false,
   };
 }
 
@@ -159,7 +161,7 @@ export function buildHomeWorkbench(
   return view;
 }
 
-export const mockHomeWorkbenchAdapter: HomeWorkbenchAdapter = {
+export const homeWorkbenchAdapter: HomeWorkbenchAdapter = {
   async load(variant, principal) {
     return Promise.resolve(buildHomeWorkbench(variant, principal));
   },

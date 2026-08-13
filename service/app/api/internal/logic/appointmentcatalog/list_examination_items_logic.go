@@ -39,6 +39,7 @@ func (l *ListExaminationItemsLogic) ListExaminationItems(req *types.ListExaminat
 		Page:              req.Page,
 		PageSize:          req.PageSize,
 		RequestId:         logging.RequestIDFromContext(l.ctx),
+		Audience:          "staff",
 	})
 	if err != nil {
 		return nil, err

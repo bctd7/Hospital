@@ -3,7 +3,7 @@ import { onShow } from "@dcloudio/uni-app";
 import { ref } from "vue";
 
 import PatientServiceHome from "@/components/home/PatientServiceHome.vue";
-import { mockHomeWorkbenchAdapter } from "@/mocks/homeWorkbench";
+import { homeWorkbenchAdapter } from "@/services/homeWorkbench";
 import { sessionState } from "@/stores/session";
 import type { HomeAction, HomeWorkbenchView } from "@/types/homeWorkbench";
 
@@ -24,7 +24,7 @@ async function loadWorkbench() {
   loading.value = true;
   error.value = "";
   try {
-    const result = await mockHomeWorkbenchAdapter.load(
+    const result = await homeWorkbenchAdapter.load(
       sessionState.appVariant,
       sessionState.principal,
     );

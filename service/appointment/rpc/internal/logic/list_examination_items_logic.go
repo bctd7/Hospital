@@ -34,7 +34,11 @@ func (l *ListExaminationItemsLogic) ListExaminationItems(in *appointmentv1.ListE
 	if in == nil {
 		return nil, projectRPCError(manager.ErrInvalid)
 	}
-	if principal.AccountType == authn.AccountTypePatient {
+	if in.Audience != "" && in.Audience != "patient" && in.Audience != "staff" {
+		return nil, projectRPCError(manager.ErrInvalid)
+	}
+	patientAudience := in.Audience == "patient" || (in.Audience == "" && principal.AccountType == authn.AccountTypePatient)
+	if patientAudience {
 		result, err := l.svcCtx.PatientManager.ListProjects(l.ctx, principal, in.OwnerDepartmentId, in.Page, in.PageSize)
 		if err != nil {
 			return nil, projectRPCError(err)

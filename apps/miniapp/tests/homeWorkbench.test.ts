@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildHomeWorkbench } from "@/mocks/homeWorkbench";
+import { buildHomeWorkbench } from "@/services/homeWorkbench";
 import type { CurrentIdentityResponse } from "@/types/auth";
 
 function principal(roles: string[], permissions: string[]): CurrentIdentityResponse {
@@ -15,7 +15,7 @@ function principal(roles: string[], permissions: string[]): CurrentIdentityRespo
   };
 }
 
-describe("home workbench mock", () => {
+describe("home workbench", () => {
   it("uses a patient examination browser rather than a management label", () => {
     const view = buildHomeWorkbench("patient", principal([], []));
 
@@ -24,6 +24,9 @@ describe("home workbench mock", () => {
       type: "navigate",
       url: "/pages/appointment/create/index",
     });
+    expect(view.primaryAction?.badge).toBe("真实数据");
+    expect(view.notice).toContain("真实 Appointment 数据");
+    expect(view.mock).toBe(false);
     expect(view.managementActions).toHaveLength(0);
   });
 
