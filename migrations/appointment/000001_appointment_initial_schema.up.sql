@@ -184,4 +184,3 @@ CREATE TABLE appointment_resource_audit (
     CONSTRAINT fk_appointment_resource_audit_operation
         FOREIGN KEY (operation_id) REFERENCES appointment_resource_operations (operation_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
