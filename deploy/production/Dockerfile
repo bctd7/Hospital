@@ -12,6 +12,8 @@ ARG TARGETARCH=amd64
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -trimpath -ldflags="-s -w" -o /out/identity-rpc ./service/identity/rpc && \
     CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+    go build -trimpath -ldflags="-s -w" -o /out/appointment-rpc ./service/appointment/rpc && \
+    CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -trimpath -ldflags="-s -w" -o /out/app-api ./service/app/api && \
     CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -trimpath -ldflags="-s -w" -o /out/db-migrate ./tools/db-migrate && \
@@ -42,6 +44,15 @@ COPY deploy/production/config/identity-rpc.yaml /etc/hospital/identity-rpc.yaml
 
 USER 65532:65532
 ENTRYPOINT ["/usr/local/bin/identity-rpc", "-f", "/etc/hospital/identity-rpc.yaml"]
+
+FROM alpine:3.22 AS appointment-rpc
+
+RUN apk add --no-cache ca-certificates tzdata
+COPY --from=builder /out/appointment-rpc /usr/local/bin/appointment-rpc
+COPY deploy/production/config/appointment-rpc.yaml /etc/hospital/appointment-rpc.yaml
+
+USER 65532:65532
+ENTRYPOINT ["/usr/local/bin/appointment-rpc", "-f", "/etc/hospital/appointment-rpc.yaml"]
 
 FROM alpine:3.22 AS app-api
 

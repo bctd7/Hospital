@@ -6,6 +6,8 @@ package handler
 import (
 	"net/http"
 
+	appointmentcatalog "hospital/service/app/api/internal/handler/appointmentcatalog"
+	appointmentresources "hospital/service/app/api/internal/handler/appointmentresources"
 	auth "hospital/service/app/api/internal/handler/auth"
 	identityadmin "hospital/service/app/api/internal/handler/identityadmin"
 	identityprofile "hospital/service/app/api/internal/handler/identityprofile"
@@ -18,6 +20,139 @@ import (
 )
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AccessToken},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/admin/appointment/examination-items",
+					Handler: appointmentcatalog.ListExaminationItemsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/appointment/examination-items",
+					Handler: appointmentcatalog.CreateExaminationItemHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/admin/appointment/examination-items/:itemId",
+					Handler: appointmentcatalog.GetExaminationItemHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/admin/appointment/examination-items/:itemId",
+					Handler: appointmentcatalog.UpdateExaminationItemHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/appointment/examination-items/:itemId/disable",
+					Handler: appointmentcatalog.DisableExaminationItemHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/appointment/examination-items/:itemId/enable",
+					Handler: appointmentcatalog.EnableExaminationItemHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AccessToken},
+			[]rest.Route{
+				{
+					Method:  http.MethodPut,
+					Path:    "/admin/appointment/examination-items/:itemId/weekly-window",
+					Handler: appointmentresources.SetItemWeeklyWindowHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/admin/appointment/examination-items/:resourceId/weekly-windows",
+					Handler: appointmentresources.ListItemWeeklyWindowsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/appointment/item-weekly-windows/:resourceId/disable",
+					Handler: appointmentresources.DisableItemWeeklyWindowHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/appointment/room-examination-items/:resourceId/disable",
+					Handler: appointmentresources.DisableRoomExaminationItemHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/appointment/room-examination-items/:resourceId/enable",
+					Handler: appointmentresources.EnableRoomExaminationItemHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/appointment/room-weekly-windows/:resourceId/disable",
+					Handler: appointmentresources.DisableRoomWeeklyWindowHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/admin/appointment/rooms",
+					Handler: appointmentresources.ListAppointmentRoomsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/appointment/rooms",
+					Handler: appointmentresources.CreateAppointmentRoomHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/appointment/rooms/:resourceId/disable",
+					Handler: appointmentresources.DisableAppointmentRoomHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/appointment/rooms/:resourceId/enable",
+					Handler: appointmentresources.EnableAppointmentRoomHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/admin/appointment/rooms/:resourceId/weekly-windows",
+					Handler: appointmentresources.ListRoomWeeklyWindowsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/admin/appointment/rooms/:roomId",
+					Handler: appointmentresources.GetAppointmentRoomHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/admin/appointment/rooms/:roomId",
+					Handler: appointmentresources.UpdateAppointmentRoomHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/admin/appointment/rooms/:roomId/examination-items",
+					Handler: appointmentresources.ListRoomExaminationItemsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/appointment/rooms/:roomId/examination-items",
+					Handler: appointmentresources.AddRoomExaminationItemHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/admin/appointment/rooms/:roomId/weekly-window",
+					Handler: appointmentresources.SetRoomWeeklyWindowHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/appointment/examination-items/:itemId/rooms",
+					Handler: appointmentresources.ListAvailableRoomsByExaminationItemHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
 	server.AddRoutes(
 		[]rest.Route{
 			{

@@ -1,0 +1,165 @@
+syntax = "v1"
+
+type (
+	AppointmentRoomResponse {
+		RoomID       string `json:"room_id"`
+		DepartmentID string `json:"department_id"`
+		Name         string `json:"name"`
+		Status       string `json:"status"`
+		Version      int64  `json:"version"`
+		CreatedAt    string `json:"created_at"`
+		UpdatedAt    string `json:"updated_at"`
+	}
+	CreateAppointmentRoomRequest {
+		DepartmentID string `json:"department_id"`
+		Name         string `json:"name"`
+		OperationID  string `json:"operation_id"`
+	}
+	AppointmentRoomPathRequest { RoomID string `path:"roomId"` }
+	ListAppointmentRoomsRequest {
+		DepartmentID string `form:"department_id"`
+		Status       string `form:"status,optional"`
+		Page         int64  `form:"page,default=1"`
+		PageSize     int64  `form:"page_size,default=20"`
+	}
+	ListAppointmentRoomsResponse {
+		Rooms    []AppointmentRoomResponse `json:"rooms"`
+		Page     int64                     `json:"page"`
+		PageSize int64                     `json:"page_size"`
+		Total    int64                     `json:"total"`
+	}
+	UpdateAppointmentRoomRequest {
+		RoomID          string `path:"roomId"`
+		Name            string `json:"name"`
+		ExpectedVersion int64  `json:"expected_version"`
+		OperationID     string `json:"operation_id"`
+	}
+	ChangeAppointmentResourceStatusRequest {
+		ResourceID      string `path:"resourceId"`
+		ExpectedVersion int64  `json:"expected_version"`
+		OperationID     string `json:"operation_id"`
+	}
+	AddRoomExaminationItemAPIRequest {
+		RoomID      string `path:"roomId"`
+		ItemID      string `json:"item_id"`
+		OperationID string `json:"operation_id"`
+	}
+	ListRoomExaminationItemsAPIRequest {
+		RoomID   string `path:"roomId"`
+		Status   string `form:"status,optional"`
+		Page     int64  `form:"page,default=1"`
+		PageSize int64  `form:"page_size,default=20"`
+	}
+	ItemRoomsPathRequest { ItemID string `path:"itemId"` }
+	RoomExaminationItemResponse {
+		RelationID string `json:"relation_id"`
+		RoomID     string `json:"room_id"`
+		ItemID     string `json:"item_id"`
+		RoomName   string `json:"room_name"`
+		ItemName   string `json:"item_name"`
+		Status     string `json:"status"`
+		Version    int64  `json:"version"`
+		CreatedAt  string `json:"created_at"`
+		UpdatedAt  string `json:"updated_at"`
+	}
+	ListRoomExaminationItemsAPIResponse {
+		Relations []RoomExaminationItemResponse `json:"relations"`
+		Page      int64                         `json:"page"`
+		PageSize  int64                         `json:"page_size"`
+		Total     int64                         `json:"total"`
+	}
+	SetRoomWeeklyWindowAPIRequest {
+		RoomID          string `path:"roomId"`
+		WindowID        string `json:"window_id,optional"`
+		Weekday         int32  `json:"weekday"`
+		Session         string `json:"session"`
+		OpenTime        string `json:"open_time"`
+		CloseTime       string `json:"close_time"`
+		ActiveCapacity  int64  `json:"active_capacity"`
+		ExpectedVersion int64  `json:"expected_version"`
+		OperationID     string `json:"operation_id"`
+	}
+	SetItemWeeklyWindowAPIRequest {
+		ItemID            string `path:"itemId"`
+		WindowID          string `json:"window_id,optional"`
+		Weekday           int32  `json:"weekday"`
+		Session           string `json:"session"`
+		StartTime         string `json:"start_time"`
+		BookingCutoffTime string `json:"booking_cutoff_time"`
+		EndTime           string `json:"end_time"`
+		ExpectedVersion   int64  `json:"expected_version"`
+		OperationID       string `json:"operation_id"`
+	}
+	WeeklyWindowsPathRequest { ResourceID string `path:"resourceId"` }
+	RoomWeeklyWindowResponse {
+		WindowID       string `json:"window_id"`
+		RoomID         string `json:"room_id"`
+		Weekday        int32  `json:"weekday"`
+		Session        string `json:"session"`
+		OpenTime       string `json:"open_time"`
+		CloseTime      string `json:"close_time"`
+		ActiveCapacity int64  `json:"active_capacity"`
+		Status         string `json:"status"`
+		Version        int64  `json:"version"`
+		CreatedAt      string `json:"created_at"`
+		UpdatedAt      string `json:"updated_at"`
+	}
+	ItemWeeklyWindowResponse {
+		WindowID         string `json:"window_id"`
+		ItemID           string `json:"item_id"`
+		Weekday          int32  `json:"weekday"`
+		Session          string `json:"session"`
+		StartTime        string `json:"start_time"`
+		BookingCutoffTime string `json:"booking_cutoff_time"`
+		EndTime          string `json:"end_time"`
+		Status           string `json:"status"`
+		Version          int64  `json:"version"`
+		CreatedAt        string `json:"created_at"`
+		UpdatedAt        string `json:"updated_at"`
+	}
+	ListRoomWeeklyWindowsAPIResponse { Windows []RoomWeeklyWindowResponse `json:"windows"` }
+	ListItemWeeklyWindowsAPIResponse { Windows []ItemWeeklyWindowResponse `json:"windows"` }
+)
+
+@server (
+	prefix: /api/v1
+	group: appointmentresources
+	middleware: AccessToken
+	authType: BearerAuth
+)
+service app-api {
+	@handler listAppointmentRooms
+	get /admin/appointment/rooms (ListAppointmentRoomsRequest) returns (ListAppointmentRoomsResponse)
+	@handler getAppointmentRoom
+	get /admin/appointment/rooms/:roomId (AppointmentRoomPathRequest) returns (AppointmentRoomResponse)
+	@handler createAppointmentRoom
+	post /admin/appointment/rooms (CreateAppointmentRoomRequest) returns (AppointmentRoomResponse)
+	@handler updateAppointmentRoom
+	put /admin/appointment/rooms/:roomId (UpdateAppointmentRoomRequest) returns (AppointmentRoomResponse)
+	@handler disableAppointmentRoom
+	post /admin/appointment/rooms/:resourceId/disable (ChangeAppointmentResourceStatusRequest) returns (AppointmentRoomResponse)
+	@handler enableAppointmentRoom
+	post /admin/appointment/rooms/:resourceId/enable (ChangeAppointmentResourceStatusRequest) returns (AppointmentRoomResponse)
+	@handler listRoomExaminationItems
+	get /admin/appointment/rooms/:roomId/examination-items (ListRoomExaminationItemsAPIRequest) returns (ListRoomExaminationItemsAPIResponse)
+	@handler addRoomExaminationItem
+	post /admin/appointment/rooms/:roomId/examination-items (AddRoomExaminationItemAPIRequest) returns (RoomExaminationItemResponse)
+	@handler disableRoomExaminationItem
+	post /admin/appointment/room-examination-items/:resourceId/disable (ChangeAppointmentResourceStatusRequest) returns (RoomExaminationItemResponse)
+	@handler enableRoomExaminationItem
+	post /admin/appointment/room-examination-items/:resourceId/enable (ChangeAppointmentResourceStatusRequest) returns (RoomExaminationItemResponse)
+	@handler setRoomWeeklyWindow
+	put /admin/appointment/rooms/:roomId/weekly-window (SetRoomWeeklyWindowAPIRequest) returns (RoomWeeklyWindowResponse)
+	@handler listRoomWeeklyWindows
+	get /admin/appointment/rooms/:resourceId/weekly-windows (WeeklyWindowsPathRequest) returns (ListRoomWeeklyWindowsAPIResponse)
+	@handler disableRoomWeeklyWindow
+	post /admin/appointment/room-weekly-windows/:resourceId/disable (ChangeAppointmentResourceStatusRequest) returns (RoomWeeklyWindowResponse)
+	@handler setItemWeeklyWindow
+	put /admin/appointment/examination-items/:itemId/weekly-window (SetItemWeeklyWindowAPIRequest) returns (ItemWeeklyWindowResponse)
+	@handler listItemWeeklyWindows
+	get /admin/appointment/examination-items/:resourceId/weekly-windows (WeeklyWindowsPathRequest) returns (ListItemWeeklyWindowsAPIResponse)
+	@handler disableItemWeeklyWindow
+	post /admin/appointment/item-weekly-windows/:resourceId/disable (ChangeAppointmentResourceStatusRequest) returns (ItemWeeklyWindowResponse)
+	@handler listAvailableRoomsByExaminationItem
+	get /appointment/examination-items/:itemId/rooms (ItemRoomsPathRequest) returns (ListRoomExaminationItemsAPIResponse)
+}

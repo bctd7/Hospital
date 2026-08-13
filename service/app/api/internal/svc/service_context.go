@@ -8,6 +8,7 @@ import (
 	"crypto/ed25519"
 	"encoding/base64"
 	"fmt"
+	"hospital/service/appointment/rpc/appointmentservice"
 	"net/http"
 	"time"
 
@@ -27,6 +28,7 @@ import (
 type ServiceContext struct {
 	Config      config.Config
 	Identity    identityservice.IdentityService
+	Appointment appointmentservice.AppointmentService
 	AccessToken func(next http.HandlerFunc) http.HandlerFunc
 	redisClient *redis.Client
 }
@@ -70,9 +72,15 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 	for _, method := range identityRPCMethodsWithSensitiveContent() {
 		zrpc.DontLogClientContentForMethod(method)
 	}
+
 	return &ServiceContext{
-		Config:      c,
-		Identity:    identityservice.NewIdentityService(zrpc.MustNewClient(c.IdentityRPC)),
+		Config: c,
+		Identity: identityservice.NewIdentityService(
+			zrpc.MustNewClient(c.IdentityRPC),
+		),
+		Appointment: appointmentservice.NewAppointmentService(
+			zrpc.MustNewClient(c.AppointmentRPC),
+		),
 		AccessToken: accessToken.Handle,
 		redisClient: redisClient,
 	}, nil

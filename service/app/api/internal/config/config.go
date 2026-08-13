@@ -12,6 +12,7 @@ type Config struct {
 	rest.RestConf
 	Environment        string `json:",default=local"`
 	IdentityRPC        zrpc.RpcClientConf
+	AppointmentRPC     zrpc.RpcClientConf
 	AuthorizationRedis struct {
 		Addr     string
 		Password string `json:",optional"`

@@ -18,11 +18,19 @@ if (-not (Test-Path -LiteralPath $environmentFile)) {
 
 $identityUser = Get-RequiredEnvironmentValue -Name "IDENTITY_MYSQL_USER"
 $identityPassword = Get-RequiredEnvironmentValue -Name "IDENTITY_MYSQL_PASSWORD"
+$appointmentUser = Get-RequiredEnvironmentValue -Name "APPOINTMENT_MYSQL_USER"
+$appointmentPassword = Get-RequiredEnvironmentValue -Name "APPOINTMENT_MYSQL_PASSWORD"
 if ($identityUser -notmatch "^[A-Za-z0-9_]+$") {
     throw "IDENTITY_MYSQL_USER contains unsupported characters."
 }
 if ($identityPassword -notmatch "^[A-Za-z0-9_.@%+=:-]+$") {
     throw "For local bootstrap, IDENTITY_MYSQL_PASSWORD may only contain letters, numbers, and ._@%+=:- characters."
+}
+if ($appointmentUser -notmatch "^[A-Za-z0-9_]+$") {
+    throw "APPOINTMENT_MYSQL_USER contains unsupported characters."
+}
+if ($appointmentPassword -notmatch "^[A-Za-z0-9_.@%+=:-]+$") {
+    throw "For local bootstrap, APPOINTMENT_MYSQL_PASSWORD may only contain letters, numbers, and ._@%+=:- characters."
 }
 
 $composeArguments = @(
@@ -58,6 +66,12 @@ CREATE DATABASE IF NOT EXISTS hospital_identity
 CREATE USER IF NOT EXISTS '$identityUser'@'%'
     IDENTIFIED BY '$identityPassword';
 GRANT ALL PRIVILEGES ON hospital_identity.* TO '$identityUser'@'%';
+CREATE DATABASE IF NOT EXISTS hospital_appointment
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_0900_ai_ci;
+CREATE USER IF NOT EXISTS '$appointmentUser'@'%'
+    IDENTIFIED BY '$appointmentPassword';
+GRANT ALL PRIVILEGES ON hospital_appointment.* TO '$appointmentUser'@'%';
 FLUSH PRIVILEGES;
 "@
 
@@ -71,7 +85,12 @@ FLUSH PRIVILEGES;
         throw "Identity migration failed after local database bootstrap."
     }
 
-    Write-Host "Local Identity database is ready."
+    & (Join-Path $PSScriptRoot "migrate.ps1") -Service appointment -Direction up
+    if ($LASTEXITCODE -ne 0) {
+        throw "Appointment migration failed after local database bootstrap."
+    }
+
+    Write-Host "Local Identity and Appointment databases are ready."
 }
 finally {
     Pop-Location

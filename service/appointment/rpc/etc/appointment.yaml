@@ -1,0 +1,26 @@
+Name: appointment-rpc
+ListenOn: 0.0.0.0:8081
+Mode: dev
+Environment: "${APP_ENV}"
+Log:
+  ServiceName: appointment-rpc
+  Mode: console
+  Encoding: json
+  Level: info
+MySQL:
+  DataSource: ${APPOINTMENT_MYSQL_DSN}
+AuthorizationRedis:
+  Addr: ${REDIS_HOST}:${REDIS_PORT}
+  Password: ${REDIS_PASSWORD}
+  DB: 0
+  VersionPrefix: "identity:authorization-version:"
+AppointmentRedis:
+  Addr: ${REDIS_HOST}:${REDIS_PORT}
+  Password: ${REDIS_PASSWORD}
+  DB: 0
+  Prefix: "appointment:"
+Token:
+  Issuer: hospital-identity
+  Audience: hospital-services
+  AccessPublicKeyBase64: ${IDENTITY_ACCESS_PUBLIC_KEY_BASE64}
+  AccessTTLSeconds: 900

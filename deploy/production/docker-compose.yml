@@ -52,6 +52,30 @@ services:
     networks:
       - backend
 
+  appointment-migrate:
+    build:
+      context: ../..
+      dockerfile: deploy/production/Dockerfile
+      target: db-migrate
+    restart: "no"
+    env_file:
+      - ${HOSPITAL_PRODUCTION_ENV_FILE:-.env.production}
+    command:
+      - -migrations
+      - /migrations
+      - -dsn-env
+      - APPOINTMENT_MYSQL_DSN
+      - -direction
+      - up
+    volumes:
+      - ../../migrations/appointment:/migrations:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+    mem_limit: 128m
+    networks:
+      - backend
+
   redis:
     image: redis:7.4.10-alpine
     restart: unless-stopped
@@ -177,6 +201,28 @@ services:
       - backend
       - edge
 
+  appointment-rpc:
+    build:
+      context: ../..
+      dockerfile: deploy/production/Dockerfile
+      target: appointment-rpc
+    restart: unless-stopped
+    env_file:
+      - ${HOSPITAL_PRODUCTION_ENV_FILE:-.env.production}
+    depends_on:
+      appointment-migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    expose:
+      - "8081"
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    mem_limit: 384m
+    networks:
+      - backend
+
   app-api:
     build:
       context: ../..
@@ -187,6 +233,8 @@ services:
       - ${HOSPITAL_PRODUCTION_ENV_FILE:-.env.production}
     depends_on:
       identity-rpc:
+        condition: service_started
+      appointment-rpc:
         condition: service_started
     ports:
       - "${APP_BIND_ADDRESS:-0.0.0.0}:${APP_PORT:-8888}:8888"

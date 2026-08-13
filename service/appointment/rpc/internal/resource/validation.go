@@ -1,0 +1,100 @@
+package resource
+
+import (
+	"fmt"
+	"strings"
+	"time"
+	"unicode"
+	"unicode/utf8"
+
+	"github.com/google/uuid"
+)
+
+const (
+	defaultPage     = 1
+	defaultPageSize = 20
+	maxPageSize     = 100
+)
+
+func normalizeUUID(value, field string) (string, error) {
+	parsed, err := uuid.Parse(strings.TrimSpace(value))
+	if err != nil {
+		return "", fmt.Errorf("%w: %s must be a UUID", ErrInvalid, field)
+	}
+	return parsed.String(), nil
+}
+
+func normalizeName(value string) (string, error) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return "", fmt.Errorf("%w: name is required", ErrInvalid)
+	}
+	if utf8.RuneCountInString(value) > 128 {
+		return "", fmt.Errorf("%w: name exceeds 128 characters", ErrInvalid)
+	}
+	if strings.IndexFunc(value, unicode.IsControl) >= 0 {
+		return "", fmt.Errorf("%w: name contains control characters", ErrInvalid)
+	}
+	return value, nil
+}
+
+func normalizeOperation(meta OperationMeta) (OperationMeta, error) {
+	var err error
+	meta.OperationID, err = normalizeUUID(meta.OperationID, "operation_id")
+	if err != nil {
+		return OperationMeta{}, err
+	}
+	meta.RequestID = strings.TrimSpace(meta.RequestID)
+	if len(meta.RequestID) > 64 || strings.IndexFunc(meta.RequestID, unicode.IsControl) >= 0 {
+		return OperationMeta{}, fmt.Errorf("%w: invalid request_id", ErrInvalid)
+	}
+	return meta, nil
+}
+
+func normalizePage(page, pageSize int64) (int64, int64, int64, error) {
+	if page == 0 {
+		page = defaultPage
+	}
+	if pageSize == 0 {
+		pageSize = defaultPageSize
+	}
+	if page < 1 || pageSize < 1 || pageSize > maxPageSize {
+		return 0, 0, 0, fmt.Errorf("%w: invalid page or page_size", ErrInvalid)
+	}
+	if page-1 > (1<<63-1)/pageSize {
+		return 0, 0, 0, fmt.Errorf("%w: page offset exceeds supported range", ErrInvalid)
+	}
+	return page, pageSize, (page - 1) * pageSize, nil
+}
+
+func normalizeSlot(weekday int32, session Session) (int32, Session, error) {
+	if weekday < 1 || weekday > 7 {
+		return 0, "", fmt.Errorf("%w: weekday must be between 1 and 7", ErrInvalid)
+	}
+	session = Session(strings.TrimSpace(string(session)))
+	if !session.Valid() {
+		return 0, "", fmt.Errorf("%w: invalid session", ErrInvalid)
+	}
+	return weekday, session, nil
+}
+
+func normalizeClock(value, field string) (string, int, error) {
+	value = strings.TrimSpace(value)
+	parsed, err := time.Parse("15:04", value)
+	if err != nil {
+		return "", 0, fmt.Errorf("%w: %s must use HH:MM", ErrInvalid, field)
+	}
+	minutes := parsed.Hour()*60 + parsed.Minute()
+	return parsed.Format("15:04"), minutes, nil
+}
+
+func containsWindow(room RoomWeeklyWindow, item ItemWeeklyWindow) bool {
+	if room.Status != StatusActive || item.Status != StatusActive || room.Weekday != item.Weekday || room.Session != item.Session {
+		return false
+	}
+	_, roomStart, _ := normalizeClock(room.OpenTime, "open_time")
+	_, roomEnd, _ := normalizeClock(room.CloseTime, "close_time")
+	_, itemStart, _ := normalizeClock(item.StartTime, "start_time")
+	_, itemEnd, _ := normalizeClock(item.EndTime, "end_time")
+	return roomStart <= itemStart && itemEnd <= roomEnd
+}

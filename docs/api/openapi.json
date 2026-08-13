@@ -15,6 +15,1932 @@
   },
   "basePath": "/",
   "paths": {
+    "/api/v1/admin/appointment/examination-items": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listExaminationItems",
+        "operationId": "appointmentcatalogListExaminationItems",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "owner_department_id",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "status",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "item_id",
+                      "owner_department_id",
+                      "name",
+                      "description",
+                      "status",
+                      "version",
+                      "created_at",
+                      "updated_at"
+                    ],
+                    "properties": {
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "item_id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "owner_department_id": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "integer"
+                },
+                "page_size": {
+                  "type": "integer"
+                },
+                "total": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "createExaminationItem",
+        "operationId": "appointmentcatalogCreateExaminationItem",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "owner_department_id",
+                "name",
+                "description",
+                "operation_id"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "operation_id": {
+                  "type": "string"
+                },
+                "owner_department_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created_at": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "owner_department_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/examination-items/{itemId}": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "getExaminationItem",
+        "operationId": "appointmentcatalogGetExaminationItem",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "itemId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created_at": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "owner_department_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "updateExaminationItem",
+        "operationId": "appointmentcatalogUpdateExaminationItem",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "itemId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "expected_version",
+                "operation_id"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "expected_version": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created_at": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "owner_department_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/examination-items/{itemId}/disable": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "disableExaminationItem",
+        "operationId": "appointmentcatalogDisableExaminationItem",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "itemId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "expected_version",
+                "operation_id"
+              ],
+              "properties": {
+                "expected_version": {
+                  "type": "integer"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created_at": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "owner_department_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/examination-items/{itemId}/enable": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "enableExaminationItem",
+        "operationId": "appointmentcatalogEnableExaminationItem",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "itemId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "expected_version",
+                "operation_id"
+              ],
+              "properties": {
+                "expected_version": {
+                  "type": "integer"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created_at": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "owner_department_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/examination-items/{itemId}/weekly-window": {
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "setItemWeeklyWindow",
+        "operationId": "appointmentresourcesSetItemWeeklyWindow",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "itemId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "weekday",
+                "session",
+                "start_time",
+                "booking_cutoff_time",
+                "end_time",
+                "expected_version",
+                "operation_id"
+              ],
+              "properties": {
+                "booking_cutoff_time": {
+                  "type": "string"
+                },
+                "end_time": {
+                  "type": "string"
+                },
+                "expected_version": {
+                  "type": "integer"
+                },
+                "operation_id": {
+                  "type": "string"
+                },
+                "session": {
+                  "type": "string"
+                },
+                "start_time": {
+                  "type": "string"
+                },
+                "weekday": {
+                  "type": "integer"
+                },
+                "window_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "booking_cutoff_time": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "end_time": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "session": {
+                  "type": "string"
+                },
+                "start_time": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                },
+                "weekday": {
+                  "type": "integer"
+                },
+                "window_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/examination-items/{resourceId}/weekly-windows": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listItemWeeklyWindows",
+        "operationId": "appointmentresourcesListItemWeeklyWindows",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "resourceId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "windows": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "window_id",
+                      "item_id",
+                      "weekday",
+                      "session",
+                      "start_time",
+                      "booking_cutoff_time",
+                      "end_time",
+                      "status",
+                      "version",
+                      "created_at",
+                      "updated_at"
+                    ],
+                    "properties": {
+                      "booking_cutoff_time": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "end_time": {
+                        "type": "string"
+                      },
+                      "item_id": {
+                        "type": "string"
+                      },
+                      "session": {
+                        "type": "string"
+                      },
+                      "start_time": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "integer"
+                      },
+                      "weekday": {
+                        "type": "integer"
+                      },
+                      "window_id": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/item-weekly-windows/{resourceId}/disable": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "disableItemWeeklyWindow",
+        "operationId": "appointmentresourcesDisableItemWeeklyWindow",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "resourceId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "expected_version",
+                "operation_id"
+              ],
+              "properties": {
+                "expected_version": {
+                  "type": "integer"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "booking_cutoff_time": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "end_time": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "session": {
+                  "type": "string"
+                },
+                "start_time": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                },
+                "weekday": {
+                  "type": "integer"
+                },
+                "window_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/room-examination-items/{resourceId}/disable": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "disableRoomExaminationItem",
+        "operationId": "appointmentresourcesDisableRoomExaminationItem",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "resourceId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "expected_version",
+                "operation_id"
+              ],
+              "properties": {
+                "expected_version": {
+                  "type": "integer"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created_at": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "relation_id": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "room_name": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/room-examination-items/{resourceId}/enable": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "enableRoomExaminationItem",
+        "operationId": "appointmentresourcesEnableRoomExaminationItem",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "resourceId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "expected_version",
+                "operation_id"
+              ],
+              "properties": {
+                "expected_version": {
+                  "type": "integer"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created_at": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "relation_id": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "room_name": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/room-weekly-windows/{resourceId}/disable": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "disableRoomWeeklyWindow",
+        "operationId": "appointmentresourcesDisableRoomWeeklyWindow",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "resourceId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "expected_version",
+                "operation_id"
+              ],
+              "properties": {
+                "expected_version": {
+                  "type": "integer"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "active_capacity": {
+                  "type": "integer"
+                },
+                "close_time": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "open_time": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "session": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                },
+                "weekday": {
+                  "type": "integer"
+                },
+                "window_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/rooms": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listAppointmentRooms",
+        "operationId": "appointmentresourcesListAppointmentRooms",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "department_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "status",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "page": {
+                  "type": "integer"
+                },
+                "page_size": {
+                  "type": "integer"
+                },
+                "rooms": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "room_id",
+                      "department_id",
+                      "name",
+                      "status",
+                      "version",
+                      "created_at",
+                      "updated_at"
+                    ],
+                    "properties": {
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "department_id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "room_id": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "total": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "createAppointmentRoom",
+        "operationId": "appointmentresourcesCreateAppointmentRoom",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "department_id",
+                "name",
+                "operation_id"
+              ],
+              "properties": {
+                "department_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created_at": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/rooms/{resourceId}/disable": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "disableAppointmentRoom",
+        "operationId": "appointmentresourcesDisableAppointmentRoom",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "resourceId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "expected_version",
+                "operation_id"
+              ],
+              "properties": {
+                "expected_version": {
+                  "type": "integer"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created_at": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/rooms/{resourceId}/enable": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "enableAppointmentRoom",
+        "operationId": "appointmentresourcesEnableAppointmentRoom",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "resourceId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "expected_version",
+                "operation_id"
+              ],
+              "properties": {
+                "expected_version": {
+                  "type": "integer"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created_at": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/rooms/{resourceId}/weekly-windows": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listRoomWeeklyWindows",
+        "operationId": "appointmentresourcesListRoomWeeklyWindows",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "resourceId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "windows": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "window_id",
+                      "room_id",
+                      "weekday",
+                      "session",
+                      "open_time",
+                      "close_time",
+                      "active_capacity",
+                      "status",
+                      "version",
+                      "created_at",
+                      "updated_at"
+                    ],
+                    "properties": {
+                      "active_capacity": {
+                        "type": "integer"
+                      },
+                      "close_time": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "open_time": {
+                        "type": "string"
+                      },
+                      "room_id": {
+                        "type": "string"
+                      },
+                      "session": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "integer"
+                      },
+                      "weekday": {
+                        "type": "integer"
+                      },
+                      "window_id": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/rooms/{roomId}": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "getAppointmentRoom",
+        "operationId": "appointmentresourcesGetAppointmentRoom",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "roomId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created_at": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "updateAppointmentRoom",
+        "operationId": "appointmentresourcesUpdateAppointmentRoom",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "roomId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "expected_version",
+                "operation_id"
+              ],
+              "properties": {
+                "expected_version": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created_at": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/rooms/{roomId}/examination-items": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listRoomExaminationItems",
+        "operationId": "appointmentresourcesListRoomExaminationItems",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "roomId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "status",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "page": {
+                  "type": "integer"
+                },
+                "page_size": {
+                  "type": "integer"
+                },
+                "relations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "relation_id",
+                      "room_id",
+                      "item_id",
+                      "room_name",
+                      "item_name",
+                      "status",
+                      "version",
+                      "created_at",
+                      "updated_at"
+                    ],
+                    "properties": {
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "item_id": {
+                        "type": "string"
+                      },
+                      "item_name": {
+                        "type": "string"
+                      },
+                      "relation_id": {
+                        "type": "string"
+                      },
+                      "room_id": {
+                        "type": "string"
+                      },
+                      "room_name": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "total": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "addRoomExaminationItem",
+        "operationId": "appointmentresourcesAddRoomExaminationItem",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "roomId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "item_id",
+                "operation_id"
+              ],
+              "properties": {
+                "item_id": {
+                  "type": "string"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "created_at": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "relation_id": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "room_name": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/rooms/{roomId}/weekly-window": {
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "setRoomWeeklyWindow",
+        "operationId": "appointmentresourcesSetRoomWeeklyWindow",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "roomId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "weekday",
+                "session",
+                "open_time",
+                "close_time",
+                "active_capacity",
+                "expected_version",
+                "operation_id"
+              ],
+              "properties": {
+                "active_capacity": {
+                  "type": "integer"
+                },
+                "close_time": {
+                  "type": "string"
+                },
+                "expected_version": {
+                  "type": "integer"
+                },
+                "open_time": {
+                  "type": "string"
+                },
+                "operation_id": {
+                  "type": "string"
+                },
+                "session": {
+                  "type": "string"
+                },
+                "weekday": {
+                  "type": "integer"
+                },
+                "window_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "active_capacity": {
+                  "type": "integer"
+                },
+                "close_time": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "open_time": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "session": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                },
+                "weekday": {
+                  "type": "integer"
+                },
+                "window_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/identity/accounts": {
       "get": {
         "security": [
@@ -1604,6 +3530,96 @@
         }
       }
     },
+    "/api/v1/appointment/examination-items/{itemId}/rooms": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listAvailableRoomsByExaminationItem",
+        "operationId": "appointmentresourcesListAvailableRoomsByExaminationItem",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "itemId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "page": {
+                  "type": "integer"
+                },
+                "page_size": {
+                  "type": "integer"
+                },
+                "relations": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "relation_id",
+                      "room_id",
+                      "item_id",
+                      "room_name",
+                      "item_name",
+                      "status",
+                      "version",
+                      "created_at",
+                      "updated_at"
+                    ],
+                    "properties": {
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "item_id": {
+                        "type": "string"
+                      },
+                      "item_name": {
+                        "type": "string"
+                      },
+                      "relation_id": {
+                        "type": "string"
+                      },
+                      "room_id": {
+                        "type": "string"
+                      },
+                      "room_name": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "total": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/me": {
       "get": {
         "security": [
@@ -2346,7 +4362,7 @@
       "in": "header"
     }
   },
-  "x-date": "2026-08-11 14:38:46",
+  "x-date": "2026-08-13 17:34:39",
   "x-description": "This is a goctl generated swagger file.",
   "x-github": "https://github.com/zeromicro/go-zero",
   "x-go-zero-doc": "https://go-zero.dev/",

@@ -25,6 +25,14 @@ $services = @(
         Config = Join-Path $repositoryRoot "service/identity/rpc/etc/identity-rpc.yaml"
     },
     @{
+        Name = "appointment-rpc"
+        ProcessName = "appointment-rpc"
+        Port = 8081
+        Package = "./service/appointment/rpc"
+        Binary = Join-Path $runtimeRoot "appointment-rpc.exe"
+        Config = Join-Path $repositoryRoot "service/appointment/rpc/etc/appointment.yaml"
+    },
+    @{
         Name = "app-api"
         ProcessName = "app-api"
         Port = 8888

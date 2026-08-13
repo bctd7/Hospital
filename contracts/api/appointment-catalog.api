@@ -1,0 +1,79 @@
+syntax = "v1"
+
+type (
+	ExaminationItemResponse {
+		ItemID            string `json:"item_id"`
+		OwnerDepartmentID string `json:"owner_department_id"`
+		Name              string `json:"name"`
+		Description       string `json:"description"`
+		Status            string `json:"status"`
+		Version           int64  `json:"version"`
+		CreatedAt         string `json:"created_at"`
+		UpdatedAt         string `json:"updated_at"`
+	}
+
+	CreateExaminationItemRequest {
+		OwnerDepartmentID string `json:"owner_department_id"`
+		Name              string `json:"name"`
+		Description       string `json:"description"`
+		OperationID       string `json:"operation_id"`
+	}
+
+	ExaminationItemPathRequest {
+		ItemID string `path:"itemId"`
+	}
+
+	ListExaminationItemsRequest {
+		OwnerDepartmentID string `form:"owner_department_id,optional"`
+		Status            string `form:"status,optional"`
+		Page              int64  `form:"page,default=1"`
+		PageSize          int64  `form:"page_size,default=20"`
+	}
+
+	ListExaminationItemsResponse {
+		Items    []ExaminationItemResponse `json:"items"`
+		Page     int64                     `json:"page"`
+		PageSize int64                     `json:"page_size"`
+		Total    int64                     `json:"total"`
+	}
+
+	UpdateExaminationItemRequest {
+		ItemID          string  `path:"itemId"`
+		Name            *string `json:"name,optional"`
+		Description     *string `json:"description,optional"`
+		ExpectedVersion int64   `json:"expected_version"`
+		OperationID     string  `json:"operation_id"`
+	}
+
+	ChangeExaminationItemStatusRequest {
+		ItemID          string `path:"itemId"`
+		ExpectedVersion int64  `json:"expected_version"`
+		OperationID     string `json:"operation_id"`
+	}
+)
+
+@server (
+	prefix:     /api/v1
+	group:      appointmentcatalog
+	middleware: AccessToken
+	authType:   BearerAuth
+)
+service app-api {
+	@handler listExaminationItems
+	get /admin/appointment/examination-items (ListExaminationItemsRequest) returns (ListExaminationItemsResponse)
+
+	@handler getExaminationItem
+	get /admin/appointment/examination-items/:itemId (ExaminationItemPathRequest) returns (ExaminationItemResponse)
+
+	@handler createExaminationItem
+	post /admin/appointment/examination-items (CreateExaminationItemRequest) returns (ExaminationItemResponse)
+
+	@handler updateExaminationItem
+	put /admin/appointment/examination-items/:itemId (UpdateExaminationItemRequest) returns (ExaminationItemResponse)
+
+	@handler disableExaminationItem
+	post /admin/appointment/examination-items/:itemId/disable (ChangeExaminationItemStatusRequest) returns (ExaminationItemResponse)
+
+	@handler enableExaminationItem
+	post /admin/appointment/examination-items/:itemId/enable (ChangeExaminationItemStatusRequest) returns (ExaminationItemResponse)
+}

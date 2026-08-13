@@ -24,8 +24,10 @@ $images = @(
     "redis:7.4.10-alpine",
     "apache/kafka:4.2.0",
     "hospital-production-identity-migrate:latest",
+    "hospital-production-appointment-migrate:latest",
     "hospital-production-identity-bootstrap-admin:latest",
     "hospital-production-identity-rpc:latest",
+    "hospital-production-appointment-rpc:latest",
     "hospital-production-app-api:latest"
 )
 
@@ -43,9 +45,11 @@ try {
     Invoke-Docker -Arguments @("pull", "redis:7.4.10-alpine")
     Invoke-Docker -Arguments @("pull", "apache/kafka:4.2.0")
     Invoke-Docker -Arguments @("build", "--target", "db-migrate", "-t", $images[3], "-f", $dockerfile, ".")
-    Invoke-Docker -Arguments @("build", "--target", "identity-bootstrap-admin", "-t", $images[4], "-f", $dockerfile, ".")
-    Invoke-Docker -Arguments @("build", "--target", "identity-rpc", "-t", $images[5], "-f", $dockerfile, ".")
-    Invoke-Docker -Arguments @("build", "--target", "app-api", "-t", $images[6], "-f", $dockerfile, ".")
+    Invoke-Docker -Arguments @("tag", $images[3], $images[4])
+    Invoke-Docker -Arguments @("build", "--target", "identity-bootstrap-admin", "-t", $images[5], "-f", $dockerfile, ".")
+    Invoke-Docker -Arguments @("build", "--target", "identity-rpc", "-t", $images[6], "-f", $dockerfile, ".")
+    Invoke-Docker -Arguments @("build", "--target", "appointment-rpc", "-t", $images[7], "-f", $dockerfile, ".")
+    Invoke-Docker -Arguments @("build", "--target", "app-api", "-t", $images[8], "-f", $dockerfile, ".")
     Invoke-Docker -Arguments (@("save", "-o", $rawTarPath) + $images)
 
     $input = [IO.File]::OpenRead($rawTarPath)

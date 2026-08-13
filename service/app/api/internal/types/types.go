@@ -14,6 +14,12 @@ type AccountMutationRequest struct {
 	OperationID       string `json:"operation_id"`
 }
 
+type AddRoomExaminationItemAPIRequest struct {
+	RoomID      string `path:"roomId"`
+	ItemID      string `json:"item_id"`
+	OperationID string `json:"operation_id"`
+}
+
 type AdminAccountDetailResponse struct {
 	AccountID               string   `json:"account_id"`
 	Nickname                *string  `json:"nickname,optional"`
@@ -74,6 +80,20 @@ type AdminSearchAccountByPhoneResponse struct {
 	Phone    PhoneBindingResponse        `json:"phone"`
 }
 
+type AppointmentRoomPathRequest struct {
+	RoomID string `path:"roomId"`
+}
+
+type AppointmentRoomResponse struct {
+	RoomID       string `json:"room_id"`
+	DepartmentID string `json:"department_id"`
+	Name         string `json:"name"`
+	Status       string `json:"status"`
+	Version      int64  `json:"version"`
+	CreatedAt    string `json:"created_at"`
+	UpdatedAt    string `json:"updated_at"`
+}
+
 type CampusSummaryResponse struct {
 	CampusID        string `json:"campus_id"`
 	HospitalID      string `json:"hospital_id"`
@@ -84,6 +104,12 @@ type CampusSummaryResponse struct {
 	Version         int64  `json:"version"`
 }
 
+type ChangeAppointmentResourceStatusRequest struct {
+	ResourceID      string `path:"resourceId"`
+	ExpectedVersion int64  `json:"expected_version"`
+	OperationID     string `json:"operation_id"`
+}
+
 type ChangeDoctorDepartmentRequest struct {
 	AccountID         string `path:"accountId"`
 	DepartmentID      string `json:"department_id"`
@@ -91,10 +117,29 @@ type ChangeDoctorDepartmentRequest struct {
 	OperationID       string `json:"operation_id"`
 }
 
+type ChangeExaminationItemStatusRequest struct {
+	ItemID          string `path:"itemId"`
+	ExpectedVersion int64  `json:"expected_version"`
+	OperationID     string `json:"operation_id"`
+}
+
 type ChangeOrganizationUnitStatusRequest struct {
 	UnitID      string `path:"unitId"`
 	Version     int64  `json:"version"`
 	OperationID string `json:"operation_id"`
+}
+
+type CreateAppointmentRoomRequest struct {
+	DepartmentID string `json:"department_id"`
+	Name         string `json:"name"`
+	OperationID  string `json:"operation_id"`
+}
+
+type CreateExaminationItemRequest struct {
+	OwnerDepartmentID string `json:"owner_department_id"`
+	Name              string `json:"name"`
+	Description       string `json:"description"`
+	OperationID       string `json:"operation_id"`
 }
 
 type CreateOrganizationUnitRequest struct {
@@ -140,6 +185,21 @@ type DoctorSummaryResponse struct {
 	Version      int64   `json:"version"`
 }
 
+type ExaminationItemPathRequest struct {
+	ItemID string `path:"itemId"`
+}
+
+type ExaminationItemResponse struct {
+	ItemID            string `json:"item_id"`
+	OwnerDepartmentID string `json:"owner_department_id"`
+	Name              string `json:"name"`
+	Description       string `json:"description"`
+	Status            string `json:"status"`
+	Version           int64  `json:"version"`
+	CreatedAt         string `json:"created_at"`
+	UpdatedAt         string `json:"updated_at"`
+}
+
 type HealthResponse struct {
 	Status  string `json:"status"`
 	Service string `json:"service"`
@@ -151,6 +211,24 @@ type HospitalSummaryResponse struct {
 	Code       string `json:"code"`
 	Name       string `json:"name"`
 	Version    int64  `json:"version"`
+}
+
+type ItemRoomsPathRequest struct {
+	ItemID string `path:"itemId"`
+}
+
+type ItemWeeklyWindowResponse struct {
+	WindowID          string `json:"window_id"`
+	ItemID            string `json:"item_id"`
+	Weekday           int32  `json:"weekday"`
+	Session           string `json:"session"`
+	StartTime         string `json:"start_time"`
+	BookingCutoffTime string `json:"booking_cutoff_time"`
+	EndTime           string `json:"end_time"`
+	Status            string `json:"status"`
+	Version           int64  `json:"version"`
+	CreatedAt         string `json:"created_at"`
+	UpdatedAt         string `json:"updated_at"`
 }
 
 type ListAdminAccountsRequest struct {
@@ -169,6 +247,20 @@ type ListAdminAccountsResponse struct {
 	Total    int64                         `json:"total"`
 }
 
+type ListAppointmentRoomsRequest struct {
+	DepartmentID string `form:"department_id"`
+	Status       string `form:"status,optional"`
+	Page         int64  `form:"page,default=1"`
+	PageSize     int64  `form:"page_size,default=20"`
+}
+
+type ListAppointmentRoomsResponse struct {
+	Rooms    []AppointmentRoomResponse `json:"rooms"`
+	Page     int64                     `json:"page"`
+	PageSize int64                     `json:"page_size"`
+	Total    int64                     `json:"total"`
+}
+
 type ListDepartmentsRequest struct {
 	CampusID string `form:"campus_id"`
 }
@@ -184,6 +276,24 @@ type ListDoctorsResponse struct {
 	Total    int64                   `json:"total"`
 }
 
+type ListExaminationItemsRequest struct {
+	OwnerDepartmentID string `form:"owner_department_id,optional"`
+	Status            string `form:"status,optional"`
+	Page              int64  `form:"page,default=1"`
+	PageSize          int64  `form:"page_size,default=20"`
+}
+
+type ListExaminationItemsResponse struct {
+	Items    []ExaminationItemResponse `json:"items"`
+	Page     int64                     `json:"page"`
+	PageSize int64                     `json:"page_size"`
+	Total    int64                     `json:"total"`
+}
+
+type ListItemWeeklyWindowsAPIResponse struct {
+	Windows []ItemWeeklyWindowResponse `json:"windows"`
+}
+
 type ListOrganizationUnitsRequest struct {
 	UnitType string `form:"unit_type"`
 	ParentID string `form:"parent_id"`
@@ -192,6 +302,24 @@ type ListOrganizationUnitsRequest struct {
 
 type ListOrganizationUnitsResponse struct {
 	Items []AdminOrganizationUnitResponse `json:"items"`
+}
+
+type ListRoomExaminationItemsAPIRequest struct {
+	RoomID   string `path:"roomId"`
+	Status   string `form:"status,optional"`
+	Page     int64  `form:"page,default=1"`
+	PageSize int64  `form:"page_size,default=20"`
+}
+
+type ListRoomExaminationItemsAPIResponse struct {
+	Relations []RoomExaminationItemResponse `json:"relations"`
+	Page      int64                         `json:"page"`
+	PageSize  int64                         `json:"page_size"`
+	Total     int64                         `json:"total"`
+}
+
+type ListRoomWeeklyWindowsAPIResponse struct {
+	Windows []RoomWeeklyWindowResponse `json:"windows"`
 }
 
 type OrganizationContextResponse struct {
@@ -234,6 +362,32 @@ type RevokeTokenResponse struct {
 	Revoked bool `json:"revoked"`
 }
 
+type RoomExaminationItemResponse struct {
+	RelationID string `json:"relation_id"`
+	RoomID     string `json:"room_id"`
+	ItemID     string `json:"item_id"`
+	RoomName   string `json:"room_name"`
+	ItemName   string `json:"item_name"`
+	Status     string `json:"status"`
+	Version    int64  `json:"version"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at"`
+}
+
+type RoomWeeklyWindowResponse struct {
+	WindowID       string `json:"window_id"`
+	RoomID         string `json:"room_id"`
+	Weekday        int32  `json:"weekday"`
+	Session        string `json:"session"`
+	OpenTime       string `json:"open_time"`
+	CloseTime      string `json:"close_time"`
+	ActiveCapacity int64  `json:"active_capacity"`
+	Status         string `json:"status"`
+	Version        int64  `json:"version"`
+	CreatedAt      string `json:"created_at"`
+	UpdatedAt      string `json:"updated_at"`
+}
+
 type SendPhoneLoginCodeRequest struct {
 	Phone string `json:"phone"`
 }
@@ -243,8 +397,32 @@ type SendPhoneLoginCodeResponse struct {
 	RetryAfterSeconds int64 `json:"retry_after_seconds"`
 }
 
+type SetItemWeeklyWindowAPIRequest struct {
+	ItemID            string `path:"itemId"`
+	WindowID          string `json:"window_id,optional"`
+	Weekday           int32  `json:"weekday"`
+	Session           string `json:"session"`
+	StartTime         string `json:"start_time"`
+	BookingCutoffTime string `json:"booking_cutoff_time"`
+	EndTime           string `json:"end_time"`
+	ExpectedVersion   int64  `json:"expected_version"`
+	OperationID       string `json:"operation_id"`
+}
+
 type SetPhoneRequest struct {
 	Phone string `json:"phone"`
+}
+
+type SetRoomWeeklyWindowAPIRequest struct {
+	RoomID          string `path:"roomId"`
+	WindowID        string `json:"window_id,optional"`
+	Weekday         int32  `json:"weekday"`
+	Session         string `json:"session"`
+	OpenTime        string `json:"open_time"`
+	CloseTime       string `json:"close_time"`
+	ActiveCapacity  int64  `json:"active_capacity"`
+	ExpectedVersion int64  `json:"expected_version"`
+	OperationID     string `json:"operation_id"`
 }
 
 type TokenResponse struct {
@@ -258,6 +436,13 @@ type UpdateAccountDisplayProfileRequest struct {
 	Nickname string `json:"nickname"`
 }
 
+type UpdateAppointmentRoomRequest struct {
+	RoomID          string `path:"roomId"`
+	Name            string `json:"name"`
+	ExpectedVersion int64  `json:"expected_version"`
+	OperationID     string `json:"operation_id"`
+}
+
 type UpdateDoctorRequest struct {
 	AccountID         string  `path:"accountId"`
 	DisplayName       *string `json:"display_name,optional"`
@@ -266,6 +451,14 @@ type UpdateDoctorRequest struct {
 	Description       *string `json:"description,optional"`
 	ManagementVersion int64   `json:"management_version"`
 	OperationID       string  `json:"operation_id"`
+}
+
+type UpdateExaminationItemRequest struct {
+	ItemID          string  `path:"itemId"`
+	Name            *string `json:"name,optional"`
+	Description     *string `json:"description,optional"`
+	ExpectedVersion int64   `json:"expected_version"`
+	OperationID     string  `json:"operation_id"`
 }
 
 type UpdateOrganizationUnitRequest struct {
@@ -278,4 +471,8 @@ type UpdateOrganizationUnitRequest struct {
 
 type WeChatLoginRequest struct {
 	LoginCode string `json:"login_code"`
+}
+
+type WeeklyWindowsPathRequest struct {
+	ResourceID string `path:"resourceId"`
 }

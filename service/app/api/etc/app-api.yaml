@@ -22,6 +22,12 @@ IdentityRPC:
     - 127.0.0.1:8080
   NonBlock: true
 
+AppointmentRPC:
+  Endpoints:
+    - 127.0.0.1:8081
+  NonBlock: true
+
+
 AuthorizationRedis:
   Addr: ${REDIS_HOST}:${REDIS_PORT}
   Password: ${REDIS_PASSWORD}
