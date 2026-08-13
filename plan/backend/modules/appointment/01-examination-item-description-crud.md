@@ -33,15 +33,14 @@ Proto 契约
 
 - 稳定内部 `item_id`；
 - 所属管理科室 `owner_department_id`；
-- 科室内稳定且唯一的 `code`；
 - 患者可见 `name`；
 - 患者可见 `description`；
 - `active/disabled` 状态；
 - 从 1 开始递增的 `version`；
 - 创建和更新时间。
 
-`owner_department_id` 表示当前由哪个科室维护该项目，不等于该检查未来只能在一个地点执行。后续项目与
-院区、执行科室和地点的多对多关系使用独立关系表增加，不把执行地点提前塞入本表。
+`owner_department_id` 表示当前由哪个科室维护该项目，不等于该检查未来只能在一个地点执行。后续一个项目
+可以拥有多个可执行单元，每个可执行单元绑定一个执行科室和一个地点；不把执行地点提前塞入本表。
 
 ### 2.2 描述字段
 
@@ -100,7 +99,7 @@ EnableExaminationItem
 - 列表支持游标或稳定分页、科室过滤和状态过滤，不一次返回全库；
 - `ExaminationItem` 返回稳定业务字段，不暴露数据库列名或审计内部数据；
 - 已发布字段号不能复用，后续新增结构化状态时只追加新字段；
-- 错误至少稳定区分参数非法、无权限、不存在、编码冲突、版本冲突和幂等冲突。
+- 错误至少稳定区分参数非法、无权限、不存在、同科室名称冲突、版本冲突和幂等冲突。
 
 Proto 评审通过后再生成：
 
@@ -139,8 +138,8 @@ service/appointment/rpc/
 - ServiceContext：创建数据库连接和 Manager，并在关闭时释放资源。
 
 服务复用 `common/authn` 的 Access Token 与授权版本校验。普通科室工作人员只能维护本人当前科室项目；
-`super_admin` 可以跨科室维护。第一阶段使用 `appointment.catalog.manage`，若 Identity 中尚无该权限，必须
-通过新的 Identity 增量迁移加入，不能修改已经执行过的历史迁移。
+`super_admin` 可以跨科室维护。第一阶段沿用现有细粒度权限：创建使用 `appointment.create`，读取使用
+`appointment.read`，更新、停用和恢复使用 `appointment.update`。
 
 ## 6. MySQL 接入
 
@@ -148,7 +147,7 @@ service/appointment/rpc/
 
 - `APPOINTMENT_MYSQL_USER`、`APPOINTMENT_MYSQL_PASSWORD`、`APPOINTMENT_MYSQL_DSN`；
 - 本地 `hospital_appointment` 数据库和最小权限账号；
-- `migrations/appointment/000001_appointment_catalog.*.sql`；
+- `migrations/appointment/000001_appointment_examination_catalog.*.sql`；
 - `scripts/migrate.ps1` 中 `appointment` 白名单和迁移目录映射；
 - Appointment RPC 配置中的 MySQL DataSource。
 
@@ -158,7 +157,6 @@ service/appointment/rpc/
 examination_items
   id
   owner_department_id
-  code
   name
   description            TEXT
   status                 active | disabled
@@ -170,7 +168,7 @@ examination_items
 约束：
 
 - `id` 为稳定 UUID；
-- `(owner_department_id, code)` 唯一；
+- `(owner_department_id, name)` 唯一；
 - `version >= 1`；
 - 不建立指向 Identity 数据库的外键；
 - 不物理删除业务记录；
@@ -184,10 +182,10 @@ examination_items
 
 ### 创建
 
-- 校验科室、编码、名称和描述；
+- 校验科室、名称和描述；
 - 相同 `operation_id`、相同请求返回第一次结果；
 - 相同 `operation_id`、不同请求返回幂等冲突；
-- 同一科室下编码重复返回编码冲突；
+- 同一科室下名称重复返回名称冲突；
 - 创建结果为 `active`、`version = 1`。
 
 ### 查询与列表
@@ -199,7 +197,7 @@ examination_items
 
 ### 更新
 
-- 允许修改名称和描述；编码是否允许修改在 Proto 评审时固定，默认创建后不修改；
+- 允许修改名称和描述；
 - `expected_version` 不等于当前版本时返回版本冲突；
 - 成功更新后版本递增；
 - disabled 项目默认不能普通更新，需先恢复；
@@ -237,7 +235,7 @@ examination_items
 - 空库迁移 `up` 成功，最近版本 `down -> up` 成功；
 - 创建、按 ID 查询、分页列表、更新、停用和恢复；
 - 描述包含长文本、换行和中文时可以无损往返；
-- 编码冲突、版本冲突、非法状态转换和无权限；
+- 同科室名称冲突、版本冲突、非法状态转换和无权限；
 - 同操作同请求幂等、同操作不同请求冲突；
 - 普通工作人员不能跨科室维护，超级管理员可以；
 - 日志与审计摘要不包含完整 `description`；
@@ -250,8 +248,8 @@ examination_items
 
 - AI 提取、结构化时间约束、规则审核和发布；
 - 准备动作节点、时间区间求值和排序求解器；
-- 项目与执行科室、院区、地点的关系；
-- 上午/下午窗口、活动容量和并发占用；
+- 检查房间以及房间与本部门项目的关系；
+- 房间开放周配置、项目预约周配置、房间共享活动容量和并发占用；
 - 患者档案、预约、限制方案 A、取消和历史；
 - 报到、队列、叫号、检查执行和报告；
 - App API、OpenAPI 和小程序页面接入。
