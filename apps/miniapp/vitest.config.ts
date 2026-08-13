@@ -11,10 +11,6 @@ export default defineConfig({
   test: {
     clearMocks: true,
     environment: "node",
-    env: {
-      VITE_DEV_AUTH_BYPASS: "false",
-      VITE_DEV_AUTH_ROLE: "patient",
-    },
     include: ["tests/**/*.test.ts"],
   },
 });

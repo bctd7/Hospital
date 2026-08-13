@@ -3,17 +3,12 @@ import { onLaunch, onShow } from "@dcloudio/uni-app";
 import { watch } from "vue";
 
 import { initializeCloudBase } from "@/platform/cloudbase";
-import {
-  initializeDevelopmentSession,
-  restoreSession,
-  sessionState,
-} from "@/stores/session";
+import { restoreSession, sessionState } from "@/stores/session";
 import { applyAppVariantNavigation } from "@/utils/appShell";
 
 onLaunch(() => {
   initializeCloudBase();
   restoreSession();
-  initializeDevelopmentSession();
   applyAppVariantNavigation(sessionState.appVariant);
 });
 

@@ -94,19 +94,9 @@ VITE_API_BASE_URL=http://192.168.x.x:8888
 
 ## 登录联调
 
-本地只查看前端时，`.env.local` 可以开启开发登录旁路：
-
-```dotenv
-VITE_DEV_AUTH_BYPASS=true
-VITE_DEV_AUTH_ROLE=patient
-```
-
-`VITE_DEV_AUTH_ROLE` 支持 `patient`、`doctor` 和 `admin`。修改后重启开发构建即可直接进入对应首页，
-无需启动后端。关闭 `VITE_DEV_AUTH_BYPASS` 后恢复手机号登录。该开关同时受 Vite `DEV` 模式约束，
-生产构建即使误配为 `true` 也不会生效；开发 Mock Token 不能用于任何后端接口。
-
-检查项目管理必须关闭开发登录旁路并使用真实工作人员账号联调；页面会将会话或 Identity 目录返回的稳定
-`department_id` 传给 Appointment，不会按科室名称建立关系。
+开发、测试和正式构建均不提供免登录身份。页面联调必须使用手机号验证码获取真实 Hospital Token，随后由
+`GET /api/v1/auth/me` 恢复角色、权限和稳定 `department_id`。检查项目管理会把该 ID 或 Identity 公共目录
+返回的科室 ID 交给 Appointment，不会按科室名称建立关系。
 
 需要联调真实登录时：
 
