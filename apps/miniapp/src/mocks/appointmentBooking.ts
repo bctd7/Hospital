@@ -9,7 +9,11 @@ export interface PatientMockWindow {
 
 export interface PatientMockRoom {
   id: string;
-  name: string;
+  campusId: string;
+  building: string;
+  floorNumber: number;
+  roomNumber: string;
+  displayName: string;
   windows: PatientMockWindow[];
 }
 
@@ -44,7 +48,11 @@ export const patientAppointmentMockAdapter = {
             rooms: [
               {
                 id: "room-ct-a",
-                name: "CT 室 A",
+                campusId: "00000000-0000-4000-8000-000000000001",
+                building: "门诊楼",
+                floorNumber: 3,
+                roomNumber: "301",
+                displayName: "门诊楼 · 3层 · 301室",
                 windows: [
                   { id: "a-mon-am", weekday: "周一", date: "08-17", session: "上午", time: "09:00—12:00", cutoff: "11:30" },
                   { id: "a-wed-pm", weekday: "周三", date: "08-19", session: "下午", time: "14:00—17:00", cutoff: "16:30" },
@@ -52,7 +60,11 @@ export const patientAppointmentMockAdapter = {
               },
               {
                 id: "room-ct-b",
-                name: "CT 室 B",
+                campusId: "00000000-0000-4000-8000-000000000001",
+                building: "医技楼",
+                floorNumber: 2,
+                roomNumber: "A201",
+                displayName: "医技楼 · 2层 · A201室",
                 windows: [
                   { id: "b-tue-am", weekday: "周二", date: "08-18", session: "上午", time: "08:30—11:30", cutoff: "11:00" },
                 ],
@@ -66,7 +78,11 @@ export const patientAppointmentMockAdapter = {
             preparation: "检查前取下眼镜、耳环及可摘义齿。",
             rooms: [{
               id: "room-imaging-c",
-              name: "影像室 C",
+              campusId: "00000000-0000-4000-8000-000000000001",
+              building: "门诊楼",
+              floorNumber: 4,
+              roomNumber: "C408",
+              displayName: "门诊楼 · 4层 · C408室",
               windows: [{ id: "c-thu-am", weekday: "周四", date: "08-20", session: "上午", time: "09:00—11:00", cutoff: "10:30" }],
             }],
           },
@@ -83,7 +99,11 @@ export const patientAppointmentMockAdapter = {
           preparation: "请提前移除胸前金属物品。",
           rooms: [{
             id: "room-north-ct",
-            name: "北区 CT 室",
+            campusId: "00000000-0000-4000-8000-000000000002",
+            building: "住院楼",
+            floorNumber: 1,
+            roomNumber: "CT01",
+            displayName: "住院楼 · 1层 · CT01室",
             windows: [{ id: "north-fri-pm", weekday: "周五", date: "08-21", session: "下午", time: "13:30—16:30", cutoff: "16:00" }],
           }],
         }],

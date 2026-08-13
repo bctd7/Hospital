@@ -73,14 +73,9 @@ func (s *AppointmentServiceServer) UpdateRoom(ctx context.Context, in *appointme
 	return l.UpdateRoom(in)
 }
 
-func (s *AppointmentServiceServer) DisableRoom(ctx context.Context, in *appointmentv1.ChangeResourceStatusRequest) (*appointmentv1.Room, error) {
-	l := logic.NewDisableRoomLogic(ctx, s.svcCtx)
-	return l.DisableRoom(in)
-}
-
-func (s *AppointmentServiceServer) EnableRoom(ctx context.Context, in *appointmentv1.ChangeResourceStatusRequest) (*appointmentv1.Room, error) {
-	l := logic.NewEnableRoomLogic(ctx, s.svcCtx)
-	return l.EnableRoom(in)
+func (s *AppointmentServiceServer) RetireRoom(ctx context.Context, in *appointmentv1.RetireRoomRequest) (*appointmentv1.Room, error) {
+	l := logic.NewRetireRoomLogic(ctx, s.svcCtx)
+	return l.RetireRoom(in)
 }
 
 func (s *AppointmentServiceServer) AddRoomExaminationItem(ctx context.Context, in *appointmentv1.AddRoomExaminationItemRequest) (*appointmentv1.RoomExaminationItem, error) {

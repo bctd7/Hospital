@@ -860,8 +860,17 @@
             "schema": {
               "type": "object",
               "properties": {
+                "building": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
                 "created_at": {
                   "type": "string"
+                },
+                "floor_number": {
+                  "type": "integer"
                 },
                 "item_id": {
                   "type": "string"
@@ -872,10 +881,13 @@
                 "relation_id": {
                   "type": "string"
                 },
+                "room_display_name": {
+                  "type": "string"
+                },
                 "room_id": {
                   "type": "string"
                 },
-                "room_name": {
+                "room_number": {
                   "type": "string"
                 },
                 "status": {
@@ -945,8 +957,17 @@
             "schema": {
               "type": "object",
               "properties": {
+                "building": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
                 "created_at": {
                   "type": "string"
+                },
+                "floor_number": {
+                  "type": "integer"
                 },
                 "item_id": {
                   "type": "string"
@@ -957,10 +978,13 @@
                 "relation_id": {
                   "type": "string"
                 },
+                "room_display_name": {
+                  "type": "string"
+                },
                 "room_id": {
                   "type": "string"
                 },
-                "room_name": {
+                "room_number": {
                   "type": "string"
                 },
                 "status": {
@@ -1092,12 +1116,6 @@
             "required": true
           },
           {
-            "type": "string",
-            "name": "status",
-            "in": "query",
-            "allowEmptyValue": true
-          },
-          {
             "type": "integer",
             "default": 1,
             "example": 1,
@@ -1133,26 +1151,38 @@
                     "required": [
                       "room_id",
                       "department_id",
-                      "name",
-                      "status",
+                      "campus_id",
+                      "building",
+                      "floor_number",
+                      "room_number",
+                      "display_name",
                       "version",
                       "created_at",
                       "updated_at"
                     ],
                     "properties": {
+                      "building": {
+                        "type": "string"
+                      },
+                      "campus_id": {
+                        "type": "string"
+                      },
                       "created_at": {
                         "type": "string"
                       },
                       "department_id": {
                         "type": "string"
                       },
-                      "name": {
+                      "display_name": {
                         "type": "string"
+                      },
+                      "floor_number": {
+                        "type": "integer"
                       },
                       "room_id": {
                         "type": "string"
                       },
-                      "status": {
+                      "room_number": {
                         "type": "string"
                       },
                       "updated_at": {
@@ -1198,17 +1228,29 @@
               "type": "object",
               "required": [
                 "department_id",
-                "name",
+                "campus_id",
+                "building",
+                "floor_number",
+                "room_number",
                 "operation_id"
               ],
               "properties": {
+                "building": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
                 "department_id": {
                   "type": "string"
                 },
-                "name": {
-                  "type": "string"
+                "floor_number": {
+                  "type": "integer"
                 },
                 "operation_id": {
+                  "type": "string"
+                },
+                "room_number": {
                   "type": "string"
                 }
               }
@@ -1221,19 +1263,28 @@
             "schema": {
               "type": "object",
               "properties": {
+                "building": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
                 "created_at": {
                   "type": "string"
                 },
                 "department_id": {
                   "type": "string"
                 },
-                "name": {
+                "display_name": {
                   "type": "string"
+                },
+                "floor_number": {
+                  "type": "integer"
                 },
                 "room_id": {
                   "type": "string"
                 },
-                "status": {
+                "room_number": {
                   "type": "string"
                 },
                 "updated_at": {
@@ -1248,7 +1299,7 @@
         }
       }
     },
-    "/api/v1/admin/appointment/rooms/{resourceId}/disable": {
+    "/api/v1/admin/appointment/rooms/{resourceId}/retire": {
       "post": {
         "security": [
           {
@@ -1264,8 +1315,8 @@
         "schemes": [
           "https"
         ],
-        "summary": "disableAppointmentRoom",
-        "operationId": "appointmentresourcesDisableAppointmentRoom",
+        "summary": "retireAppointmentRoom",
+        "operationId": "appointmentresourcesRetireAppointmentRoom",
         "parameters": [
           {
             "type": "string",
@@ -1300,98 +1351,28 @@
             "schema": {
               "type": "object",
               "properties": {
+                "building": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
                 "created_at": {
                   "type": "string"
                 },
                 "department_id": {
                   "type": "string"
                 },
-                "name": {
+                "display_name": {
                   "type": "string"
+                },
+                "floor_number": {
+                  "type": "integer"
                 },
                 "room_id": {
                   "type": "string"
                 },
-                "status": {
-                  "type": "string"
-                },
-                "updated_at": {
-                  "type": "string"
-                },
-                "version": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/admin/appointment/rooms/{resourceId}/enable": {
-      "post": {
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "schemes": [
-          "https"
-        ],
-        "summary": "enableAppointmentRoom",
-        "operationId": "appointmentresourcesEnableAppointmentRoom",
-        "parameters": [
-          {
-            "type": "string",
-            "name": "resourceId",
-            "in": "path",
-            "required": true
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "required": [
-                "expected_version",
-                "operation_id"
-              ],
-              "properties": {
-                "expected_version": {
-                  "type": "integer"
-                },
-                "operation_id": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "created_at": {
-                  "type": "string"
-                },
-                "department_id": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "room_id": {
-                  "type": "string"
-                },
-                "status": {
+                "room_number": {
                   "type": "string"
                 },
                 "updated_at": {
@@ -1524,19 +1505,28 @@
             "schema": {
               "type": "object",
               "properties": {
+                "building": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
                 "created_at": {
                   "type": "string"
                 },
                 "department_id": {
                   "type": "string"
                 },
-                "name": {
+                "display_name": {
                   "type": "string"
+                },
+                "floor_number": {
+                  "type": "integer"
                 },
                 "room_id": {
                   "type": "string"
                 },
-                "status": {
+                "room_number": {
                   "type": "string"
                 },
                 "updated_at": {
@@ -1581,18 +1571,30 @@
             "schema": {
               "type": "object",
               "required": [
-                "name",
+                "campus_id",
+                "building",
+                "floor_number",
+                "room_number",
                 "expected_version",
                 "operation_id"
               ],
               "properties": {
+                "building": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
                 "expected_version": {
                   "type": "integer"
                 },
-                "name": {
-                  "type": "string"
+                "floor_number": {
+                  "type": "integer"
                 },
                 "operation_id": {
+                  "type": "string"
+                },
+                "room_number": {
                   "type": "string"
                 }
               }
@@ -1605,19 +1607,28 @@
             "schema": {
               "type": "object",
               "properties": {
+                "building": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
                 "created_at": {
                   "type": "string"
                 },
                 "department_id": {
                   "type": "string"
                 },
-                "name": {
+                "display_name": {
                   "type": "string"
+                },
+                "floor_number": {
+                  "type": "integer"
                 },
                 "room_id": {
                   "type": "string"
                 },
-                "status": {
+                "room_number": {
                   "type": "string"
                 },
                 "updated_at": {
@@ -1697,7 +1708,11 @@
                       "relation_id",
                       "room_id",
                       "item_id",
-                      "room_name",
+                      "room_display_name",
+                      "campus_id",
+                      "building",
+                      "floor_number",
+                      "room_number",
                       "item_name",
                       "status",
                       "version",
@@ -1705,8 +1720,17 @@
                       "updated_at"
                     ],
                     "properties": {
+                      "building": {
+                        "type": "string"
+                      },
+                      "campus_id": {
+                        "type": "string"
+                      },
                       "created_at": {
                         "type": "string"
+                      },
+                      "floor_number": {
+                        "type": "integer"
                       },
                       "item_id": {
                         "type": "string"
@@ -1717,10 +1741,13 @@
                       "relation_id": {
                         "type": "string"
                       },
+                      "room_display_name": {
+                        "type": "string"
+                      },
                       "room_id": {
                         "type": "string"
                       },
-                      "room_name": {
+                      "room_number": {
                         "type": "string"
                       },
                       "status": {
@@ -1794,8 +1821,17 @@
             "schema": {
               "type": "object",
               "properties": {
+                "building": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
                 "created_at": {
                   "type": "string"
+                },
+                "floor_number": {
+                  "type": "integer"
                 },
                 "item_id": {
                   "type": "string"
@@ -1806,10 +1842,13 @@
                 "relation_id": {
                   "type": "string"
                 },
+                "room_display_name": {
+                  "type": "string"
+                },
                 "room_id": {
                   "type": "string"
                 },
-                "room_name": {
+                "room_number": {
                   "type": "string"
                 },
                 "status": {
@@ -3573,7 +3612,11 @@
                       "relation_id",
                       "room_id",
                       "item_id",
-                      "room_name",
+                      "room_display_name",
+                      "campus_id",
+                      "building",
+                      "floor_number",
+                      "room_number",
                       "item_name",
                       "status",
                       "version",
@@ -3581,8 +3624,17 @@
                       "updated_at"
                     ],
                     "properties": {
+                      "building": {
+                        "type": "string"
+                      },
+                      "campus_id": {
+                        "type": "string"
+                      },
                       "created_at": {
                         "type": "string"
+                      },
+                      "floor_number": {
+                        "type": "integer"
                       },
                       "item_id": {
                         "type": "string"
@@ -3593,10 +3645,13 @@
                       "relation_id": {
                         "type": "string"
                       },
+                      "room_display_name": {
+                        "type": "string"
+                      },
                       "room_id": {
                         "type": "string"
                       },
-                      "room_name": {
+                      "room_number": {
                         "type": "string"
                       },
                       "status": {
@@ -4362,7 +4417,7 @@
       "in": "header"
     }
   },
-  "x-date": "2026-08-13 17:34:39",
+  "x-date": "2026-08-13 19:12:54",
   "x-description": "This is a goctl generated swagger file.",
   "x-github": "https://github.com/zeromicro/go-zero",
   "x-go-zero-doc": "https://go-zero.dev/",

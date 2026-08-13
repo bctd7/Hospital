@@ -16,8 +16,7 @@ service AppointmentService {
   rpc GetRoom(GetRoomRequest) returns (Room);
   rpc ListRooms(ListRoomsRequest) returns (ListRoomsResponse);
   rpc UpdateRoom(UpdateRoomRequest) returns (Room);
-  rpc DisableRoom(ChangeResourceStatusRequest) returns (Room);
-  rpc EnableRoom(ChangeResourceStatusRequest) returns (Room);
+  rpc RetireRoom(RetireRoomRequest) returns (Room);
 
   rpc AddRoomExaminationItem(AddRoomExaminationItemRequest) returns (RoomExaminationItem);
   rpc DisableRoomExaminationItem(ChangeResourceStatusRequest) returns (RoomExaminationItem);
@@ -97,9 +96,12 @@ message ExaminationItem {
 
 message CreateRoomRequest {
   string department_id = 1;
-  string name = 2;
-  string operation_id = 3;
-  string request_id = 4;
+  string campus_id = 2;
+  string building = 3;
+  int32 floor_number = 4;
+  string room_number = 5;
+  string operation_id = 6;
+  string request_id = 7;
 }
 
 message GetRoomRequest {
@@ -109,10 +111,9 @@ message GetRoomRequest {
 
 message ListRoomsRequest {
   string department_id = 1;
-  string status = 2;
-  int64 page = 3;
-  int64 page_size = 4;
-  string request_id = 5;
+  int64 page = 2;
+  int64 page_size = 3;
+  string request_id = 4;
 }
 
 message ListRoomsResponse {
@@ -124,10 +125,20 @@ message ListRoomsResponse {
 
 message UpdateRoomRequest {
   string room_id = 1;
-  string name = 2;
-  int64 expected_version = 3;
-  string operation_id = 4;
-  string request_id = 5;
+  string campus_id = 2;
+  string building = 3;
+  int32 floor_number = 4;
+  string room_number = 5;
+  int64 expected_version = 6;
+  string operation_id = 7;
+  string request_id = 8;
+}
+
+message RetireRoomRequest {
+  string room_id = 1;
+  int64 expected_version = 2;
+  string operation_id = 3;
+  string request_id = 4;
 }
 
 message ChangeResourceStatusRequest {
@@ -140,11 +151,14 @@ message ChangeResourceStatusRequest {
 message Room {
   string room_id = 1;
   string department_id = 2;
-  string name = 3;
-  string status = 4;
-  int64 version = 5;
-  string created_at = 6;
-  string updated_at = 7;
+  string campus_id = 3;
+  string building = 4;
+  int32 floor_number = 5;
+  string room_number = 6;
+  string display_name = 7;
+  int64 version = 8;
+  string created_at = 9;
+  string updated_at = 10;
 }
 
 message AddRoomExaminationItemRequest {
@@ -179,12 +193,16 @@ message RoomExaminationItem {
   string relation_id = 1;
   string room_id = 2;
   string item_id = 3;
-  string room_name = 4;
+  string room_display_name = 4;
   string item_name = 5;
   string status = 6;
   int64 version = 7;
   string created_at = 8;
   string updated_at = 9;
+  string campus_id = 10;
+  string building = 11;
+  int32 floor_number = 12;
+  string room_number = 13;
 }
 
 message SetRoomWeeklyWindowRequest {

@@ -43,10 +43,10 @@ func statusCommand(in *appointmentv1.ChangeResourceStatusRequest) resource.Chang
 }
 
 func roomResponse(v resource.Room) *appointmentv1.Room {
-	return &appointmentv1.Room{RoomId: v.RoomID, DepartmentId: v.DepartmentID, Name: v.Name, Status: string(v.Status), Version: v.Version, CreatedAt: v.CreatedAt.UTC().Format(timeLayout), UpdatedAt: v.UpdatedAt.UTC().Format(timeLayout)}
+	return &appointmentv1.Room{RoomId: v.RoomID, DepartmentId: v.DepartmentID, CampusId: v.CampusID, Building: v.Building, FloorNumber: v.FloorNumber, RoomNumber: v.RoomNumber, DisplayName: v.DisplayName, Version: v.Version, CreatedAt: v.CreatedAt.UTC().Format(timeLayout), UpdatedAt: v.UpdatedAt.UTC().Format(timeLayout)}
 }
 func relationResponse(v resource.RoomItem) *appointmentv1.RoomExaminationItem {
-	return &appointmentv1.RoomExaminationItem{RelationId: v.RelationID, RoomId: v.RoomID, ItemId: v.ItemID, RoomName: v.RoomName, ItemName: v.ItemName, Status: string(v.Status), Version: v.Version, CreatedAt: v.CreatedAt.UTC().Format(timeLayout), UpdatedAt: v.UpdatedAt.UTC().Format(timeLayout)}
+	return &appointmentv1.RoomExaminationItem{RelationId: v.RelationID, RoomId: v.RoomID, ItemId: v.ItemID, RoomDisplayName: v.RoomDisplayName, CampusId: v.CampusID, Building: v.Building, FloorNumber: v.FloorNumber, RoomNumber: v.RoomNumber, ItemName: v.ItemName, Status: string(v.Status), Version: v.Version, CreatedAt: v.CreatedAt.UTC().Format(timeLayout), UpdatedAt: v.UpdatedAt.UTC().Format(timeLayout)}
 }
 func roomWindowResponse(v resource.RoomWeeklyWindow) *appointmentv1.RoomWeeklyWindow {
 	return &appointmentv1.RoomWeeklyWindow{WindowId: v.WindowID, RoomId: v.RoomID, Weekday: v.Weekday, Session: string(v.Session), OpenTime: v.OpenTime, CloseTime: v.CloseTime, ActiveCapacity: v.ActiveCapacity, Status: string(v.Status), Version: v.Version, CreatedAt: v.CreatedAt.UTC().Format(timeLayout), UpdatedAt: v.UpdatedAt.UTC().Format(timeLayout)}
@@ -60,7 +60,7 @@ func createRoom(ctx context.Context, svcCtx *svc.ServiceContext, in *appointment
 	if err != nil {
 		return nil, err
 	}
-	v, err := svcCtx.ResourceManager.CreateRoom(ctx, p, resource.CreateRoomCommand{DepartmentID: in.DepartmentId, Name: in.Name, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
+	v, err := svcCtx.ResourceManager.CreateRoom(ctx, p, resource.CreateRoomCommand{DepartmentID: in.DepartmentId, CampusID: in.CampusId, Building: in.Building, FloorNumber: in.FloorNumber, RoomNumber: in.RoomNumber, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
 	if err != nil {
 		return nil, resourceRPCError(err)
 	}
@@ -82,7 +82,7 @@ func listRooms(ctx context.Context, svcCtx *svc.ServiceContext, in *appointmentv
 	if err != nil {
 		return nil, err
 	}
-	v, err := svcCtx.ResourceManager.ListRooms(ctx, p, resource.ListRoomsQuery{DepartmentID: in.DepartmentId, Status: resource.Status(in.Status), Page: in.Page, PageSize: in.PageSize})
+	v, err := svcCtx.ResourceManager.ListRooms(ctx, p, resource.ListRoomsQuery{DepartmentID: in.DepartmentId, Page: in.Page, PageSize: in.PageSize})
 	if err != nil {
 		return nil, resourceRPCError(err)
 	}
@@ -97,23 +97,18 @@ func updateRoom(ctx context.Context, svcCtx *svc.ServiceContext, in *appointment
 	if err != nil {
 		return nil, err
 	}
-	v, err := svcCtx.ResourceManager.UpdateRoom(ctx, p, resource.UpdateRoomCommand{RoomID: in.RoomId, Name: in.Name, ExpectedVersion: in.ExpectedVersion, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
+	v, err := svcCtx.ResourceManager.UpdateRoom(ctx, p, resource.UpdateRoomCommand{RoomID: in.RoomId, CampusID: in.CampusId, Building: in.Building, FloorNumber: in.FloorNumber, RoomNumber: in.RoomNumber, ExpectedVersion: in.ExpectedVersion, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
 	if err != nil {
 		return nil, resourceRPCError(err)
 	}
 	return roomResponse(v), nil
 }
-func changeRoom(ctx context.Context, svcCtx *svc.ServiceContext, in *appointmentv1.ChangeResourceStatusRequest, enable bool) (*appointmentv1.Room, error) {
+func retireRoom(ctx context.Context, svcCtx *svc.ServiceContext, in *appointmentv1.RetireRoomRequest) (*appointmentv1.Room, error) {
 	p, err := catalogPrincipal(ctx)
 	if err != nil {
 		return nil, err
 	}
-	var v resource.Room
-	if enable {
-		v, err = svcCtx.ResourceManager.EnableRoom(ctx, p, statusCommand(in))
-	} else {
-		v, err = svcCtx.ResourceManager.DisableRoom(ctx, p, statusCommand(in))
-	}
+	v, err := svcCtx.ResourceManager.RetireRoom(ctx, p, resource.RetireRoomCommand{RoomID: in.RoomId, ExpectedVersion: in.ExpectedVersion, OperationMeta: operationMeta(in.OperationId, in.RequestId)})
 	if err != nil {
 		return nil, resourceRPCError(err)
 	}

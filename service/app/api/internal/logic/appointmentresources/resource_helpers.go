@@ -14,10 +14,10 @@ func rpcContext(ctx context.Context, svcCtx *svc.ServiceContext) (context.Contex
 	return rpcCtx, logging.RequestIDFromContext(ctx), err
 }
 func room(v *appointmentv1.Room) *types.AppointmentRoomResponse {
-	return &types.AppointmentRoomResponse{RoomID: v.RoomId, DepartmentID: v.DepartmentId, Name: v.Name, Status: v.Status, Version: v.Version, CreatedAt: v.CreatedAt, UpdatedAt: v.UpdatedAt}
+	return &types.AppointmentRoomResponse{RoomID: v.RoomId, DepartmentID: v.DepartmentId, CampusID: v.CampusId, Building: v.Building, FloorNumber: v.FloorNumber, RoomNumber: v.RoomNumber, DisplayName: v.DisplayName, Version: v.Version, CreatedAt: v.CreatedAt, UpdatedAt: v.UpdatedAt}
 }
 func relation(v *appointmentv1.RoomExaminationItem) types.RoomExaminationItemResponse {
-	return types.RoomExaminationItemResponse{RelationID: v.RelationId, RoomID: v.RoomId, ItemID: v.ItemId, RoomName: v.RoomName, ItemName: v.ItemName, Status: v.Status, Version: v.Version, CreatedAt: v.CreatedAt, UpdatedAt: v.UpdatedAt}
+	return types.RoomExaminationItemResponse{RelationID: v.RelationId, RoomID: v.RoomId, ItemID: v.ItemId, RoomDisplayName: v.RoomDisplayName, CampusID: v.CampusId, Building: v.Building, FloorNumber: v.FloorNumber, RoomNumber: v.RoomNumber, ItemName: v.ItemName, Status: v.Status, Version: v.Version, CreatedAt: v.CreatedAt, UpdatedAt: v.UpdatedAt}
 }
 func roomWindow(v *appointmentv1.RoomWeeklyWindow) *types.RoomWeeklyWindowResponse {
 	return &types.RoomWeeklyWindowResponse{WindowID: v.WindowId, RoomID: v.RoomId, Weekday: v.Weekday, Session: v.Session, OpenTime: v.OpenTime, CloseTime: v.CloseTime, ActiveCapacity: v.ActiveCapacity, Status: v.Status, Version: v.Version, CreatedAt: v.CreatedAt, UpdatedAt: v.UpdatedAt}
@@ -31,7 +31,7 @@ func createRoom(ctx context.Context, s *svc.ServiceContext, req *types.CreateApp
 	if err != nil {
 		return nil, err
 	}
-	v, err := s.Appointment.CreateRoom(rpcCtx, &appointmentv1.CreateRoomRequest{DepartmentId: req.DepartmentID, Name: req.Name, OperationId: req.OperationID, RequestId: requestID})
+	v, err := s.Appointment.CreateRoom(rpcCtx, &appointmentv1.CreateRoomRequest{DepartmentId: req.DepartmentID, CampusId: req.CampusID, Building: req.Building, FloorNumber: req.FloorNumber, RoomNumber: req.RoomNumber, OperationId: req.OperationID, RequestId: requestID})
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func listRooms(ctx context.Context, s *svc.ServiceContext, req *types.ListAppoin
 	if err != nil {
 		return nil, err
 	}
-	v, err := s.Appointment.ListRooms(rpcCtx, &appointmentv1.ListRoomsRequest{DepartmentId: req.DepartmentID, Status: req.Status, Page: req.Page, PageSize: req.PageSize, RequestId: requestID})
+	v, err := s.Appointment.ListRooms(rpcCtx, &appointmentv1.ListRoomsRequest{DepartmentId: req.DepartmentID, Page: req.Page, PageSize: req.PageSize, RequestId: requestID})
 	if err != nil {
 		return nil, err
 	}
@@ -68,24 +68,18 @@ func updateRoom(ctx context.Context, s *svc.ServiceContext, req *types.UpdateApp
 	if err != nil {
 		return nil, err
 	}
-	v, err := s.Appointment.UpdateRoom(rpcCtx, &appointmentv1.UpdateRoomRequest{RoomId: req.RoomID, Name: req.Name, ExpectedVersion: req.ExpectedVersion, OperationId: req.OperationID, RequestId: requestID})
+	v, err := s.Appointment.UpdateRoom(rpcCtx, &appointmentv1.UpdateRoomRequest{RoomId: req.RoomID, CampusId: req.CampusID, Building: req.Building, FloorNumber: req.FloorNumber, RoomNumber: req.RoomNumber, ExpectedVersion: req.ExpectedVersion, OperationId: req.OperationID, RequestId: requestID})
 	if err != nil {
 		return nil, err
 	}
 	return room(v), nil
 }
-func changeRoom(ctx context.Context, s *svc.ServiceContext, req *types.ChangeAppointmentResourceStatusRequest, enable bool) (*types.AppointmentRoomResponse, error) {
+func retireRoom(ctx context.Context, s *svc.ServiceContext, req *types.ChangeAppointmentResourceStatusRequest) (*types.AppointmentRoomResponse, error) {
 	rpcCtx, requestID, err := rpcContext(ctx, s)
 	if err != nil {
 		return nil, err
 	}
-	in := &appointmentv1.ChangeResourceStatusRequest{ResourceId: req.ResourceID, ExpectedVersion: req.ExpectedVersion, OperationId: req.OperationID, RequestId: requestID}
-	var v *appointmentv1.Room
-	if enable {
-		v, err = s.Appointment.EnableRoom(rpcCtx, in)
-	} else {
-		v, err = s.Appointment.DisableRoom(rpcCtx, in)
-	}
+	v, err := s.Appointment.RetireRoom(rpcCtx, &appointmentv1.RetireRoomRequest{RoomId: req.ResourceID, ExpectedVersion: req.ExpectedVersion, OperationId: req.OperationID, RequestId: requestID})
 	if err != nil {
 		return nil, err
 	}

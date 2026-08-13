@@ -7,13 +7,25 @@ type OperationMeta struct {
 
 type CreateRoomCommand struct {
 	DepartmentID string
-	Name         string
+	CampusID     string
+	Building     string
+	FloorNumber  int32
+	RoomNumber   string
 	OperationMeta
 }
 
 type UpdateRoomCommand struct {
 	RoomID          string
-	Name            string
+	CampusID        string
+	Building        string
+	FloorNumber     int32
+	RoomNumber      string
+	ExpectedVersion int64
+	OperationMeta
+}
+
+type RetireRoomCommand struct {
+	RoomID          string
 	ExpectedVersion int64
 	OperationMeta
 }
@@ -56,7 +68,6 @@ type SetItemWindowCommand struct {
 
 type ListRoomsQuery struct {
 	DepartmentID string
-	Status       Status
 	Page         int64
 	PageSize     int64
 }

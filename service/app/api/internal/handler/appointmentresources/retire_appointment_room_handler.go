@@ -12,7 +12,7 @@ import (
 	"hospital/service/app/api/internal/types"
 )
 
-func DisableAppointmentRoomHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func RetireAppointmentRoomHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.ChangeAppointmentResourceStatusRequest
 		if err := httpx.Parse(r, &req); err != nil {
@@ -20,8 +20,8 @@ func DisableAppointmentRoomHandler(svcCtx *svc.ServiceContext) http.HandlerFunc 
 			return
 		}
 
-		l := appointmentresources.NewDisableAppointmentRoomLogic(r.Context(), svcCtx)
-		resp, err := l.DisableAppointmentRoom(&req)
+		l := appointmentresources.NewRetireAppointmentRoomLogic(r.Context(), svcCtx)
+		resp, err := l.RetireAppointmentRoom(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

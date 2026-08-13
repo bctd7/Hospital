@@ -9,6 +9,7 @@ import type {
   ExaminationItem,
   ItemWeeklyWindow,
   RoomExaminationItem,
+  RoomLocationInput,
   RoomWeeklyWindow,
   SaveItemWindowInput,
   SaveRoomWindowInput,
@@ -28,8 +29,11 @@ interface ItemResponse {
 interface RoomResponse {
   room_id: string;
   department_id: string;
-  name: string;
-  status: AppointmentStatus;
+  campus_id: string;
+  building: string;
+  floor_number: number;
+  room_number: string;
+  display_name: string;
   version: number;
   created_at: string;
   updated_at: string;
@@ -39,7 +43,11 @@ interface RelationResponse {
   relation_id: string;
   room_id: string;
   item_id: string;
-  room_name: string;
+  room_display_name: string;
+  campus_id: string;
+  building: string;
+  floor_number: number;
+  room_number: string;
   item_name: string;
   status: AppointmentStatus;
   version: number;
@@ -89,8 +97,11 @@ const item = (value: ItemResponse): ExaminationItem => ({
 const room = (value: RoomResponse): AppointmentRoom => ({
   roomId: value.room_id,
   departmentId: value.department_id,
-  name: value.name,
-  status: value.status,
+  campusId: value.campus_id,
+  building: value.building,
+  floorNumber: value.floor_number,
+  roomNumber: value.room_number,
+  displayName: value.display_name,
   version: value.version,
   createdAt: value.created_at,
   updatedAt: value.updated_at,
@@ -100,7 +111,11 @@ const relation = (value: RelationResponse): RoomExaminationItem => ({
   relationId: value.relation_id,
   roomId: value.room_id,
   itemId: value.item_id,
-  roomName: value.room_name,
+  roomDisplayName: value.room_display_name,
+  campusId: value.campus_id,
+  building: value.building,
+  floorNumber: value.floor_number,
+  roomNumber: value.room_number,
   itemName: value.item_name,
   status: value.status,
   version: value.version,
@@ -201,9 +216,9 @@ export const appointmentManagementApi: AppointmentManagementApi = {
     return item(await mutation<ItemResponse>(key, `/api/v1/admin/appointment/examination-items/${encodeURIComponent(value.itemId)}/${enabled ? "enable" : "disable"}`, "POST", statusBody(value.itemId, value.version)));
   },
 
-  async listRooms(departmentId, status, currentPage = 1, pageSize = 50) {
+  async listRooms(departmentId, currentPage = 1, pageSize = 50) {
     const value = await request<{ rooms: RoomResponse[]; page: number; page_size: number; total: number }>({
-      path: queryPath("/api/v1/admin/appointment/rooms", { department_id: departmentId, status, page: currentPage, page_size: pageSize }),
+      path: queryPath("/api/v1/admin/appointment/rooms", { department_id: departmentId, page: currentPage, page_size: pageSize }),
       authenticated: true,
     });
     return page(value.rooms.map(room), value);
@@ -213,19 +228,18 @@ export const appointmentManagementApi: AppointmentManagementApi = {
     return room(await request<RoomResponse>({ path: `/api/v1/admin/appointment/rooms/${encodeURIComponent(roomId)}`, authenticated: true }));
   },
 
-  async createRoom(departmentId, name) {
-    const key = `room:create:${departmentId}:${name}`;
-    return room(await mutation<RoomResponse>(key, "/api/v1/admin/appointment/rooms", "POST", { department_id: departmentId, name }));
+  async createRoom(departmentId, location: RoomLocationInput) {
+    const data = { department_id: departmentId, campus_id: location.campusId, building: location.building, floor_number: location.floorNumber, room_number: location.roomNumber };
+    return room(await mutation<RoomResponse>(`room:create:${JSON.stringify(data)}`, "/api/v1/admin/appointment/rooms", "POST", data));
   },
 
-  async updateRoom(value, name) {
-    const key = `room:update:${value.roomId}:${value.version}:${name}`;
-    return room(await mutation<RoomResponse>(key, `/api/v1/admin/appointment/rooms/${encodeURIComponent(value.roomId)}`, "PUT", { name, expected_version: value.version }));
+  async updateRoom(value, location: RoomLocationInput) {
+    const data = { campus_id: location.campusId, building: location.building, floor_number: location.floorNumber, room_number: location.roomNumber, expected_version: value.version };
+    return room(await mutation<RoomResponse>(`room:update:${value.roomId}:${JSON.stringify(data)}`, `/api/v1/admin/appointment/rooms/${encodeURIComponent(value.roomId)}`, "PUT", data));
   },
 
-  async setRoomEnabled(value, enabled) {
-    const key = `room:status:${value.roomId}:${value.version}:${enabled}`;
-    return room(await mutation<RoomResponse>(key, `/api/v1/admin/appointment/rooms/${encodeURIComponent(value.roomId)}/${enabled ? "enable" : "disable"}`, "POST", statusBody(value.roomId, value.version)));
+  async retireRoom(value) {
+    return room(await mutation<RoomResponse>(`room:retire:${value.roomId}:${value.version}`, `/api/v1/admin/appointment/rooms/${encodeURIComponent(value.roomId)}/retire`, "POST", statusBody(value.roomId, value.version)));
   },
 
   async listRoomItems(roomId, status, currentPage = 1, pageSize = 100) {

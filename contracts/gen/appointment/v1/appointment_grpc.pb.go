@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v7.34.1
-// source: appointment/v1/appointment.proto
+// source: contracts/proto/appointment/v1/appointment.proto
 
 package appointmentv1
 
@@ -29,8 +29,7 @@ const (
 	AppointmentService_GetRoom_FullMethodName                             = "/hospital.appointment.v1.AppointmentService/GetRoom"
 	AppointmentService_ListRooms_FullMethodName                           = "/hospital.appointment.v1.AppointmentService/ListRooms"
 	AppointmentService_UpdateRoom_FullMethodName                          = "/hospital.appointment.v1.AppointmentService/UpdateRoom"
-	AppointmentService_DisableRoom_FullMethodName                         = "/hospital.appointment.v1.AppointmentService/DisableRoom"
-	AppointmentService_EnableRoom_FullMethodName                          = "/hospital.appointment.v1.AppointmentService/EnableRoom"
+	AppointmentService_RetireRoom_FullMethodName                          = "/hospital.appointment.v1.AppointmentService/RetireRoom"
 	AppointmentService_AddRoomExaminationItem_FullMethodName              = "/hospital.appointment.v1.AppointmentService/AddRoomExaminationItem"
 	AppointmentService_DisableRoomExaminationItem_FullMethodName          = "/hospital.appointment.v1.AppointmentService/DisableRoomExaminationItem"
 	AppointmentService_EnableRoomExaminationItem_FullMethodName           = "/hospital.appointment.v1.AppointmentService/EnableRoomExaminationItem"
@@ -58,8 +57,7 @@ type AppointmentServiceClient interface {
 	GetRoom(ctx context.Context, in *GetRoomRequest, opts ...grpc.CallOption) (*Room, error)
 	ListRooms(ctx context.Context, in *ListRoomsRequest, opts ...grpc.CallOption) (*ListRoomsResponse, error)
 	UpdateRoom(ctx context.Context, in *UpdateRoomRequest, opts ...grpc.CallOption) (*Room, error)
-	DisableRoom(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*Room, error)
-	EnableRoom(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*Room, error)
+	RetireRoom(ctx context.Context, in *RetireRoomRequest, opts ...grpc.CallOption) (*Room, error)
 	AddRoomExaminationItem(ctx context.Context, in *AddRoomExaminationItemRequest, opts ...grpc.CallOption) (*RoomExaminationItem, error)
 	DisableRoomExaminationItem(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*RoomExaminationItem, error)
 	EnableRoomExaminationItem(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*RoomExaminationItem, error)
@@ -181,20 +179,10 @@ func (c *appointmentServiceClient) UpdateRoom(ctx context.Context, in *UpdateRoo
 	return out, nil
 }
 
-func (c *appointmentServiceClient) DisableRoom(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*Room, error) {
+func (c *appointmentServiceClient) RetireRoom(ctx context.Context, in *RetireRoomRequest, opts ...grpc.CallOption) (*Room, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Room)
-	err := c.cc.Invoke(ctx, AppointmentService_DisableRoom_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *appointmentServiceClient) EnableRoom(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*Room, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Room)
-	err := c.cc.Invoke(ctx, AppointmentService_EnableRoom_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, AppointmentService_RetireRoom_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -325,8 +313,7 @@ type AppointmentServiceServer interface {
 	GetRoom(context.Context, *GetRoomRequest) (*Room, error)
 	ListRooms(context.Context, *ListRoomsRequest) (*ListRoomsResponse, error)
 	UpdateRoom(context.Context, *UpdateRoomRequest) (*Room, error)
-	DisableRoom(context.Context, *ChangeResourceStatusRequest) (*Room, error)
-	EnableRoom(context.Context, *ChangeResourceStatusRequest) (*Room, error)
+	RetireRoom(context.Context, *RetireRoomRequest) (*Room, error)
 	AddRoomExaminationItem(context.Context, *AddRoomExaminationItemRequest) (*RoomExaminationItem, error)
 	DisableRoomExaminationItem(context.Context, *ChangeResourceStatusRequest) (*RoomExaminationItem, error)
 	EnableRoomExaminationItem(context.Context, *ChangeResourceStatusRequest) (*RoomExaminationItem, error)
@@ -378,11 +365,8 @@ func (UnimplementedAppointmentServiceServer) ListRooms(context.Context, *ListRoo
 func (UnimplementedAppointmentServiceServer) UpdateRoom(context.Context, *UpdateRoomRequest) (*Room, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateRoom not implemented")
 }
-func (UnimplementedAppointmentServiceServer) DisableRoom(context.Context, *ChangeResourceStatusRequest) (*Room, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DisableRoom not implemented")
-}
-func (UnimplementedAppointmentServiceServer) EnableRoom(context.Context, *ChangeResourceStatusRequest) (*Room, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method EnableRoom not implemented")
+func (UnimplementedAppointmentServiceServer) RetireRoom(context.Context, *RetireRoomRequest) (*Room, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RetireRoom not implemented")
 }
 func (UnimplementedAppointmentServiceServer) AddRoomExaminationItem(context.Context, *AddRoomExaminationItemRequest) (*RoomExaminationItem, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddRoomExaminationItem not implemented")
@@ -618,38 +602,20 @@ func _AppointmentService_UpdateRoom_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AppointmentService_DisableRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ChangeResourceStatusRequest)
+func _AppointmentService_RetireRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RetireRoomRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AppointmentServiceServer).DisableRoom(ctx, in)
+		return srv.(AppointmentServiceServer).RetireRoom(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AppointmentService_DisableRoom_FullMethodName,
+		FullMethod: AppointmentService_RetireRoom_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppointmentServiceServer).DisableRoom(ctx, req.(*ChangeResourceStatusRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AppointmentService_EnableRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ChangeResourceStatusRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AppointmentServiceServer).EnableRoom(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AppointmentService_EnableRoom_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppointmentServiceServer).EnableRoom(ctx, req.(*ChangeResourceStatusRequest))
+		return srv.(AppointmentServiceServer).RetireRoom(ctx, req.(*RetireRoomRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -900,12 +866,8 @@ var AppointmentService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AppointmentService_UpdateRoom_Handler,
 		},
 		{
-			MethodName: "DisableRoom",
-			Handler:    _AppointmentService_DisableRoom_Handler,
-		},
-		{
-			MethodName: "EnableRoom",
-			Handler:    _AppointmentService_EnableRoom_Handler,
+			MethodName: "RetireRoom",
+			Handler:    _AppointmentService_RetireRoom_Handler,
 		},
 		{
 			MethodName: "AddRoomExaminationItem",
@@ -953,5 +915,5 @@ var AppointmentService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "appointment/v1/appointment.proto",
+	Metadata: "contracts/proto/appointment/v1/appointment.proto",
 }

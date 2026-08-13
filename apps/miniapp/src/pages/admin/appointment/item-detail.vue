@@ -253,7 +253,6 @@ function disableWindow(value: ItemWeeklyWindow) {
 
       <view v-if="item" class="section">
         <view class="section__heading"><text>项目周预约窗口</text><button v-if="canUpdate" @tap="openWindowEditor()">＋ 配置</button></view>
-        <text class="section__hint">项目时间独立于房间开放时间，必须完整落在所有关联房间对应窗口内。</text>
         <view v-if="!sortedWindows.length" class="inline-empty">尚未配置预约窗口</view>
         <view v-for="value in sortedWindows" :key="value.windowId" class="window-row">
           <view>
@@ -279,7 +278,6 @@ function disableWindow(value: ItemWeeklyWindow) {
         <text class="field-label">预约开始（HH:MM）</text><input v-model="startTime" class="field-input" placeholder="09:00" />
         <text class="field-label">停止新增（HH:MM）</text><input v-model="cutoffTime" class="field-input" placeholder="11:30" />
         <text class="field-label">预约结束（HH:MM）</text><input v-model="endTime" class="field-input" placeholder="12:00" />
-        <text class="dialog__notice">保存后从本周立即生效，后续周继续沿用。</text>
         <view class="dialog__buttons"><button @tap="editorVisible = false">取消</button><button class="primary-button" :disabled="saving" @tap="saveWindow">保存</button></view>
       </view>
     </view>

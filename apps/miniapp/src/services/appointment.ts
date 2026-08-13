@@ -73,12 +73,11 @@ export function loadExaminationItems(
 
 export function loadAppointmentRooms(
   departmentId: string,
-  status: AppointmentStatus,
   page = 1,
   force = false,
 ) {
-  const key = `${departmentId}:${status}:${page}`;
-  return roomPages.load(key, () => appointmentManagementApi.listRooms(departmentId, status, page), force);
+  const key = `${departmentId}:${page}`;
+  return roomPages.load(key, () => appointmentManagementApi.listRooms(departmentId, page), force);
 }
 
 export function loadRoomExaminationItems(

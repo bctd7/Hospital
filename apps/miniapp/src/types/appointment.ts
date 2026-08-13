@@ -15,8 +15,11 @@ export interface ExaminationItem {
 export interface AppointmentRoom {
   roomId: string;
   departmentId: string;
-  name: string;
-  status: AppointmentStatus;
+  campusId: string;
+  building: string;
+  floorNumber: number;
+  roomNumber: string;
+  displayName: string;
   version: number;
   createdAt: string;
   updatedAt: string;
@@ -26,7 +29,11 @@ export interface RoomExaminationItem {
   relationId: string;
   roomId: string;
   itemId: string;
-  roomName: string;
+  roomDisplayName: string;
+  campusId: string;
+  building: string;
+  floorNumber: number;
+  roomNumber: string;
   itemName: string;
   status: AppointmentStatus;
   version: number;
@@ -79,6 +86,13 @@ export interface SaveRoomWindowInput {
   expectedVersion: number;
 }
 
+export interface RoomLocationInput {
+  campusId: string;
+  building: string;
+  floorNumber: number;
+  roomNumber: string;
+}
+
 export interface SaveItemWindowInput {
   windowId?: string;
   weekday: number;
@@ -95,11 +109,11 @@ export interface AppointmentManagementApi {
   createItem(departmentId: string, name: string, description: string): Promise<ExaminationItem>;
   updateItem(item: ExaminationItem, name: string, description: string): Promise<ExaminationItem>;
   setItemEnabled(item: ExaminationItem, enabled: boolean): Promise<ExaminationItem>;
-  listRooms(departmentId: string, status: AppointmentStatus, page?: number, pageSize?: number): Promise<AppointmentPage<AppointmentRoom>>;
+  listRooms(departmentId: string, page?: number, pageSize?: number): Promise<AppointmentPage<AppointmentRoom>>;
   getRoom(roomId: string): Promise<AppointmentRoom>;
-  createRoom(departmentId: string, name: string): Promise<AppointmentRoom>;
-  updateRoom(room: AppointmentRoom, name: string): Promise<AppointmentRoom>;
-  setRoomEnabled(room: AppointmentRoom, enabled: boolean): Promise<AppointmentRoom>;
+  createRoom(departmentId: string, location: RoomLocationInput): Promise<AppointmentRoom>;
+  updateRoom(room: AppointmentRoom, location: RoomLocationInput): Promise<AppointmentRoom>;
+  retireRoom(room: AppointmentRoom): Promise<AppointmentRoom>;
   listRoomItems(roomId: string, status: AppointmentStatus, page?: number, pageSize?: number): Promise<AppointmentPage<RoomExaminationItem>>;
   addRoomItem(roomId: string, itemId: string): Promise<RoomExaminationItem>;
   setRoomItemEnabled(relation: RoomExaminationItem, enabled: boolean): Promise<RoomExaminationItem>;

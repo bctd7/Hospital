@@ -10,9 +10,10 @@ import (
 	"hospital/service/appointment/rpc/internal/resource"
 )
 
-const roomSelect = `SELECT id, department_id, name, status, version, created_at, updated_at FROM appointment_rooms`
+const roomSelect = `SELECT id, department_id, campus_id, building, floor_number, room_number, retired_at, version, created_at, updated_at FROM appointment_rooms`
 const relationSelect = `
-SELECT r.id, r.room_id, r.item_id, room.name, item.name, r.status, r.version, r.created_at, r.updated_at
+SELECT r.id, r.room_id, r.item_id, room.campus_id, room.building, room.floor_number, room.room_number,
+       item.name, r.status, r.version, r.created_at, r.updated_at
 FROM appointment_room_examination_items r
 JOIN appointment_rooms room ON room.id = r.room_id
 JOIN appointment_examination_items item ON item.id = r.item_id`
@@ -37,17 +38,13 @@ func (s *Store) GetRoom(ctx context.Context, roomID string) (resource.Room, erro
 	return value, nil
 }
 
-func (s *Store) ListRooms(ctx context.Context, departmentID string, status resource.Status, offset, limit int64) ([]resource.Room, int64, error) {
-	where, args := " WHERE department_id = ?", []any{departmentID}
-	if status != "" {
-		where += " AND status = ?"
-		args = append(args, status)
-	}
+func (s *Store) ListRooms(ctx context.Context, departmentID string, offset, limit int64) ([]resource.Room, int64, error) {
+	where, args := " WHERE department_id = ? AND retired_at IS NULL", []any{departmentID}
 	var total int64
 	if err := s.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM appointment_rooms"+where, args...).Scan(&total); err != nil {
 		return nil, 0, fmt.Errorf("count appointment rooms: %w", err)
 	}
-	rows, err := s.db.QueryContext(ctx, roomSelect+where+" ORDER BY name, id LIMIT ? OFFSET ?", append(args, limit, offset)...)
+	rows, err := s.db.QueryContext(ctx, roomSelect+where+" ORDER BY building, floor_number, room_number, id LIMIT ? OFFSET ?", append(args, limit, offset)...)
 	if err != nil {
 		return nil, 0, fmt.Errorf("list appointment rooms: %w", err)
 	}
@@ -97,9 +94,9 @@ func (s *Store) ListRoomItems(ctx context.Context, roomID string, status resourc
 func (s *Store) ListItemRooms(ctx context.Context, itemID string, activeOnly bool) ([]resource.RoomItem, error) {
 	where, args := " WHERE r.item_id = ?", []any{itemID}
 	if activeOnly {
-		where += " AND r.status = 'active' AND room.status = 'active'"
+		where += " AND r.status = 'active' AND room.retired_at IS NULL"
 	}
-	rows, err := s.db.QueryContext(ctx, relationSelect+where+" ORDER BY room.name, r.id", args...)
+	rows, err := s.db.QueryContext(ctx, relationSelect+where+" ORDER BY room.building, room.floor_number, room.room_number, r.id", args...)
 	if err != nil {
 		return nil, fmt.Errorf("list item rooms: %w", err)
 	}
@@ -158,12 +155,14 @@ type rowScanner interface{ Scan(...any) error }
 
 func scanRoom(s rowScanner) (resource.Room, error) {
 	var v resource.Room
-	err := s.Scan(&v.RoomID, &v.DepartmentID, &v.Name, &v.Status, &v.Version, &v.CreatedAt, &v.UpdatedAt)
+	err := s.Scan(&v.RoomID, &v.DepartmentID, &v.CampusID, &v.Building, &v.FloorNumber, &v.RoomNumber, &v.RetiredAt, &v.Version, &v.CreatedAt, &v.UpdatedAt)
+	v.DisplayName = resource.FormatRoomDisplayName(v.Building, v.FloorNumber, v.RoomNumber)
 	return v, err
 }
 func scanRelation(s rowScanner) (resource.RoomItem, error) {
 	var v resource.RoomItem
-	err := s.Scan(&v.RelationID, &v.RoomID, &v.ItemID, &v.RoomName, &v.ItemName, &v.Status, &v.Version, &v.CreatedAt, &v.UpdatedAt)
+	err := s.Scan(&v.RelationID, &v.RoomID, &v.ItemID, &v.CampusID, &v.Building, &v.FloorNumber, &v.RoomNumber, &v.ItemName, &v.Status, &v.Version, &v.CreatedAt, &v.UpdatedAt)
+	v.RoomDisplayName = resource.FormatRoomDisplayName(v.Building, v.FloorNumber, v.RoomNumber)
 	return v, err
 }
 func scanRoomWindow(s rowScanner) (resource.RoomWeeklyWindow, error) {

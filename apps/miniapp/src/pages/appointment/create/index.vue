@@ -69,7 +69,7 @@ function confirmMockAppointment() {
   if (!canConfirm.value) return;
   uni.showModal({
     title: "Mock 预约预览",
-    content: `${selectedDepartment.value?.campus} / ${selectedDepartment.value?.name}\n${selectedItem.value?.name} · ${selectedRoom.value?.name}\n${selectedWindow.value?.weekday} ${selectedWindow.value?.session} ${selectedWindow.value?.time}\n\n当前只验证患者选择流程，不会创建真实预约。`,
+    content: `${selectedDepartment.value?.campus} / ${selectedDepartment.value?.name}\n${selectedItem.value?.name} · ${selectedRoom.value?.displayName}\n${selectedWindow.value?.weekday} ${selectedWindow.value?.session} ${selectedWindow.value?.time}\n\n当前只验证患者选择流程，不会创建真实预约。`,
     showCancel: false,
     confirmText: "我知道了",
   });
@@ -91,10 +91,6 @@ function confirmMockAppointment() {
         <text class="hospital-card__address">{{ selectedDepartment?.name || '请选择科室' }}</text>
       </view>
       <text class="hospital-card__switch">← 左侧切换</text>
-    </view>
-
-    <view class="flow-hint">
-      <text class="flow-hint__active">1 科室</text><text>→</text><text>2 检查项目</text><text>→</text><text>3 房间</text>
     </view>
 
     <view class="cascade">
@@ -135,7 +131,7 @@ function confirmMockAppointment() {
           :class="{ selected: selectedRoomId === room.id }"
           @tap="chooseRoom(room.id)"
         >
-          <text>{{ room.name }}</text><text class="cascade-option__check">{{ selectedRoomId === room.id ? '✓' : '›' }}</text>
+          <text>{{ room.displayName }}</text><text class="cascade-option__check">{{ selectedRoomId === room.id ? '✓' : '›' }}</text>
         </button>
         <text v-if="selectedItem && !rooms.length" class="column-empty">暂无可选房间</text>
       </scroll-view>
@@ -143,7 +139,7 @@ function confirmMockAppointment() {
 
     <view v-if="selectedItem && selectedRoom" class="selection-detail">
       <view class="selection-detail__heading">
-        <view><text class="selection-detail__title">{{ selectedItem.name }}</text><text class="selection-detail__room">{{ selectedRoom.name }}</text></view>
+        <view><text class="selection-detail__title">{{ selectedItem.name }}</text><text class="selection-detail__room">{{ selectedRoom.displayName }}</text></view>
         <text class="mock-badge">MOCK</text>
       </view>
       <text class="selection-detail__description">{{ selectedItem.description }}</text>

@@ -39,7 +39,7 @@ Appointment 直接拥有“检查房间”这个预约资源，不依赖独立 N
 
 ```text
 Appointment
-  -> 房间所属科室、名称、状态和版本
+  -> 房间所属科室、结构化院区位置、退役时间和版本
   -> 房间开放时间和共享活动容量
   -> 房间可以执行哪些检查项目
 
@@ -47,8 +47,9 @@ Appointment
   -> 可选的院区、楼栋、楼层、坐标和移动时间
 ```
 
-以后确需地图时，可以给房间增加空间元数据或由检查顺序模块引用 `room_id`，不要求先建立独立 Navigation
-服务。Appointment 不拥有 Identity 的科室；数据库只保存稳定 `department_id`，不建立跨数据库外键。
+院区由 Identity 提供稳定 `campus_id`，楼栋、楼层和房间号由 Appointment 强约束保存。后续地图与检查顺序
+直接引用 `room_id` 和这些结构化字段，不再从自由文本名称中解析位置。Appointment 不拥有 Identity 的科室；
+数据库只保存稳定 `department_id` 和 `campus_id`，不建立跨数据库外键。
 
 ## 3. 检查房间
 
@@ -58,8 +59,11 @@ Appointment
 appointment_rooms
   room_id
   department_id
-  name
-  status                 active | disabled
+  campus_id
+  building
+  floor_number
+  room_number
+  retired_at             NULL 表示仍在使用
   version
   created_at
   updated_at
@@ -69,9 +73,11 @@ appointment_rooms
 
 - `room_id` 是稳定 UUID；
 - 一个房间只能属于一个科室；
-- `(department_id, name)` 唯一；
-- 房间创建后不能直接改变所属科室；配置错误时停用旧房间并在目标科室创建新房间；
-- 停用是业务状态，不提供物理删除 RPC；
+- `campus_id` 必须是稳定 UUID，楼栋必填，楼层只能为 `-9..-1` 或 `1..99`，房间号只允许字母、数字、`-` 和 `_`；
+- `(campus_id, building, floor_number, room_number)` 全局唯一，禁止同一物理房间重复登记；
+- `display_name` 由服务端根据结构化字段生成，不持久化、不允许管理员自由填写；
+- 房间创建后不能改变所属科室；配置错误时修改位置，分配错误时将旧房间标记为不再使用并在目标科室创建；
+- 房间没有 active/disabled 切换。“不再使用”只写入 `retired_at`，管理列表和患者查询均不展示，也不提供恢复入口；
 - 普通工作人员只能管理当前科室房间，`super_admin` 可以跨科室管理。
 
 ### 3.2 管理能力
@@ -81,12 +87,11 @@ CreateRoom
 GetRoom
 ListRooms
 UpdateRoom
-DisableRoom
-EnableRoom
+RetireRoom
 ```
 
-房间列表支持科室、状态和稳定分页。更新只允许修改名称；停用房间会立即禁止新预约，但不会物理删除房间、
-关系、配置或预约历史。
+房间列表只返回仍在使用的房间并支持科室和稳定分页。更新允许修改院区、楼栋、楼层和房间号；不再使用后
+立即禁止新预约，但不会物理删除房间、关系、配置或预约历史。
 
 ## 4. 房间与检查项目关系
 
@@ -105,10 +110,10 @@ appointment_room_examination_items
 
 - `UNIQUE(room_id, item_id)`；
 - 房间和项目必须存在且属于同一个 `department_id`；
-- 激活关系时，房间和项目都必须为 `active`；
+- 激活关系时，房间必须仍在使用且项目必须为 `active`；
 - 关系只表达“这个房间可以执行这个项目”，不保存时间、容量、医生或重复的科室 ID；
 - 移除项目使用 `disabled`，恢复使用 `active`，不物理删除；
-- 房间或项目停用后，关系记录保持不变，但患者可用查询必须 fail-closed。
+- 房间不再使用或项目停用后，关系记录保持不变，但患者可用查询必须 fail-closed。
 
 管理端以房间为中心提供：
 
@@ -124,7 +129,7 @@ RemoveRoomExaminationItem
 ListAvailableRoomsByExaminationItem
 ```
 
-患者查询只返回同科室且房间、项目和关系均为 `active` 的房间。
+患者查询只返回同科室、仍在使用且项目和关系均为 `active` 的房间。
 
 ## 5. 两条独立周配置
 
@@ -373,7 +378,7 @@ appointment_resource_audit
 
 至少覆盖：
 
-- 房间 CRUD、同科室名称唯一、乐观锁、幂等和科室权限；
+- 房间 CRUD、物理位置唯一、结构化字段校验、单向退役、乐观锁、幂等和科室权限；
 - 一个房间加入多个项目、一个项目加入多个房间；
 - 跨科室关系被拒绝，关系中不存在 `doctor_id`；
 - 管理员按房间查项目、患者按项目查房间得到同一关系的相反视图；

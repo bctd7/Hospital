@@ -26,7 +26,7 @@ type Change struct {
 
 type Store interface {
 	GetRoom(ctx context.Context, roomID string) (Room, error)
-	ListRooms(ctx context.Context, departmentID string, status Status, offset, limit int64) ([]Room, int64, error)
+	ListRooms(ctx context.Context, departmentID string, offset, limit int64) ([]Room, int64, error)
 	GetItemSummary(ctx context.Context, itemID string) (ItemSummary, error)
 	ListRoomItems(ctx context.Context, roomID string, status Status, offset, limit int64) ([]RoomItem, int64, error)
 	ListItemRooms(ctx context.Context, itemID string, activeOnly bool) ([]RoomItem, error)
@@ -42,7 +42,7 @@ type TxStore interface {
 	GetRoomForUpdate(ctx context.Context, roomID string) (Room, error)
 	CreateRoom(ctx context.Context, room Room) error
 	UpdateRoom(ctx context.Context, room Room, expectedVersion int64) error
-	SetRoomStatus(ctx context.Context, room Room, expectedVersion int64) error
+	RetireRoom(ctx context.Context, room Room, expectedVersion int64) error
 	GetItemForUpdate(ctx context.Context, itemID string) (ItemSummary, error)
 
 	GetRelationForUpdate(ctx context.Context, relationID string) (RoomItem, error)

@@ -20,8 +20,7 @@ import (
 const (
 	actionRoomCreated        = "appointment.resource.room.created"
 	actionRoomUpdated        = "appointment.resource.room.updated"
-	actionRoomDisabled       = "appointment.resource.room.disabled"
-	actionRoomEnabled        = "appointment.resource.room.enabled"
+	actionRoomRetired        = "appointment.resource.room.retired"
 	actionRelationAdded      = "appointment.resource.room_item.added"
 	actionRelationDisabled   = "appointment.resource.room_item.disabled"
 	actionRelationEnabled    = "appointment.resource.room_item.enabled"
@@ -52,7 +51,7 @@ func (m *Manager) CreateRoom(ctx context.Context, operator authn.Principal, comm
 	if err != nil {
 		return Room{}, err
 	}
-	name, err := normalizeName(command.Name)
+	campusID, building, floorNumber, roomNumber, displayName, err := normalizeRoomLocation(command.CampusID, command.Building, command.FloorNumber, command.RoomNumber)
 	if err != nil {
 		return Room{}, err
 	}
@@ -63,11 +62,11 @@ func (m *Manager) CreateRoom(ctx context.Context, operator authn.Principal, comm
 	if err = requireScope(operator, departmentID); err != nil {
 		return Room{}, err
 	}
-	command.DepartmentID, command.Name, command.OperationMeta = departmentID, name, meta
+	command.DepartmentID, command.CampusID, command.Building, command.FloorNumber, command.RoomNumber, command.OperationMeta = departmentID, campusID, building, floorNumber, roomNumber, meta
 	var result Room
 	err = m.mutate(ctx, operator, meta, "room", "", actionRoomCreated, command, func() string { return departmentID }, func(tx TxStore) (any, string, error) {
 		now := time.Now().UTC()
-		result = Room{RoomID: uuid.NewString(), DepartmentID: departmentID, Name: name, Status: StatusActive, Version: 1, CreatedAt: now, UpdatedAt: now}
+		result = Room{RoomID: uuid.NewString(), DepartmentID: departmentID, CampusID: campusID, Building: building, FloorNumber: floorNumber, RoomNumber: roomNumber, DisplayName: displayName, Version: 1, CreatedAt: now, UpdatedAt: now}
 		if err := tx.CreateRoom(ctx, result); err != nil {
 			return nil, "", err
 		}
@@ -114,9 +113,6 @@ func (m *Manager) ListRooms(ctx context.Context, operator authn.Principal, query
 	if err != nil {
 		return Page[Room]{}, err
 	}
-	if query.Status != "" && !query.Status.Valid() {
-		return Page[Room]{}, fmt.Errorf("%w: invalid status", ErrInvalid)
-	}
 	page, size, offset, err := normalizePage(query.Page, query.PageSize)
 	if err != nil {
 		return Page[Room]{}, err
@@ -127,9 +123,9 @@ func (m *Manager) ListRooms(ctx context.Context, operator authn.Principal, query
 			gen = value
 		}
 	}
-	key := fmt.Sprintf("department:%s:g:%s:rooms:%s:%d:%d", departmentID, gen, query.Status, page, size)
+	key := fmt.Sprintf("department:%s:g:%s:rooms:%d:%d", departmentID, gen, page, size)
 	result, _, err := loadCached(ctx, m.cache, &m.flights, key, resourceCacheTTL, func() (Page[Room], bool, error) {
-		items, total, loadErr := m.store.ListRooms(ctx, departmentID, query.Status, offset, size)
+		items, total, loadErr := m.store.ListRooms(ctx, departmentID, offset, size)
 		return Page[Room]{Items: items, Page: page, PageSize: size, Total: total}, true, loadErr
 	})
 	return result, err
@@ -143,7 +139,7 @@ func (m *Manager) UpdateRoom(ctx context.Context, operator authn.Principal, comm
 	if err != nil {
 		return Room{}, err
 	}
-	name, err := normalizeName(command.Name)
+	campusID, building, floorNumber, roomNumber, displayName, err := normalizeRoomLocation(command.CampusID, command.Building, command.FloorNumber, command.RoomNumber)
 	if err != nil {
 		return Room{}, err
 	}
@@ -154,7 +150,7 @@ func (m *Manager) UpdateRoom(ctx context.Context, operator authn.Principal, comm
 	if command.ExpectedVersion < 1 {
 		return Room{}, fmt.Errorf("%w: expected_version must be positive", ErrInvalid)
 	}
-	command.RoomID, command.Name, command.OperationMeta = roomID, name, meta
+	command.RoomID, command.CampusID, command.Building, command.FloorNumber, command.RoomNumber, command.OperationMeta = roomID, campusID, building, floorNumber, roomNumber, meta
 	var result Room
 	var departmentID string
 	err = m.mutate(ctx, operator, meta, "room", roomID, actionRoomUpdated, command, func() string { return departmentID }, func(tx TxStore) (any, string, error) {
@@ -169,11 +165,15 @@ func (m *Manager) UpdateRoom(ctx context.Context, operator authn.Principal, comm
 		if before.Version != command.ExpectedVersion {
 			return nil, "", ErrVersionConflict
 		}
-		if before.Status != StatusActive {
+		if before.RetiredAt != nil {
 			return nil, "", ErrInvalidState
 		}
 		result = before
-		result.Name = name
+		result.CampusID = campusID
+		result.Building = building
+		result.FloorNumber = floorNumber
+		result.RoomNumber = roomNumber
+		result.DisplayName = displayName
 		result.Version++
 		result.UpdatedAt = time.Now().UTC()
 		if err := tx.UpdateRoom(ctx, result, command.ExpectedVersion); err != nil {
@@ -190,18 +190,11 @@ func (m *Manager) UpdateRoom(ctx context.Context, operator authn.Principal, comm
 	return result, err
 }
 
-func (m *Manager) DisableRoom(ctx context.Context, operator authn.Principal, command ChangeStatusCommand) (Room, error) {
-	return m.changeRoomStatus(ctx, operator, command, StatusDisabled, actionRoomDisabled)
-}
-func (m *Manager) EnableRoom(ctx context.Context, operator authn.Principal, command ChangeStatusCommand) (Room, error) {
-	return m.changeRoomStatus(ctx, operator, command, StatusActive, actionRoomEnabled)
-}
-
-func (m *Manager) changeRoomStatus(ctx context.Context, operator authn.Principal, command ChangeStatusCommand, target Status, action string) (Room, error) {
+func (m *Manager) RetireRoom(ctx context.Context, operator authn.Principal, command RetireRoomCommand) (Room, error) {
 	if err := requirePermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
 		return Room{}, err
 	}
-	id, err := normalizeUUID(command.ResourceID, "room_id")
+	id, err := normalizeUUID(command.RoomID, "room_id")
 	if err != nil {
 		return Room{}, err
 	}
@@ -212,10 +205,10 @@ func (m *Manager) changeRoomStatus(ctx context.Context, operator authn.Principal
 	if command.ExpectedVersion < 1 {
 		return Room{}, fmt.Errorf("%w: expected_version must be positive", ErrInvalid)
 	}
-	command.ResourceID, command.OperationMeta = id, meta
+	command.RoomID, command.OperationMeta = id, meta
 	var result Room
 	var departmentID string
-	err = m.mutate(ctx, operator, meta, "room", id, action, command, func() string { return departmentID }, func(tx TxStore) (any, string, error) {
+	err = m.mutate(ctx, operator, meta, "room", id, actionRoomRetired, command, func() string { return departmentID }, func(tx TxStore) (any, string, error) {
 		before, lockErr := tx.GetRoomForUpdate(ctx, id)
 		if lockErr != nil {
 			return nil, "", lockErr
@@ -227,14 +220,16 @@ func (m *Manager) changeRoomStatus(ctx context.Context, operator authn.Principal
 		if before.Version != command.ExpectedVersion {
 			return nil, "", ErrVersionConflict
 		}
+		if before.RetiredAt != nil {
+			return nil, "", ErrInvalidState
+		}
 		result = before
-		if result.Status != target {
-			result.Status = target
-			result.Version++
-			result.UpdatedAt = time.Now().UTC()
-			if err := tx.SetRoomStatus(ctx, result, command.ExpectedVersion); err != nil {
-				return nil, "", err
-			}
+		now := time.Now().UTC()
+		result.RetiredAt = &now
+		result.Version++
+		result.UpdatedAt = now
+		if err := tx.RetireRoom(ctx, result, command.ExpectedVersion); err != nil {
+			return nil, "", err
 		}
 		return struct{ Before, After Room }{before, result}, id, nil
 	}, func(data []byte) error { return decodeAfter(data, &result) })
@@ -282,7 +277,7 @@ func (m *Manager) AddRoomItem(ctx context.Context, operator authn.Principal, com
 		if room.DepartmentID != item.DepartmentID {
 			return nil, "", fmt.Errorf("%w: room and examination item must belong to the same department", ErrConflict)
 		}
-		if room.Status != StatusActive || item.Status != StatusActive {
+		if room.RetiredAt != nil || item.Status != StatusActive {
 			return nil, "", ErrInvalidState
 		}
 		if existing, exists, findErr := tx.FindRelationForUpdate(ctx, roomID, itemID); findErr != nil {
@@ -352,7 +347,7 @@ func (m *Manager) changeRelationStatus(ctx context.Context, operator authn.Princ
 			if itemErr != nil {
 				return nil, "", itemErr
 			}
-			if room.Status != StatusActive || item.Status != StatusActive || room.DepartmentID != item.DepartmentID {
+			if room.RetiredAt != nil || item.Status != StatusActive || room.DepartmentID != item.DepartmentID {
 				return nil, "", ErrInvalidState
 			}
 			if err := validatePair(ctx, tx, before.RoomID, before.ItemID, nil, nil); err != nil {
@@ -477,7 +472,7 @@ func (m *Manager) SetRoomWindow(ctx context.Context, operator authn.Principal, c
 		if err := requireScope(operator, departmentID); err != nil {
 			return nil, "", err
 		}
-		if room.Status != StatusActive {
+		if room.RetiredAt != nil {
 			return nil, "", ErrInvalidState
 		}
 		now := time.Now().UTC()

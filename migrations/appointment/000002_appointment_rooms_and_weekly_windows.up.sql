@@ -1,15 +1,27 @@
 CREATE TABLE appointment_rooms (
     id              CHAR(36)        NOT NULL,
     department_id   CHAR(36)        NOT NULL,
-    name            VARCHAR(128)    NOT NULL,
-    status          VARCHAR(16)     NOT NULL,
+    campus_id       CHAR(36)        NOT NULL,
+    building        VARCHAR(64)     NOT NULL,
+    floor_number    SMALLINT        NOT NULL,
+    room_number     VARCHAR(32)     NOT NULL,
+    retired_at      DATETIME(3)     NULL,
     version         BIGINT UNSIGNED NOT NULL,
     created_at      DATETIME(3)     NOT NULL,
     updated_at      DATETIME(3)     NOT NULL,
     PRIMARY KEY (id),
-    UNIQUE KEY uk_appointment_rooms_department_name (department_id, name),
-    KEY idx_appointment_rooms_department_status (department_id, status, name, id),
-    CONSTRAINT chk_appointment_rooms_status CHECK (status IN ('active', 'disabled')),
+    UNIQUE KEY uk_appointment_rooms_location (campus_id, building, floor_number, room_number),
+    KEY idx_appointment_rooms_department_active_location
+        (department_id, retired_at, building, floor_number, room_number, id),
+    CONSTRAINT chk_appointment_rooms_campus_id CHECK (
+        campus_id REGEXP '^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$'
+    ),
+    CONSTRAINT chk_appointment_rooms_building CHECK (CHAR_LENGTH(TRIM(building)) BETWEEN 1 AND 64),
+    CONSTRAINT chk_appointment_rooms_floor CHECK (floor_number BETWEEN -9 AND 99 AND floor_number <> 0),
+    CONSTRAINT chk_appointment_rooms_room_number CHECK (
+        CHAR_LENGTH(TRIM(room_number)) BETWEEN 1 AND 32
+        AND room_number REGEXP '^[[:alnum:]_-]+$'
+    ),
     CONSTRAINT chk_appointment_rooms_version CHECK (version > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 

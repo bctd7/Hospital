@@ -87,8 +87,11 @@ type AppointmentRoomPathRequest struct {
 type AppointmentRoomResponse struct {
 	RoomID       string `json:"room_id"`
 	DepartmentID string `json:"department_id"`
-	Name         string `json:"name"`
-	Status       string `json:"status"`
+	CampusID     string `json:"campus_id"`
+	Building     string `json:"building"`
+	FloorNumber  int32  `json:"floor_number"`
+	RoomNumber   string `json:"room_number"`
+	DisplayName  string `json:"display_name"`
 	Version      int64  `json:"version"`
 	CreatedAt    string `json:"created_at"`
 	UpdatedAt    string `json:"updated_at"`
@@ -131,7 +134,10 @@ type ChangeOrganizationUnitStatusRequest struct {
 
 type CreateAppointmentRoomRequest struct {
 	DepartmentID string `json:"department_id"`
-	Name         string `json:"name"`
+	CampusID     string `json:"campus_id"`
+	Building     string `json:"building"`
+	FloorNumber  int32  `json:"floor_number"`
+	RoomNumber   string `json:"room_number"`
 	OperationID  string `json:"operation_id"`
 }
 
@@ -249,7 +255,6 @@ type ListAdminAccountsResponse struct {
 
 type ListAppointmentRoomsRequest struct {
 	DepartmentID string `form:"department_id"`
-	Status       string `form:"status,optional"`
 	Page         int64  `form:"page,default=1"`
 	PageSize     int64  `form:"page_size,default=20"`
 }
@@ -363,15 +368,19 @@ type RevokeTokenResponse struct {
 }
 
 type RoomExaminationItemResponse struct {
-	RelationID string `json:"relation_id"`
-	RoomID     string `json:"room_id"`
-	ItemID     string `json:"item_id"`
-	RoomName   string `json:"room_name"`
-	ItemName   string `json:"item_name"`
-	Status     string `json:"status"`
-	Version    int64  `json:"version"`
-	CreatedAt  string `json:"created_at"`
-	UpdatedAt  string `json:"updated_at"`
+	RelationID      string `json:"relation_id"`
+	RoomID          string `json:"room_id"`
+	ItemID          string `json:"item_id"`
+	RoomDisplayName string `json:"room_display_name"`
+	CampusID        string `json:"campus_id"`
+	Building        string `json:"building"`
+	FloorNumber     int32  `json:"floor_number"`
+	RoomNumber      string `json:"room_number"`
+	ItemName        string `json:"item_name"`
+	Status          string `json:"status"`
+	Version         int64  `json:"version"`
+	CreatedAt       string `json:"created_at"`
+	UpdatedAt       string `json:"updated_at"`
 }
 
 type RoomWeeklyWindowResponse struct {
@@ -438,7 +447,10 @@ type UpdateAccountDisplayProfileRequest struct {
 
 type UpdateAppointmentRoomRequest struct {
 	RoomID          string `path:"roomId"`
-	Name            string `json:"name"`
+	CampusID        string `json:"campus_id"`
+	Building        string `json:"building"`
+	FloorNumber     int32  `json:"floor_number"`
+	RoomNumber      string `json:"room_number"`
 	ExpectedVersion int64  `json:"expected_version"`
 	OperationID     string `json:"operation_id"`
 }

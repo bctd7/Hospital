@@ -80,20 +80,20 @@ func (s *resourceTxStore) GetRoomForUpdate(ctx context.Context, id string) (reso
 	return value, nil
 }
 func (s *resourceTxStore) CreateRoom(ctx context.Context, v resource.Room) error {
-	_, err := s.tx.ExecContext(ctx, `INSERT INTO appointment_rooms (id, department_id, name, status, version, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)`, v.RoomID, v.DepartmentID, v.Name, v.Status, v.Version, v.CreatedAt, v.UpdatedAt)
+	_, err := s.tx.ExecContext(ctx, `INSERT INTO appointment_rooms (id, department_id, campus_id, building, floor_number, room_number, retired_at, version, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, NULL, ?, ?, ?)`, v.RoomID, v.DepartmentID, v.CampusID, v.Building, v.FloorNumber, v.RoomNumber, v.Version, v.CreatedAt, v.UpdatedAt)
 	return mapWriteError(err, "create appointment room")
 }
 func (s *resourceTxStore) UpdateRoom(ctx context.Context, v resource.Room, expected int64) error {
-	result, err := s.tx.ExecContext(ctx, `UPDATE appointment_rooms SET name = ?, version = version + 1, updated_at = ? WHERE id = ? AND version = ?`, v.Name, v.UpdatedAt, v.RoomID, expected)
+	result, err := s.tx.ExecContext(ctx, `UPDATE appointment_rooms SET campus_id = ?, building = ?, floor_number = ?, room_number = ?, version = version + 1, updated_at = ? WHERE id = ? AND version = ? AND retired_at IS NULL`, v.CampusID, v.Building, v.FloorNumber, v.RoomNumber, v.UpdatedAt, v.RoomID, expected)
 	if err != nil {
 		return mapWriteError(err, "update appointment room")
 	}
 	return s.requireMutation(ctx, result, "appointment_rooms", v.RoomID)
 }
-func (s *resourceTxStore) SetRoomStatus(ctx context.Context, v resource.Room, expected int64) error {
-	result, err := s.tx.ExecContext(ctx, `UPDATE appointment_rooms SET status = ?, version = version + 1, updated_at = ? WHERE id = ? AND version = ?`, v.Status, v.UpdatedAt, v.RoomID, expected)
+func (s *resourceTxStore) RetireRoom(ctx context.Context, v resource.Room, expected int64) error {
+	result, err := s.tx.ExecContext(ctx, `UPDATE appointment_rooms SET retired_at = ?, version = version + 1, updated_at = ? WHERE id = ? AND version = ? AND retired_at IS NULL`, v.RetiredAt, v.UpdatedAt, v.RoomID, expected)
 	if err != nil {
-		return mapWriteError(err, "set appointment room status")
+		return mapWriteError(err, "retire appointment room")
 	}
 	return s.requireMutation(ctx, result, "appointment_rooms", v.RoomID)
 }

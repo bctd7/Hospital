@@ -44,6 +44,45 @@ func TestNormalizeClockRejectsSecondsAndNormalizes(t *testing.T) {
 	}
 }
 
+func TestNormalizeRoomLocationProducesCanonicalDisplayName(t *testing.T) {
+	campusID := uuid.NewString()
+	gotCampus, building, floor, roomNumber, displayName, err := normalizeRoomLocation(
+		" "+campusID+" ", " 门诊楼 ", -1, " A_01 ",
+	)
+	if err != nil {
+		t.Fatalf("normalizeRoomLocation() error = %v", err)
+	}
+	if gotCampus != campusID || building != "门诊楼" || floor != -1 || roomNumber != "A_01" {
+		t.Fatalf("unexpected normalized location: %q, %q, %d, %q", gotCampus, building, floor, roomNumber)
+	}
+	if displayName != "门诊楼 · B1层 · A_01室" {
+		t.Fatalf("display name = %q", displayName)
+	}
+}
+
+func TestNormalizeRoomLocationRejectsInvalidStructure(t *testing.T) {
+	campusID := uuid.NewString()
+	tests := []struct {
+		name       string
+		campusID   string
+		building   string
+		floor      int32
+		roomNumber string
+	}{
+		{name: "campus must be uuid", campusID: "north-campus", building: "门诊楼", floor: 1, roomNumber: "101"},
+		{name: "floor cannot be zero", campusID: campusID, building: "门诊楼", floor: 0, roomNumber: "101"},
+		{name: "building required", campusID: campusID, building: " ", floor: 1, roomNumber: "101"},
+		{name: "room number has strict characters", campusID: campusID, building: "门诊楼", floor: 1, roomNumber: "10 1"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if _, _, _, _, _, err := normalizeRoomLocation(tt.campusID, tt.building, tt.floor, tt.roomNumber); err == nil {
+				t.Fatal("normalizeRoomLocation accepted invalid structure")
+			}
+		})
+	}
+}
+
 type memoryCache struct {
 	mu     sync.Mutex
 	values map[string][]byte

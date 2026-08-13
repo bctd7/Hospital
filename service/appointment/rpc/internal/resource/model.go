@@ -21,13 +21,17 @@ const (
 func (s Session) Valid() bool { return s == SessionMorning || s == SessionAfternoon }
 
 type Room struct {
-	RoomID       string    `json:"room_id"`
-	DepartmentID string    `json:"department_id"`
-	Name         string    `json:"name"`
-	Status       Status    `json:"status"`
-	Version      int64     `json:"version"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	RoomID       string     `json:"room_id"`
+	DepartmentID string     `json:"department_id"`
+	CampusID     string     `json:"campus_id"`
+	Building     string     `json:"building"`
+	FloorNumber  int32      `json:"floor_number"`
+	RoomNumber   string     `json:"room_number"`
+	DisplayName  string     `json:"display_name"`
+	RetiredAt    *time.Time `json:"retired_at,omitempty"`
+	Version      int64      `json:"version"`
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
 }
 
 type ItemSummary struct {
@@ -39,15 +43,19 @@ type ItemSummary struct {
 }
 
 type RoomItem struct {
-	RelationID string    `json:"relation_id"`
-	RoomID     string    `json:"room_id"`
-	ItemID     string    `json:"item_id"`
-	RoomName   string    `json:"room_name,omitempty"`
-	ItemName   string    `json:"item_name,omitempty"`
-	Status     Status    `json:"status"`
-	Version    int64     `json:"version"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	RelationID      string    `json:"relation_id"`
+	RoomID          string    `json:"room_id"`
+	ItemID          string    `json:"item_id"`
+	RoomDisplayName string    `json:"room_display_name,omitempty"`
+	CampusID        string    `json:"campus_id,omitempty"`
+	Building        string    `json:"building,omitempty"`
+	FloorNumber     int32     `json:"floor_number,omitempty"`
+	RoomNumber      string    `json:"room_number,omitempty"`
+	ItemName        string    `json:"item_name,omitempty"`
+	Status          Status    `json:"status"`
+	Version         int64     `json:"version"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 type RoomWeeklyWindow struct {

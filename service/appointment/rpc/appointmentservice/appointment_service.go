@@ -37,6 +37,7 @@ type (
 	Room                                       = appointmentv1.Room
 	RoomExaminationItem                        = appointmentv1.RoomExaminationItem
 	RoomWeeklyWindow                           = appointmentv1.RoomWeeklyWindow
+	RetireRoomRequest                          = appointmentv1.RetireRoomRequest
 	SetItemWeeklyWindowRequest                 = appointmentv1.SetItemWeeklyWindowRequest
 	SetRoomWeeklyWindowRequest                 = appointmentv1.SetRoomWeeklyWindowRequest
 	UpdateExaminationItemRequest               = appointmentv1.UpdateExaminationItemRequest
@@ -53,8 +54,7 @@ type (
 		GetRoom(ctx context.Context, in *GetRoomRequest, opts ...grpc.CallOption) (*Room, error)
 		ListRooms(ctx context.Context, in *ListRoomsRequest, opts ...grpc.CallOption) (*ListRoomsResponse, error)
 		UpdateRoom(ctx context.Context, in *UpdateRoomRequest, opts ...grpc.CallOption) (*Room, error)
-		DisableRoom(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*Room, error)
-		EnableRoom(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*Room, error)
+		RetireRoom(ctx context.Context, in *RetireRoomRequest, opts ...grpc.CallOption) (*Room, error)
 		AddRoomExaminationItem(ctx context.Context, in *AddRoomExaminationItemRequest, opts ...grpc.CallOption) (*RoomExaminationItem, error)
 		DisableRoomExaminationItem(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*RoomExaminationItem, error)
 		EnableRoomExaminationItem(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*RoomExaminationItem, error)
@@ -129,14 +129,9 @@ func (m *defaultAppointmentService) UpdateRoom(ctx context.Context, in *UpdateRo
 	return client.UpdateRoom(ctx, in, opts...)
 }
 
-func (m *defaultAppointmentService) DisableRoom(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*Room, error) {
+func (m *defaultAppointmentService) RetireRoom(ctx context.Context, in *RetireRoomRequest, opts ...grpc.CallOption) (*Room, error) {
 	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
-	return client.DisableRoom(ctx, in, opts...)
-}
-
-func (m *defaultAppointmentService) EnableRoom(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*Room, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
-	return client.EnableRoom(ctx, in, opts...)
+	return client.RetireRoom(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) AddRoomExaminationItem(ctx context.Context, in *AddRoomExaminationItemRequest, opts ...grpc.CallOption) (*RoomExaminationItem, error) {

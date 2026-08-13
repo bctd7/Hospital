@@ -105,13 +105,8 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					Method:  http.MethodPost,
-					Path:    "/admin/appointment/rooms/:resourceId/disable",
-					Handler: appointmentresources.DisableAppointmentRoomHandler(serverCtx),
-				},
-				{
-					Method:  http.MethodPost,
-					Path:    "/admin/appointment/rooms/:resourceId/enable",
-					Handler: appointmentresources.EnableAppointmentRoomHandler(serverCtx),
+					Path:    "/admin/appointment/rooms/:resourceId/retire",
+					Handler: appointmentresources.RetireAppointmentRoomHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodGet,
@@ -325,8 +320,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodGet,
-				Path:    "/directory/departments/:departmentId/doctors",
-				Handler: organizationdirectory.ListDoctorsHandler(serverCtx),
+				Path:    "/directory/departments",
+				Handler: organizationdirectory.ListDepartmentsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/directory/organization-context",
+				Handler: organizationdirectory.GetOrganizationContextHandler(serverCtx),
 			},
 		},
 		rest.WithPrefix("/api/v1"),
@@ -336,13 +336,8 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodGet,
-				Path:    "/directory/departments",
-				Handler: organizationdirectory.ListDepartmentsHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/directory/organization-context",
-				Handler: organizationdirectory.GetOrganizationContextHandler(serverCtx),
+				Path:    "/directory/departments/:departmentId/doctors",
+				Handler: organizationdirectory.ListDoctorsHandler(serverCtx),
 			},
 		},
 		rest.WithPrefix("/api/v1"),

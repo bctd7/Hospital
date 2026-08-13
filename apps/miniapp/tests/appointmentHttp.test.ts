@@ -51,7 +51,11 @@ describe("appointment HTTP adapter", () => {
       relation_id: "relation-a",
       room_id: "room-a",
       item_id: "item-a",
-      room_name: "CT 室 A",
+      room_display_name: "门诊楼 · 3层 · 301室",
+      campus_id: "00000000-0000-4000-8000-000000000001",
+      building: "门诊楼",
+      floor_number: 3,
+      room_number: "301",
       item_name: "胸部 CT",
       status: "disabled",
       version: 3,
@@ -64,7 +68,11 @@ describe("appointment HTTP adapter", () => {
       relationId: "relation-a",
       roomId: "room-a",
       itemId: "item-a",
-      roomName: "CT 室 A",
+      roomDisplayName: "门诊楼 · 3层 · 301室",
+      campusId: "00000000-0000-4000-8000-000000000001",
+      building: "门诊楼",
+      floorNumber: 3,
+      roomNumber: "301",
       itemName: "胸部 CT",
       status: "active",
       version: 2,
@@ -109,14 +117,23 @@ describe("appointment HTTP adapter", () => {
 
   it("reuses the operation id when an ambiguous write is retried", async () => {
     const response = {
-      room_id: "room-retry", department_id: "department-a", name: "CT 室 A",
-      status: "active", version: 1, created_at: "now", updated_at: "now",
+      room_id: "room-retry", department_id: "department-a",
+      campus_id: "00000000-0000-4000-8000-000000000001",
+      building: "门诊楼", floor_number: 3, room_number: "301",
+      display_name: "门诊楼 · 3层 · 301室",
+      version: 1, created_at: "now", updated_at: "now",
     };
     requestMock.mockRejectedValueOnce(new Error("network timeout")).mockResolvedValueOnce(response);
     const { appointmentManagementApi } = await import("@/api/appointment");
 
-    await expect(appointmentManagementApi.createRoom("department-a", "CT 室 A")).rejects.toThrow();
-    await appointmentManagementApi.createRoom("department-a", "CT 室 A");
+    const location = {
+      campusId: "00000000-0000-4000-8000-000000000001",
+      building: "门诊楼",
+      floorNumber: 3,
+      roomNumber: "301",
+    };
+    await expect(appointmentManagementApi.createRoom("department-a", location)).rejects.toThrow();
+    await appointmentManagementApi.createRoom("department-a", location);
 
     expect(requestMock.mock.calls[0]?.[0]?.data.operation_id).toBe(
       requestMock.mock.calls[1]?.[0]?.data.operation_id,
