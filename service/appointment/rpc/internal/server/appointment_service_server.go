@@ -7,14 +7,14 @@ package server
 import (
 	"context"
 
-	"hospital/contracts/gen/appointment/v1"
+	v1_appointmentv1 "hospital/contracts/gen/appointment/v1"
 	"hospital/service/appointment/rpc/internal/logic"
 	"hospital/service/appointment/rpc/internal/svc"
 )
 
 type AppointmentServiceServer struct {
 	svcCtx *svc.ServiceContext
-	appointmentv1.UnimplementedAppointmentServiceServer
+	v1_appointmentv1.UnimplementedAppointmentServiceServer
 }
 
 func NewAppointmentServiceServer(svcCtx *svc.ServiceContext) *AppointmentServiceServer {
@@ -23,112 +23,157 @@ func NewAppointmentServiceServer(svcCtx *svc.ServiceContext) *AppointmentService
 	}
 }
 
-func (s *AppointmentServiceServer) CreateExaminationItem(ctx context.Context, in *appointmentv1.CreateExaminationItemRequest) (*appointmentv1.ExaminationItem, error) {
+func (s *AppointmentServiceServer) CreateExaminationItem(ctx context.Context, in *v1_appointmentv1.CreateExaminationItemRequest) (*v1_appointmentv1.ExaminationItem, error) {
 	l := logic.NewCreateExaminationItemLogic(ctx, s.svcCtx)
 	return l.CreateExaminationItem(in)
 }
 
-func (s *AppointmentServiceServer) GetExaminationItem(ctx context.Context, in *appointmentv1.GetExaminationItemRequest) (*appointmentv1.ExaminationItem, error) {
+func (s *AppointmentServiceServer) GetExaminationItem(ctx context.Context, in *v1_appointmentv1.GetExaminationItemRequest) (*v1_appointmentv1.ExaminationItem, error) {
 	l := logic.NewGetExaminationItemLogic(ctx, s.svcCtx)
 	return l.GetExaminationItem(in)
 }
 
-func (s *AppointmentServiceServer) ListExaminationItems(ctx context.Context, in *appointmentv1.ListExaminationItemsRequest) (*appointmentv1.ListExaminationItemsResponse, error) {
+func (s *AppointmentServiceServer) ListExaminationItems(ctx context.Context, in *v1_appointmentv1.ListExaminationItemsRequest) (*v1_appointmentv1.ListExaminationItemsResponse, error) {
 	l := logic.NewListExaminationItemsLogic(ctx, s.svcCtx)
 	return l.ListExaminationItems(in)
 }
 
-func (s *AppointmentServiceServer) UpdateExaminationItem(ctx context.Context, in *appointmentv1.UpdateExaminationItemRequest) (*appointmentv1.ExaminationItem, error) {
+func (s *AppointmentServiceServer) UpdateExaminationItem(ctx context.Context, in *v1_appointmentv1.UpdateExaminationItemRequest) (*v1_appointmentv1.ExaminationItem, error) {
 	l := logic.NewUpdateExaminationItemLogic(ctx, s.svcCtx)
 	return l.UpdateExaminationItem(in)
 }
 
-func (s *AppointmentServiceServer) DisableExaminationItem(ctx context.Context, in *appointmentv1.ChangeExaminationItemStatusRequest) (*appointmentv1.ExaminationItem, error) {
+func (s *AppointmentServiceServer) DisableExaminationItem(ctx context.Context, in *v1_appointmentv1.ChangeExaminationItemStatusRequest) (*v1_appointmentv1.ExaminationItem, error) {
 	l := logic.NewDisableExaminationItemLogic(ctx, s.svcCtx)
 	return l.DisableExaminationItem(in)
 }
 
-func (s *AppointmentServiceServer) EnableExaminationItem(ctx context.Context, in *appointmentv1.ChangeExaminationItemStatusRequest) (*appointmentv1.ExaminationItem, error) {
+func (s *AppointmentServiceServer) EnableExaminationItem(ctx context.Context, in *v1_appointmentv1.ChangeExaminationItemStatusRequest) (*v1_appointmentv1.ExaminationItem, error) {
 	l := logic.NewEnableExaminationItemLogic(ctx, s.svcCtx)
 	return l.EnableExaminationItem(in)
 }
 
-func (s *AppointmentServiceServer) CreateRoom(ctx context.Context, in *appointmentv1.CreateRoomRequest) (*appointmentv1.Room, error) {
+func (s *AppointmentServiceServer) CreateRoom(ctx context.Context, in *v1_appointmentv1.CreateRoomRequest) (*v1_appointmentv1.Room, error) {
 	l := logic.NewCreateRoomLogic(ctx, s.svcCtx)
 	return l.CreateRoom(in)
 }
 
-func (s *AppointmentServiceServer) GetRoom(ctx context.Context, in *appointmentv1.GetRoomRequest) (*appointmentv1.Room, error) {
+func (s *AppointmentServiceServer) GetRoom(ctx context.Context, in *v1_appointmentv1.GetRoomRequest) (*v1_appointmentv1.Room, error) {
 	l := logic.NewGetRoomLogic(ctx, s.svcCtx)
 	return l.GetRoom(in)
 }
 
-func (s *AppointmentServiceServer) ListRooms(ctx context.Context, in *appointmentv1.ListRoomsRequest) (*appointmentv1.ListRoomsResponse, error) {
+func (s *AppointmentServiceServer) ListRooms(ctx context.Context, in *v1_appointmentv1.ListRoomsRequest) (*v1_appointmentv1.ListRoomsResponse, error) {
 	l := logic.NewListRoomsLogic(ctx, s.svcCtx)
 	return l.ListRooms(in)
 }
 
-func (s *AppointmentServiceServer) UpdateRoom(ctx context.Context, in *appointmentv1.UpdateRoomRequest) (*appointmentv1.Room, error) {
+func (s *AppointmentServiceServer) UpdateRoom(ctx context.Context, in *v1_appointmentv1.UpdateRoomRequest) (*v1_appointmentv1.Room, error) {
 	l := logic.NewUpdateRoomLogic(ctx, s.svcCtx)
 	return l.UpdateRoom(in)
 }
 
-func (s *AppointmentServiceServer) RetireRoom(ctx context.Context, in *appointmentv1.RetireRoomRequest) (*appointmentv1.Room, error) {
+func (s *AppointmentServiceServer) RetireRoom(ctx context.Context, in *v1_appointmentv1.RetireRoomRequest) (*v1_appointmentv1.Room, error) {
 	l := logic.NewRetireRoomLogic(ctx, s.svcCtx)
 	return l.RetireRoom(in)
 }
 
-func (s *AppointmentServiceServer) AddRoomExaminationItem(ctx context.Context, in *appointmentv1.AddRoomExaminationItemRequest) (*appointmentv1.RoomExaminationItem, error) {
+func (s *AppointmentServiceServer) AddRoomExaminationItem(ctx context.Context, in *v1_appointmentv1.AddRoomExaminationItemRequest) (*v1_appointmentv1.RoomExaminationItem, error) {
 	l := logic.NewAddRoomExaminationItemLogic(ctx, s.svcCtx)
 	return l.AddRoomExaminationItem(in)
 }
 
-func (s *AppointmentServiceServer) DisableRoomExaminationItem(ctx context.Context, in *appointmentv1.ChangeResourceStatusRequest) (*appointmentv1.RoomExaminationItem, error) {
+func (s *AppointmentServiceServer) DisableRoomExaminationItem(ctx context.Context, in *v1_appointmentv1.ChangeResourceStatusRequest) (*v1_appointmentv1.RoomExaminationItem, error) {
 	l := logic.NewDisableRoomExaminationItemLogic(ctx, s.svcCtx)
 	return l.DisableRoomExaminationItem(in)
 }
 
-func (s *AppointmentServiceServer) EnableRoomExaminationItem(ctx context.Context, in *appointmentv1.ChangeResourceStatusRequest) (*appointmentv1.RoomExaminationItem, error) {
+func (s *AppointmentServiceServer) EnableRoomExaminationItem(ctx context.Context, in *v1_appointmentv1.ChangeResourceStatusRequest) (*v1_appointmentv1.RoomExaminationItem, error) {
 	l := logic.NewEnableRoomExaminationItemLogic(ctx, s.svcCtx)
 	return l.EnableRoomExaminationItem(in)
 }
 
-func (s *AppointmentServiceServer) ListRoomExaminationItems(ctx context.Context, in *appointmentv1.ListRoomExaminationItemsRequest) (*appointmentv1.ListRoomExaminationItemsResponse, error) {
+func (s *AppointmentServiceServer) ListRoomExaminationItems(ctx context.Context, in *v1_appointmentv1.ListRoomExaminationItemsRequest) (*v1_appointmentv1.ListRoomExaminationItemsResponse, error) {
 	l := logic.NewListRoomExaminationItemsLogic(ctx, s.svcCtx)
 	return l.ListRoomExaminationItems(in)
 }
 
-func (s *AppointmentServiceServer) ListAvailableRoomsByExaminationItem(ctx context.Context, in *appointmentv1.ListAvailableRoomsByExaminationItemRequest) (*appointmentv1.ListRoomExaminationItemsResponse, error) {
+func (s *AppointmentServiceServer) ListAvailableRoomsByExaminationItem(ctx context.Context, in *v1_appointmentv1.ListAvailableRoomsByExaminationItemRequest) (*v1_appointmentv1.ListRoomExaminationItemsResponse, error) {
 	l := logic.NewListAvailableRoomsByExaminationItemLogic(ctx, s.svcCtx)
 	return l.ListAvailableRoomsByExaminationItem(in)
 }
 
-func (s *AppointmentServiceServer) SetRoomWeeklyWindow(ctx context.Context, in *appointmentv1.SetRoomWeeklyWindowRequest) (*appointmentv1.RoomWeeklyWindow, error) {
+func (s *AppointmentServiceServer) SetRoomWeeklyWindow(ctx context.Context, in *v1_appointmentv1.SetRoomWeeklyWindowRequest) (*v1_appointmentv1.RoomWeeklyWindow, error) {
 	l := logic.NewSetRoomWeeklyWindowLogic(ctx, s.svcCtx)
 	return l.SetRoomWeeklyWindow(in)
 }
 
-func (s *AppointmentServiceServer) DisableRoomWeeklyWindow(ctx context.Context, in *appointmentv1.ChangeResourceStatusRequest) (*appointmentv1.RoomWeeklyWindow, error) {
+func (s *AppointmentServiceServer) DisableRoomWeeklyWindow(ctx context.Context, in *v1_appointmentv1.ChangeResourceStatusRequest) (*v1_appointmentv1.RoomWeeklyWindow, error) {
 	l := logic.NewDisableRoomWeeklyWindowLogic(ctx, s.svcCtx)
 	return l.DisableRoomWeeklyWindow(in)
 }
 
-func (s *AppointmentServiceServer) ListRoomWeeklyWindows(ctx context.Context, in *appointmentv1.ListWeeklyWindowsRequest) (*appointmentv1.ListRoomWeeklyWindowsResponse, error) {
+func (s *AppointmentServiceServer) ListRoomWeeklyWindows(ctx context.Context, in *v1_appointmentv1.ListWeeklyWindowsRequest) (*v1_appointmentv1.ListRoomWeeklyWindowsResponse, error) {
 	l := logic.NewListRoomWeeklyWindowsLogic(ctx, s.svcCtx)
 	return l.ListRoomWeeklyWindows(in)
 }
 
-func (s *AppointmentServiceServer) SetItemWeeklyWindow(ctx context.Context, in *appointmentv1.SetItemWeeklyWindowRequest) (*appointmentv1.ItemWeeklyWindow, error) {
+func (s *AppointmentServiceServer) SetItemWeeklyWindow(ctx context.Context, in *v1_appointmentv1.SetItemWeeklyWindowRequest) (*v1_appointmentv1.ItemWeeklyWindow, error) {
 	l := logic.NewSetItemWeeklyWindowLogic(ctx, s.svcCtx)
 	return l.SetItemWeeklyWindow(in)
 }
 
-func (s *AppointmentServiceServer) DisableItemWeeklyWindow(ctx context.Context, in *appointmentv1.ChangeResourceStatusRequest) (*appointmentv1.ItemWeeklyWindow, error) {
+func (s *AppointmentServiceServer) DisableItemWeeklyWindow(ctx context.Context, in *v1_appointmentv1.ChangeResourceStatusRequest) (*v1_appointmentv1.ItemWeeklyWindow, error) {
 	l := logic.NewDisableItemWeeklyWindowLogic(ctx, s.svcCtx)
 	return l.DisableItemWeeklyWindow(in)
 }
 
-func (s *AppointmentServiceServer) ListItemWeeklyWindows(ctx context.Context, in *appointmentv1.ListWeeklyWindowsRequest) (*appointmentv1.ListItemWeeklyWindowsResponse, error) {
+func (s *AppointmentServiceServer) ListItemWeeklyWindows(ctx context.Context, in *v1_appointmentv1.ListWeeklyWindowsRequest) (*v1_appointmentv1.ListItemWeeklyWindowsResponse, error) {
 	l := logic.NewListItemWeeklyWindowsLogic(ctx, s.svcCtx)
 	return l.ListItemWeeklyWindows(in)
+}
+
+func (s *AppointmentServiceServer) ListBookingOptions(ctx context.Context, in *v1_appointmentv1.ListBookingOptionsRequest) (*v1_appointmentv1.ListBookingOptionsResponse, error) {
+	l := logic.NewListBookingOptionsLogic(ctx, s.svcCtx)
+	return l.ListBookingOptions(in)
+}
+
+func (s *AppointmentServiceServer) CreateBooking(ctx context.Context, in *v1_appointmentv1.CreateBookingRequest) (*v1_appointmentv1.Booking, error) {
+	l := logic.NewCreateBookingLogic(ctx, s.svcCtx)
+	return l.CreateBooking(in)
+}
+
+func (s *AppointmentServiceServer) GetMyBooking(ctx context.Context, in *v1_appointmentv1.GetBookingRequest) (*v1_appointmentv1.Booking, error) {
+	l := logic.NewGetMyBookingLogic(ctx, s.svcCtx)
+	return l.GetMyBooking(in)
+}
+
+func (s *AppointmentServiceServer) ListMyBookings(ctx context.Context, in *v1_appointmentv1.ListMyBookingsRequest) (*v1_appointmentv1.ListBookingsResponse, error) {
+	l := logic.NewListMyBookingsLogic(ctx, s.svcCtx)
+	return l.ListMyBookings(in)
+}
+
+func (s *AppointmentServiceServer) DeleteMyBooking(ctx context.Context, in *v1_appointmentv1.DeleteBookingRequest) (*v1_appointmentv1.DeleteBookingResponse, error) {
+	l := logic.NewDeleteMyBookingLogic(ctx, s.svcCtx)
+	return l.DeleteMyBooking(in)
+}
+
+func (s *AppointmentServiceServer) GetBooking(ctx context.Context, in *v1_appointmentv1.GetBookingRequest) (*v1_appointmentv1.Booking, error) {
+	l := logic.NewGetBookingLogic(ctx, s.svcCtx)
+	return l.GetBooking(in)
+}
+
+func (s *AppointmentServiceServer) ListBookings(ctx context.Context, in *v1_appointmentv1.ListBookingsRequest) (*v1_appointmentv1.ListBookingsResponse, error) {
+	l := logic.NewListBookingsLogic(ctx, s.svcCtx)
+	return l.ListBookings(in)
+}
+
+func (s *AppointmentServiceServer) CheckInBooking(ctx context.Context, in *v1_appointmentv1.CheckInBookingRequest) (*v1_appointmentv1.Booking, error) {
+	l := logic.NewCheckInBookingLogic(ctx, s.svcCtx)
+	return l.CheckInBooking(in)
+}
+
+func (s *AppointmentServiceServer) DeleteBooking(ctx context.Context, in *v1_appointmentv1.DeleteBookingRequest) (*v1_appointmentv1.DeleteBookingResponse, error) {
+	l := logic.NewDeleteBookingLogic(ctx, s.svcCtx)
+	return l.DeleteBooking(in)
 }

@@ -62,6 +62,9 @@ service app-api {
 	@handler listExaminationItems
 	get /admin/appointment/examination-items (ListExaminationItemsRequest) returns (ListExaminationItemsResponse)
 
+	@handler listPatientExaminationItems
+	get /appointment/examination-items (ListExaminationItemsRequest) returns (ListExaminationItemsResponse)
+
 	@handler getExaminationItem
 	get /admin/appointment/examination-items/:itemId (ExaminationItemPathRequest) returns (ExaminationItemResponse)
 

@@ -265,6 +265,11 @@ function openRoom(room?: AppointmentRoom) {
   navigate(`/pages/admin/appointment/room-detail?department_id=${encodeURIComponent(selectedDepartmentId.value)}&campus_id=${encodeURIComponent(selectedCampusId.value)}&room_id=${encodeURIComponent(room?.roomId ?? "")}&department_label=${encodeURIComponent(label)}`);
 }
 
+function openBookings() {
+  const label = `${currentCampus.value?.name ?? "院区"} / ${selectedDepartment.value?.name ?? "所属科室"}`;
+  navigate(`/pages/admin/appointment/bookings?department_id=${encodeURIComponent(selectedDepartmentId.value)}&department_label=${encodeURIComponent(label)}`);
+}
+
 function navigate(url: string) {
   if (navigationPending.value || !selectedDepartmentId.value) return;
   navigationPending.value = true;
@@ -286,6 +291,7 @@ function navigate(url: string) {
         placeholder-class="search-field__placeholder"
         @input="updateSearch"
       />
+      <button v-if="selectedDepartmentId" class="search-field__booking" @tap="openBookings">预约</button>
     </view>
 
     <view class="campus-bar">
@@ -417,6 +423,7 @@ button::after { display: none; }
 .search-field__icon { position: relative; width: 22rpx; height: 22rpx; flex: 0 0 auto; border: 3rpx solid #8793a4; border-radius: 50%; }
 .search-field__icon::after { position: absolute; right: -8rpx; bottom: -5rpx; width: 10rpx; height: 3rpx; content: ""; background: #8793a4; border-radius: 2rpx; transform: rotate(45deg); }
 .search-field input { flex: 1; height: 100%; color: #253146; font-size: 25rpx; }
+.search-field__booking { flex: 0 0 auto; padding: 0 20rpx; margin: 0; color: #fff; font-size: 20rpx; line-height: 50rpx; background: #2188c7; border-radius: 25rpx; }
 .search-field__placeholder { color: #9ca6b4; }
 .campus-bar { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 16rpx; min-height: 98rpx; margin-top: 16rpx; padding: 18rpx 22rpx; box-sizing: border-box; background: #fff; border: 1rpx solid #e1e6ed; border-radius: 20rpx; box-shadow: 0 6rpx 20rpx rgba(32,45,64,.04); }
 .campus-bar__copy { min-width: 0; }

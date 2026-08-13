@@ -5,6 +5,7 @@ import "identity-account-management.api"
 import "identity-organization.api"
 import "appointment-catalog.api"
 import "appointment-resources.api"
+import "appointment-bookings.api"
 
 info (
 	title:                       "Hospital App API"

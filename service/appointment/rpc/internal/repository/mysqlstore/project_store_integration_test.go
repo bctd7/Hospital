@@ -37,7 +37,7 @@ func TestMySQLCatalogLifecycle(t *testing.T) {
 	cleanupCatalogIntegrationData(t, store, ctx)
 	defer cleanupCatalogIntegrationData(t, store, ctx)
 
-	manager, err := staffmanager.NewManager(store, store, nil)
+	manager, err := staffmanager.NewManager(store, store, store, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -10,16 +10,20 @@ import (
 type Manager struct {
 	projectStore ProjectStore
 	store        RoomScheduleStore
+	bookings     BookingStore
 	cache        Cache
 	flights      flightGroup
 }
 
-func NewManager(projectStore ProjectStore, roomScheduleStore RoomScheduleStore, cache Cache) (*Manager, error) {
+func NewManager(projectStore ProjectStore, roomScheduleStore RoomScheduleStore, bookingStore BookingStore, cache Cache) (*Manager, error) {
 	if projectStore == nil {
 		return nil, errors.New("appointment project store is required")
 	}
 	if roomScheduleStore == nil {
 		return nil, errors.New("appointment room and schedule store is required")
 	}
-	return &Manager{projectStore: projectStore, store: roomScheduleStore, cache: cache}, nil
+	if bookingStore == nil {
+		return nil, errors.New("appointment booking store is required")
+	}
+	return &Manager{projectStore: projectStore, store: roomScheduleStore, bookings: bookingStore, cache: cache}, nil
 }

@@ -98,8 +98,22 @@ func (m *Manager) SetRoomWindow(ctx context.Context, operator authn.Principal, c
 			if err := tx.CreateRoomWindow(ctx, result); err != nil {
 				return nil, "", err
 			}
-		} else if err := tx.UpdateRoomWindow(ctx, result, command.ExpectedVersion); err != nil {
-			return nil, "", err
+		} else {
+			if before.OpenTime != result.OpenTime || before.CloseTime != result.CloseTime {
+				if serviceDate, relevant := currentWeekDateForWeekday(result.Weekday); relevant {
+					if _, err := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, meta.OperationID, BookingListFilter{
+						RoomID: result.RoomID, ServiceDate: &serviceDate, Session: result.Session,
+					}); err != nil {
+						return nil, "", err
+					}
+				}
+			}
+			if err := reconcileRoomWindowCapacity(ctx, tx, operator.AccountID, meta.OperationID, result); err != nil {
+				return nil, "", err
+			}
+			if err := tx.UpdateRoomWindow(ctx, result, command.ExpectedVersion); err != nil {
+				return nil, "", err
+			}
 		}
 		return struct {
 			Before *RoomWeeklyWindow
@@ -210,8 +224,19 @@ func (m *Manager) SetItemWindow(ctx context.Context, operator authn.Principal, c
 			if err := tx.CreateItemWindow(ctx, result); err != nil {
 				return nil, "", err
 			}
-		} else if err := tx.UpdateItemWindow(ctx, result, command.ExpectedVersion); err != nil {
-			return nil, "", err
+		} else {
+			if before.StartTime != result.StartTime || before.BookingCutoffTime != result.BookingCutoffTime || before.EndTime != result.EndTime {
+				if serviceDate, relevant := currentWeekDateForWeekday(result.Weekday); relevant {
+					if _, err := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, meta.OperationID, BookingListFilter{
+						ItemID: result.ItemID, ServiceDate: &serviceDate, Session: result.Session,
+					}); err != nil {
+						return nil, "", err
+					}
+				}
+			}
+			if err := tx.UpdateItemWindow(ctx, result, command.ExpectedVersion); err != nil {
+				return nil, "", err
+			}
 		}
 		return struct {
 			Before *ItemWeeklyWindow
@@ -273,12 +298,16 @@ func (m *Manager) disableWindow(ctx context.Context, operator authn.Principal, c
 			}
 			after := before
 			if after.Status != StatusDisabled {
+				if serviceDate, relevant := currentWeekDateForWeekday(after.Weekday); relevant {
+					if _, e = deleteBookingsForConfiguration(ctx, tx, operator.AccountID, meta.OperationID, BookingListFilter{
+						RoomID: after.RoomID, ServiceDate: &serviceDate, Session: after.Session,
+					}); e != nil {
+						return nil, "", e
+					}
+				}
 				after.Status = StatusDisabled
 				after.Version++
 				after.UpdatedAt = time.Now().UTC()
-				if e = validateRoomWindowChange(ctx, tx, after); e != nil {
-					return nil, "", e
-				}
 				if e = tx.SetRoomWindowStatus(ctx, after, command.ExpectedVersion); e != nil {
 					return nil, "", e
 				}
@@ -303,6 +332,13 @@ func (m *Manager) disableWindow(ctx context.Context, operator authn.Principal, c
 		}
 		after := before
 		if after.Status != StatusDisabled {
+			if serviceDate, relevant := currentWeekDateForWeekday(after.Weekday); relevant {
+				if _, e = deleteBookingsForConfiguration(ctx, tx, operator.AccountID, meta.OperationID, BookingListFilter{
+					ItemID: after.ItemID, ServiceDate: &serviceDate, Session: after.Session,
+				}); e != nil {
+					return nil, "", e
+				}
+			}
 			after.Status = StatusDisabled
 			after.Version++
 			after.UpdatedAt = time.Now().UTC()

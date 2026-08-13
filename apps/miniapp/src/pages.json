@@ -108,6 +108,12 @@
           "style": {
             "navigationBarTitleText": "房间资源详情"
           }
+        },
+        {
+          "path": "appointment/bookings",
+          "style": {
+            "navigationBarTitleText": "科室预约"
+          }
         }
       ]
     }

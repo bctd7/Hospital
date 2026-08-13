@@ -8,35 +8,46 @@ import (
 )
 
 type (
-	Cache                 = appointmentmanager.Cache
-	ProjectStore          = appointmentmanager.ProjectStore
-	ProjectTxStore        = appointmentmanager.ProjectTxStore
-	ProjectOperation      = appointmentmanager.ProjectOperation
-	ProjectChange         = appointmentmanager.ProjectChange
-	ProjectListFilter     = appointmentmanager.ProjectListFilter
-	RoomScheduleStore     = appointmentmanager.RoomScheduleStore
-	RoomScheduleTxStore   = appointmentmanager.RoomScheduleTxStore
-	RoomScheduleOperation = appointmentmanager.RoomScheduleOperation
-	RoomScheduleChange    = appointmentmanager.RoomScheduleChange
-	ExaminationItem       = appointmentmanager.ExaminationItem
-	Room                  = appointmentmanager.Room
-	RoomItem              = appointmentmanager.RoomItem
-	RoomWeeklyWindow      = appointmentmanager.RoomWeeklyWindow
-	ItemWeeklyWindow      = appointmentmanager.ItemWeeklyWindow
-	ItemSummary           = appointmentmanager.ItemSummary
-	Status                = appointmentmanager.Status
-	Session               = appointmentmanager.Session
-	Page[T any]           = appointmentmanager.Page[T]
-	flightGroup           = appointmentmanager.FlightGroup
+	Cache                  = appointmentmanager.Cache
+	ProjectStore           = appointmentmanager.ProjectStore
+	ProjectTxStore         = appointmentmanager.ProjectTxStore
+	ProjectOperation       = appointmentmanager.ProjectOperation
+	ProjectChange          = appointmentmanager.ProjectChange
+	ProjectListFilter      = appointmentmanager.ProjectListFilter
+	RoomScheduleStore      = appointmentmanager.RoomScheduleStore
+	BookingStore           = appointmentmanager.BookingStore
+	BookingTxStore         = appointmentmanager.BookingTxStore
+	Booking                = appointmentmanager.Booking
+	BookingListFilter      = appointmentmanager.BookingListFilter
+	BookingOperation       = appointmentmanager.BookingOperation
+	BookingOperationChange = appointmentmanager.BookingOperationChange
+	BookingStatus          = appointmentmanager.BookingStatus
+	DateCapacity           = appointmentmanager.DateCapacity
+	BookingSelection       = appointmentmanager.BookingSelection
+	RoomScheduleTxStore    = appointmentmanager.RoomScheduleTxStore
+	RoomScheduleOperation  = appointmentmanager.RoomScheduleOperation
+	RoomScheduleChange     = appointmentmanager.RoomScheduleChange
+	ExaminationItem        = appointmentmanager.ExaminationItem
+	Room                   = appointmentmanager.Room
+	RoomItem               = appointmentmanager.RoomItem
+	RoomWeeklyWindow       = appointmentmanager.RoomWeeklyWindow
+	ItemWeeklyWindow       = appointmentmanager.ItemWeeklyWindow
+	ItemSummary            = appointmentmanager.ItemSummary
+	Status                 = appointmentmanager.Status
+	Session                = appointmentmanager.Session
+	Page[T any]            = appointmentmanager.Page[T]
+	flightGroup            = appointmentmanager.FlightGroup
 )
 
 const (
-	StatusActive     = appointmentmanager.StatusActive
-	StatusDisabled   = appointmentmanager.StatusDisabled
-	SessionMorning   = appointmentmanager.SessionMorning
-	SessionAfternoon = appointmentmanager.SessionAfternoon
-	hotReadCacheTTL  = appointmentmanager.HotReadCacheTTL
-	queryCacheTTL    = appointmentmanager.QueryCacheTTL
+	StatusActive           = appointmentmanager.StatusActive
+	StatusDisabled         = appointmentmanager.StatusDisabled
+	SessionMorning         = appointmentmanager.SessionMorning
+	SessionAfternoon       = appointmentmanager.SessionAfternoon
+	BookingStatusConfirmed = appointmentmanager.BookingStatusConfirmed
+	BookingStatusCheckedIn = appointmentmanager.BookingStatusCheckedIn
+	hotReadCacheTTL        = appointmentmanager.HotReadCacheTTL
+	queryCacheTTL          = appointmentmanager.QueryCacheTTL
 )
 
 func loadCached[T any](ctx context.Context, cache Cache, flights *flightGroup, key string, ttl time.Duration, loader func() (T, bool, error)) (T, bool, error) {

@@ -6,6 +6,7 @@ package handler
 import (
 	"net/http"
 
+	appointmentbookings "hospital/service/app/api/internal/handler/appointmentbookings"
 	appointmentcatalog "hospital/service/app/api/internal/handler/appointmentcatalog"
 	appointmentresources "hospital/service/app/api/internal/handler/appointmentresources"
 	auth "hospital/service/app/api/internal/handler/auth"
@@ -20,6 +21,60 @@ import (
 )
 
 func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AccessToken},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
+					Path:    "/admin/appointment/bookings",
+					Handler: appointmentbookings.ListBookingsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/admin/appointment/bookings/:bookingId",
+					Handler: appointmentbookings.GetBookingHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodDelete,
+					Path:    "/admin/appointment/bookings/:bookingId",
+					Handler: appointmentbookings.DeleteBookingHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/appointment/bookings/:bookingId/check-in",
+					Handler: appointmentbookings.CheckInBookingHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/appointment/bookings",
+					Handler: appointmentbookings.CreateBookingHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/appointment/bookings",
+					Handler: appointmentbookings.ListMyBookingsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/appointment/bookings/:bookingId",
+					Handler: appointmentbookings.GetMyBookingHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodDelete,
+					Path:    "/appointment/bookings/:bookingId",
+					Handler: appointmentbookings.DeleteMyBookingHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/appointment/examination-items/:itemId/booking-options",
+					Handler: appointmentbookings.ListBookingOptionsHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
 	server.AddRoutes(
 		rest.WithMiddlewares(
 			[]rest.Middleware{serverCtx.AccessToken},
@@ -53,6 +108,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPost,
 					Path:    "/admin/appointment/examination-items/:itemId/enable",
 					Handler: appointmentcatalog.EnableExaminationItemHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/appointment/examination-items",
+					Handler: appointmentcatalog.ListPatientExaminationItemsHandler(serverCtx),
 				},
 			}...,
 		),

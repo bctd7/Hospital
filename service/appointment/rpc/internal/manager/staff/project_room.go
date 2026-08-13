@@ -126,6 +126,14 @@ func (m *Manager) changeRelationStatus(ctx context.Context, operator authn.Princ
 		}
 		result = before
 		if result.Status != target {
+			if target == StatusDisabled {
+				today, weekEnd := currentBookingWeek()
+				if _, err := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, meta.OperationID, BookingListFilter{
+					RoomID: before.RoomID, ItemID: before.ItemID, FromDate: &today, ThroughDate: &weekEnd,
+				}); err != nil {
+					return nil, "", err
+				}
+			}
 			result.Status = target
 			result.Version++
 			result.UpdatedAt = time.Now().UTC()

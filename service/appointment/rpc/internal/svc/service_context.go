@@ -26,7 +26,10 @@ type ServiceContext struct {
 	AppointmentRedis              *redis.Client
 	AppointmentRedisPrefix        string
 	appointmentStore              *mysqlstore.Store
+	bookingCache                  appointmentmanager.Cache
 	authorizationRedisClient      *redis.Client
+	bookingCleanupCancel          context.CancelFunc
+	bookingCleanupDone            chan struct{}
 }
 
 func NewServiceContext(c config.Config) (*ServiceContext, error) {
@@ -94,14 +97,14 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		store.Close()
 		return nil, fmt.Errorf("create appointment query cache: %w", err)
 	}
-	staffManager, err := staffmanager.NewManager(store, store, appointmentCache)
+	staffManager, err := staffmanager.NewManager(store, store, store, appointmentCache)
 	if err != nil {
 		appointmentRedisClient.Close()
 		authorizationRedisClient.Close()
 		store.Close()
 		return nil, fmt.Errorf("create staff appointment manager: %w", err)
 	}
-	patientManager, err := patientmanager.NewManager(store, appointmentCache)
+	patientManager, err := patientmanager.NewManager(store, store, store, appointmentCache)
 	if err != nil {
 		appointmentRedisClient.Close()
 		authorizationRedisClient.Close()
@@ -109,7 +112,7 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		return nil, fmt.Errorf("create patient appointment manager: %w", err)
 	}
 
-	return &ServiceContext{
+	serviceContext := &ServiceContext{
 		Config:                        c,
 		StaffManager:                  staffManager,
 		PatientManager:                patientManager,
@@ -118,11 +121,20 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		AppointmentRedis:              appointmentRedisClient,
 		AppointmentRedisPrefix:        c.AppointmentRedis.Prefix,
 		appointmentStore:              store,
+		bookingCache:                  appointmentCache,
 		authorizationRedisClient:      authorizationRedisClient,
-	}, nil
+	}
+	serviceContext.startBookingCleanup()
+	return serviceContext, nil
 }
 
 func (s *ServiceContext) Close() error {
+	if s.bookingCleanupCancel != nil {
+		s.bookingCleanupCancel()
+	}
+	if s.bookingCleanupDone != nil {
+		<-s.bookingCleanupDone
+	}
 	return errors.Join(
 		s.appointmentStore.Close(),
 		s.AppointmentRedis.Close(),

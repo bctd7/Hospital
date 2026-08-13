@@ -30,6 +30,16 @@ service AppointmentService {
   rpc SetItemWeeklyWindow(SetItemWeeklyWindowRequest) returns (ItemWeeklyWindow);
   rpc DisableItemWeeklyWindow(ChangeResourceStatusRequest) returns (ItemWeeklyWindow);
   rpc ListItemWeeklyWindows(ListWeeklyWindowsRequest) returns (ListItemWeeklyWindowsResponse);
+
+  rpc ListBookingOptions(ListBookingOptionsRequest) returns (ListBookingOptionsResponse);
+  rpc CreateBooking(CreateBookingRequest) returns (Booking);
+  rpc GetMyBooking(GetBookingRequest) returns (Booking);
+  rpc ListMyBookings(ListMyBookingsRequest) returns (ListBookingsResponse);
+  rpc DeleteMyBooking(DeleteBookingRequest) returns (DeleteBookingResponse);
+  rpc GetBooking(GetBookingRequest) returns (Booking);
+  rpc ListBookings(ListBookingsRequest) returns (ListBookingsResponse);
+  rpc CheckInBooking(CheckInBookingRequest) returns (Booking);
+  rpc DeleteBooking(DeleteBookingRequest) returns (DeleteBookingResponse);
 }
 
 // ExaminationItemInput contains only fields controlled by the caller when
@@ -243,6 +253,118 @@ message ListRoomWeeklyWindowsResponse {
 
 message ListItemWeeklyWindowsResponse {
   repeated ItemWeeklyWindow windows = 1;
+}
+
+message ListBookingOptionsRequest {
+  string item_id = 1;
+  string request_id = 2;
+}
+
+message BookingOption {
+  string item_id = 1;
+  string room_id = 2;
+  string room_display_name = 3;
+  string campus_id = 4;
+  string building = 5;
+  int32 floor_number = 6;
+  string room_number = 7;
+  string service_date = 8;
+  string session = 9;
+  string room_open_time = 10;
+  string room_close_time = 11;
+  string item_start_time = 12;
+  string item_end_time = 13;
+  string booking_cutoff_time = 14;
+  int64 total_capacity = 15;
+  int64 remaining_capacity = 16;
+}
+
+message ListBookingOptionsResponse {
+  repeated BookingOption options = 1;
+  string week_start_date = 2;
+  string week_end_date = 3;
+}
+
+message CreateBookingRequest {
+  string item_id = 1;
+  string room_id = 2;
+  string service_date = 3;
+  string session = 4;
+  string operation_id = 5;
+  string request_id = 6;
+}
+
+message GetBookingRequest {
+  string booking_id = 1;
+  string request_id = 2;
+}
+
+message ListMyBookingsRequest {
+  int64 page = 1;
+  int64 page_size = 2;
+  string request_id = 3;
+}
+
+message ListBookingsRequest {
+  string department_id = 1;
+  string service_date = 2;
+  string session = 3;
+  string item_id = 4;
+  string room_id = 5;
+  string status = 6;
+  int64 page = 7;
+  int64 page_size = 8;
+  string request_id = 9;
+}
+
+message DeleteBookingRequest {
+  string booking_id = 1;
+  string operation_id = 2;
+  string reason = 3;
+  string request_id = 4;
+}
+
+message DeleteBookingResponse {
+  string booking_id = 1;
+  bool deleted = 2;
+}
+
+message CheckInBookingRequest {
+  string booking_id = 1;
+  int64 expected_version = 2;
+  string operation_id = 3;
+  string request_id = 4;
+}
+
+message Booking {
+  string booking_id = 1;
+  string patient_account_id = 2;
+  string department_id = 3;
+  string item_id = 4;
+  string item_name = 5;
+  string room_id = 6;
+  string room_display_name = 7;
+  string campus_id = 8;
+  string service_date = 9;
+  string session = 10;
+  string status = 11;
+  string room_open_time = 12;
+  string room_close_time = 13;
+  string item_start_time = 14;
+  string item_end_time = 15;
+  string booking_cutoff_time = 16;
+  int64 version = 17;
+  string created_at = 18;
+  string updated_at = 19;
+  string checked_in_at = 20;
+  string checked_in_by = 21;
+}
+
+message ListBookingsResponse {
+  repeated Booking bookings = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  int64 total = 4;
 }
 
 message RoomWeeklyWindow {

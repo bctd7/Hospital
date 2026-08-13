@@ -16,9 +16,7 @@ import (
 
 var _ appointmentmanager.ProjectTxStore = (*projectTxStore)(nil)
 
-type projectTxStore struct {
-	tx *sql.Tx
-}
+type projectTxStore struct{ *bookingTxStore }
 
 func (s *projectTxStore) FindOperation(ctx context.Context, operationID string) (appointmentmanager.ProjectOperation, bool, error) {
 	var operation appointmentmanager.ProjectOperation

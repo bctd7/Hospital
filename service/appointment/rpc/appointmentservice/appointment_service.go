@@ -7,41 +7,53 @@ package appointmentservice
 import (
 	"context"
 
-	"hospital/contracts/gen/appointment/v1"
+	v1_appointmentv1 "hospital/contracts/gen/appointment/v1"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 
 type (
-	AddRoomExaminationItemRequest              = appointmentv1.AddRoomExaminationItemRequest
-	ChangeExaminationItemStatusRequest         = appointmentv1.ChangeExaminationItemStatusRequest
-	ChangeResourceStatusRequest                = appointmentv1.ChangeResourceStatusRequest
-	CreateExaminationItemRequest               = appointmentv1.CreateExaminationItemRequest
-	CreateRoomRequest                          = appointmentv1.CreateRoomRequest
-	ExaminationItem                            = appointmentv1.ExaminationItem
-	ExaminationItemInput                       = appointmentv1.ExaminationItemInput
-	GetExaminationItemRequest                  = appointmentv1.GetExaminationItemRequest
-	GetRoomRequest                             = appointmentv1.GetRoomRequest
-	ItemWeeklyWindow                           = appointmentv1.ItemWeeklyWindow
-	ListAvailableRoomsByExaminationItemRequest = appointmentv1.ListAvailableRoomsByExaminationItemRequest
-	ListExaminationItemsRequest                = appointmentv1.ListExaminationItemsRequest
-	ListExaminationItemsResponse               = appointmentv1.ListExaminationItemsResponse
-	ListItemWeeklyWindowsResponse              = appointmentv1.ListItemWeeklyWindowsResponse
-	ListRoomExaminationItemsRequest            = appointmentv1.ListRoomExaminationItemsRequest
-	ListRoomExaminationItemsResponse           = appointmentv1.ListRoomExaminationItemsResponse
-	ListRoomWeeklyWindowsResponse              = appointmentv1.ListRoomWeeklyWindowsResponse
-	ListRoomsRequest                           = appointmentv1.ListRoomsRequest
-	ListRoomsResponse                          = appointmentv1.ListRoomsResponse
-	ListWeeklyWindowsRequest                   = appointmentv1.ListWeeklyWindowsRequest
-	Room                                       = appointmentv1.Room
-	RoomExaminationItem                        = appointmentv1.RoomExaminationItem
-	RoomWeeklyWindow                           = appointmentv1.RoomWeeklyWindow
-	RetireRoomRequest                          = appointmentv1.RetireRoomRequest
-	SetItemWeeklyWindowRequest                 = appointmentv1.SetItemWeeklyWindowRequest
-	SetRoomWeeklyWindowRequest                 = appointmentv1.SetRoomWeeklyWindowRequest
-	UpdateExaminationItemRequest               = appointmentv1.UpdateExaminationItemRequest
-	UpdateRoomRequest                          = appointmentv1.UpdateRoomRequest
+	AddRoomExaminationItemRequest              = v1_appointmentv1.AddRoomExaminationItemRequest
+	Booking                                    = v1_appointmentv1.Booking
+	BookingOption                              = v1_appointmentv1.BookingOption
+	ChangeExaminationItemStatusRequest         = v1_appointmentv1.ChangeExaminationItemStatusRequest
+	ChangeResourceStatusRequest                = v1_appointmentv1.ChangeResourceStatusRequest
+	CheckInBookingRequest                      = v1_appointmentv1.CheckInBookingRequest
+	CreateBookingRequest                       = v1_appointmentv1.CreateBookingRequest
+	CreateExaminationItemRequest               = v1_appointmentv1.CreateExaminationItemRequest
+	CreateRoomRequest                          = v1_appointmentv1.CreateRoomRequest
+	DeleteBookingRequest                       = v1_appointmentv1.DeleteBookingRequest
+	DeleteBookingResponse                      = v1_appointmentv1.DeleteBookingResponse
+	ExaminationItem                            = v1_appointmentv1.ExaminationItem
+	ExaminationItemInput                       = v1_appointmentv1.ExaminationItemInput
+	GetBookingRequest                          = v1_appointmentv1.GetBookingRequest
+	GetExaminationItemRequest                  = v1_appointmentv1.GetExaminationItemRequest
+	GetRoomRequest                             = v1_appointmentv1.GetRoomRequest
+	ItemWeeklyWindow                           = v1_appointmentv1.ItemWeeklyWindow
+	ListAvailableRoomsByExaminationItemRequest = v1_appointmentv1.ListAvailableRoomsByExaminationItemRequest
+	ListBookingOptionsRequest                  = v1_appointmentv1.ListBookingOptionsRequest
+	ListBookingOptionsResponse                 = v1_appointmentv1.ListBookingOptionsResponse
+	ListBookingsRequest                        = v1_appointmentv1.ListBookingsRequest
+	ListBookingsResponse                       = v1_appointmentv1.ListBookingsResponse
+	ListExaminationItemsRequest                = v1_appointmentv1.ListExaminationItemsRequest
+	ListExaminationItemsResponse               = v1_appointmentv1.ListExaminationItemsResponse
+	ListItemWeeklyWindowsResponse              = v1_appointmentv1.ListItemWeeklyWindowsResponse
+	ListMyBookingsRequest                      = v1_appointmentv1.ListMyBookingsRequest
+	ListRoomExaminationItemsRequest            = v1_appointmentv1.ListRoomExaminationItemsRequest
+	ListRoomExaminationItemsResponse           = v1_appointmentv1.ListRoomExaminationItemsResponse
+	ListRoomWeeklyWindowsResponse              = v1_appointmentv1.ListRoomWeeklyWindowsResponse
+	ListRoomsRequest                           = v1_appointmentv1.ListRoomsRequest
+	ListRoomsResponse                          = v1_appointmentv1.ListRoomsResponse
+	ListWeeklyWindowsRequest                   = v1_appointmentv1.ListWeeklyWindowsRequest
+	RetireRoomRequest                          = v1_appointmentv1.RetireRoomRequest
+	Room                                       = v1_appointmentv1.Room
+	RoomExaminationItem                        = v1_appointmentv1.RoomExaminationItem
+	RoomWeeklyWindow                           = v1_appointmentv1.RoomWeeklyWindow
+	SetItemWeeklyWindowRequest                 = v1_appointmentv1.SetItemWeeklyWindowRequest
+	SetRoomWeeklyWindowRequest                 = v1_appointmentv1.SetRoomWeeklyWindowRequest
+	UpdateExaminationItemRequest               = v1_appointmentv1.UpdateExaminationItemRequest
+	UpdateRoomRequest                          = v1_appointmentv1.UpdateRoomRequest
 
 	AppointmentService interface {
 		CreateExaminationItem(ctx context.Context, in *CreateExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
@@ -66,6 +78,15 @@ type (
 		SetItemWeeklyWindow(ctx context.Context, in *SetItemWeeklyWindowRequest, opts ...grpc.CallOption) (*ItemWeeklyWindow, error)
 		DisableItemWeeklyWindow(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*ItemWeeklyWindow, error)
 		ListItemWeeklyWindows(ctx context.Context, in *ListWeeklyWindowsRequest, opts ...grpc.CallOption) (*ListItemWeeklyWindowsResponse, error)
+		ListBookingOptions(ctx context.Context, in *ListBookingOptionsRequest, opts ...grpc.CallOption) (*ListBookingOptionsResponse, error)
+		CreateBooking(ctx context.Context, in *CreateBookingRequest, opts ...grpc.CallOption) (*Booking, error)
+		GetMyBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
+		ListMyBookings(ctx context.Context, in *ListMyBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
+		DeleteMyBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
+		GetBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
+		ListBookings(ctx context.Context, in *ListBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
+		CheckInBooking(ctx context.Context, in *CheckInBookingRequest, opts ...grpc.CallOption) (*Booking, error)
+		DeleteBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
 	}
 
 	defaultAppointmentService struct {
@@ -80,111 +101,156 @@ func NewAppointmentService(cli zrpc.Client) AppointmentService {
 }
 
 func (m *defaultAppointmentService) CreateExaminationItem(ctx context.Context, in *CreateExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.CreateExaminationItem(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) GetExaminationItem(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.GetExaminationItem(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) ListExaminationItems(ctx context.Context, in *ListExaminationItemsRequest, opts ...grpc.CallOption) (*ListExaminationItemsResponse, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.ListExaminationItems(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) UpdateExaminationItem(ctx context.Context, in *UpdateExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.UpdateExaminationItem(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) DisableExaminationItem(ctx context.Context, in *ChangeExaminationItemStatusRequest, opts ...grpc.CallOption) (*ExaminationItem, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.DisableExaminationItem(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) EnableExaminationItem(ctx context.Context, in *ChangeExaminationItemStatusRequest, opts ...grpc.CallOption) (*ExaminationItem, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.EnableExaminationItem(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*Room, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.CreateRoom(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) GetRoom(ctx context.Context, in *GetRoomRequest, opts ...grpc.CallOption) (*Room, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.GetRoom(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) ListRooms(ctx context.Context, in *ListRoomsRequest, opts ...grpc.CallOption) (*ListRoomsResponse, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.ListRooms(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) UpdateRoom(ctx context.Context, in *UpdateRoomRequest, opts ...grpc.CallOption) (*Room, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.UpdateRoom(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) RetireRoom(ctx context.Context, in *RetireRoomRequest, opts ...grpc.CallOption) (*Room, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.RetireRoom(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) AddRoomExaminationItem(ctx context.Context, in *AddRoomExaminationItemRequest, opts ...grpc.CallOption) (*RoomExaminationItem, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.AddRoomExaminationItem(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) DisableRoomExaminationItem(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*RoomExaminationItem, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.DisableRoomExaminationItem(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) EnableRoomExaminationItem(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*RoomExaminationItem, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.EnableRoomExaminationItem(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) ListRoomExaminationItems(ctx context.Context, in *ListRoomExaminationItemsRequest, opts ...grpc.CallOption) (*ListRoomExaminationItemsResponse, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.ListRoomExaminationItems(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) ListAvailableRoomsByExaminationItem(ctx context.Context, in *ListAvailableRoomsByExaminationItemRequest, opts ...grpc.CallOption) (*ListRoomExaminationItemsResponse, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.ListAvailableRoomsByExaminationItem(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) SetRoomWeeklyWindow(ctx context.Context, in *SetRoomWeeklyWindowRequest, opts ...grpc.CallOption) (*RoomWeeklyWindow, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.SetRoomWeeklyWindow(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) DisableRoomWeeklyWindow(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*RoomWeeklyWindow, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.DisableRoomWeeklyWindow(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) ListRoomWeeklyWindows(ctx context.Context, in *ListWeeklyWindowsRequest, opts ...grpc.CallOption) (*ListRoomWeeklyWindowsResponse, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.ListRoomWeeklyWindows(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) SetItemWeeklyWindow(ctx context.Context, in *SetItemWeeklyWindowRequest, opts ...grpc.CallOption) (*ItemWeeklyWindow, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.SetItemWeeklyWindow(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) DisableItemWeeklyWindow(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*ItemWeeklyWindow, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.DisableItemWeeklyWindow(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) ListItemWeeklyWindows(ctx context.Context, in *ListWeeklyWindowsRequest, opts ...grpc.CallOption) (*ListItemWeeklyWindowsResponse, error) {
-	client := appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.ListItemWeeklyWindows(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) ListBookingOptions(ctx context.Context, in *ListBookingOptionsRequest, opts ...grpc.CallOption) (*ListBookingOptionsResponse, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.ListBookingOptions(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) CreateBooking(ctx context.Context, in *CreateBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.CreateBooking(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) GetMyBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.GetMyBooking(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) ListMyBookings(ctx context.Context, in *ListMyBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.ListMyBookings(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) DeleteMyBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.DeleteMyBooking(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) GetBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.GetBooking(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) ListBookings(ctx context.Context, in *ListBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.ListBookings(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) CheckInBooking(ctx context.Context, in *CheckInBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.CheckInBooking(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) DeleteBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.DeleteBooking(ctx, in, opts...)
 }

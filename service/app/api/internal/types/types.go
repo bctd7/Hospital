@@ -97,6 +97,57 @@ type AppointmentRoomResponse struct {
 	UpdatedAt    string `json:"updated_at"`
 }
 
+type BookingOptionResponse struct {
+	ItemID            string `json:"item_id"`
+	RoomID            string `json:"room_id"`
+	RoomDisplayName   string `json:"room_display_name"`
+	CampusID          string `json:"campus_id"`
+	Building          string `json:"building"`
+	FloorNumber       int32  `json:"floor_number"`
+	RoomNumber        string `json:"room_number"`
+	ServiceDate       string `json:"service_date"`
+	Session           string `json:"session"`
+	RoomOpenTime      string `json:"room_open_time"`
+	RoomCloseTime     string `json:"room_close_time"`
+	ItemStartTime     string `json:"item_start_time"`
+	ItemEndTime       string `json:"item_end_time"`
+	BookingCutoffTime string `json:"booking_cutoff_time"`
+	TotalCapacity     int64  `json:"total_capacity"`
+	RemainingCapacity int64  `json:"remaining_capacity"`
+}
+
+type BookingOptionsPathRequest struct {
+	ItemID string `path:"itemId"`
+}
+
+type BookingPathRequest struct {
+	BookingID string `path:"bookingId"`
+}
+
+type BookingResponse struct {
+	BookingID         string `json:"booking_id"`
+	PatientAccountID  string `json:"patient_account_id"`
+	DepartmentID      string `json:"department_id"`
+	ItemID            string `json:"item_id"`
+	ItemName          string `json:"item_name"`
+	RoomID            string `json:"room_id"`
+	RoomDisplayName   string `json:"room_display_name"`
+	CampusID          string `json:"campus_id"`
+	ServiceDate       string `json:"service_date"`
+	Session           string `json:"session"`
+	Status            string `json:"status"`
+	RoomOpenTime      string `json:"room_open_time"`
+	RoomCloseTime     string `json:"room_close_time"`
+	ItemStartTime     string `json:"item_start_time"`
+	ItemEndTime       string `json:"item_end_time"`
+	BookingCutoffTime string `json:"booking_cutoff_time"`
+	Version           int64  `json:"version"`
+	CreatedAt         string `json:"created_at"`
+	UpdatedAt         string `json:"updated_at"`
+	CheckedInAt       string `json:"checked_in_at,omitempty"`
+	CheckedInBy       string `json:"checked_in_by,omitempty"`
+}
+
 type CampusSummaryResponse struct {
 	CampusID        string `json:"campus_id"`
 	HospitalID      string `json:"hospital_id"`
@@ -132,6 +183,12 @@ type ChangeOrganizationUnitStatusRequest struct {
 	OperationID string `json:"operation_id"`
 }
 
+type CheckInBookingAPIRequest struct {
+	BookingID       string `path:"bookingId"`
+	ExpectedVersion int64  `json:"expected_version"`
+	OperationID     string `json:"operation_id"`
+}
+
 type CreateAppointmentRoomRequest struct {
 	DepartmentID string `json:"department_id"`
 	CampusID     string `json:"campus_id"`
@@ -139,6 +196,14 @@ type CreateAppointmentRoomRequest struct {
 	FloorNumber  int32  `json:"floor_number"`
 	RoomNumber   string `json:"room_number"`
 	OperationID  string `json:"operation_id"`
+}
+
+type CreateBookingAPIRequest struct {
+	ItemID      string `json:"item_id"`
+	RoomID      string `json:"room_id"`
+	ServiceDate string `json:"service_date"`
+	Session     string `json:"session"`
+	OperationID string `json:"operation_id"`
 }
 
 type CreateExaminationItemRequest struct {
@@ -163,6 +228,17 @@ type CurrentIdentityResponse struct {
 	DepartmentID         string   `json:"department_id,optional"`
 	Permissions          []string `json:"permissions"`
 	AuthorizationVersion int64    `json:"authorization_version"`
+}
+
+type DeleteBookingAPIRequest struct {
+	BookingID   string `path:"bookingId"`
+	OperationID string `json:"operation_id"`
+	Reason      string `json:"reason,optional"`
+}
+
+type DeleteBookingAPIResponse struct {
+	BookingID string `json:"booking_id"`
+	Deleted   bool   `json:"deleted"`
 }
 
 type DepartmentSummaryResponse struct {
@@ -266,6 +342,30 @@ type ListAppointmentRoomsResponse struct {
 	Total    int64                     `json:"total"`
 }
 
+type ListBookingOptionsResponse struct {
+	Options       []BookingOptionResponse `json:"options"`
+	WeekStartDate string                  `json:"week_start_date"`
+	WeekEndDate   string                  `json:"week_end_date"`
+}
+
+type ListBookingsAPIRequest struct {
+	DepartmentID string `form:"department_id"`
+	ServiceDate  string `form:"service_date,optional"`
+	Session      string `form:"session,optional"`
+	ItemID       string `form:"item_id,optional"`
+	RoomID       string `form:"room_id,optional"`
+	Status       string `form:"status,optional"`
+	Page         int64  `form:"page,default=1"`
+	PageSize     int64  `form:"page_size,default=20"`
+}
+
+type ListBookingsAPIResponse struct {
+	Bookings []BookingResponse `json:"bookings"`
+	Page     int64             `json:"page"`
+	PageSize int64             `json:"page_size"`
+	Total    int64             `json:"total"`
+}
+
 type ListDepartmentsRequest struct {
 	CampusID string `form:"campus_id"`
 }
@@ -297,6 +397,11 @@ type ListExaminationItemsResponse struct {
 
 type ListItemWeeklyWindowsAPIResponse struct {
 	Windows []ItemWeeklyWindowResponse `json:"windows"`
+}
+
+type ListMyBookingsAPIRequest struct {
+	Page     int64 `form:"page,default=1"`
+	PageSize int64 `form:"page_size,default=20"`
 }
 
 type ListOrganizationUnitsRequest struct {

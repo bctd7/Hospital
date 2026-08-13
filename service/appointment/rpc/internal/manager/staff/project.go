@@ -271,6 +271,14 @@ func (m *Manager) changeProjectStatus(
 
 		after := before
 		if before.Status != target {
+			if target == StatusDisabled {
+				today, weekEnd := currentBookingWeek()
+				if _, err := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, command.OperationID, BookingListFilter{
+					ItemID: before.ItemID, FromDate: &today, ThroughDate: &weekEnd,
+				}); err != nil {
+					return err
+				}
+			}
 			after.Status = target
 			after.Version = before.Version + 1
 			after.UpdatedAt = time.Now().UTC()
@@ -295,6 +303,9 @@ func (m *Manager) changeProjectStatus(
 	})
 	if err != nil {
 		return ExaminationItem{}, err
+	}
+	if target == StatusDisabled {
+		m.invalidate(ctx, result.OwnerDepartmentID, "item-summary:"+result.ItemID)
 	}
 	return result, nil
 }

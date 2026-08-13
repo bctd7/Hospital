@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 
+	"hospital/common/authn"
 	"hospital/contracts/gen/appointment/v1"
 	"hospital/service/appointment/rpc/internal/manager"
 	staffmanager "hospital/service/appointment/rpc/internal/manager/staff"
@@ -32,6 +33,17 @@ func (l *ListExaminationItemsLogic) ListExaminationItems(in *appointmentv1.ListE
 	}
 	if in == nil {
 		return nil, projectRPCError(manager.ErrInvalid)
+	}
+	if principal.AccountType == authn.AccountTypePatient {
+		result, err := l.svcCtx.PatientManager.ListProjects(l.ctx, principal, in.OwnerDepartmentId, in.Page, in.PageSize)
+		if err != nil {
+			return nil, projectRPCError(err)
+		}
+		items := make([]*appointmentv1.ExaminationItem, 0, len(result.Items))
+		for _, item := range result.Items {
+			items = append(items, examinationItemResponse(item))
+		}
+		return &appointmentv1.ListExaminationItemsResponse{Items: items, Page: result.Page, PageSize: result.PageSize, Total: result.Total}, nil
 	}
 	result, err := l.svcCtx.StaffManager.ListProjects(l.ctx, principal, staffmanager.ListProjectsQuery{
 		OwnerDepartmentID: in.OwnerDepartmentId,

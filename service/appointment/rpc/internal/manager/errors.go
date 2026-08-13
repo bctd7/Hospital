@@ -10,5 +10,7 @@ var (
 	ErrVersionConflict = errors.New("appointment data version conflict")
 	ErrInvalidState    = errors.New("appointment state does not allow the operation")
 	ErrWindowConflict  = errors.New("item window is not fully contained by room window")
+	ErrCapacityFull    = errors.New("appointment capacity is full")
+	ErrBookingClosed   = errors.New("appointment booking window is closed")
 	ErrNotImplemented  = errors.New("appointment operation is not implemented")
 )

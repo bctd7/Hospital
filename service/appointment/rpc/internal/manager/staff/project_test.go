@@ -5,6 +5,7 @@ import (
 	"errors"
 	"sort"
 	"testing"
+	"time"
 
 	"hospital/common/authn"
 	contractauthz "hospital/contracts/authz"
@@ -27,7 +28,7 @@ func (stubStore) WithinProjectTransaction(context.Context, func(ProjectTxStore) 
 }
 
 func TestManagerRequiresProjectStore(t *testing.T) {
-	if _, err := NewManager(nil, nil, nil); err == nil {
+	if _, err := NewManager(nil, nil, nil, nil); err == nil {
 		t.Fatal("expected nil project store to be rejected")
 	}
 	if manager, _ := projectTestManager(stubStore{}); manager == nil {
@@ -348,4 +349,56 @@ func (s *memoryCatalogStore) RecordChange(_ context.Context, change ProjectChang
 		Result:             change.After,
 	}
 	return nil
+}
+
+func (s *memoryCatalogStore) FindBookingOperation(context.Context, string) (BookingOperation, bool, error) {
+	return BookingOperation{}, false, nil
+}
+
+func (s *memoryCatalogStore) RecordBookingOperation(context.Context, BookingOperationChange) error {
+	return nil
+}
+
+func (s *memoryCatalogStore) ListBookingsForUpdate(context.Context, BookingListFilter) ([]Booking, error) {
+	return nil, nil
+}
+
+func (s *memoryCatalogStore) LockBookingSelection(context.Context, string, string, time.Time, Session) (BookingSelection, error) {
+	return BookingSelection{}, ErrNotImplemented
+}
+
+func (s *memoryCatalogStore) FindDateCapacityForUpdate(context.Context, string, time.Time, Session) (DateCapacity, bool, error) {
+	return DateCapacity{}, false, nil
+}
+
+func (s *memoryCatalogStore) CreateDateCapacity(context.Context, DateCapacity) error {
+	return ErrNotImplemented
+}
+
+func (s *memoryCatalogStore) IncreaseOccupiedCapacity(context.Context, string) error {
+	return ErrNotImplemented
+}
+
+func (s *memoryCatalogStore) DecreaseOccupiedCapacity(context.Context, string) error {
+	return ErrNotImplemented
+}
+
+func (s *memoryCatalogStore) UpdateDateCapacity(context.Context, string, int64, string, int64) error {
+	return ErrNotImplemented
+}
+
+func (s *memoryCatalogStore) GetBookingForUpdate(context.Context, string) (Booking, error) {
+	return Booking{}, ErrNotImplemented
+}
+
+func (s *memoryCatalogStore) CreateBooking(context.Context, Booking) error {
+	return ErrNotImplemented
+}
+
+func (s *memoryCatalogStore) CheckInBooking(context.Context, Booking, int64) error {
+	return ErrNotImplemented
+}
+
+func (s *memoryCatalogStore) DeleteBooking(context.Context, string) error {
+	return ErrNotImplemented
 }

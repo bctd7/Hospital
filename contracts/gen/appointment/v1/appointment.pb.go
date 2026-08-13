@@ -2016,6 +2016,1046 @@ func (x *ListItemWeeklyWindowsResponse) GetWindows() []*ItemWeeklyWindow {
 	return nil
 }
 
+type ListBookingOptionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ItemId        string                 `protobuf:"bytes,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	RequestId     string                 `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListBookingOptionsRequest) Reset() {
+	*x = ListBookingOptionsRequest{}
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListBookingOptionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListBookingOptionsRequest) ProtoMessage() {}
+
+func (x *ListBookingOptionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListBookingOptionsRequest.ProtoReflect.Descriptor instead.
+func (*ListBookingOptionsRequest) Descriptor() ([]byte, []int) {
+	return file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *ListBookingOptionsRequest) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+func (x *ListBookingOptionsRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+type BookingOption struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	ItemId            string                 `protobuf:"bytes,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	RoomId            string                 `protobuf:"bytes,2,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	RoomDisplayName   string                 `protobuf:"bytes,3,opt,name=room_display_name,json=roomDisplayName,proto3" json:"room_display_name,omitempty"`
+	CampusId          string                 `protobuf:"bytes,4,opt,name=campus_id,json=campusId,proto3" json:"campus_id,omitempty"`
+	Building          string                 `protobuf:"bytes,5,opt,name=building,proto3" json:"building,omitempty"`
+	FloorNumber       int32                  `protobuf:"varint,6,opt,name=floor_number,json=floorNumber,proto3" json:"floor_number,omitempty"`
+	RoomNumber        string                 `protobuf:"bytes,7,opt,name=room_number,json=roomNumber,proto3" json:"room_number,omitempty"`
+	ServiceDate       string                 `protobuf:"bytes,8,opt,name=service_date,json=serviceDate,proto3" json:"service_date,omitempty"`
+	Session           string                 `protobuf:"bytes,9,opt,name=session,proto3" json:"session,omitempty"`
+	RoomOpenTime      string                 `protobuf:"bytes,10,opt,name=room_open_time,json=roomOpenTime,proto3" json:"room_open_time,omitempty"`
+	RoomCloseTime     string                 `protobuf:"bytes,11,opt,name=room_close_time,json=roomCloseTime,proto3" json:"room_close_time,omitempty"`
+	ItemStartTime     string                 `protobuf:"bytes,12,opt,name=item_start_time,json=itemStartTime,proto3" json:"item_start_time,omitempty"`
+	ItemEndTime       string                 `protobuf:"bytes,13,opt,name=item_end_time,json=itemEndTime,proto3" json:"item_end_time,omitempty"`
+	BookingCutoffTime string                 `protobuf:"bytes,14,opt,name=booking_cutoff_time,json=bookingCutoffTime,proto3" json:"booking_cutoff_time,omitempty"`
+	TotalCapacity     int64                  `protobuf:"varint,15,opt,name=total_capacity,json=totalCapacity,proto3" json:"total_capacity,omitempty"`
+	RemainingCapacity int64                  `protobuf:"varint,16,opt,name=remaining_capacity,json=remainingCapacity,proto3" json:"remaining_capacity,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *BookingOption) Reset() {
+	*x = BookingOption{}
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BookingOption) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BookingOption) ProtoMessage() {}
+
+func (x *BookingOption) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BookingOption.ProtoReflect.Descriptor instead.
+func (*BookingOption) Descriptor() ([]byte, []int) {
+	return file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *BookingOption) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+func (x *BookingOption) GetRoomId() string {
+	if x != nil {
+		return x.RoomId
+	}
+	return ""
+}
+
+func (x *BookingOption) GetRoomDisplayName() string {
+	if x != nil {
+		return x.RoomDisplayName
+	}
+	return ""
+}
+
+func (x *BookingOption) GetCampusId() string {
+	if x != nil {
+		return x.CampusId
+	}
+	return ""
+}
+
+func (x *BookingOption) GetBuilding() string {
+	if x != nil {
+		return x.Building
+	}
+	return ""
+}
+
+func (x *BookingOption) GetFloorNumber() int32 {
+	if x != nil {
+		return x.FloorNumber
+	}
+	return 0
+}
+
+func (x *BookingOption) GetRoomNumber() string {
+	if x != nil {
+		return x.RoomNumber
+	}
+	return ""
+}
+
+func (x *BookingOption) GetServiceDate() string {
+	if x != nil {
+		return x.ServiceDate
+	}
+	return ""
+}
+
+func (x *BookingOption) GetSession() string {
+	if x != nil {
+		return x.Session
+	}
+	return ""
+}
+
+func (x *BookingOption) GetRoomOpenTime() string {
+	if x != nil {
+		return x.RoomOpenTime
+	}
+	return ""
+}
+
+func (x *BookingOption) GetRoomCloseTime() string {
+	if x != nil {
+		return x.RoomCloseTime
+	}
+	return ""
+}
+
+func (x *BookingOption) GetItemStartTime() string {
+	if x != nil {
+		return x.ItemStartTime
+	}
+	return ""
+}
+
+func (x *BookingOption) GetItemEndTime() string {
+	if x != nil {
+		return x.ItemEndTime
+	}
+	return ""
+}
+
+func (x *BookingOption) GetBookingCutoffTime() string {
+	if x != nil {
+		return x.BookingCutoffTime
+	}
+	return ""
+}
+
+func (x *BookingOption) GetTotalCapacity() int64 {
+	if x != nil {
+		return x.TotalCapacity
+	}
+	return 0
+}
+
+func (x *BookingOption) GetRemainingCapacity() int64 {
+	if x != nil {
+		return x.RemainingCapacity
+	}
+	return 0
+}
+
+type ListBookingOptionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Options       []*BookingOption       `protobuf:"bytes,1,rep,name=options,proto3" json:"options,omitempty"`
+	WeekStartDate string                 `protobuf:"bytes,2,opt,name=week_start_date,json=weekStartDate,proto3" json:"week_start_date,omitempty"`
+	WeekEndDate   string                 `protobuf:"bytes,3,opt,name=week_end_date,json=weekEndDate,proto3" json:"week_end_date,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListBookingOptionsResponse) Reset() {
+	*x = ListBookingOptionsResponse{}
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListBookingOptionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListBookingOptionsResponse) ProtoMessage() {}
+
+func (x *ListBookingOptionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListBookingOptionsResponse.ProtoReflect.Descriptor instead.
+func (*ListBookingOptionsResponse) Descriptor() ([]byte, []int) {
+	return file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *ListBookingOptionsResponse) GetOptions() []*BookingOption {
+	if x != nil {
+		return x.Options
+	}
+	return nil
+}
+
+func (x *ListBookingOptionsResponse) GetWeekStartDate() string {
+	if x != nil {
+		return x.WeekStartDate
+	}
+	return ""
+}
+
+func (x *ListBookingOptionsResponse) GetWeekEndDate() string {
+	if x != nil {
+		return x.WeekEndDate
+	}
+	return ""
+}
+
+type CreateBookingRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ItemId        string                 `protobuf:"bytes,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	RoomId        string                 `protobuf:"bytes,2,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	ServiceDate   string                 `protobuf:"bytes,3,opt,name=service_date,json=serviceDate,proto3" json:"service_date,omitempty"`
+	Session       string                 `protobuf:"bytes,4,opt,name=session,proto3" json:"session,omitempty"`
+	OperationId   string                 `protobuf:"bytes,5,opt,name=operation_id,json=operationId,proto3" json:"operation_id,omitempty"`
+	RequestId     string                 `protobuf:"bytes,6,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateBookingRequest) Reset() {
+	*x = CreateBookingRequest{}
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateBookingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateBookingRequest) ProtoMessage() {}
+
+func (x *CreateBookingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateBookingRequest.ProtoReflect.Descriptor instead.
+func (*CreateBookingRequest) Descriptor() ([]byte, []int) {
+	return file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *CreateBookingRequest) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+func (x *CreateBookingRequest) GetRoomId() string {
+	if x != nil {
+		return x.RoomId
+	}
+	return ""
+}
+
+func (x *CreateBookingRequest) GetServiceDate() string {
+	if x != nil {
+		return x.ServiceDate
+	}
+	return ""
+}
+
+func (x *CreateBookingRequest) GetSession() string {
+	if x != nil {
+		return x.Session
+	}
+	return ""
+}
+
+func (x *CreateBookingRequest) GetOperationId() string {
+	if x != nil {
+		return x.OperationId
+	}
+	return ""
+}
+
+func (x *CreateBookingRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+type GetBookingRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BookingId     string                 `protobuf:"bytes,1,opt,name=booking_id,json=bookingId,proto3" json:"booking_id,omitempty"`
+	RequestId     string                 `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetBookingRequest) Reset() {
+	*x = GetBookingRequest{}
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetBookingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetBookingRequest) ProtoMessage() {}
+
+func (x *GetBookingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetBookingRequest.ProtoReflect.Descriptor instead.
+func (*GetBookingRequest) Descriptor() ([]byte, []int) {
+	return file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *GetBookingRequest) GetBookingId() string {
+	if x != nil {
+		return x.BookingId
+	}
+	return ""
+}
+
+func (x *GetBookingRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+type ListMyBookingsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int64                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	RequestId     string                 `protobuf:"bytes,3,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListMyBookingsRequest) Reset() {
+	*x = ListMyBookingsRequest{}
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListMyBookingsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListMyBookingsRequest) ProtoMessage() {}
+
+func (x *ListMyBookingsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListMyBookingsRequest.ProtoReflect.Descriptor instead.
+func (*ListMyBookingsRequest) Descriptor() ([]byte, []int) {
+	return file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *ListMyBookingsRequest) GetPage() int64 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListMyBookingsRequest) GetPageSize() int64 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListMyBookingsRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+type ListBookingsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DepartmentId  string                 `protobuf:"bytes,1,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	ServiceDate   string                 `protobuf:"bytes,2,opt,name=service_date,json=serviceDate,proto3" json:"service_date,omitempty"`
+	Session       string                 `protobuf:"bytes,3,opt,name=session,proto3" json:"session,omitempty"`
+	ItemId        string                 `protobuf:"bytes,4,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	RoomId        string                 `protobuf:"bytes,5,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	Page          int64                  `protobuf:"varint,7,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,8,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	RequestId     string                 `protobuf:"bytes,9,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListBookingsRequest) Reset() {
+	*x = ListBookingsRequest{}
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListBookingsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListBookingsRequest) ProtoMessage() {}
+
+func (x *ListBookingsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListBookingsRequest.ProtoReflect.Descriptor instead.
+func (*ListBookingsRequest) Descriptor() ([]byte, []int) {
+	return file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *ListBookingsRequest) GetDepartmentId() string {
+	if x != nil {
+		return x.DepartmentId
+	}
+	return ""
+}
+
+func (x *ListBookingsRequest) GetServiceDate() string {
+	if x != nil {
+		return x.ServiceDate
+	}
+	return ""
+}
+
+func (x *ListBookingsRequest) GetSession() string {
+	if x != nil {
+		return x.Session
+	}
+	return ""
+}
+
+func (x *ListBookingsRequest) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+func (x *ListBookingsRequest) GetRoomId() string {
+	if x != nil {
+		return x.RoomId
+	}
+	return ""
+}
+
+func (x *ListBookingsRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *ListBookingsRequest) GetPage() int64 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListBookingsRequest) GetPageSize() int64 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListBookingsRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+type DeleteBookingRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BookingId     string                 `protobuf:"bytes,1,opt,name=booking_id,json=bookingId,proto3" json:"booking_id,omitempty"`
+	OperationId   string                 `protobuf:"bytes,2,opt,name=operation_id,json=operationId,proto3" json:"operation_id,omitempty"`
+	Reason        string                 `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
+	RequestId     string                 `protobuf:"bytes,4,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteBookingRequest) Reset() {
+	*x = DeleteBookingRequest{}
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteBookingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteBookingRequest) ProtoMessage() {}
+
+func (x *DeleteBookingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteBookingRequest.ProtoReflect.Descriptor instead.
+func (*DeleteBookingRequest) Descriptor() ([]byte, []int) {
+	return file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *DeleteBookingRequest) GetBookingId() string {
+	if x != nil {
+		return x.BookingId
+	}
+	return ""
+}
+
+func (x *DeleteBookingRequest) GetOperationId() string {
+	if x != nil {
+		return x.OperationId
+	}
+	return ""
+}
+
+func (x *DeleteBookingRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *DeleteBookingRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+type DeleteBookingResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	BookingId     string                 `protobuf:"bytes,1,opt,name=booking_id,json=bookingId,proto3" json:"booking_id,omitempty"`
+	Deleted       bool                   `protobuf:"varint,2,opt,name=deleted,proto3" json:"deleted,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteBookingResponse) Reset() {
+	*x = DeleteBookingResponse{}
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteBookingResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteBookingResponse) ProtoMessage() {}
+
+func (x *DeleteBookingResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteBookingResponse.ProtoReflect.Descriptor instead.
+func (*DeleteBookingResponse) Descriptor() ([]byte, []int) {
+	return file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *DeleteBookingResponse) GetBookingId() string {
+	if x != nil {
+		return x.BookingId
+	}
+	return ""
+}
+
+func (x *DeleteBookingResponse) GetDeleted() bool {
+	if x != nil {
+		return x.Deleted
+	}
+	return false
+}
+
+type CheckInBookingRequest struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	BookingId       string                 `protobuf:"bytes,1,opt,name=booking_id,json=bookingId,proto3" json:"booking_id,omitempty"`
+	ExpectedVersion int64                  `protobuf:"varint,2,opt,name=expected_version,json=expectedVersion,proto3" json:"expected_version,omitempty"`
+	OperationId     string                 `protobuf:"bytes,3,opt,name=operation_id,json=operationId,proto3" json:"operation_id,omitempty"`
+	RequestId       string                 `protobuf:"bytes,4,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *CheckInBookingRequest) Reset() {
+	*x = CheckInBookingRequest{}
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckInBookingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckInBookingRequest) ProtoMessage() {}
+
+func (x *CheckInBookingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckInBookingRequest.ProtoReflect.Descriptor instead.
+func (*CheckInBookingRequest) Descriptor() ([]byte, []int) {
+	return file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *CheckInBookingRequest) GetBookingId() string {
+	if x != nil {
+		return x.BookingId
+	}
+	return ""
+}
+
+func (x *CheckInBookingRequest) GetExpectedVersion() int64 {
+	if x != nil {
+		return x.ExpectedVersion
+	}
+	return 0
+}
+
+func (x *CheckInBookingRequest) GetOperationId() string {
+	if x != nil {
+		return x.OperationId
+	}
+	return ""
+}
+
+func (x *CheckInBookingRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+type Booking struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	BookingId         string                 `protobuf:"bytes,1,opt,name=booking_id,json=bookingId,proto3" json:"booking_id,omitempty"`
+	PatientAccountId  string                 `protobuf:"bytes,2,opt,name=patient_account_id,json=patientAccountId,proto3" json:"patient_account_id,omitempty"`
+	DepartmentId      string                 `protobuf:"bytes,3,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
+	ItemId            string                 `protobuf:"bytes,4,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	ItemName          string                 `protobuf:"bytes,5,opt,name=item_name,json=itemName,proto3" json:"item_name,omitempty"`
+	RoomId            string                 `protobuf:"bytes,6,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	RoomDisplayName   string                 `protobuf:"bytes,7,opt,name=room_display_name,json=roomDisplayName,proto3" json:"room_display_name,omitempty"`
+	CampusId          string                 `protobuf:"bytes,8,opt,name=campus_id,json=campusId,proto3" json:"campus_id,omitempty"`
+	ServiceDate       string                 `protobuf:"bytes,9,opt,name=service_date,json=serviceDate,proto3" json:"service_date,omitempty"`
+	Session           string                 `protobuf:"bytes,10,opt,name=session,proto3" json:"session,omitempty"`
+	Status            string                 `protobuf:"bytes,11,opt,name=status,proto3" json:"status,omitempty"`
+	RoomOpenTime      string                 `protobuf:"bytes,12,opt,name=room_open_time,json=roomOpenTime,proto3" json:"room_open_time,omitempty"`
+	RoomCloseTime     string                 `protobuf:"bytes,13,opt,name=room_close_time,json=roomCloseTime,proto3" json:"room_close_time,omitempty"`
+	ItemStartTime     string                 `protobuf:"bytes,14,opt,name=item_start_time,json=itemStartTime,proto3" json:"item_start_time,omitempty"`
+	ItemEndTime       string                 `protobuf:"bytes,15,opt,name=item_end_time,json=itemEndTime,proto3" json:"item_end_time,omitempty"`
+	BookingCutoffTime string                 `protobuf:"bytes,16,opt,name=booking_cutoff_time,json=bookingCutoffTime,proto3" json:"booking_cutoff_time,omitempty"`
+	Version           int64                  `protobuf:"varint,17,opt,name=version,proto3" json:"version,omitempty"`
+	CreatedAt         string                 `protobuf:"bytes,18,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt         string                 `protobuf:"bytes,19,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CheckedInAt       string                 `protobuf:"bytes,20,opt,name=checked_in_at,json=checkedInAt,proto3" json:"checked_in_at,omitempty"`
+	CheckedInBy       string                 `protobuf:"bytes,21,opt,name=checked_in_by,json=checkedInBy,proto3" json:"checked_in_by,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *Booking) Reset() {
+	*x = Booking{}
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Booking) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Booking) ProtoMessage() {}
+
+func (x *Booking) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Booking.ProtoReflect.Descriptor instead.
+func (*Booking) Descriptor() ([]byte, []int) {
+	return file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *Booking) GetBookingId() string {
+	if x != nil {
+		return x.BookingId
+	}
+	return ""
+}
+
+func (x *Booking) GetPatientAccountId() string {
+	if x != nil {
+		return x.PatientAccountId
+	}
+	return ""
+}
+
+func (x *Booking) GetDepartmentId() string {
+	if x != nil {
+		return x.DepartmentId
+	}
+	return ""
+}
+
+func (x *Booking) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+func (x *Booking) GetItemName() string {
+	if x != nil {
+		return x.ItemName
+	}
+	return ""
+}
+
+func (x *Booking) GetRoomId() string {
+	if x != nil {
+		return x.RoomId
+	}
+	return ""
+}
+
+func (x *Booking) GetRoomDisplayName() string {
+	if x != nil {
+		return x.RoomDisplayName
+	}
+	return ""
+}
+
+func (x *Booking) GetCampusId() string {
+	if x != nil {
+		return x.CampusId
+	}
+	return ""
+}
+
+func (x *Booking) GetServiceDate() string {
+	if x != nil {
+		return x.ServiceDate
+	}
+	return ""
+}
+
+func (x *Booking) GetSession() string {
+	if x != nil {
+		return x.Session
+	}
+	return ""
+}
+
+func (x *Booking) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *Booking) GetRoomOpenTime() string {
+	if x != nil {
+		return x.RoomOpenTime
+	}
+	return ""
+}
+
+func (x *Booking) GetRoomCloseTime() string {
+	if x != nil {
+		return x.RoomCloseTime
+	}
+	return ""
+}
+
+func (x *Booking) GetItemStartTime() string {
+	if x != nil {
+		return x.ItemStartTime
+	}
+	return ""
+}
+
+func (x *Booking) GetItemEndTime() string {
+	if x != nil {
+		return x.ItemEndTime
+	}
+	return ""
+}
+
+func (x *Booking) GetBookingCutoffTime() string {
+	if x != nil {
+		return x.BookingCutoffTime
+	}
+	return ""
+}
+
+func (x *Booking) GetVersion() int64 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+func (x *Booking) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *Booking) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+func (x *Booking) GetCheckedInAt() string {
+	if x != nil {
+		return x.CheckedInAt
+	}
+	return ""
+}
+
+func (x *Booking) GetCheckedInBy() string {
+	if x != nil {
+		return x.CheckedInBy
+	}
+	return ""
+}
+
+type ListBookingsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Bookings      []*Booking             `protobuf:"bytes,1,rep,name=bookings,proto3" json:"bookings,omitempty"`
+	Page          int64                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int64                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Total         int64                  `protobuf:"varint,4,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListBookingsResponse) Reset() {
+	*x = ListBookingsResponse{}
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListBookingsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListBookingsResponse) ProtoMessage() {}
+
+func (x *ListBookingsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListBookingsResponse.ProtoReflect.Descriptor instead.
+func (*ListBookingsResponse) Descriptor() ([]byte, []int) {
+	return file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *ListBookingsResponse) GetBookings() []*Booking {
+	if x != nil {
+		return x.Bookings
+	}
+	return nil
+}
+
+func (x *ListBookingsResponse) GetPage() int64 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListBookingsResponse) GetPageSize() int64 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+func (x *ListBookingsResponse) GetTotal() int64 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
 type RoomWeeklyWindow struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	WindowId       string                 `protobuf:"bytes,1,opt,name=window_id,json=windowId,proto3" json:"window_id,omitempty"`
@@ -2035,7 +3075,7 @@ type RoomWeeklyWindow struct {
 
 func (x *RoomWeeklyWindow) Reset() {
 	*x = RoomWeeklyWindow{}
-	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[26]
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2047,7 +3087,7 @@ func (x *RoomWeeklyWindow) String() string {
 func (*RoomWeeklyWindow) ProtoMessage() {}
 
 func (x *RoomWeeklyWindow) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[26]
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2060,7 +3100,7 @@ func (x *RoomWeeklyWindow) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoomWeeklyWindow.ProtoReflect.Descriptor instead.
 func (*RoomWeeklyWindow) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP(), []int{26}
+	return file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *RoomWeeklyWindow) GetWindowId() string {
@@ -2159,7 +3199,7 @@ type ItemWeeklyWindow struct {
 
 func (x *ItemWeeklyWindow) Reset() {
 	*x = ItemWeeklyWindow{}
-	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[27]
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2171,7 +3211,7 @@ func (x *ItemWeeklyWindow) String() string {
 func (*ItemWeeklyWindow) ProtoMessage() {}
 
 func (x *ItemWeeklyWindow) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[27]
+	mi := &file_contracts_proto_appointment_v1_appointment_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2184,7 +3224,7 @@ func (x *ItemWeeklyWindow) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ItemWeeklyWindow.ProtoReflect.Descriptor instead.
 func (*ItemWeeklyWindow) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP(), []int{27}
+	return file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *ItemWeeklyWindow) GetWindowId() string {
@@ -2466,7 +3506,112 @@ const file_contracts_proto_appointment_v1_appointment_proto_rawDesc = "" +
 	"\x1dListRoomWeeklyWindowsResponse\x12C\n" +
 	"\awindows\x18\x01 \x03(\v2).hospital.appointment.v1.RoomWeeklyWindowR\awindows\"d\n" +
 	"\x1dListItemWeeklyWindowsResponse\x12C\n" +
-	"\awindows\x18\x01 \x03(\v2).hospital.appointment.v1.ItemWeeklyWindowR\awindows\"\xd1\x02\n" +
+	"\awindows\x18\x01 \x03(\v2).hospital.appointment.v1.ItemWeeklyWindowR\awindows\"S\n" +
+	"\x19ListBookingOptionsRequest\x12\x17\n" +
+	"\aitem_id\x18\x01 \x01(\tR\x06itemId\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x02 \x01(\tR\trequestId\"\xc7\x04\n" +
+	"\rBookingOption\x12\x17\n" +
+	"\aitem_id\x18\x01 \x01(\tR\x06itemId\x12\x17\n" +
+	"\aroom_id\x18\x02 \x01(\tR\x06roomId\x12*\n" +
+	"\x11room_display_name\x18\x03 \x01(\tR\x0froomDisplayName\x12\x1b\n" +
+	"\tcampus_id\x18\x04 \x01(\tR\bcampusId\x12\x1a\n" +
+	"\bbuilding\x18\x05 \x01(\tR\bbuilding\x12!\n" +
+	"\ffloor_number\x18\x06 \x01(\x05R\vfloorNumber\x12\x1f\n" +
+	"\vroom_number\x18\a \x01(\tR\n" +
+	"roomNumber\x12!\n" +
+	"\fservice_date\x18\b \x01(\tR\vserviceDate\x12\x18\n" +
+	"\asession\x18\t \x01(\tR\asession\x12$\n" +
+	"\x0eroom_open_time\x18\n" +
+	" \x01(\tR\froomOpenTime\x12&\n" +
+	"\x0froom_close_time\x18\v \x01(\tR\rroomCloseTime\x12&\n" +
+	"\x0fitem_start_time\x18\f \x01(\tR\ritemStartTime\x12\"\n" +
+	"\ritem_end_time\x18\r \x01(\tR\vitemEndTime\x12.\n" +
+	"\x13booking_cutoff_time\x18\x0e \x01(\tR\x11bookingCutoffTime\x12%\n" +
+	"\x0etotal_capacity\x18\x0f \x01(\x03R\rtotalCapacity\x12-\n" +
+	"\x12remaining_capacity\x18\x10 \x01(\x03R\x11remainingCapacity\"\xaa\x01\n" +
+	"\x1aListBookingOptionsResponse\x12@\n" +
+	"\aoptions\x18\x01 \x03(\v2&.hospital.appointment.v1.BookingOptionR\aoptions\x12&\n" +
+	"\x0fweek_start_date\x18\x02 \x01(\tR\rweekStartDate\x12\"\n" +
+	"\rweek_end_date\x18\x03 \x01(\tR\vweekEndDate\"\xc7\x01\n" +
+	"\x14CreateBookingRequest\x12\x17\n" +
+	"\aitem_id\x18\x01 \x01(\tR\x06itemId\x12\x17\n" +
+	"\aroom_id\x18\x02 \x01(\tR\x06roomId\x12!\n" +
+	"\fservice_date\x18\x03 \x01(\tR\vserviceDate\x12\x18\n" +
+	"\asession\x18\x04 \x01(\tR\asession\x12!\n" +
+	"\foperation_id\x18\x05 \x01(\tR\voperationId\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x06 \x01(\tR\trequestId\"Q\n" +
+	"\x11GetBookingRequest\x12\x1d\n" +
+	"\n" +
+	"booking_id\x18\x01 \x01(\tR\tbookingId\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x02 \x01(\tR\trequestId\"g\n" +
+	"\x15ListMyBookingsRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x03R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x03R\bpageSize\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x03 \x01(\tR\trequestId\"\x91\x02\n" +
+	"\x13ListBookingsRequest\x12#\n" +
+	"\rdepartment_id\x18\x01 \x01(\tR\fdepartmentId\x12!\n" +
+	"\fservice_date\x18\x02 \x01(\tR\vserviceDate\x12\x18\n" +
+	"\asession\x18\x03 \x01(\tR\asession\x12\x17\n" +
+	"\aitem_id\x18\x04 \x01(\tR\x06itemId\x12\x17\n" +
+	"\aroom_id\x18\x05 \x01(\tR\x06roomId\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12\x12\n" +
+	"\x04page\x18\a \x01(\x03R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\b \x01(\x03R\bpageSize\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\t \x01(\tR\trequestId\"\x8f\x01\n" +
+	"\x14DeleteBookingRequest\x12\x1d\n" +
+	"\n" +
+	"booking_id\x18\x01 \x01(\tR\tbookingId\x12!\n" +
+	"\foperation_id\x18\x02 \x01(\tR\voperationId\x12\x16\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x04 \x01(\tR\trequestId\"P\n" +
+	"\x15DeleteBookingResponse\x12\x1d\n" +
+	"\n" +
+	"booking_id\x18\x01 \x01(\tR\tbookingId\x12\x18\n" +
+	"\adeleted\x18\x02 \x01(\bR\adeleted\"\xa3\x01\n" +
+	"\x15CheckInBookingRequest\x12\x1d\n" +
+	"\n" +
+	"booking_id\x18\x01 \x01(\tR\tbookingId\x12)\n" +
+	"\x10expected_version\x18\x02 \x01(\x03R\x0fexpectedVersion\x12!\n" +
+	"\foperation_id\x18\x03 \x01(\tR\voperationId\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x04 \x01(\tR\trequestId\"\xd2\x05\n" +
+	"\aBooking\x12\x1d\n" +
+	"\n" +
+	"booking_id\x18\x01 \x01(\tR\tbookingId\x12,\n" +
+	"\x12patient_account_id\x18\x02 \x01(\tR\x10patientAccountId\x12#\n" +
+	"\rdepartment_id\x18\x03 \x01(\tR\fdepartmentId\x12\x17\n" +
+	"\aitem_id\x18\x04 \x01(\tR\x06itemId\x12\x1b\n" +
+	"\titem_name\x18\x05 \x01(\tR\bitemName\x12\x17\n" +
+	"\aroom_id\x18\x06 \x01(\tR\x06roomId\x12*\n" +
+	"\x11room_display_name\x18\a \x01(\tR\x0froomDisplayName\x12\x1b\n" +
+	"\tcampus_id\x18\b \x01(\tR\bcampusId\x12!\n" +
+	"\fservice_date\x18\t \x01(\tR\vserviceDate\x12\x18\n" +
+	"\asession\x18\n" +
+	" \x01(\tR\asession\x12\x16\n" +
+	"\x06status\x18\v \x01(\tR\x06status\x12$\n" +
+	"\x0eroom_open_time\x18\f \x01(\tR\froomOpenTime\x12&\n" +
+	"\x0froom_close_time\x18\r \x01(\tR\rroomCloseTime\x12&\n" +
+	"\x0fitem_start_time\x18\x0e \x01(\tR\ritemStartTime\x12\"\n" +
+	"\ritem_end_time\x18\x0f \x01(\tR\vitemEndTime\x12.\n" +
+	"\x13booking_cutoff_time\x18\x10 \x01(\tR\x11bookingCutoffTime\x12\x18\n" +
+	"\aversion\x18\x11 \x01(\x03R\aversion\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x12 \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\x13 \x01(\tR\tupdatedAt\x12\"\n" +
+	"\rchecked_in_at\x18\x14 \x01(\tR\vcheckedInAt\x12\"\n" +
+	"\rchecked_in_by\x18\x15 \x01(\tR\vcheckedInBy\"\x9b\x01\n" +
+	"\x14ListBookingsResponse\x12<\n" +
+	"\bbookings\x18\x01 \x03(\v2 .hospital.appointment.v1.BookingR\bbookings\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x03R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\x03R\bpageSize\x12\x14\n" +
+	"\x05total\x18\x04 \x01(\x03R\x05total\"\xd1\x02\n" +
 	"\x10RoomWeeklyWindow\x12\x1b\n" +
 	"\twindow_id\x18\x01 \x01(\tR\bwindowId\x12\x17\n" +
 	"\aroom_id\x18\x02 \x01(\tR\x06roomId\x12\x18\n" +
@@ -2498,7 +3643,7 @@ const file_contracts_proto_appointment_v1_appointment_proto_rawDesc = "" +
 	"created_at\x18\n" +
 	" \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\v \x01(\tR\tupdatedAt2\xf3\x14\n" +
+	"updated_at\x18\v \x01(\tR\tupdatedAt2\xb2\x1c\n" +
 	"\x12AppointmentService\x12x\n" +
 	"\x15CreateExaminationItem\x125.hospital.appointment.v1.CreateExaminationItemRequest\x1a(.hospital.appointment.v1.ExaminationItem\x12r\n" +
 	"\x12GetExaminationItem\x122.hospital.appointment.v1.GetExaminationItemRequest\x1a(.hospital.appointment.v1.ExaminationItem\x12\x83\x01\n" +
@@ -2524,7 +3669,17 @@ const file_contracts_proto_appointment_v1_appointment_proto_rawDesc = "" +
 	"\x15ListRoomWeeklyWindows\x121.hospital.appointment.v1.ListWeeklyWindowsRequest\x1a6.hospital.appointment.v1.ListRoomWeeklyWindowsResponse\x12u\n" +
 	"\x13SetItemWeeklyWindow\x123.hospital.appointment.v1.SetItemWeeklyWindowRequest\x1a).hospital.appointment.v1.ItemWeeklyWindow\x12z\n" +
 	"\x17DisableItemWeeklyWindow\x124.hospital.appointment.v1.ChangeResourceStatusRequest\x1a).hospital.appointment.v1.ItemWeeklyWindow\x12\x82\x01\n" +
-	"\x15ListItemWeeklyWindows\x121.hospital.appointment.v1.ListWeeklyWindowsRequest\x1a6.hospital.appointment.v1.ListItemWeeklyWindowsResponseB5Z3hospital/contracts/gen/appointment/v1;appointmentv1b\x06proto3"
+	"\x15ListItemWeeklyWindows\x121.hospital.appointment.v1.ListWeeklyWindowsRequest\x1a6.hospital.appointment.v1.ListItemWeeklyWindowsResponse\x12}\n" +
+	"\x12ListBookingOptions\x122.hospital.appointment.v1.ListBookingOptionsRequest\x1a3.hospital.appointment.v1.ListBookingOptionsResponse\x12`\n" +
+	"\rCreateBooking\x12-.hospital.appointment.v1.CreateBookingRequest\x1a .hospital.appointment.v1.Booking\x12\\\n" +
+	"\fGetMyBooking\x12*.hospital.appointment.v1.GetBookingRequest\x1a .hospital.appointment.v1.Booking\x12o\n" +
+	"\x0eListMyBookings\x12..hospital.appointment.v1.ListMyBookingsRequest\x1a-.hospital.appointment.v1.ListBookingsResponse\x12p\n" +
+	"\x0fDeleteMyBooking\x12-.hospital.appointment.v1.DeleteBookingRequest\x1a..hospital.appointment.v1.DeleteBookingResponse\x12Z\n" +
+	"\n" +
+	"GetBooking\x12*.hospital.appointment.v1.GetBookingRequest\x1a .hospital.appointment.v1.Booking\x12k\n" +
+	"\fListBookings\x12,.hospital.appointment.v1.ListBookingsRequest\x1a-.hospital.appointment.v1.ListBookingsResponse\x12b\n" +
+	"\x0eCheckInBooking\x12..hospital.appointment.v1.CheckInBookingRequest\x1a .hospital.appointment.v1.Booking\x12n\n" +
+	"\rDeleteBooking\x12-.hospital.appointment.v1.DeleteBookingRequest\x1a..hospital.appointment.v1.DeleteBookingResponseB5Z3hospital/contracts/gen/appointment/v1;appointmentv1b\x06proto3"
 
 var (
 	file_contracts_proto_appointment_v1_appointment_proto_rawDescOnce sync.Once
@@ -2538,7 +3693,7 @@ func file_contracts_proto_appointment_v1_appointment_proto_rawDescGZIP() []byte 
 	return file_contracts_proto_appointment_v1_appointment_proto_rawDescData
 }
 
-var file_contracts_proto_appointment_v1_appointment_proto_msgTypes = make([]protoimpl.MessageInfo, 28)
+var file_contracts_proto_appointment_v1_appointment_proto_msgTypes = make([]protoimpl.MessageInfo, 40)
 var file_contracts_proto_appointment_v1_appointment_proto_goTypes = []any{
 	(*ExaminationItemInput)(nil),                       // 0: hospital.appointment.v1.ExaminationItemInput
 	(*CreateExaminationItemRequest)(nil),               // 1: hospital.appointment.v1.CreateExaminationItemRequest
@@ -2566,65 +3721,97 @@ var file_contracts_proto_appointment_v1_appointment_proto_goTypes = []any{
 	(*ListWeeklyWindowsRequest)(nil),                   // 23: hospital.appointment.v1.ListWeeklyWindowsRequest
 	(*ListRoomWeeklyWindowsResponse)(nil),              // 24: hospital.appointment.v1.ListRoomWeeklyWindowsResponse
 	(*ListItemWeeklyWindowsResponse)(nil),              // 25: hospital.appointment.v1.ListItemWeeklyWindowsResponse
-	(*RoomWeeklyWindow)(nil),                           // 26: hospital.appointment.v1.RoomWeeklyWindow
-	(*ItemWeeklyWindow)(nil),                           // 27: hospital.appointment.v1.ItemWeeklyWindow
+	(*ListBookingOptionsRequest)(nil),                  // 26: hospital.appointment.v1.ListBookingOptionsRequest
+	(*BookingOption)(nil),                              // 27: hospital.appointment.v1.BookingOption
+	(*ListBookingOptionsResponse)(nil),                 // 28: hospital.appointment.v1.ListBookingOptionsResponse
+	(*CreateBookingRequest)(nil),                       // 29: hospital.appointment.v1.CreateBookingRequest
+	(*GetBookingRequest)(nil),                          // 30: hospital.appointment.v1.GetBookingRequest
+	(*ListMyBookingsRequest)(nil),                      // 31: hospital.appointment.v1.ListMyBookingsRequest
+	(*ListBookingsRequest)(nil),                        // 32: hospital.appointment.v1.ListBookingsRequest
+	(*DeleteBookingRequest)(nil),                       // 33: hospital.appointment.v1.DeleteBookingRequest
+	(*DeleteBookingResponse)(nil),                      // 34: hospital.appointment.v1.DeleteBookingResponse
+	(*CheckInBookingRequest)(nil),                      // 35: hospital.appointment.v1.CheckInBookingRequest
+	(*Booking)(nil),                                    // 36: hospital.appointment.v1.Booking
+	(*ListBookingsResponse)(nil),                       // 37: hospital.appointment.v1.ListBookingsResponse
+	(*RoomWeeklyWindow)(nil),                           // 38: hospital.appointment.v1.RoomWeeklyWindow
+	(*ItemWeeklyWindow)(nil),                           // 39: hospital.appointment.v1.ItemWeeklyWindow
 }
 var file_contracts_proto_appointment_v1_appointment_proto_depIdxs = []int32{
 	0,  // 0: hospital.appointment.v1.CreateExaminationItemRequest.examination_item:type_name -> hospital.appointment.v1.ExaminationItemInput
 	7,  // 1: hospital.appointment.v1.ListExaminationItemsResponse.items:type_name -> hospital.appointment.v1.ExaminationItem
 	15, // 2: hospital.appointment.v1.ListRoomsResponse.rooms:type_name -> hospital.appointment.v1.Room
 	20, // 3: hospital.appointment.v1.ListRoomExaminationItemsResponse.relations:type_name -> hospital.appointment.v1.RoomExaminationItem
-	26, // 4: hospital.appointment.v1.ListRoomWeeklyWindowsResponse.windows:type_name -> hospital.appointment.v1.RoomWeeklyWindow
-	27, // 5: hospital.appointment.v1.ListItemWeeklyWindowsResponse.windows:type_name -> hospital.appointment.v1.ItemWeeklyWindow
-	1,  // 6: hospital.appointment.v1.AppointmentService.CreateExaminationItem:input_type -> hospital.appointment.v1.CreateExaminationItemRequest
-	2,  // 7: hospital.appointment.v1.AppointmentService.GetExaminationItem:input_type -> hospital.appointment.v1.GetExaminationItemRequest
-	3,  // 8: hospital.appointment.v1.AppointmentService.ListExaminationItems:input_type -> hospital.appointment.v1.ListExaminationItemsRequest
-	5,  // 9: hospital.appointment.v1.AppointmentService.UpdateExaminationItem:input_type -> hospital.appointment.v1.UpdateExaminationItemRequest
-	6,  // 10: hospital.appointment.v1.AppointmentService.DisableExaminationItem:input_type -> hospital.appointment.v1.ChangeExaminationItemStatusRequest
-	6,  // 11: hospital.appointment.v1.AppointmentService.EnableExaminationItem:input_type -> hospital.appointment.v1.ChangeExaminationItemStatusRequest
-	8,  // 12: hospital.appointment.v1.AppointmentService.CreateRoom:input_type -> hospital.appointment.v1.CreateRoomRequest
-	9,  // 13: hospital.appointment.v1.AppointmentService.GetRoom:input_type -> hospital.appointment.v1.GetRoomRequest
-	10, // 14: hospital.appointment.v1.AppointmentService.ListRooms:input_type -> hospital.appointment.v1.ListRoomsRequest
-	12, // 15: hospital.appointment.v1.AppointmentService.UpdateRoom:input_type -> hospital.appointment.v1.UpdateRoomRequest
-	13, // 16: hospital.appointment.v1.AppointmentService.RetireRoom:input_type -> hospital.appointment.v1.RetireRoomRequest
-	16, // 17: hospital.appointment.v1.AppointmentService.AddRoomExaminationItem:input_type -> hospital.appointment.v1.AddRoomExaminationItemRequest
-	14, // 18: hospital.appointment.v1.AppointmentService.DisableRoomExaminationItem:input_type -> hospital.appointment.v1.ChangeResourceStatusRequest
-	14, // 19: hospital.appointment.v1.AppointmentService.EnableRoomExaminationItem:input_type -> hospital.appointment.v1.ChangeResourceStatusRequest
-	17, // 20: hospital.appointment.v1.AppointmentService.ListRoomExaminationItems:input_type -> hospital.appointment.v1.ListRoomExaminationItemsRequest
-	18, // 21: hospital.appointment.v1.AppointmentService.ListAvailableRoomsByExaminationItem:input_type -> hospital.appointment.v1.ListAvailableRoomsByExaminationItemRequest
-	21, // 22: hospital.appointment.v1.AppointmentService.SetRoomWeeklyWindow:input_type -> hospital.appointment.v1.SetRoomWeeklyWindowRequest
-	14, // 23: hospital.appointment.v1.AppointmentService.DisableRoomWeeklyWindow:input_type -> hospital.appointment.v1.ChangeResourceStatusRequest
-	23, // 24: hospital.appointment.v1.AppointmentService.ListRoomWeeklyWindows:input_type -> hospital.appointment.v1.ListWeeklyWindowsRequest
-	22, // 25: hospital.appointment.v1.AppointmentService.SetItemWeeklyWindow:input_type -> hospital.appointment.v1.SetItemWeeklyWindowRequest
-	14, // 26: hospital.appointment.v1.AppointmentService.DisableItemWeeklyWindow:input_type -> hospital.appointment.v1.ChangeResourceStatusRequest
-	23, // 27: hospital.appointment.v1.AppointmentService.ListItemWeeklyWindows:input_type -> hospital.appointment.v1.ListWeeklyWindowsRequest
-	7,  // 28: hospital.appointment.v1.AppointmentService.CreateExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
-	7,  // 29: hospital.appointment.v1.AppointmentService.GetExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
-	4,  // 30: hospital.appointment.v1.AppointmentService.ListExaminationItems:output_type -> hospital.appointment.v1.ListExaminationItemsResponse
-	7,  // 31: hospital.appointment.v1.AppointmentService.UpdateExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
-	7,  // 32: hospital.appointment.v1.AppointmentService.DisableExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
-	7,  // 33: hospital.appointment.v1.AppointmentService.EnableExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
-	15, // 34: hospital.appointment.v1.AppointmentService.CreateRoom:output_type -> hospital.appointment.v1.Room
-	15, // 35: hospital.appointment.v1.AppointmentService.GetRoom:output_type -> hospital.appointment.v1.Room
-	11, // 36: hospital.appointment.v1.AppointmentService.ListRooms:output_type -> hospital.appointment.v1.ListRoomsResponse
-	15, // 37: hospital.appointment.v1.AppointmentService.UpdateRoom:output_type -> hospital.appointment.v1.Room
-	15, // 38: hospital.appointment.v1.AppointmentService.RetireRoom:output_type -> hospital.appointment.v1.Room
-	20, // 39: hospital.appointment.v1.AppointmentService.AddRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
-	20, // 40: hospital.appointment.v1.AppointmentService.DisableRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
-	20, // 41: hospital.appointment.v1.AppointmentService.EnableRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
-	19, // 42: hospital.appointment.v1.AppointmentService.ListRoomExaminationItems:output_type -> hospital.appointment.v1.ListRoomExaminationItemsResponse
-	19, // 43: hospital.appointment.v1.AppointmentService.ListAvailableRoomsByExaminationItem:output_type -> hospital.appointment.v1.ListRoomExaminationItemsResponse
-	26, // 44: hospital.appointment.v1.AppointmentService.SetRoomWeeklyWindow:output_type -> hospital.appointment.v1.RoomWeeklyWindow
-	26, // 45: hospital.appointment.v1.AppointmentService.DisableRoomWeeklyWindow:output_type -> hospital.appointment.v1.RoomWeeklyWindow
-	24, // 46: hospital.appointment.v1.AppointmentService.ListRoomWeeklyWindows:output_type -> hospital.appointment.v1.ListRoomWeeklyWindowsResponse
-	27, // 47: hospital.appointment.v1.AppointmentService.SetItemWeeklyWindow:output_type -> hospital.appointment.v1.ItemWeeklyWindow
-	27, // 48: hospital.appointment.v1.AppointmentService.DisableItemWeeklyWindow:output_type -> hospital.appointment.v1.ItemWeeklyWindow
-	25, // 49: hospital.appointment.v1.AppointmentService.ListItemWeeklyWindows:output_type -> hospital.appointment.v1.ListItemWeeklyWindowsResponse
-	28, // [28:50] is the sub-list for method output_type
-	6,  // [6:28] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	38, // 4: hospital.appointment.v1.ListRoomWeeklyWindowsResponse.windows:type_name -> hospital.appointment.v1.RoomWeeklyWindow
+	39, // 5: hospital.appointment.v1.ListItemWeeklyWindowsResponse.windows:type_name -> hospital.appointment.v1.ItemWeeklyWindow
+	27, // 6: hospital.appointment.v1.ListBookingOptionsResponse.options:type_name -> hospital.appointment.v1.BookingOption
+	36, // 7: hospital.appointment.v1.ListBookingsResponse.bookings:type_name -> hospital.appointment.v1.Booking
+	1,  // 8: hospital.appointment.v1.AppointmentService.CreateExaminationItem:input_type -> hospital.appointment.v1.CreateExaminationItemRequest
+	2,  // 9: hospital.appointment.v1.AppointmentService.GetExaminationItem:input_type -> hospital.appointment.v1.GetExaminationItemRequest
+	3,  // 10: hospital.appointment.v1.AppointmentService.ListExaminationItems:input_type -> hospital.appointment.v1.ListExaminationItemsRequest
+	5,  // 11: hospital.appointment.v1.AppointmentService.UpdateExaminationItem:input_type -> hospital.appointment.v1.UpdateExaminationItemRequest
+	6,  // 12: hospital.appointment.v1.AppointmentService.DisableExaminationItem:input_type -> hospital.appointment.v1.ChangeExaminationItemStatusRequest
+	6,  // 13: hospital.appointment.v1.AppointmentService.EnableExaminationItem:input_type -> hospital.appointment.v1.ChangeExaminationItemStatusRequest
+	8,  // 14: hospital.appointment.v1.AppointmentService.CreateRoom:input_type -> hospital.appointment.v1.CreateRoomRequest
+	9,  // 15: hospital.appointment.v1.AppointmentService.GetRoom:input_type -> hospital.appointment.v1.GetRoomRequest
+	10, // 16: hospital.appointment.v1.AppointmentService.ListRooms:input_type -> hospital.appointment.v1.ListRoomsRequest
+	12, // 17: hospital.appointment.v1.AppointmentService.UpdateRoom:input_type -> hospital.appointment.v1.UpdateRoomRequest
+	13, // 18: hospital.appointment.v1.AppointmentService.RetireRoom:input_type -> hospital.appointment.v1.RetireRoomRequest
+	16, // 19: hospital.appointment.v1.AppointmentService.AddRoomExaminationItem:input_type -> hospital.appointment.v1.AddRoomExaminationItemRequest
+	14, // 20: hospital.appointment.v1.AppointmentService.DisableRoomExaminationItem:input_type -> hospital.appointment.v1.ChangeResourceStatusRequest
+	14, // 21: hospital.appointment.v1.AppointmentService.EnableRoomExaminationItem:input_type -> hospital.appointment.v1.ChangeResourceStatusRequest
+	17, // 22: hospital.appointment.v1.AppointmentService.ListRoomExaminationItems:input_type -> hospital.appointment.v1.ListRoomExaminationItemsRequest
+	18, // 23: hospital.appointment.v1.AppointmentService.ListAvailableRoomsByExaminationItem:input_type -> hospital.appointment.v1.ListAvailableRoomsByExaminationItemRequest
+	21, // 24: hospital.appointment.v1.AppointmentService.SetRoomWeeklyWindow:input_type -> hospital.appointment.v1.SetRoomWeeklyWindowRequest
+	14, // 25: hospital.appointment.v1.AppointmentService.DisableRoomWeeklyWindow:input_type -> hospital.appointment.v1.ChangeResourceStatusRequest
+	23, // 26: hospital.appointment.v1.AppointmentService.ListRoomWeeklyWindows:input_type -> hospital.appointment.v1.ListWeeklyWindowsRequest
+	22, // 27: hospital.appointment.v1.AppointmentService.SetItemWeeklyWindow:input_type -> hospital.appointment.v1.SetItemWeeklyWindowRequest
+	14, // 28: hospital.appointment.v1.AppointmentService.DisableItemWeeklyWindow:input_type -> hospital.appointment.v1.ChangeResourceStatusRequest
+	23, // 29: hospital.appointment.v1.AppointmentService.ListItemWeeklyWindows:input_type -> hospital.appointment.v1.ListWeeklyWindowsRequest
+	26, // 30: hospital.appointment.v1.AppointmentService.ListBookingOptions:input_type -> hospital.appointment.v1.ListBookingOptionsRequest
+	29, // 31: hospital.appointment.v1.AppointmentService.CreateBooking:input_type -> hospital.appointment.v1.CreateBookingRequest
+	30, // 32: hospital.appointment.v1.AppointmentService.GetMyBooking:input_type -> hospital.appointment.v1.GetBookingRequest
+	31, // 33: hospital.appointment.v1.AppointmentService.ListMyBookings:input_type -> hospital.appointment.v1.ListMyBookingsRequest
+	33, // 34: hospital.appointment.v1.AppointmentService.DeleteMyBooking:input_type -> hospital.appointment.v1.DeleteBookingRequest
+	30, // 35: hospital.appointment.v1.AppointmentService.GetBooking:input_type -> hospital.appointment.v1.GetBookingRequest
+	32, // 36: hospital.appointment.v1.AppointmentService.ListBookings:input_type -> hospital.appointment.v1.ListBookingsRequest
+	35, // 37: hospital.appointment.v1.AppointmentService.CheckInBooking:input_type -> hospital.appointment.v1.CheckInBookingRequest
+	33, // 38: hospital.appointment.v1.AppointmentService.DeleteBooking:input_type -> hospital.appointment.v1.DeleteBookingRequest
+	7,  // 39: hospital.appointment.v1.AppointmentService.CreateExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
+	7,  // 40: hospital.appointment.v1.AppointmentService.GetExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
+	4,  // 41: hospital.appointment.v1.AppointmentService.ListExaminationItems:output_type -> hospital.appointment.v1.ListExaminationItemsResponse
+	7,  // 42: hospital.appointment.v1.AppointmentService.UpdateExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
+	7,  // 43: hospital.appointment.v1.AppointmentService.DisableExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
+	7,  // 44: hospital.appointment.v1.AppointmentService.EnableExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
+	15, // 45: hospital.appointment.v1.AppointmentService.CreateRoom:output_type -> hospital.appointment.v1.Room
+	15, // 46: hospital.appointment.v1.AppointmentService.GetRoom:output_type -> hospital.appointment.v1.Room
+	11, // 47: hospital.appointment.v1.AppointmentService.ListRooms:output_type -> hospital.appointment.v1.ListRoomsResponse
+	15, // 48: hospital.appointment.v1.AppointmentService.UpdateRoom:output_type -> hospital.appointment.v1.Room
+	15, // 49: hospital.appointment.v1.AppointmentService.RetireRoom:output_type -> hospital.appointment.v1.Room
+	20, // 50: hospital.appointment.v1.AppointmentService.AddRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
+	20, // 51: hospital.appointment.v1.AppointmentService.DisableRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
+	20, // 52: hospital.appointment.v1.AppointmentService.EnableRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
+	19, // 53: hospital.appointment.v1.AppointmentService.ListRoomExaminationItems:output_type -> hospital.appointment.v1.ListRoomExaminationItemsResponse
+	19, // 54: hospital.appointment.v1.AppointmentService.ListAvailableRoomsByExaminationItem:output_type -> hospital.appointment.v1.ListRoomExaminationItemsResponse
+	38, // 55: hospital.appointment.v1.AppointmentService.SetRoomWeeklyWindow:output_type -> hospital.appointment.v1.RoomWeeklyWindow
+	38, // 56: hospital.appointment.v1.AppointmentService.DisableRoomWeeklyWindow:output_type -> hospital.appointment.v1.RoomWeeklyWindow
+	24, // 57: hospital.appointment.v1.AppointmentService.ListRoomWeeklyWindows:output_type -> hospital.appointment.v1.ListRoomWeeklyWindowsResponse
+	39, // 58: hospital.appointment.v1.AppointmentService.SetItemWeeklyWindow:output_type -> hospital.appointment.v1.ItemWeeklyWindow
+	39, // 59: hospital.appointment.v1.AppointmentService.DisableItemWeeklyWindow:output_type -> hospital.appointment.v1.ItemWeeklyWindow
+	25, // 60: hospital.appointment.v1.AppointmentService.ListItemWeeklyWindows:output_type -> hospital.appointment.v1.ListItemWeeklyWindowsResponse
+	28, // 61: hospital.appointment.v1.AppointmentService.ListBookingOptions:output_type -> hospital.appointment.v1.ListBookingOptionsResponse
+	36, // 62: hospital.appointment.v1.AppointmentService.CreateBooking:output_type -> hospital.appointment.v1.Booking
+	36, // 63: hospital.appointment.v1.AppointmentService.GetMyBooking:output_type -> hospital.appointment.v1.Booking
+	37, // 64: hospital.appointment.v1.AppointmentService.ListMyBookings:output_type -> hospital.appointment.v1.ListBookingsResponse
+	34, // 65: hospital.appointment.v1.AppointmentService.DeleteMyBooking:output_type -> hospital.appointment.v1.DeleteBookingResponse
+	36, // 66: hospital.appointment.v1.AppointmentService.GetBooking:output_type -> hospital.appointment.v1.Booking
+	37, // 67: hospital.appointment.v1.AppointmentService.ListBookings:output_type -> hospital.appointment.v1.ListBookingsResponse
+	36, // 68: hospital.appointment.v1.AppointmentService.CheckInBooking:output_type -> hospital.appointment.v1.Booking
+	34, // 69: hospital.appointment.v1.AppointmentService.DeleteBooking:output_type -> hospital.appointment.v1.DeleteBookingResponse
+	39, // [39:70] is the sub-list for method output_type
+	8,  // [8:39] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_contracts_proto_appointment_v1_appointment_proto_init() }
@@ -2639,7 +3826,7 @@ func file_contracts_proto_appointment_v1_appointment_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_contracts_proto_appointment_v1_appointment_proto_rawDesc), len(file_contracts_proto_appointment_v1_appointment_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   28,
+			NumMessages:   40,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

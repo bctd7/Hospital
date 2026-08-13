@@ -6,6 +6,8 @@ import type {
   AppointmentRoom,
   AppointmentSession,
   AppointmentStatus,
+  BookingOption,
+  BookingOptionsResult,
   ExaminationItem,
   ItemWeeklyWindow,
   RoomExaminationItem,
@@ -13,6 +15,9 @@ import type {
   RoomWeeklyWindow,
   SaveItemWindowInput,
   SaveRoomWindowInput,
+  PatientAppointmentApi,
+  PatientBooking,
+  StaffBookingApi,
 } from "@/types/appointment";
 
 interface ItemResponse {
@@ -83,6 +88,49 @@ interface ItemWindowResponse {
   updated_at: string;
 }
 
+interface BookingOptionResponse {
+  item_id: string;
+  room_id: string;
+  room_display_name: string;
+  campus_id: string;
+  building: string;
+  floor_number: number;
+  room_number: string;
+  service_date: string;
+  session: AppointmentSession;
+  room_open_time: string;
+  room_close_time: string;
+  item_start_time: string;
+  item_end_time: string;
+  booking_cutoff_time: string;
+  total_capacity: number;
+  remaining_capacity: number;
+}
+
+interface BookingResponse {
+  booking_id: string;
+  patient_account_id: string;
+  department_id: string;
+  item_id: string;
+  item_name: string;
+  room_id: string;
+  room_display_name: string;
+  campus_id: string;
+  service_date: string;
+  session: AppointmentSession;
+  status: "confirmed" | "checked_in";
+  room_open_time: string;
+  room_close_time: string;
+  item_start_time: string;
+  item_end_time: string;
+  booking_cutoff_time: string;
+  version: number;
+  created_at: string;
+  updated_at: string;
+  checked_in_at?: string;
+  checked_in_by?: string;
+}
+
 const item = (value: ItemResponse): ExaminationItem => ({
   itemId: value.item_id,
   ownerDepartmentId: value.owner_department_id,
@@ -149,6 +197,49 @@ const itemWindow = (value: ItemWindowResponse): ItemWeeklyWindow => ({
   version: value.version,
   createdAt: value.created_at,
   updatedAt: value.updated_at,
+});
+
+const bookingOption = (value: BookingOptionResponse): BookingOption => ({
+  itemId: value.item_id,
+  roomId: value.room_id,
+  roomDisplayName: value.room_display_name,
+  campusId: value.campus_id,
+  building: value.building,
+  floorNumber: value.floor_number,
+  roomNumber: value.room_number,
+  serviceDate: value.service_date,
+  session: value.session,
+  roomOpenTime: value.room_open_time,
+  roomCloseTime: value.room_close_time,
+  itemStartTime: value.item_start_time,
+  itemEndTime: value.item_end_time,
+  bookingCutoffTime: value.booking_cutoff_time,
+  totalCapacity: value.total_capacity,
+  remainingCapacity: value.remaining_capacity,
+});
+
+const booking = (value: BookingResponse): PatientBooking => ({
+  bookingId: value.booking_id,
+  patientAccountId: value.patient_account_id,
+  departmentId: value.department_id,
+  itemId: value.item_id,
+  itemName: value.item_name,
+  roomId: value.room_id,
+  roomDisplayName: value.room_display_name,
+  campusId: value.campus_id,
+  serviceDate: value.service_date,
+  session: value.session,
+  status: value.status,
+  roomOpenTime: value.room_open_time,
+  roomCloseTime: value.room_close_time,
+  itemStartTime: value.item_start_time,
+  itemEndTime: value.item_end_time,
+  bookingCutoffTime: value.booking_cutoff_time,
+  version: value.version,
+  createdAt: value.created_at,
+  updatedAt: value.updated_at,
+  checkedInAt: value.checked_in_at,
+  checkedInBy: value.checked_in_by,
 });
 
 const retryOperationIds = new Map<string, string>();
@@ -314,5 +405,101 @@ export const appointmentManagementApi: AppointmentManagementApi = {
   async disableItemWindow(value) {
     const key = `item-window:disable:${value.windowId}:${value.version}`;
     return itemWindow(await mutation<ItemWindowResponse>(key, `/api/v1/admin/appointment/item-weekly-windows/${encodeURIComponent(value.windowId)}/disable`, "POST", statusBody(value.windowId, value.version)));
+  },
+};
+
+export const patientAppointmentApi: PatientAppointmentApi = {
+  async listItems(departmentId) {
+    const value = await request<{ items: ItemResponse[] | null }>({
+      path: queryPath("/api/v1/appointment/examination-items", {
+        owner_department_id: departmentId,
+        page: 1,
+        page_size: 100,
+      }),
+      authenticated: true,
+    });
+    return arrayOrEmpty(value.items).map(item);
+  },
+
+  async listBookingOptions(itemId): Promise<BookingOptionsResult> {
+    const value = await request<{
+      options: BookingOptionResponse[] | null;
+      week_start_date: string;
+      week_end_date: string;
+    }>({
+      path: `/api/v1/appointment/examination-items/${encodeURIComponent(itemId)}/booking-options`,
+      authenticated: true,
+    });
+    return {
+      options: arrayOrEmpty(value.options).map(bookingOption),
+      weekStartDate: value.week_start_date,
+      weekEndDate: value.week_end_date,
+    };
+  },
+
+  async createBooking(itemId, roomId, serviceDate, session) {
+    const data = { item_id: itemId, room_id: roomId, service_date: serviceDate, session };
+    return booking(await mutation<BookingResponse>(
+      `booking:create:${itemId}:${roomId}:${serviceDate}:${session}`,
+      "/api/v1/appointment/bookings",
+      "POST",
+      data,
+    ));
+  },
+
+  async listMyBookings(currentPage = 1, pageSize = 20) {
+    const value = await request<{ bookings: BookingResponse[] | null; page: number; page_size: number; total: number }>({
+      path: queryPath("/api/v1/appointment/bookings", { page: currentPage, page_size: pageSize }),
+      authenticated: true,
+    });
+    return page(arrayOrEmpty(value.bookings).map(booking), value);
+  },
+
+  async getMyBooking(bookingId) {
+    return booking(await request<BookingResponse>({
+      path: `/api/v1/appointment/bookings/${encodeURIComponent(bookingId)}`,
+      authenticated: true,
+    }));
+  },
+
+  async deleteMyBooking(bookingId, reason = "") {
+    await request<{ booking_id: string; deleted: boolean }>({
+      path: `/api/v1/appointment/bookings/${encodeURIComponent(bookingId)}`,
+      method: "DELETE",
+      authenticated: true,
+      data: { operation_id: operationId(), reason },
+    });
+  },
+};
+
+export const staffBookingApi: StaffBookingApi = {
+  async listBookings(departmentId, currentPage = 1, pageSize = 100) {
+    const value = await request<{ bookings: BookingResponse[] | null; page: number; page_size: number; total: number }>({
+      path: queryPath("/api/v1/admin/appointment/bookings", {
+        department_id: departmentId,
+        page: currentPage,
+        page_size: pageSize,
+      }),
+      authenticated: true,
+    });
+    return page(arrayOrEmpty(value.bookings).map(booking), value);
+  },
+
+  async checkInBooking(value) {
+    return booking(await mutation<BookingResponse>(
+      `booking:check-in:${value.bookingId}:${value.version}`,
+      `/api/v1/admin/appointment/bookings/${encodeURIComponent(value.bookingId)}/check-in`,
+      "POST",
+      { expected_version: value.version },
+    ));
+  },
+
+  async deleteBooking(bookingId, reason = "工作人员删除") {
+    await request<{ booking_id: string; deleted: boolean }>({
+      path: `/api/v1/admin/appointment/bookings/${encodeURIComponent(bookingId)}`,
+      method: "DELETE",
+      authenticated: true,
+      data: { operation_id: operationId(), reason },
+    });
   },
 };

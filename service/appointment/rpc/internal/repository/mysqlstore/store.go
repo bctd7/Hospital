@@ -112,7 +112,7 @@ func (s *Store) WithinProjectTransaction(ctx context.Context, fn func(appointmen
 	if err != nil {
 		return fmt.Errorf("begin project transaction: %w", err)
 	}
-	txStore := &projectTxStore{tx: tx}
+	txStore := &projectTxStore{bookingTxStore: &bookingTxStore{tx: tx}}
 	if err := fn(txStore); err != nil {
 		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
 			return errors.Join(err, fmt.Errorf("rollback project transaction: %w", rollbackErr))

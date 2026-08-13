@@ -12,7 +12,7 @@ import (
 	appointmentmanager "hospital/service/appointment/rpc/internal/manager"
 )
 
-type roomScheduleTxStore struct{ tx *sql.Tx }
+type roomScheduleTxStore struct{ *bookingTxStore }
 
 var _ appointmentmanager.RoomScheduleTxStore = (*roomScheduleTxStore)(nil)
 

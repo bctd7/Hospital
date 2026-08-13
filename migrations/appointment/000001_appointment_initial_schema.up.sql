@@ -184,3 +184,101 @@ CREATE TABLE appointment_resource_audit (
     CONSTRAINT fk_appointment_resource_audit_operation
         FOREIGN KEY (operation_id) REFERENCES appointment_resource_operations (operation_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE appointment_room_date_capacity (
+    id                  CHAR(36)        NOT NULL,
+    room_id             CHAR(36)        NOT NULL,
+    service_date        DATE            NOT NULL,
+    session             VARCHAR(16)     NOT NULL,
+    total_capacity      INT UNSIGNED    NOT NULL,
+    occupied_capacity   INT UNSIGNED    NOT NULL DEFAULT 0,
+    room_window_id      CHAR(36)        NOT NULL,
+    room_window_version BIGINT UNSIGNED NOT NULL,
+    version             BIGINT UNSIGNED NOT NULL,
+    created_at          DATETIME(3)     NOT NULL,
+    updated_at          DATETIME(3)     NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_appointment_room_date_capacity_slot (room_id, service_date, session),
+    KEY idx_appointment_room_date_capacity_date (service_date, room_id, session),
+    CONSTRAINT fk_appointment_room_date_capacity_room
+        FOREIGN KEY (room_id) REFERENCES appointment_rooms (id),
+    CONSTRAINT fk_appointment_room_date_capacity_window
+        FOREIGN KEY (room_window_id) REFERENCES appointment_room_weekly_windows (id),
+    CONSTRAINT chk_appointment_room_date_capacity_session
+        CHECK (session IN ('morning', 'afternoon')),
+    CONSTRAINT chk_appointment_room_date_capacity_total CHECK (total_capacity > 0),
+    CONSTRAINT chk_appointment_room_date_capacity_occupied
+        CHECK (occupied_capacity <= total_capacity),
+    CONSTRAINT chk_appointment_room_date_capacity_window_version
+        CHECK (room_window_version > 0),
+    CONSTRAINT chk_appointment_room_date_capacity_version CHECK (version > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE appointment_bookings (
+    id                           CHAR(36)        NOT NULL,
+    patient_account_id           CHAR(36)        NOT NULL,
+    department_id                CHAR(36)        NOT NULL,
+    item_id                      CHAR(36)        NOT NULL,
+    room_id                      CHAR(36)        NOT NULL,
+    service_date                 DATE            NOT NULL,
+    session                      VARCHAR(16)     NOT NULL,
+    status                       VARCHAR(16)     NOT NULL,
+    room_open_time_snapshot      TIME            NOT NULL,
+    room_close_time_snapshot     TIME            NOT NULL,
+    item_start_time_snapshot     TIME            NOT NULL,
+    item_end_time_snapshot       TIME            NOT NULL,
+    item_cutoff_time_snapshot    TIME            NOT NULL,
+    checked_in_at                DATETIME(3)      NULL,
+    checked_in_by                CHAR(36)         NULL,
+    version                      BIGINT UNSIGNED  NOT NULL,
+    created_at                   DATETIME(3)      NOT NULL,
+    updated_at                   DATETIME(3)      NOT NULL,
+    PRIMARY KEY (id),
+    KEY idx_appointment_bookings_patient
+        (patient_account_id, service_date DESC, created_at DESC, id),
+    KEY idx_appointment_bookings_department
+        (department_id, service_date, session, created_at, id),
+    KEY idx_appointment_bookings_room_capacity
+        (room_id, service_date, session, status, created_at, id),
+    KEY idx_appointment_bookings_cleanup
+        (status, service_date, id),
+    CONSTRAINT fk_appointment_bookings_item
+        FOREIGN KEY (item_id) REFERENCES appointment_examination_items (id),
+    CONSTRAINT fk_appointment_bookings_room
+        FOREIGN KEY (room_id) REFERENCES appointment_rooms (id),
+    CONSTRAINT chk_appointment_bookings_session
+        CHECK (session IN ('morning', 'afternoon')),
+    CONSTRAINT chk_appointment_bookings_status
+        CHECK (status IN ('confirmed', 'checked_in')),
+    CONSTRAINT chk_appointment_bookings_room_time
+        CHECK (room_open_time_snapshot < room_close_time_snapshot),
+    CONSTRAINT chk_appointment_bookings_item_time
+        CHECK (
+            item_start_time_snapshot <= item_cutoff_time_snapshot
+            AND item_cutoff_time_snapshot < item_end_time_snapshot
+            AND room_open_time_snapshot <= item_start_time_snapshot
+            AND item_end_time_snapshot <= room_close_time_snapshot
+        ),
+    CONSTRAINT chk_appointment_bookings_check_in CHECK (
+        (status = 'confirmed' AND checked_in_at IS NULL AND checked_in_by IS NULL)
+        OR (status = 'checked_in' AND checked_in_at IS NOT NULL AND checked_in_by IS NOT NULL)
+    ),
+    CONSTRAINT chk_appointment_bookings_version CHECK (version > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE appointment_booking_operations (
+    operation_id        CHAR(36)        NOT NULL,
+    operator_account_id CHAR(36)        NOT NULL,
+    booking_id          CHAR(36)        NOT NULL,
+    action              VARCHAR(64)     NOT NULL,
+    request_fingerprint CHAR(64)        NOT NULL,
+    result_data         JSON            NOT NULL,
+    created_at          DATETIME(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (operation_id),
+    KEY idx_appointment_booking_operations_booking (booking_id, created_at),
+    KEY idx_appointment_booking_operations_operator (operator_account_id, created_at),
+    CONSTRAINT chk_appointment_booking_operations_action CHECK (
+        action IN ('create', 'delete_by_patient', 'delete_by_staff', 'delete_by_configuration',
+                   'delete_by_cleanup', 'check_in')
+    )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

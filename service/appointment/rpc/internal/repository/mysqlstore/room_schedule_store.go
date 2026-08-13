@@ -137,7 +137,7 @@ func (s *Store) WithinRoomScheduleTransaction(ctx context.Context, fn func(appoi
 	if err != nil {
 		return fmt.Errorf("begin room and schedule transaction: %w", err)
 	}
-	if err = fn(&roomScheduleTxStore{tx: tx}); err != nil {
+	if err = fn(&roomScheduleTxStore{bookingTxStore: &bookingTxStore{tx: tx}}); err != nil {
 		if rb := tx.Rollback(); rb != nil && !errors.Is(rb, sql.ErrTxDone) {
 			return errors.Join(err, rb)
 		}

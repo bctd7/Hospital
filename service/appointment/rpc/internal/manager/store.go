@@ -35,6 +35,7 @@ type ProjectStore interface {
 }
 
 type ProjectTxStore interface {
+	BookingTxStore
 	FindOperation(ctx context.Context, operationID string) (ProjectOperation, bool, error)
 	GetItemForUpdate(ctx context.Context, itemID string) (ExaminationItem, error)
 	CreateItem(ctx context.Context, item ExaminationItem) error
@@ -77,6 +78,7 @@ type RoomScheduleStore interface {
 }
 
 type RoomScheduleTxStore interface {
+	BookingTxStore
 	FindOperation(ctx context.Context, operationID string) (RoomScheduleOperation, bool, error)
 	RecordChange(ctx context.Context, change RoomScheduleChange) error
 	GetRoomForUpdate(ctx context.Context, roomID string) (Room, error)

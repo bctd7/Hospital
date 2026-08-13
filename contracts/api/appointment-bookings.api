@@ -1,0 +1,125 @@
+syntax = "v1"
+
+type (
+	BookingOptionResponse {
+		ItemID            string `json:"item_id"`
+		RoomID            string `json:"room_id"`
+		RoomDisplayName   string `json:"room_display_name"`
+		CampusID          string `json:"campus_id"`
+		Building          string `json:"building"`
+		FloorNumber       int32  `json:"floor_number"`
+		RoomNumber        string `json:"room_number"`
+		ServiceDate       string `json:"service_date"`
+		Session           string `json:"session"`
+		RoomOpenTime      string `json:"room_open_time"`
+		RoomCloseTime     string `json:"room_close_time"`
+		ItemStartTime     string `json:"item_start_time"`
+		ItemEndTime       string `json:"item_end_time"`
+		BookingCutoffTime string `json:"booking_cutoff_time"`
+		TotalCapacity     int64  `json:"total_capacity"`
+		RemainingCapacity int64  `json:"remaining_capacity"`
+	}
+	BookingOptionsPathRequest {
+		ItemID string `path:"itemId"`
+	}
+	ListBookingOptionsResponse {
+		Options       []BookingOptionResponse `json:"options"`
+		WeekStartDate string                  `json:"week_start_date"`
+		WeekEndDate   string                  `json:"week_end_date"`
+	}
+	CreateBookingAPIRequest {
+		ItemID      string `json:"item_id"`
+		RoomID      string `json:"room_id"`
+		ServiceDate string `json:"service_date"`
+		Session     string `json:"session"`
+		OperationID string `json:"operation_id"`
+	}
+	BookingPathRequest {
+		BookingID string `path:"bookingId"`
+	}
+	ListMyBookingsAPIRequest {
+		Page     int64 `form:"page,default=1"`
+		PageSize int64 `form:"page_size,default=20"`
+	}
+	ListBookingsAPIRequest {
+		DepartmentID string `form:"department_id"`
+		ServiceDate  string `form:"service_date,optional"`
+		Session      string `form:"session,optional"`
+		ItemID       string `form:"item_id,optional"`
+		RoomID       string `form:"room_id,optional"`
+		Status       string `form:"status,optional"`
+		Page         int64  `form:"page,default=1"`
+		PageSize     int64  `form:"page_size,default=20"`
+	}
+	DeleteBookingAPIRequest {
+		BookingID   string `path:"bookingId"`
+		OperationID string `json:"operation_id"`
+		Reason      string `json:"reason,optional"`
+	}
+	CheckInBookingAPIRequest {
+		BookingID      string `path:"bookingId"`
+		ExpectedVersion int64  `json:"expected_version"`
+		OperationID    string `json:"operation_id"`
+	}
+	BookingResponse {
+		BookingID          string `json:"booking_id"`
+		PatientAccountID   string `json:"patient_account_id"`
+		DepartmentID       string `json:"department_id"`
+		ItemID             string `json:"item_id"`
+		ItemName           string `json:"item_name"`
+		RoomID             string `json:"room_id"`
+		RoomDisplayName    string `json:"room_display_name"`
+		CampusID           string `json:"campus_id"`
+		ServiceDate        string `json:"service_date"`
+		Session            string `json:"session"`
+		Status             string `json:"status"`
+		RoomOpenTime       string `json:"room_open_time"`
+		RoomCloseTime      string `json:"room_close_time"`
+		ItemStartTime      string `json:"item_start_time"`
+		ItemEndTime        string `json:"item_end_time"`
+		BookingCutoffTime  string `json:"booking_cutoff_time"`
+		Version            int64  `json:"version"`
+		CreatedAt          string `json:"created_at"`
+		UpdatedAt          string `json:"updated_at"`
+		CheckedInAt        string `json:"checked_in_at,omitempty"`
+		CheckedInBy        string `json:"checked_in_by,omitempty"`
+	}
+	ListBookingsAPIResponse {
+		Bookings []BookingResponse `json:"bookings"`
+		Page     int64             `json:"page"`
+		PageSize int64             `json:"page_size"`
+		Total    int64             `json:"total"`
+	}
+	DeleteBookingAPIResponse {
+		BookingID string `json:"booking_id"`
+		Deleted   bool   `json:"deleted"`
+	}
+)
+
+@server (
+	prefix: /api/v1
+	group: appointmentbookings
+	middleware: AccessToken
+	authType: BearerAuth
+)
+service app-api {
+	@handler listBookingOptions
+	get /appointment/examination-items/:itemId/booking-options (BookingOptionsPathRequest) returns (ListBookingOptionsResponse)
+	@handler createBooking
+	post /appointment/bookings (CreateBookingAPIRequest) returns (BookingResponse)
+	@handler listMyBookings
+	get /appointment/bookings (ListMyBookingsAPIRequest) returns (ListBookingsAPIResponse)
+	@handler getMyBooking
+	get /appointment/bookings/:bookingId (BookingPathRequest) returns (BookingResponse)
+	@handler deleteMyBooking
+	delete /appointment/bookings/:bookingId (DeleteBookingAPIRequest) returns (DeleteBookingAPIResponse)
+
+	@handler listBookings
+	get /admin/appointment/bookings (ListBookingsAPIRequest) returns (ListBookingsAPIResponse)
+	@handler getBooking
+	get /admin/appointment/bookings/:bookingId (BookingPathRequest) returns (BookingResponse)
+	@handler checkInBooking
+	post /admin/appointment/bookings/:bookingId/check-in (CheckInBookingAPIRequest) returns (BookingResponse)
+	@handler deleteBooking
+	delete /admin/appointment/bookings/:bookingId (DeleteBookingAPIRequest) returns (DeleteBookingAPIResponse)
+}

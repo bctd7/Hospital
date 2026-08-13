@@ -15,6 +15,470 @@
   },
   "basePath": "/",
   "paths": {
+    "/api/v1/admin/appointment/bookings": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listBookings",
+        "operationId": "appointmentbookingsListBookings",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "department_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "service_date",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "session",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "item_id",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "room_id",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "status",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "bookings": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "booking_id",
+                      "patient_account_id",
+                      "department_id",
+                      "item_id",
+                      "item_name",
+                      "room_id",
+                      "room_display_name",
+                      "campus_id",
+                      "service_date",
+                      "session",
+                      "status",
+                      "room_open_time",
+                      "room_close_time",
+                      "item_start_time",
+                      "item_end_time",
+                      "booking_cutoff_time",
+                      "version",
+                      "created_at",
+                      "updated_at",
+                      "checked_in_at",
+                      "checked_in_by"
+                    ],
+                    "properties": {
+                      "booking_cutoff_time": {
+                        "type": "string"
+                      },
+                      "booking_id": {
+                        "type": "string"
+                      },
+                      "campus_id": {
+                        "type": "string"
+                      },
+                      "checked_in_at": {
+                        "type": "string"
+                      },
+                      "checked_in_by": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "department_id": {
+                        "type": "string"
+                      },
+                      "item_end_time": {
+                        "type": "string"
+                      },
+                      "item_id": {
+                        "type": "string"
+                      },
+                      "item_name": {
+                        "type": "string"
+                      },
+                      "item_start_time": {
+                        "type": "string"
+                      },
+                      "patient_account_id": {
+                        "type": "string"
+                      },
+                      "room_close_time": {
+                        "type": "string"
+                      },
+                      "room_display_name": {
+                        "type": "string"
+                      },
+                      "room_id": {
+                        "type": "string"
+                      },
+                      "room_open_time": {
+                        "type": "string"
+                      },
+                      "service_date": {
+                        "type": "string"
+                      },
+                      "session": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "integer"
+                },
+                "page_size": {
+                  "type": "integer"
+                },
+                "total": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/bookings/{bookingId}": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "getBooking",
+        "operationId": "appointmentbookingsGetBooking",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "bookingId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "booking_cutoff_time": {
+                  "type": "string"
+                },
+                "booking_id": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
+                "checked_in_at": {
+                  "type": "string"
+                },
+                "checked_in_by": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "item_end_time": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "item_start_time": {
+                  "type": "string"
+                },
+                "patient_account_id": {
+                  "type": "string"
+                },
+                "room_close_time": {
+                  "type": "string"
+                },
+                "room_display_name": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "room_open_time": {
+                  "type": "string"
+                },
+                "service_date": {
+                  "type": "string"
+                },
+                "session": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "deleteBooking",
+        "operationId": "appointmentbookingsDeleteBooking",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "bookingId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "operation_id"
+              ],
+              "properties": {
+                "operation_id": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "booking_id": {
+                  "type": "string"
+                },
+                "deleted": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/bookings/{bookingId}/check-in": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "checkInBooking",
+        "operationId": "appointmentbookingsCheckInBooking",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "bookingId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "expected_version",
+                "operation_id"
+              ],
+              "properties": {
+                "expected_version": {
+                  "type": "integer"
+                },
+                "operation_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "booking_cutoff_time": {
+                  "type": "string"
+                },
+                "booking_id": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
+                "checked_in_at": {
+                  "type": "string"
+                },
+                "checked_in_by": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "item_end_time": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "item_start_time": {
+                  "type": "string"
+                },
+                "patient_account_id": {
+                  "type": "string"
+                },
+                "room_close_time": {
+                  "type": "string"
+                },
+                "room_display_name": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "room_open_time": {
+                  "type": "string"
+                },
+                "service_date": {
+                  "type": "string"
+                },
+                "session": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/appointment/examination-items": {
       "get": {
         "security": [
@@ -3569,6 +4033,661 @@
         }
       }
     },
+    "/api/v1/appointment/bookings": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listMyBookings",
+        "operationId": "appointmentbookingsListMyBookings",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "bookings": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "booking_id",
+                      "patient_account_id",
+                      "department_id",
+                      "item_id",
+                      "item_name",
+                      "room_id",
+                      "room_display_name",
+                      "campus_id",
+                      "service_date",
+                      "session",
+                      "status",
+                      "room_open_time",
+                      "room_close_time",
+                      "item_start_time",
+                      "item_end_time",
+                      "booking_cutoff_time",
+                      "version",
+                      "created_at",
+                      "updated_at",
+                      "checked_in_at",
+                      "checked_in_by"
+                    ],
+                    "properties": {
+                      "booking_cutoff_time": {
+                        "type": "string"
+                      },
+                      "booking_id": {
+                        "type": "string"
+                      },
+                      "campus_id": {
+                        "type": "string"
+                      },
+                      "checked_in_at": {
+                        "type": "string"
+                      },
+                      "checked_in_by": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "department_id": {
+                        "type": "string"
+                      },
+                      "item_end_time": {
+                        "type": "string"
+                      },
+                      "item_id": {
+                        "type": "string"
+                      },
+                      "item_name": {
+                        "type": "string"
+                      },
+                      "item_start_time": {
+                        "type": "string"
+                      },
+                      "patient_account_id": {
+                        "type": "string"
+                      },
+                      "room_close_time": {
+                        "type": "string"
+                      },
+                      "room_display_name": {
+                        "type": "string"
+                      },
+                      "room_id": {
+                        "type": "string"
+                      },
+                      "room_open_time": {
+                        "type": "string"
+                      },
+                      "service_date": {
+                        "type": "string"
+                      },
+                      "session": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "integer"
+                },
+                "page_size": {
+                  "type": "integer"
+                },
+                "total": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "createBooking",
+        "operationId": "appointmentbookingsCreateBooking",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "item_id",
+                "room_id",
+                "service_date",
+                "session",
+                "operation_id"
+              ],
+              "properties": {
+                "item_id": {
+                  "type": "string"
+                },
+                "operation_id": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "service_date": {
+                  "type": "string"
+                },
+                "session": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "booking_cutoff_time": {
+                  "type": "string"
+                },
+                "booking_id": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
+                "checked_in_at": {
+                  "type": "string"
+                },
+                "checked_in_by": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "item_end_time": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "item_start_time": {
+                  "type": "string"
+                },
+                "patient_account_id": {
+                  "type": "string"
+                },
+                "room_close_time": {
+                  "type": "string"
+                },
+                "room_display_name": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "room_open_time": {
+                  "type": "string"
+                },
+                "service_date": {
+                  "type": "string"
+                },
+                "session": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/appointment/bookings/{bookingId}": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "getMyBooking",
+        "operationId": "appointmentbookingsGetMyBooking",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "bookingId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "booking_cutoff_time": {
+                  "type": "string"
+                },
+                "booking_id": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
+                "checked_in_at": {
+                  "type": "string"
+                },
+                "checked_in_by": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "item_end_time": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "item_start_time": {
+                  "type": "string"
+                },
+                "patient_account_id": {
+                  "type": "string"
+                },
+                "room_close_time": {
+                  "type": "string"
+                },
+                "room_display_name": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "room_open_time": {
+                  "type": "string"
+                },
+                "service_date": {
+                  "type": "string"
+                },
+                "session": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "deleteMyBooking",
+        "operationId": "appointmentbookingsDeleteMyBooking",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "bookingId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "operation_id"
+              ],
+              "properties": {
+                "operation_id": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "booking_id": {
+                  "type": "string"
+                },
+                "deleted": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/appointment/examination-items": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listPatientExaminationItems",
+        "operationId": "appointmentcatalogListPatientExaminationItems",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "owner_department_id",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "name": "status",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "item_id",
+                      "owner_department_id",
+                      "name",
+                      "description",
+                      "status",
+                      "version",
+                      "created_at",
+                      "updated_at"
+                    ],
+                    "properties": {
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "item_id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "owner_department_id": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "integer"
+                },
+                "page_size": {
+                  "type": "integer"
+                },
+                "total": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/appointment/examination-items/{itemId}/booking-options": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listBookingOptions",
+        "operationId": "appointmentbookingsListBookingOptions",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "itemId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "options": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "item_id",
+                      "room_id",
+                      "room_display_name",
+                      "campus_id",
+                      "building",
+                      "floor_number",
+                      "room_number",
+                      "service_date",
+                      "session",
+                      "room_open_time",
+                      "room_close_time",
+                      "item_start_time",
+                      "item_end_time",
+                      "booking_cutoff_time",
+                      "total_capacity",
+                      "remaining_capacity"
+                    ],
+                    "properties": {
+                      "booking_cutoff_time": {
+                        "type": "string"
+                      },
+                      "building": {
+                        "type": "string"
+                      },
+                      "campus_id": {
+                        "type": "string"
+                      },
+                      "floor_number": {
+                        "type": "integer"
+                      },
+                      "item_end_time": {
+                        "type": "string"
+                      },
+                      "item_id": {
+                        "type": "string"
+                      },
+                      "item_start_time": {
+                        "type": "string"
+                      },
+                      "remaining_capacity": {
+                        "type": "integer"
+                      },
+                      "room_close_time": {
+                        "type": "string"
+                      },
+                      "room_display_name": {
+                        "type": "string"
+                      },
+                      "room_id": {
+                        "type": "string"
+                      },
+                      "room_number": {
+                        "type": "string"
+                      },
+                      "room_open_time": {
+                        "type": "string"
+                      },
+                      "service_date": {
+                        "type": "string"
+                      },
+                      "session": {
+                        "type": "string"
+                      },
+                      "total_capacity": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "week_end_date": {
+                  "type": "string"
+                },
+                "week_start_date": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/appointment/examination-items/{itemId}/rooms": {
       "get": {
         "security": [
@@ -4417,7 +5536,7 @@
       "in": "header"
     }
   },
-  "x-date": "2026-08-13 19:12:54",
+  "x-date": "2026-08-13 22:14:22",
   "x-description": "This is a goctl generated swagger file.",
   "x-github": "https://github.com/zeromicro/go-zero",
   "x-go-zero-doc": "https://go-zero.dev/",

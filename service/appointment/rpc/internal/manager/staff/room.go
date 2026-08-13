@@ -138,6 +138,12 @@ func (m *Manager) UpdateRoom(ctx context.Context, operator authn.Principal, comm
 		if before.RetiredAt != nil {
 			return nil, "", ErrInvalidState
 		}
+		today, weekEnd := currentBookingWeek()
+		if _, err := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, meta.OperationID, BookingListFilter{
+			RoomID: before.RoomID, FromDate: &today, ThroughDate: &weekEnd,
+		}); err != nil {
+			return nil, "", err
+		}
 		result = before
 		result.CampusID = campusID
 		result.Building = building

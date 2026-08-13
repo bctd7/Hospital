@@ -41,6 +41,15 @@ const (
 	AppointmentService_SetItemWeeklyWindow_FullMethodName                 = "/hospital.appointment.v1.AppointmentService/SetItemWeeklyWindow"
 	AppointmentService_DisableItemWeeklyWindow_FullMethodName             = "/hospital.appointment.v1.AppointmentService/DisableItemWeeklyWindow"
 	AppointmentService_ListItemWeeklyWindows_FullMethodName               = "/hospital.appointment.v1.AppointmentService/ListItemWeeklyWindows"
+	AppointmentService_ListBookingOptions_FullMethodName                  = "/hospital.appointment.v1.AppointmentService/ListBookingOptions"
+	AppointmentService_CreateBooking_FullMethodName                       = "/hospital.appointment.v1.AppointmentService/CreateBooking"
+	AppointmentService_GetMyBooking_FullMethodName                        = "/hospital.appointment.v1.AppointmentService/GetMyBooking"
+	AppointmentService_ListMyBookings_FullMethodName                      = "/hospital.appointment.v1.AppointmentService/ListMyBookings"
+	AppointmentService_DeleteMyBooking_FullMethodName                     = "/hospital.appointment.v1.AppointmentService/DeleteMyBooking"
+	AppointmentService_GetBooking_FullMethodName                          = "/hospital.appointment.v1.AppointmentService/GetBooking"
+	AppointmentService_ListBookings_FullMethodName                        = "/hospital.appointment.v1.AppointmentService/ListBookings"
+	AppointmentService_CheckInBooking_FullMethodName                      = "/hospital.appointment.v1.AppointmentService/CheckInBooking"
+	AppointmentService_DeleteBooking_FullMethodName                       = "/hospital.appointment.v1.AppointmentService/DeleteBooking"
 )
 
 // AppointmentServiceClient is the client API for AppointmentService service.
@@ -69,6 +78,15 @@ type AppointmentServiceClient interface {
 	SetItemWeeklyWindow(ctx context.Context, in *SetItemWeeklyWindowRequest, opts ...grpc.CallOption) (*ItemWeeklyWindow, error)
 	DisableItemWeeklyWindow(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*ItemWeeklyWindow, error)
 	ListItemWeeklyWindows(ctx context.Context, in *ListWeeklyWindowsRequest, opts ...grpc.CallOption) (*ListItemWeeklyWindowsResponse, error)
+	ListBookingOptions(ctx context.Context, in *ListBookingOptionsRequest, opts ...grpc.CallOption) (*ListBookingOptionsResponse, error)
+	CreateBooking(ctx context.Context, in *CreateBookingRequest, opts ...grpc.CallOption) (*Booking, error)
+	GetMyBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
+	ListMyBookings(ctx context.Context, in *ListMyBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
+	DeleteMyBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
+	GetBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
+	ListBookings(ctx context.Context, in *ListBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
+	CheckInBooking(ctx context.Context, in *CheckInBookingRequest, opts ...grpc.CallOption) (*Booking, error)
+	DeleteBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
 }
 
 type appointmentServiceClient struct {
@@ -299,6 +317,96 @@ func (c *appointmentServiceClient) ListItemWeeklyWindows(ctx context.Context, in
 	return out, nil
 }
 
+func (c *appointmentServiceClient) ListBookingOptions(ctx context.Context, in *ListBookingOptionsRequest, opts ...grpc.CallOption) (*ListBookingOptionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListBookingOptionsResponse)
+	err := c.cc.Invoke(ctx, AppointmentService_ListBookingOptions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) CreateBooking(ctx context.Context, in *CreateBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Booking)
+	err := c.cc.Invoke(ctx, AppointmentService_CreateBooking_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) GetMyBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Booking)
+	err := c.cc.Invoke(ctx, AppointmentService_GetMyBooking_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) ListMyBookings(ctx context.Context, in *ListMyBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListBookingsResponse)
+	err := c.cc.Invoke(ctx, AppointmentService_ListMyBookings_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) DeleteMyBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteBookingResponse)
+	err := c.cc.Invoke(ctx, AppointmentService_DeleteMyBooking_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) GetBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Booking)
+	err := c.cc.Invoke(ctx, AppointmentService_GetBooking_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) ListBookings(ctx context.Context, in *ListBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListBookingsResponse)
+	err := c.cc.Invoke(ctx, AppointmentService_ListBookings_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) CheckInBooking(ctx context.Context, in *CheckInBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Booking)
+	err := c.cc.Invoke(ctx, AppointmentService_CheckInBooking_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) DeleteBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteBookingResponse)
+	err := c.cc.Invoke(ctx, AppointmentService_DeleteBooking_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AppointmentServiceServer is the server API for AppointmentService service.
 // All implementations must embed UnimplementedAppointmentServiceServer
 // for forward compatibility.
@@ -325,6 +433,15 @@ type AppointmentServiceServer interface {
 	SetItemWeeklyWindow(context.Context, *SetItemWeeklyWindowRequest) (*ItemWeeklyWindow, error)
 	DisableItemWeeklyWindow(context.Context, *ChangeResourceStatusRequest) (*ItemWeeklyWindow, error)
 	ListItemWeeklyWindows(context.Context, *ListWeeklyWindowsRequest) (*ListItemWeeklyWindowsResponse, error)
+	ListBookingOptions(context.Context, *ListBookingOptionsRequest) (*ListBookingOptionsResponse, error)
+	CreateBooking(context.Context, *CreateBookingRequest) (*Booking, error)
+	GetMyBooking(context.Context, *GetBookingRequest) (*Booking, error)
+	ListMyBookings(context.Context, *ListMyBookingsRequest) (*ListBookingsResponse, error)
+	DeleteMyBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error)
+	GetBooking(context.Context, *GetBookingRequest) (*Booking, error)
+	ListBookings(context.Context, *ListBookingsRequest) (*ListBookingsResponse, error)
+	CheckInBooking(context.Context, *CheckInBookingRequest) (*Booking, error)
+	DeleteBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error)
 	mustEmbedUnimplementedAppointmentServiceServer()
 }
 
@@ -400,6 +517,33 @@ func (UnimplementedAppointmentServiceServer) DisableItemWeeklyWindow(context.Con
 }
 func (UnimplementedAppointmentServiceServer) ListItemWeeklyWindows(context.Context, *ListWeeklyWindowsRequest) (*ListItemWeeklyWindowsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListItemWeeklyWindows not implemented")
+}
+func (UnimplementedAppointmentServiceServer) ListBookingOptions(context.Context, *ListBookingOptionsRequest) (*ListBookingOptionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListBookingOptions not implemented")
+}
+func (UnimplementedAppointmentServiceServer) CreateBooking(context.Context, *CreateBookingRequest) (*Booking, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateBooking not implemented")
+}
+func (UnimplementedAppointmentServiceServer) GetMyBooking(context.Context, *GetBookingRequest) (*Booking, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMyBooking not implemented")
+}
+func (UnimplementedAppointmentServiceServer) ListMyBookings(context.Context, *ListMyBookingsRequest) (*ListBookingsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMyBookings not implemented")
+}
+func (UnimplementedAppointmentServiceServer) DeleteMyBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteMyBooking not implemented")
+}
+func (UnimplementedAppointmentServiceServer) GetBooking(context.Context, *GetBookingRequest) (*Booking, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBooking not implemented")
+}
+func (UnimplementedAppointmentServiceServer) ListBookings(context.Context, *ListBookingsRequest) (*ListBookingsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListBookings not implemented")
+}
+func (UnimplementedAppointmentServiceServer) CheckInBooking(context.Context, *CheckInBookingRequest) (*Booking, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckInBooking not implemented")
+}
+func (UnimplementedAppointmentServiceServer) DeleteBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteBooking not implemented")
 }
 func (UnimplementedAppointmentServiceServer) mustEmbedUnimplementedAppointmentServiceServer() {}
 func (UnimplementedAppointmentServiceServer) testEmbeddedByValue()                            {}
@@ -818,6 +962,168 @@ func _AppointmentService_ListItemWeeklyWindows_Handler(srv interface{}, ctx cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AppointmentService_ListBookingOptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListBookingOptionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).ListBookingOptions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_ListBookingOptions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).ListBookingOptions(ctx, req.(*ListBookingOptionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_CreateBooking_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateBookingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).CreateBooking(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_CreateBooking_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).CreateBooking(ctx, req.(*CreateBookingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_GetMyBooking_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBookingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).GetMyBooking(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_GetMyBooking_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).GetMyBooking(ctx, req.(*GetBookingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_ListMyBookings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMyBookingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).ListMyBookings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_ListMyBookings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).ListMyBookings(ctx, req.(*ListMyBookingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_DeleteMyBooking_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteBookingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).DeleteMyBooking(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_DeleteMyBooking_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).DeleteMyBooking(ctx, req.(*DeleteBookingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_GetBooking_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBookingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).GetBooking(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_GetBooking_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).GetBooking(ctx, req.(*GetBookingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_ListBookings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListBookingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).ListBookings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_ListBookings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).ListBookings(ctx, req.(*ListBookingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_CheckInBooking_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckInBookingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).CheckInBooking(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_CheckInBooking_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).CheckInBooking(ctx, req.(*CheckInBookingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_DeleteBooking_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteBookingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).DeleteBooking(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_DeleteBooking_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).DeleteBooking(ctx, req.(*DeleteBookingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AppointmentService_ServiceDesc is the grpc.ServiceDesc for AppointmentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -912,6 +1218,42 @@ var AppointmentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListItemWeeklyWindows",
 			Handler:    _AppointmentService_ListItemWeeklyWindows_Handler,
+		},
+		{
+			MethodName: "ListBookingOptions",
+			Handler:    _AppointmentService_ListBookingOptions_Handler,
+		},
+		{
+			MethodName: "CreateBooking",
+			Handler:    _AppointmentService_CreateBooking_Handler,
+		},
+		{
+			MethodName: "GetMyBooking",
+			Handler:    _AppointmentService_GetMyBooking_Handler,
+		},
+		{
+			MethodName: "ListMyBookings",
+			Handler:    _AppointmentService_ListMyBookings_Handler,
+		},
+		{
+			MethodName: "DeleteMyBooking",
+			Handler:    _AppointmentService_DeleteMyBooking_Handler,
+		},
+		{
+			MethodName: "GetBooking",
+			Handler:    _AppointmentService_GetBooking_Handler,
+		},
+		{
+			MethodName: "ListBookings",
+			Handler:    _AppointmentService_ListBookings_Handler,
+		},
+		{
+			MethodName: "CheckInBooking",
+			Handler:    _AppointmentService_CheckInBooking_Handler,
+		},
+		{
+			MethodName: "DeleteBooking",
+			Handler:    _AppointmentService_DeleteBooking_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

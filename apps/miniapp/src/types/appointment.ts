@@ -1,5 +1,6 @@
 export type AppointmentStatus = "active" | "disabled";
 export type AppointmentSession = "morning" | "afternoon";
+export type PatientBookingStatus = "confirmed" | "checked_in";
 
 export interface ExaminationItem {
   itemId: string;
@@ -124,4 +125,68 @@ export interface AppointmentManagementApi {
   listItemWindows(itemId: string): Promise<ItemWeeklyWindow[]>;
   saveItemWindow(itemId: string, input: SaveItemWindowInput): Promise<ItemWeeklyWindow>;
   disableItemWindow(window: ItemWeeklyWindow): Promise<ItemWeeklyWindow>;
+}
+
+export interface BookingOption {
+  itemId: string;
+  roomId: string;
+  roomDisplayName: string;
+  campusId: string;
+  building: string;
+  floorNumber: number;
+  roomNumber: string;
+  serviceDate: string;
+  session: AppointmentSession;
+  roomOpenTime: string;
+  roomCloseTime: string;
+  itemStartTime: string;
+  itemEndTime: string;
+  bookingCutoffTime: string;
+  totalCapacity: number;
+  remainingCapacity: number;
+}
+
+export interface PatientBooking {
+  bookingId: string;
+  patientAccountId: string;
+  departmentId: string;
+  itemId: string;
+  itemName: string;
+  roomId: string;
+  roomDisplayName: string;
+  campusId: string;
+  serviceDate: string;
+  session: AppointmentSession;
+  status: PatientBookingStatus;
+  roomOpenTime: string;
+  roomCloseTime: string;
+  itemStartTime: string;
+  itemEndTime: string;
+  bookingCutoffTime: string;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+  checkedInAt?: string;
+  checkedInBy?: string;
+}
+
+export interface BookingOptionsResult {
+  options: BookingOption[];
+  weekStartDate: string;
+  weekEndDate: string;
+}
+
+export interface PatientAppointmentApi {
+  listItems(departmentId: string): Promise<ExaminationItem[]>;
+  listBookingOptions(itemId: string): Promise<BookingOptionsResult>;
+  createBooking(itemId: string, roomId: string, serviceDate: string, session: AppointmentSession): Promise<PatientBooking>;
+  listMyBookings(page?: number, pageSize?: number): Promise<AppointmentPage<PatientBooking>>;
+  getMyBooking(bookingId: string): Promise<PatientBooking>;
+  deleteMyBooking(bookingId: string, reason?: string): Promise<void>;
+}
+
+export interface StaffBookingApi {
+  listBookings(departmentId: string, page?: number, pageSize?: number): Promise<AppointmentPage<PatientBooking>>;
+  checkInBooking(booking: PatientBooking): Promise<PatientBooking>;
+  deleteBooking(bookingId: string, reason?: string): Promise<void>;
 }
