@@ -32,7 +32,7 @@ Kafka:
   Brokers: "${KAFKA_BROKERS}"
   ClientID: identity-rpc
   AuthorizationChangedTopic: identity.authorization.changed.v1
-  AuthorizationVersionConsumerGroup: identity-authorization-version-projection-v1
+  AuthorizationVersionConsumerGroup: identity-authorization-version-consumer-v1
   BatchSize: 100
 Token:
   Issuer: hospital-identity

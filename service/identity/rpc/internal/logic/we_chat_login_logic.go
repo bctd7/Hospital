@@ -26,7 +26,7 @@ func NewWeChatLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *WeCha
 
 func (l *WeChatLoginLogic) WeChatLogin(in *identityv1.WeChatLoginRequest) (*identityv1.TokenPair, error) {
 	ctx := authorizationRequestContext(l.ctx, in.GetRequestId())
-	pair, err := l.svcCtx.AccountManager.WeChatLogin(ctx, in.GetLoginCode())
+	pair, err := l.svcCtx.Managers.Authentication.WeChatLogin(ctx, in.GetLoginCode())
 	if err != nil {
 		logging.Error(ctx, "identity.wechat.login_failed", err)
 		return nil, accountRPCError(err)

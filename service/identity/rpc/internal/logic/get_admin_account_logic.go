@@ -22,9 +22,9 @@ func (l *GetAdminAccountLogic) GetAdminAccount(in *identityv1.GetAdminAccountReq
 	if err != nil {
 		return nil, err
 	}
-	account, actions, err := l.svc.IdentityAdminManager.GetAccount(ctx, operator, in.GetAccountId())
+	account, actions, err := l.svc.Managers.Account.GetAccount(ctx, operator, in.GetAccountId())
 	if err != nil {
-		return nil, identityAdminRPCError(err)
+		return nil, accountManagementRPCError(err)
 	}
 	return adminAccountDetailResponse(account, actions), nil
 }

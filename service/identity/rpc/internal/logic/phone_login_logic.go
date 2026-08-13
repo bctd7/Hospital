@@ -22,7 +22,7 @@ func NewPhoneLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PhoneL
 
 func (l *PhoneLoginLogic) PhoneLogin(in *identityv1.PhoneLoginRequest) (*identityv1.TokenPair, error) {
 	ctx := authorizationRequestContext(l.ctx, in.GetRequestId())
-	pair, err := l.svcCtx.PhoneLoginManager.Login(ctx, in.GetPhone(), in.GetVerificationCode())
+	pair, err := l.svcCtx.Managers.PhoneLogin.Login(ctx, in.GetPhone(), in.GetVerificationCode())
 	if err != nil {
 		logging.Error(ctx, "identity.phone_login.failed", err)
 		return nil, accountRPCError(err)

@@ -22,7 +22,7 @@ func NewRefreshAccessTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 func (l *RefreshAccessTokenLogic) RefreshAccessToken(in *identityv1.RefreshAccessTokenRequest) (*identityv1.TokenPair, error) {
 	ctx := authorizationRequestContext(l.ctx, in.GetRequestId())
-	pair, err := l.svcCtx.SessionManager.Refresh(ctx, in.GetRefreshToken())
+	pair, err := l.svcCtx.Managers.Session.Refresh(ctx, in.GetRefreshToken())
 	if err != nil {
 		logging.Error(ctx, "identity.session.refresh.failed", err)
 		return nil, sessionRPCError(err)

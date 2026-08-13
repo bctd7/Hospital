@@ -30,7 +30,7 @@ Identity Service 是账号、登录会话、角色权限、医院组织和医生
 - `management_version` 与组织 `version` 乐观锁；
 - `operation_id` 写操作幂等；
 - 授权审计、敏感访问日志保护和 Outbox 事件；
-- Outbox 轮询发布 Kafka，Consumer 将授权版本单调投影到 Redis，成功后提交 Kafka Offset。
+- Outbox 轮询发布 Kafka，Consumer 将授权版本单调写入 Redis，成功后提交 Kafka Offset。
 
 ## 调用链
 
@@ -41,11 +41,11 @@ Miniapp
   -> Identity gRPC Client
   -> Identity Unary Auth Interceptor
   -> Identity Logic
-  -> IdentityAdmin / Organization / Authorization Manager
+  -> Account / Organization / Authorization Manager
   -> Store / Transaction Store
   -> MySQL（主数据、审计、Outbox）
 
-MySQL Outbox -> Kafka -> Authorization Projector -> Redis
+MySQL Outbox -> Kafka -> Authorization Version Consumer -> Redis -> Commit Offset
 ```
 
 职责边界：
@@ -57,7 +57,7 @@ MySQL Outbox -> Kafka -> Authorization Projector -> Redis
 - `mysqlstore`：Store 的 MySQL 实现和具体 SQL；
 - Interceptor：在进入需要认证的 RPC Logic 前校验 JWT 与授权版本，并把 Principal 写入 Context。
 
-`AuthorizationManager` 只负责读取授权上下文。管理员写操作统一进入 `IdentityAdminManager`，不存在第二套旧写链路。
+`authorization/manager` 只读取授权上下文；账号和医生写操作统一进入 `account/manager`，不存在第二套授权写链路。
 
 ## 目录
 
@@ -67,13 +67,13 @@ service/identity/rpc/
 ├── etc/                           # 本地配置
 ├── identityservice/               # 生成的 RPC Client 包装
 └── internal/
-    ├── account/                   # 登录账号与手机号绑定
-    ├── authorization/             # 授权上下文读取
-    ├── identityadmin/             # 账号和医生管理领域
-    ├── authorizationprojection/   # Kafka 授权事件到 Redis 的版本投影
-    ├── messaging/                 # Kafka Producer/Consumer 适配
-    ├── outbox/                    # 事件构建、待发布记录和 Publisher
-    ├── organization/              # 组织管理与公共目录领域
+    ├── authentication/            # 登录、手机号绑定及外部凭据 Provider
+    ├── account/manager/           # 账号、医生和本人资料管理
+    ├── authorization/manager/     # 只读取有效 Principal
+    ├── authorization/version/     # 授权版本事件与 Kafka→Redis Consumer
+    ├── messaging/kafka/           # transport-only Reader/Writer
+    ├── messaging/outbox/          # 通用 MySQL Outbox→Kafka Publisher
+    ├── organization/manager/      # 组织单元管理与公共目录读取
     ├── logic/                     # RPC 用例适配
     ├── repository/mysqlstore/     # MySQL Store 与事务实现
     ├── server/                    # gRPC Server 方法
@@ -81,12 +81,12 @@ service/identity/rpc/
     └── svc/                       # 依赖装配
 ```
 
-`identityadmin` 和 `organization` 按阅读职责拆分文件，包本身保持稳定：
+`account/manager` 和 `organization/manager` 按阅读职责拆分文件：
 
 - `manager.go`：Manager 结构、共享事务模板；
 - `administrator.go`：管理员查询和写操作；
 - `doctor.go` / `directory.go`：医生或公共目录能力；
-- `self.go`：本人资料；
+- `profile.go`：本人资料；
 - `validation.go`：输入和领域约束。
 
 ## HTTP 能力
@@ -147,9 +147,9 @@ MySQL 集成测试通过 `IDENTITY_TEST_MYSQL_DSN` 显式启用。阶段收尾�
 ## 后续扩展规则
 
 1. 先更新 `plan/` 和 `contracts/`，不要从 Handler 直接开始写；
-2. 新管理员写能力进入 `IdentityAdminManager` 或 `OrganizationManager`，不要扩展 `AuthorizationManager`；
+2. 新账号管理能力进入 `account/manager`，新组织管理能力进入 `organization/manager`；不要把写操作放进只读的 `authorization/manager`；
 3. 写操作必须在同一事务中更新主数据、审计和 Outbox；
-4. 涉及授权的变化必须递增 `authorization_version`，在同一事务写入 Outbox，并由 Kafka 投影到 Redis；
+4. 涉及授权的变化必须递增 `authorization_version`，在同一事务写入 Outbox，并由 Consumer 从 Kafka 同步到 Redis；
 5. 涉及手机号、验证码或 Token 的新 RPC 必须加入客户端和服务端正文日志屏蔽名单；
 6. 新查询要明确是公共目录、本人查询还是管理员查询，不能共用一个返回对象泄漏字段；
 7. 新接口完成后重新生成 Swagger，并补充数据库集成与 HTTP 全链路测试。

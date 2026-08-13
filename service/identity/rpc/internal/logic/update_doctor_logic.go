@@ -4,7 +4,7 @@ import (
 	"context"
 
 	identityv1 "hospital/contracts/gen/identity/v1"
-	"hospital/service/identity/rpc/internal/identityadmin"
+	accountmanager "hospital/service/identity/rpc/internal/account/manager"
 	"hospital/service/identity/rpc/internal/svc"
 )
 
@@ -23,11 +23,11 @@ func (l *UpdateDoctorLogic) UpdateDoctor(in *identityv1.UpdateDoctorRequest) (*i
 	if err != nil {
 		return nil, err
 	}
-	account, actions, err := l.svc.IdentityAdminManager.UpdateDoctor(ctx, operator, in.GetAccountId(),
-		identityadmin.OptionalDoctorProfileInput{DisplayName: in.DisplayName, StaffNo: in.StaffNo, AvatarURL: in.AvatarUrl, Description: in.Description},
+	account, actions, err := l.svc.Managers.Account.UpdateDoctor(ctx, operator, in.GetAccountId(),
+		accountmanager.OptionalDoctorProfileInput{DisplayName: in.DisplayName, StaffNo: in.StaffNo, AvatarURL: in.AvatarUrl, Description: in.Description},
 		in.GetManagementVersion(), in.GetOperationId(), in.GetRequestId())
 	if err != nil {
-		return nil, identityAdminRPCError(err)
+		return nil, accountManagementRPCError(err)
 	}
 	return adminAccountDetailResponse(account, actions), nil
 }

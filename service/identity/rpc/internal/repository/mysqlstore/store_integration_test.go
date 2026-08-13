@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	"hospital/common/authn"
-	"hospital/service/identity/rpc/internal/identityadmin"
+	accountmanager "hospital/service/identity/rpc/internal/account/manager"
 )
 
-func TestMySQLWeChatRegistrationPhoneAndIdentityAdminPromotion(t *testing.T) {
+func TestMySQLWeChatRegistrationPhoneAndDoctorPromotion(t *testing.T) {
 	dataSource := os.Getenv("IDENTITY_TEST_MYSQL_DSN")
 	if dataSource == "" {
 		t.Skip("IDENTITY_TEST_MYSQL_DSN is not set")
@@ -66,7 +66,7 @@ VALUES (?, 'department', 'login-test', 'Login Test')`, departmentID); err != nil
 	if err != nil {
 		t.Fatal(err)
 	}
-	manager, err := identityadmin.NewManager(store, []byte("integration-phone-lookup-key-32x"))
+	manager, err := accountmanager.NewManager(store, []byte("integration-phone-lookup-key-32x"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,13 +76,13 @@ VALUES (?, 'department', 'login-test', 'Login Test')`, departmentID); err != nil
 	}
 	account, _, err := manager.PromoteDoctor(
 		ctx, admin, patientID, departmentID,
-		identityadmin.DoctorProfileInput{DisplayName: "集成测试医生"},
+		accountmanager.DoctorProfileInput{DisplayName: "集成测试医生"},
 		patient.ManagementVersion, true, operationID, "integration-login-request",
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if account.AccountType != authn.AccountTypeStaff || account.IdentityType() != identityadmin.IdentityTypeDoctor || account.DepartmentID != departmentID {
+	if account.AccountType != authn.AccountTypeStaff || account.IdentityType() != accountmanager.IdentityTypeDoctor || account.DepartmentID != departmentID {
 		t.Fatalf("unexpected promoted identity: %#v", account)
 	}
 	if account.PhoneVerificationStatus != "verified" || account.PhoneVerificationSource != "admin" {

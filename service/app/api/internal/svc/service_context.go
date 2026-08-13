@@ -13,7 +13,8 @@ import (
 	"time"
 
 	"hospital/common/authn"
-	"hospital/common/authn/versionredis"
+	authversion "hospital/common/authz/version"
+	"hospital/common/authz/version/redisstore"
 	"hospital/common/observability/logging"
 	identityv1 "hospital/contracts/gen/identity/v1"
 	"hospital/service/app/api/internal/config"
@@ -55,12 +56,12 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		redisClient.Close()
 		return nil, fmt.Errorf("ping app api authorization redis: %w", err)
 	}
-	authorizationVersions, err := versionredis.NewStore(redisClient, c.AuthorizationRedis.Prefix)
+	authorizationVersions, err := redisstore.NewStore(redisClient, c.AuthorizationRedis.Prefix)
 	if err != nil {
 		redisClient.Close()
 		return nil, fmt.Errorf("create app api authorization version store: %w", err)
 	}
-	authorizationVersionValidator, err := authn.NewAuthorizationVersionValidator(authorizationVersions)
+	authorizationVersionValidator, err := authversion.NewValidator(authorizationVersions)
 	if err != nil {
 		redisClient.Close()
 		return nil, fmt.Errorf("create app api authorization version validator: %w", err)

@@ -13,7 +13,7 @@ Identity Service 是身份、账号、工作人员角色和组织主数据的事
 - 阿里云 PNVS 手机号验证码登录和兼容的微信外部身份；
 - Access Token、Refresh Session、Token 轮换、退出和重放防护；
 - `super_admin`、`department_doctor` 角色和 permission 快照；
-- 授权版本的 MySQL 事实、Outbox、Kafka 发布和 Redis 单调投影；
+- 授权版本的 MySQL 事实、Outbox、Kafka 发布和 Redis 单调同步；
 - 单医院下的医院、院区和科室管理；
 - 账号列表、详情、手机号精确搜索、停用和恢复；
 - 医生开通、资料维护、调岗和撤销；
@@ -63,7 +63,7 @@ Appointment、Navigation、Report 等业务服务本地验证 Token 和授权版
 
 授权变化在同一个 MySQL 事务中更新事实、审计和 Outbox。Publisher 在 Kafka ACK 后标记发布完成；Consumer
 成功将更高版本写入 Redis 后才提交 Offset。发布、消费或提交失败可以重试，重复或乱序旧事件不能降低
-Redis 版本。MySQL、Kafka 与 Redis 采用最终一致投影，不承诺数据库提交后的绝对下一次请求已经看到新版本。
+Redis 版本。MySQL、Kafka 与 Redis 采用最终一致同步，不承诺数据库提交后的绝对下一次请求已经看到新版本。
 
 ## 4. 公共认证与授权边界
 
@@ -71,13 +71,16 @@ Redis 版本。MySQL、Kafka 与 Redis 采用最终一致投影，不承诺数�
 
 ```text
 common/authn
-  Principal、JWT、Context、HTTP/gRPC Interceptor、授权版本校验抽象
-
-common/authn/versionredis
-  Redis 授权版本 Reader/Writer
+  Principal、JWT、Context、HTTP/gRPC Interceptor
 
 common/authz
   permission、角色和部门范围的通用判断
+
+common/authz/version
+  Token 授权版本校验边界
+
+common/authz/version/redisstore
+  Redis 授权版本 Reader/Writer
 ```
 
 Identity 注入授权版本 Reader 和 Writer；App API、Appointment、Navigation、Report 等只注入
@@ -162,8 +165,9 @@ Hospital
 或出现在公共目录；恢复账号不会自动恢复已撤销的医生身份。
 
 管理员安全边界固定为：App API 校验 → Identity RPC 再校验 → Logic 取得 Principal → Manager 校验
-permission 和状态 → Store 持久化。账号/医生写入统一由 `IdentityAdminManager` 管理，组织写入统一由
-`OrganizationManager` 管理，`AuthorizationManager` 只读取授权上下文，不得恢复旧的第二套授权写接口。
+permission 和状态 → Store 持久化。账号/医生写入统一由 `account/manager` 管理，组织单元写入统一由
+`OrganizationUnitManager` 管理，公共组织目录读取由 `OrganizationDirectoryManager` 管理；
+`authorization/manager` 只读取授权上下文，不得恢复第二套授权写接口。
 
 ## 8. 幂等、并发与事务
 

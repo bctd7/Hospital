@@ -6,9 +6,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"hospital/service/identity/rpc/internal/account"
-	"hospital/service/identity/rpc/internal/authorization"
-	"hospital/service/identity/rpc/internal/login"
+	account "hospital/service/identity/rpc/internal/authentication"
+	login "hospital/service/identity/rpc/internal/authentication/provider"
+	authorization "hospital/service/identity/rpc/internal/authorization/manager"
 )
 
 func accountRPCError(err error) error {

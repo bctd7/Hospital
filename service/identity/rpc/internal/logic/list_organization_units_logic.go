@@ -52,7 +52,7 @@ func (l *ListOrganizationUnitsLogic) ListOrganizationUnits(in *identityv1.ListOr
 		filter.Status = &status
 	}
 
-	units, err := l.svcCtx.OrganizationManager.ListManagedUnits(ctx, operator, filter)
+	units, err := l.svcCtx.Managers.OrganizationUnit.ListManagedUnits(ctx, operator, filter)
 	if err != nil {
 		logging.Error(ctx, "identity.organization.units.list", err,
 			logx.Field("operator_account_id", operator.AccountID),

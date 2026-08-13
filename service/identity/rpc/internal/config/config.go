@@ -20,7 +20,7 @@ type Config struct {
 		Brokers                           string `json:",optional"`
 		ClientID                          string `json:",default=identity-rpc"`
 		AuthorizationChangedTopic         string `json:",default=identity.authorization.changed.v1"`
-		AuthorizationVersionConsumerGroup string `json:",default=identity-authorization-version-projection-v1"`
+		AuthorizationVersionConsumerGroup string `json:",default=identity-authorization-version-consumer-v1"`
 		BatchSize                         int    `json:",default=100"`
 	}
 	Token struct {

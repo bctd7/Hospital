@@ -26,7 +26,7 @@ func NewListDepartmentsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *L
 
 func (l *ListDepartmentsLogic) ListDepartments(in *identityv1.ListDepartmentsRequest) (*identityv1.ListDepartmentsResponse, error) {
 	ctx := authorizationRequestContext(l.ctx, in.GetRequestId())
-	departments, err := l.svcCtx.OrganizationManager.ListDirectoryDepartments(ctx, in.GetCampusId())
+	departments, err := l.svcCtx.Managers.OrganizationDirectory.ListDirectoryDepartments(ctx, in.GetCampusId())
 	if err != nil {
 		logging.Error(ctx, "identity.organization.directory.departments.read", err,
 			logx.Field("campus_id", in.GetCampusId()))

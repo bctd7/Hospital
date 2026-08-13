@@ -10,7 +10,7 @@ import (
 	"hospital/common/authn"
 	"hospital/common/observability/logging"
 	identityv1 "hospital/contracts/gen/identity/v1"
-	"hospital/service/identity/rpc/internal/authorization"
+	authorization "hospital/service/identity/rpc/internal/authorization/manager"
 )
 
 func authorizationRequestContext(ctx context.Context, requestID string) context.Context {

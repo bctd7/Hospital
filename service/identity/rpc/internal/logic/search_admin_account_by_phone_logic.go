@@ -22,9 +22,9 @@ func (l *SearchAdminAccountByPhoneLogic) SearchAdminAccountByPhone(in *identityv
 	if err != nil {
 		return nil, err
 	}
-	account, masked, verificationStatus, verificationSource, err := l.svc.IdentityAdminManager.SearchByPhone(ctx, operator, in.GetPhone())
+	account, masked, verificationStatus, verificationSource, err := l.svc.Managers.Account.SearchByPhone(ctx, operator, in.GetPhone())
 	if err != nil {
-		return nil, identityAdminRPCError(err)
+		return nil, accountManagementRPCError(err)
 	}
 	return &identityv1.SearchAdminAccountByPhoneResponse{
 		Identity: adminAccountSummaryResponse(account),

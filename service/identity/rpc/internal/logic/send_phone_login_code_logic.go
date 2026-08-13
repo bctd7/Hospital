@@ -22,7 +22,7 @@ func NewSendPhoneLoginCodeLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 func (l *SendPhoneLoginCodeLogic) SendPhoneLoginCode(in *identityv1.SendPhoneLoginCodeRequest) (*identityv1.SendPhoneLoginCodeResponse, error) {
 	ctx := authorizationRequestContext(l.ctx, in.GetRequestId())
-	retryAfter, err := l.svcCtx.PhoneLoginManager.SendCode(ctx, in.GetPhone())
+	retryAfter, err := l.svcCtx.Managers.PhoneLogin.SendCode(ctx, in.GetPhone())
 	if err != nil {
 		logging.Error(ctx, "identity.phone_login.code_send_failed", err)
 		return nil, accountRPCError(err)

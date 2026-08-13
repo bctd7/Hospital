@@ -5,7 +5,7 @@ import (
 
 	"hospital/common/observability/logging"
 	"hospital/contracts/gen/identity/v1"
-	"hospital/service/identity/rpc/internal/organization"
+	organizationmanager "hospital/service/identity/rpc/internal/organization/manager"
 	"hospital/service/identity/rpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -31,7 +31,7 @@ func (l *UpdateOrganizationUnitLogic) UpdateOrganizationUnit(in *identityv1.Upda
 	if err != nil {
 		return nil, err
 	}
-	unit, err := l.svcCtx.OrganizationManager.UpdateUnit(ctx, operator, organization.UpdateUnitCommand{
+	unit, err := l.svcCtx.Managers.OrganizationUnit.UpdateUnit(ctx, operator, organizationmanager.UpdateUnitCommand{
 		UnitID:          in.GetUnitId(),
 		Name:            in.Name,
 		ParentID:        in.ParentId,
@@ -40,13 +40,13 @@ func (l *UpdateOrganizationUnitLogic) UpdateOrganizationUnit(in *identityv1.Upda
 		RequestID:       in.GetRequestId(),
 	})
 	if err != nil {
-		logging.Error(ctx, organization.ActionUnitUpdated, err,
+		logging.Error(ctx, organizationmanager.ActionUnitUpdated, err,
 			logx.Field("operator_account_id", operator.AccountID),
 			logx.Field("unit_id", in.GetUnitId()),
 			logx.Field("operation_id", in.GetOperationId()))
 		return nil, organizationRPCError(err)
 	}
-	logging.Info(ctx, organization.ActionUnitUpdated,
+	logging.Info(ctx, organizationmanager.ActionUnitUpdated,
 		logx.Field("operator_account_id", operator.AccountID),
 		logx.Field("unit_id", unit.ID),
 		logx.Field("operation_id", in.GetOperationId()))

@@ -22,9 +22,9 @@ func (l *UpdateAccountDisplayProfileLogic) UpdateAccountDisplayProfile(in *ident
 	if err != nil {
 		return nil, err
 	}
-	profile, err := l.svc.IdentityAdminManager.UpdateDisplayProfile(ctx, operator, in.GetNickname())
+	profile, err := l.svc.Managers.Account.UpdateDisplayProfile(ctx, operator, in.GetNickname())
 	if err != nil {
-		return nil, identityAdminRPCError(err)
+		return nil, accountManagementRPCError(err)
 	}
 	return accountDisplayProfileResponse(profile), nil
 }

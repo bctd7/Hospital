@@ -22,9 +22,9 @@ func (l *DisableAccountLogic) DisableAccount(in *identityv1.AccountMutationReque
 	if err != nil {
 		return nil, err
 	}
-	account, actions, err := l.svc.IdentityAdminManager.SetAccountEnabled(ctx, operator, in.GetAccountId(), false, in.GetManagementVersion(), in.GetOperationId(), in.GetRequestId())
+	account, actions, err := l.svc.Managers.Account.SetAccountEnabled(ctx, operator, in.GetAccountId(), false, in.GetManagementVersion(), in.GetOperationId(), in.GetRequestId())
 	if err != nil {
-		return nil, identityAdminRPCError(err)
+		return nil, accountManagementRPCError(err)
 	}
 	return adminAccountDetailResponse(account, actions), nil
 }

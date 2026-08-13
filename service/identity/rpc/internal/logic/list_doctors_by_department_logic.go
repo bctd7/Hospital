@@ -18,7 +18,7 @@ func NewListDoctorsByDepartmentLogic(ctx context.Context, svcCtx *svc.ServiceCon
 
 func (l *ListDoctorsByDepartmentLogic) ListDoctorsByDepartment(in *identityv1.ListDoctorsByDepartmentRequest) (*identityv1.ListDoctorsByDepartmentResponse, error) {
 	ctx := authorizationRequestContext(l.ctx, in.GetRequestId())
-	page, err := l.svc.IdentityAdminManager.ListDoctors(ctx, in.GetDepartmentId(), in.GetPage(), in.GetPageSize())
+	page, err := l.svc.Managers.Account.ListDoctors(ctx, in.GetDepartmentId(), in.GetPage(), in.GetPageSize())
 	if err != nil {
 		return nil, identityDirectoryRPCError(err)
 	}

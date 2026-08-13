@@ -3,8 +3,8 @@ package svc
 import (
 	"testing"
 
+	login "hospital/service/identity/rpc/internal/authentication/provider"
 	"hospital/service/identity/rpc/internal/config"
-	"hospital/service/identity/rpc/internal/login"
 )
 
 func TestPhoneVerificationProviderAllowsLocalOnlyInSafeEnvironments(t *testing.T) {

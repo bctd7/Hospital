@@ -56,7 +56,7 @@ func TestManagerStartsAndRotatesRefreshSession(t *testing.T) {
 		t.Fatal("replayed refresh token must revoke the current session")
 	}
 	if versions.accountID != principals.principal.AccountID || versions.version != 1 || versions.calls != 2 {
-		t.Fatalf("authorization version projection was not maintained: %#v", versions)
+		t.Fatalf("authorization version was not maintained: %#v", versions)
 	}
 }
 
@@ -87,7 +87,7 @@ func TestManagerRejectsRefreshAfterAuthorizationChange(t *testing.T) {
 	}
 }
 
-func TestManagerDoesNotCreateSessionWhenVersionProjectionFails(t *testing.T) {
+func TestManagerDoesNotCreateSessionWhenVersionUpdateFails(t *testing.T) {
 	store := &memorySessionStore{}
 	principals := &fakePrincipalStore{principal: activeTestPrincipal(1)}
 	manager, err := NewManager(
@@ -99,10 +99,10 @@ func TestManagerDoesNotCreateSessionWhenVersionProjectionFails(t *testing.T) {
 	}
 	_, err = manager.Start(context.Background(), principals.principal.AccountID)
 	if err == nil {
-		t.Fatal("expected authorization version projection failure")
+		t.Fatal("expected authorization version update failure")
 	}
 	if store.exists {
-		t.Fatal("failed projection must not create a refresh session")
+		t.Fatal("failed version update must not create a refresh session")
 	}
 }
 

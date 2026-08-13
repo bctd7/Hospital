@@ -27,7 +27,7 @@ func NewGetOrganizationContextLogic(ctx context.Context, svcCtx *svc.ServiceCont
 // Organization directory shared by visitors and authenticated identities.
 func (l *GetOrganizationContextLogic) GetOrganizationContext(in *identityv1.GetOrganizationContextRequest) (*identityv1.OrganizationContext, error) {
 	ctx := authorizationRequestContext(l.ctx, in.GetRequestId())
-	value, err := l.svcCtx.OrganizationManager.GetDirectoryContext(ctx)
+	value, err := l.svcCtx.Managers.OrganizationDirectory.GetDirectoryContext(ctx)
 	if err != nil {
 		logging.Error(ctx, "identity.organization.directory.context.read", err)
 		return nil, organizationRPCError(err)

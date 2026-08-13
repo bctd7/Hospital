@@ -7,7 +7,7 @@ import (
 	"sort"
 
 	"hospital/common/authn"
-	"hospital/service/identity/rpc/internal/authorization"
+	authorization "hospital/service/identity/rpc/internal/authorization/manager"
 )
 
 var _ authorization.Store = (*Store)(nil)

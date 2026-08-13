@@ -7,7 +7,8 @@
 | 包 | 已实现职责 |
 |---|---|
 | `authn` | Principal、Ed25519 JWT、Context、HTTP/gRPC 鉴权和授权版本抽象 |
-| `authn/versionredis` | Redis 授权版本 Reader/Writer 实现 |
+| `authz/version` | Token 授权版本校验及 Reader/Advancer 接口 |
+| `authz/version/redisstore` | Redis 授权版本 Reader/Advancer 实现 |
 | `authz` | permission 判断和组织范围等通用授权规则 |
 | `observability/logging` | 结构化业务事件、Request ID 和公共字段 |
 | `observability/httpaccess` | 不读取正文的 HTTP 访问日志中间件 |

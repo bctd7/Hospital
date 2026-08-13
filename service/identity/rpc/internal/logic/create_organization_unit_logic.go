@@ -6,6 +6,7 @@ import (
 	"hospital/common/observability/logging"
 	"hospital/contracts/gen/identity/v1"
 	"hospital/service/identity/rpc/internal/organization"
+	organizationmanager "hospital/service/identity/rpc/internal/organization/manager"
 	"hospital/service/identity/rpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -31,7 +32,7 @@ func (l *CreateOrganizationUnitLogic) CreateOrganizationUnit(in *identityv1.Crea
 	if err != nil {
 		return nil, err
 	}
-	unit, err := l.svcCtx.OrganizationManager.CreateUnit(ctx, operator, organization.CreateUnitCommand{
+	unit, err := l.svcCtx.Managers.OrganizationUnit.CreateUnit(ctx, operator, organizationmanager.CreateUnitCommand{
 		Type:        organization.UnitType(in.GetUnitType()),
 		ParentID:    in.GetParentId(),
 		Name:        in.GetName(),
@@ -39,13 +40,13 @@ func (l *CreateOrganizationUnitLogic) CreateOrganizationUnit(in *identityv1.Crea
 		RequestID:   in.GetRequestId(),
 	})
 	if err != nil {
-		logging.Error(ctx, organization.ActionUnitCreated, err,
+		logging.Error(ctx, organizationmanager.ActionUnitCreated, err,
 			logx.Field("operator_account_id", operator.AccountID),
 			logx.Field("parent_id", in.GetParentId()),
 			logx.Field("operation_id", in.GetOperationId()))
 		return nil, organizationRPCError(err)
 	}
-	logging.Info(ctx, organization.ActionUnitCreated,
+	logging.Info(ctx, organizationmanager.ActionUnitCreated,
 		logx.Field("operator_account_id", operator.AccountID),
 		logx.Field("unit_id", unit.ID),
 		logx.Field("operation_id", in.GetOperationId()))

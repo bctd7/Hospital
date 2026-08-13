@@ -13,7 +13,7 @@ import (
 
 	"hospital/common/authn"
 	identityv1 "hospital/contracts/gen/identity/v1"
-	"hospital/service/identity/rpc/internal/authorization"
+	authorization "hospital/service/identity/rpc/internal/authorization/manager"
 	"hospital/service/identity/rpc/internal/svc"
 )
 
@@ -29,7 +29,7 @@ func TestAuthorizationContextReadFailureUsesFunctionalLogging(t *testing.T) {
 		AccountID: "20000000-0000-0000-0000-000000000001",
 		Status:    authn.AccountStatusActive,
 	})
-	logic := NewGetAuthorizationContextLogic(ctx, &svc.ServiceContext{AuthorizationManager: manager})
+	logic := NewGetAuthorizationContextLogic(ctx, &svc.ServiceContext{Managers: svc.Managers{Authorization: manager}})
 	_, err = logic.GetAuthorizationContext(&identityv1.GetAuthorizationContextRequest{
 		AccountId: "20000000-0000-0000-0000-000000000002",
 		RequestId: "authorization-request-1",

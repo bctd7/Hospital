@@ -6,7 +6,7 @@ Kafka 事件采用统一信封，业务载荷放在 `payload` 中。当前已经
 |---|---|
 | Topic / Event Type | `identity.authorization.changed.v1` |
 | Kafka Key | `account_id`，保证同账号事件进入同一分区 |
-| Consumer Group | `identity-authorization-version-projection-v1` |
+| Consumer Group | `identity-authorization-version-consumer-v1` |
 | Payload Schema | `identity-authorization-changed-v1.payload.schema.json` |
 | Go 表示 | `Envelope` 与 `IdentityAuthorizationChangedV1Payload` |
 

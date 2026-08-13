@@ -11,6 +11,7 @@ import (
 	contractauthz "hospital/contracts/authz"
 	identityv1 "hospital/contracts/gen/identity/v1"
 	"hospital/service/identity/rpc/internal/organization"
+	organizationmanager "hospital/service/identity/rpc/internal/organization/manager"
 	"hospital/service/identity/rpc/internal/svc"
 )
 
@@ -40,7 +41,7 @@ func TestGetOrganizationUnitLogic(t *testing.T) {
 		},
 	})
 	logic := NewGetOrganizationUnitLogic(ctx, &svc.ServiceContext{
-		OrganizationManager: organization.NewManager(store),
+		Managers: svc.Managers{OrganizationUnit: organizationmanager.NewUnitManager(store)},
 	})
 
 	response, err := logic.GetOrganizationUnit(&identityv1.GetOrganizationUnitRequest{
@@ -70,7 +71,7 @@ func TestGetOrganizationUnitLogicRequiresPermission(t *testing.T) {
 		Status:    authn.AccountStatusActive,
 	})
 	logic := NewGetOrganizationUnitLogic(ctx, &svc.ServiceContext{
-		OrganizationManager: organization.NewManager(store),
+		Managers: svc.Managers{OrganizationUnit: organizationmanager.NewUnitManager(store)},
 	})
 
 	_, err := logic.GetOrganizationUnit(&identityv1.GetOrganizationUnitRequest{
@@ -87,7 +88,7 @@ func TestGetOrganizationUnitLogicRequiresPermission(t *testing.T) {
 func TestGetOrganizationUnitLogicRequiresAuthentication(t *testing.T) {
 	store := &getOrganizationUnitStore{}
 	logic := NewGetOrganizationUnitLogic(context.Background(), &svc.ServiceContext{
-		OrganizationManager: organization.NewManager(store),
+		Managers: svc.Managers{OrganizationUnit: organizationmanager.NewUnitManager(store)},
 	})
 
 	_, err := logic.GetOrganizationUnit(&identityv1.GetOrganizationUnitRequest{

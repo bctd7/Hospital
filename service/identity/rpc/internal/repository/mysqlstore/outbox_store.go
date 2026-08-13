@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	"hospital/service/identity/rpc/internal/outbox"
+	"hospital/service/identity/rpc/internal/messaging/outbox"
 )
 
 var _ outbox.Store = (*Store)(nil)

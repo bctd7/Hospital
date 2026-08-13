@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"hospital/common/authn"
+	authversion "hospital/common/authz/version"
 )
 
 type AccessTokenIssuer interface {
@@ -21,7 +22,7 @@ type Manager struct {
 	store      Store
 	principals PrincipalStore
 	issuer     AccessTokenIssuer
-	versions   authn.AuthorizationVersionAdvancer
+	versions   authversion.AuthorizationVersionAdvancer
 	refreshTTL time.Duration
 	now        func() time.Time
 }
@@ -39,7 +40,7 @@ func NewManager(
 	store Store,
 	principals PrincipalStore,
 	issuer AccessTokenIssuer,
-	versions authn.AuthorizationVersionAdvancer,
+	versions authversion.AuthorizationVersionAdvancer,
 	refreshTTL time.Duration,
 ) (*Manager, error) {
 	if store == nil || principals == nil || issuer == nil || versions == nil {

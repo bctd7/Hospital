@@ -22,7 +22,7 @@ func NewRevokeRefreshTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 func (l *RevokeRefreshTokenLogic) RevokeRefreshToken(in *identityv1.RevokeRefreshTokenRequest) (*identityv1.RevokeRefreshTokenResponse, error) {
 	ctx := authorizationRequestContext(l.ctx, in.GetRequestId())
-	if err := l.svcCtx.SessionManager.Revoke(ctx, in.GetRefreshToken()); err != nil {
+	if err := l.svcCtx.Managers.Session.Revoke(ctx, in.GetRefreshToken()); err != nil {
 		logging.Error(ctx, "identity.session.revoke.failed", err)
 		return nil, sessionRPCError(err)
 	}

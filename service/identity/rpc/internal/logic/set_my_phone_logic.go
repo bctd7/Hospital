@@ -30,7 +30,7 @@ func (l *SetMyPhoneLogic) SetMyPhone(in *identityv1.SetMyPhoneRequest) (*identit
 	if err != nil {
 		return nil, err
 	}
-	binding, err := l.svcCtx.AccountManager.SetMyPhone(ctx, principal.AccountID, in.GetPhone())
+	binding, err := l.svcCtx.Managers.Authentication.SetMyPhone(ctx, principal.AccountID, in.GetPhone())
 	if err != nil {
 		logging.Error(ctx, "identity.phone.self_report_failed", err,
 			logx.Field("account_id", principal.AccountID))

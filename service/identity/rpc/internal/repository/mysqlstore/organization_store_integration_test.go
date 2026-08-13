@@ -8,6 +8,7 @@ import (
 
 	"hospital/common/authn"
 	"hospital/service/identity/rpc/internal/organization"
+	organizationmanager "hospital/service/identity/rpc/internal/organization/manager"
 )
 
 const (
@@ -39,9 +40,10 @@ func TestMySQLOrganizationStoreLifecycle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	manager := organization.NewManager(store)
+	unitManager := organizationmanager.NewUnitManager(store)
+	directoryManager := organizationmanager.NewDirectoryManager(store)
 
-	created, err := manager.CreateUnit(ctx, admin, organization.CreateUnitCommand{
+	created, err := unitManager.CreateUnit(ctx, admin, organizationmanager.CreateUnitCommand{
 		Type:        organization.UnitTypeDepartment,
 		ParentID:    organizationTestCampusID,
 		Name:        "Integration Department",
@@ -56,7 +58,7 @@ func TestMySQLOrganizationStoreLifecycle(t *testing.T) {
 	}
 	organizationTestDepartmentIDValue := created.ID
 
-	replayed, err := manager.CreateUnit(ctx, admin, organization.CreateUnitCommand{
+	replayed, err := unitManager.CreateUnit(ctx, admin, organizationmanager.CreateUnitCommand{
 		Type:        organization.UnitTypeDepartment,
 		ParentID:    organizationTestCampusID,
 		Name:        "Integration Department",
@@ -70,14 +72,14 @@ func TestMySQLOrganizationStoreLifecycle(t *testing.T) {
 		t.Fatalf("organization create replay returned %#v, want %#v", replayed, created)
 	}
 
-	campus, err := manager.GetManagedUnit(ctx, admin, organizationTestCampusID)
+	campus, err := unitManager.GetManagedUnit(ctx, admin, organizationTestCampusID)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if campus.ChildCount != 1 {
 		t.Fatalf("campus child count = %d, want 1", campus.ChildCount)
 	}
-	if _, err := manager.DisableUnit(ctx, admin, organization.ChangeUnitStatusCommand{
+	if _, err := unitManager.DisableUnit(ctx, admin, organizationmanager.ChangeUnitStatusCommand{
 		UnitID:          organizationTestCampusID,
 		ExpectedVersion: campus.Version,
 		OperationID:     "20000000-0000-0000-0000-000000000024",
@@ -86,7 +88,7 @@ func TestMySQLOrganizationStoreLifecycle(t *testing.T) {
 	}
 
 	newName := "Renamed Integration Department"
-	updated, err := manager.UpdateUnit(ctx, admin, organization.UpdateUnitCommand{
+	updated, err := unitManager.UpdateUnit(ctx, admin, organizationmanager.UpdateUnitCommand{
 		UnitID:          organizationTestDepartmentIDValue,
 		Name:            &newName,
 		ExpectedVersion: 1,
@@ -100,7 +102,7 @@ func TestMySQLOrganizationStoreLifecycle(t *testing.T) {
 		t.Fatalf("unexpected updated organization unit: %#v", updated)
 	}
 
-	disabled, err := manager.DisableUnit(ctx, admin, organization.ChangeUnitStatusCommand{
+	disabled, err := unitManager.DisableUnit(ctx, admin, organizationmanager.ChangeUnitStatusCommand{
 		UnitID:          organizationTestDepartmentIDValue,
 		ExpectedVersion: 2,
 		OperationID:     organizationTestDisableOperation,
@@ -113,7 +115,7 @@ func TestMySQLOrganizationStoreLifecycle(t *testing.T) {
 		t.Fatalf("unexpected disabled organization unit: %#v", disabled)
 	}
 
-	enabled, err := manager.EnableUnit(ctx, admin, organization.ChangeUnitStatusCommand{
+	enabled, err := unitManager.EnableUnit(ctx, admin, organizationmanager.ChangeUnitStatusCommand{
 		UnitID:          organizationTestDepartmentIDValue,
 		ExpectedVersion: 3,
 		OperationID:     organizationTestEnableOperation,
@@ -140,7 +142,7 @@ func TestMySQLOrganizationStoreLifecycle(t *testing.T) {
 		t.Fatalf("unexpected organization unit list: %#v", units)
 	}
 
-	directory, err := manager.GetDirectoryContext(ctx)
+	directory, err := directoryManager.GetDirectoryContext(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -148,7 +150,7 @@ func TestMySQLOrganizationStoreLifecycle(t *testing.T) {
 		directory.Campuses[0].ID != organizationTestCampusID {
 		t.Fatalf("unexpected public organization context: %#v", directory)
 	}
-	directoryDepartments, err := manager.ListDirectoryDepartments(ctx, organizationTestCampusID)
+	directoryDepartments, err := directoryManager.ListDirectoryDepartments(ctx, organizationTestCampusID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -156,7 +158,7 @@ func TestMySQLOrganizationStoreLifecycle(t *testing.T) {
 		directoryDepartments[0].CampusName != "Test Campus" {
 		t.Fatalf("unexpected public departments: %#v", directoryDepartments)
 	}
-	managedUnits, err := manager.ListManagedUnits(ctx, admin, organization.ListFilter{
+	managedUnits, err := unitManager.ListManagedUnits(ctx, admin, organization.ListFilter{
 		Type:     organization.UnitTypeDepartment,
 		ParentID: &campusID,
 		Status:   &status,

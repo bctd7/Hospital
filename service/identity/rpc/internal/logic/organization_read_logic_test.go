@@ -9,6 +9,7 @@ import (
 	contractauthz "hospital/contracts/authz"
 	identityv1 "hospital/contracts/gen/identity/v1"
 	"hospital/service/identity/rpc/internal/organization"
+	organizationmanager "hospital/service/identity/rpc/internal/organization/manager"
 	"hospital/service/identity/rpc/internal/svc"
 )
 
@@ -88,7 +89,12 @@ func readOrganizationServiceContext() *svc.ServiceContext {
 			Code: "DEPT-A", Name: "Cardiology", Status: organization.StatusActive, DoctorCount: 2, Version: 1,
 		},
 	}}
-	return &svc.ServiceContext{OrganizationManager: organization.NewManager(store)}
+	return &svc.ServiceContext{
+		Managers: svc.Managers{
+			OrganizationUnit:      organizationmanager.NewUnitManager(store),
+			OrganizationDirectory: organizationmanager.NewDirectoryManager(store),
+		},
+	}
 }
 
 type readOrganizationStore struct {

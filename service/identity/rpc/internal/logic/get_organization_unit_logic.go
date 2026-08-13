@@ -30,7 +30,7 @@ func (l *GetOrganizationUnitLogic) GetOrganizationUnit(in *identityv1.GetOrganiz
 	if err != nil {
 		return nil, err
 	}
-	unit, err := l.svcCtx.OrganizationManager.GetManagedUnit(ctx, operator, in.GetUnitId())
+	unit, err := l.svcCtx.Managers.OrganizationUnit.GetManagedUnit(ctx, operator, in.GetUnitId())
 	if err != nil {
 		logging.Error(ctx, "identity.organization.unit.read", err,
 			logx.Field("operator_account_id", operator.AccountID),

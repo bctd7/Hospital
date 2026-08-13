@@ -9,7 +9,8 @@ import (
 	redis "github.com/redis/go-redis/v9"
 
 	"hospital/common/authn"
-	"hospital/common/authn/versionredis"
+	authversion "hospital/common/authz/version"
+	"hospital/common/authz/version/redisstore"
 	"hospital/service/appointment/rpc/internal/config"
 	appointmentmanager "hospital/service/appointment/rpc/internal/manager"
 	patientmanager "hospital/service/appointment/rpc/internal/manager/patient"
@@ -22,7 +23,7 @@ type ServiceContext struct {
 	StaffManager                  *staffmanager.Manager
 	PatientManager                *patientmanager.Manager
 	TokenManager                  *authn.TokenManager
-	AuthorizationVersionValidator *authn.AuthorizationVersionValidator
+	AuthorizationVersionValidator *authversion.Validator
 	AppointmentRedis              *redis.Client
 	AppointmentRedisPrefix        string
 	appointmentStore              *mysqlstore.Store
@@ -49,13 +50,13 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		return nil, fmt.Errorf("ping appointment authorization redis: %w", err)
 	}
 
-	authorizationVersions, err := versionredis.NewStore(authorizationRedisClient, c.AuthorizationRedis.VersionPrefix)
+	authorizationVersions, err := redisstore.NewStore(authorizationRedisClient, c.AuthorizationRedis.VersionPrefix)
 	if err != nil {
 		authorizationRedisClient.Close()
 		store.Close()
 		return nil, fmt.Errorf("create appointment authorization version store: %w", err)
 	}
-	authorizationVersionValidator, err := authn.NewAuthorizationVersionValidator(authorizationVersions)
+	authorizationVersionValidator, err := authversion.NewValidator(authorizationVersions)
 	if err != nil {
 		authorizationRedisClient.Close()
 		store.Close()

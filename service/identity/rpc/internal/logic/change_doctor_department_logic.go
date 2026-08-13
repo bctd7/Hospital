@@ -22,10 +22,10 @@ func (l *ChangeDoctorDepartmentLogic) ChangeDoctorDepartment(in *identityv1.Chan
 	if err != nil {
 		return nil, err
 	}
-	account, actions, err := l.svc.IdentityAdminManager.ChangeDoctorDepartment(ctx, operator,
+	account, actions, err := l.svc.Managers.Account.ChangeDoctorDepartment(ctx, operator,
 		in.GetAccountId(), in.GetDepartmentId(), in.GetManagementVersion(), in.GetOperationId(), in.GetRequestId())
 	if err != nil {
-		return nil, identityAdminRPCError(err)
+		return nil, accountManagementRPCError(err)
 	}
 	return adminAccountDetailResponse(account, actions), nil
 }
