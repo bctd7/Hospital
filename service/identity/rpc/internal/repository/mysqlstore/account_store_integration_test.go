@@ -10,6 +10,7 @@ import (
 
 	"hospital/common/authn"
 	contractevents "hospital/contracts/events"
+	"hospital/service/identity/rpc/internal/account"
 	accountmanager "hospital/service/identity/rpc/internal/account/manager"
 )
 
@@ -62,7 +63,7 @@ func TestMySQLAccountManagerLifecycle(t *testing.T) {
 		t.Fatalf("unexpected display profile: %#v", profile)
 	}
 
-	page, err := manager.ListAccounts(ctx, admin, accountmanager.AccountFilter{Nickname: "患者", Page: 1, PageSize: 10})
+	page, err := manager.ListAccounts(ctx, admin, account.AccountFilter{Nickname: "患者", Page: 1, PageSize: 10})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,13 +78,13 @@ func TestMySQLAccountManagerLifecycle(t *testing.T) {
 		t.Fatalf("unexpected phone search result: account=%#v phone=%s status=%s source=%s", byPhone, maskedPhone, verificationStatus, verificationSource)
 	}
 
-	account, _, err := manager.PromoteDoctor(ctx, admin, identityAdminTestPatientID, identityAdminTestDepartmentA,
-		accountmanager.DoctorProfileInput{DisplayName: "张医生", StaffNo: "D-001", Description: "影像诊断"},
+	managedAccount, _, err := manager.PromoteDoctor(ctx, admin, identityAdminTestPatientID, identityAdminTestDepartmentA,
+		account.DoctorProfileInput{DisplayName: "张医生", StaffNo: "D-001", Description: "影像诊断"},
 		2, true, identityAdminTestPromoteOp, "identity-admin-integration")
 	if err != nil {
 		t.Fatal(err)
 	}
-	assertManagedAccount(t, account, accountmanager.IdentityTypeDoctor, authn.AccountStatusActive, identityAdminTestDepartmentA, 3, 2)
+	assertManagedAccount(t, managedAccount, account.IdentityTypeDoctor, authn.AccountStatusActive, identityAdminTestDepartmentA, 3, 2)
 
 	doctors, err := manager.ListDoctors(ctx, identityAdminTestDepartmentA, 1, 10)
 	if err != nil {
@@ -95,30 +96,30 @@ func TestMySQLAccountManagerLifecycle(t *testing.T) {
 
 	displayName := "张主任"
 	description := "影像诊断与复核"
-	account, _, err = manager.UpdateDoctor(ctx, admin, identityAdminTestPatientID,
-		accountmanager.OptionalDoctorProfileInput{DisplayName: &displayName, Description: &description},
+	managedAccount, _, err = manager.UpdateDoctor(ctx, admin, identityAdminTestPatientID,
+		account.OptionalDoctorProfileInput{DisplayName: &displayName, Description: &description},
 		3, identityAdminTestUpdateOp, "identity-admin-integration")
 	if err != nil {
 		t.Fatal(err)
 	}
-	assertManagedAccount(t, account, accountmanager.IdentityTypeDoctor, authn.AccountStatusActive, identityAdminTestDepartmentA, 4, 2)
-	if account.DisplayName != displayName || account.Description != description {
-		t.Fatalf("doctor profile was not updated: %#v", account)
+	assertManagedAccount(t, managedAccount, account.IdentityTypeDoctor, authn.AccountStatusActive, identityAdminTestDepartmentA, 4, 2)
+	if managedAccount.DisplayName != displayName || managedAccount.Description != description {
+		t.Fatalf("doctor profile was not updated: %#v", managedAccount)
 	}
 
-	account, _, err = manager.ChangeDoctorDepartment(ctx, admin, identityAdminTestPatientID, identityAdminTestDepartmentB,
+	managedAccount, _, err = manager.ChangeDoctorDepartment(ctx, admin, identityAdminTestPatientID, identityAdminTestDepartmentB,
 		4, identityAdminTestTransferOp, "identity-admin-integration")
 	if err != nil {
 		t.Fatal(err)
 	}
-	assertManagedAccount(t, account, accountmanager.IdentityTypeDoctor, authn.AccountStatusActive, identityAdminTestDepartmentB, 5, 3)
+	assertManagedAccount(t, managedAccount, account.IdentityTypeDoctor, authn.AccountStatusActive, identityAdminTestDepartmentB, 5, 3)
 
-	account, _, err = manager.SetAccountEnabled(ctx, admin, identityAdminTestPatientID, false,
+	managedAccount, _, err = manager.SetAccountEnabled(ctx, admin, identityAdminTestPatientID, false,
 		5, identityAdminTestDisableOp, "identity-admin-integration")
 	if err != nil {
 		t.Fatal(err)
 	}
-	assertManagedAccount(t, account, accountmanager.IdentityTypeDoctor, authn.AccountStatusDisabled, identityAdminTestDepartmentB, 6, 4)
+	assertManagedAccount(t, managedAccount, account.IdentityTypeDoctor, authn.AccountStatusDisabled, identityAdminTestDepartmentB, 6, 4)
 	doctors, err = manager.ListDoctors(ctx, identityAdminTestDepartmentB, 1, 10)
 	if err != nil {
 		t.Fatal(err)
@@ -127,20 +128,20 @@ func TestMySQLAccountManagerLifecycle(t *testing.T) {
 		t.Fatalf("disabled doctor remained in public directory: %#v", doctors)
 	}
 
-	account, _, err = manager.SetAccountEnabled(ctx, admin, identityAdminTestPatientID, true,
+	managedAccount, _, err = manager.SetAccountEnabled(ctx, admin, identityAdminTestPatientID, true,
 		6, identityAdminTestEnableOp, "identity-admin-integration")
 	if err != nil {
 		t.Fatal(err)
 	}
-	assertManagedAccount(t, account, accountmanager.IdentityTypeDoctor, authn.AccountStatusActive, identityAdminTestDepartmentB, 7, 5)
+	assertManagedAccount(t, managedAccount, account.IdentityTypeDoctor, authn.AccountStatusActive, identityAdminTestDepartmentB, 7, 5)
 
-	account, _, err = manager.RevokeDoctor(ctx, admin, identityAdminTestPatientID,
+	managedAccount, _, err = manager.RevokeDoctor(ctx, admin, identityAdminTestPatientID,
 		7, identityAdminTestRevokeOp, "identity-admin-integration")
 	if err != nil {
 		t.Fatal(err)
 	}
-	assertManagedAccount(t, account, accountmanager.IdentityTypePatient, authn.AccountStatusActive, identityAdminTestDepartmentB, 8, 6)
-	departmentAccounts, err := manager.ListAccounts(ctx, admin, accountmanager.AccountFilter{
+	assertManagedAccount(t, managedAccount, account.IdentityTypePatient, authn.AccountStatusActive, identityAdminTestDepartmentB, 8, 6)
+	departmentAccounts, err := manager.ListAccounts(ctx, admin, account.AccountFilter{
 		DepartmentID: identityAdminTestDepartmentB, Page: 1, PageSize: 10,
 	})
 	if err != nil {
@@ -164,11 +165,11 @@ func TestMySQLAccountManagerLifecycle(t *testing.T) {
 	assertIdentityAuthorizationOutboxEvents(t, store, ctx)
 }
 
-func assertManagedAccount(t *testing.T, account accountmanager.Account, identityType, status, departmentID string, managementVersion, authorizationVersion int64) {
+func assertManagedAccount(t *testing.T, managedAccount account.Account, identityType, status, departmentID string, managementVersion, authorizationVersion int64) {
 	t.Helper()
-	if account.IdentityType() != identityType || account.AccountStatus != status || account.DepartmentID != departmentID ||
-		account.ManagementVersion != managementVersion || account.AuthorizationVersion != authorizationVersion {
-		t.Fatalf("unexpected managed account: %#v", account)
+	if managedAccount.IdentityType() != identityType || managedAccount.AccountStatus != status || managedAccount.DepartmentID != departmentID ||
+		managedAccount.ManagementVersion != managementVersion || managedAccount.AuthorizationVersion != authorizationVersion {
+		t.Fatalf("unexpected managed account: %#v", managedAccount)
 	}
 }
 

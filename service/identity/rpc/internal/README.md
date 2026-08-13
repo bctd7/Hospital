@@ -13,20 +13,29 @@ server/identity_service_server.go
 `server` 和 `logic` 是协议适配层；权限、状态机、事务和幂等规则必须留在
 Manager。Logic 不得直接访问 Repository。
 
+领域根包负责表达“是什么”：模型、稳定错误和 Store 端口；`manager/` 负责表达
+“怎样操作”：权限判断、校验、状态迁移、事务编排和幂等流程。Repository 只实现
+根包声明的 Store 端口，因此不会反向依赖业务 Manager。
+
 ## 领域目录
 
 ```text
 internal/
 ├─ authentication/             登录凭据验证、账号解析和开始 Session
+│  ├─ manager/                 微信登录、手机号登录和认证校验
 │  └─ provider/                微信、阿里云短信、本地测试 Provider
 ├─ account/
+│  ├─ model.go / errors.go       账号领域模型与稳定错误
+│  ├─ store.go                   账号持久化端口
 │  └─ manager/                 账号、医生、本人资料的业务操作
 ├─ authorization/
-│  ├─ manager/                 只读取有效 Principal
-│  └─ version/                 授权版本事件及 Kafka→Redis Consumer
+│  ├─ context/                   有效 Principal 的 Manager 与 Store 端口
+│  └─ version/                   授权版本事件、Consumer 与 Redis 写入端口
 ├─ organization/
+│  ├─ model.go / errors.go       组织领域模型与稳定错误
+│  ├─ store.go                   组织持久化端口
 │  └─ manager/                 组织单元管理与公共目录读取
-├─ session/                    Access/Refresh Token 生命周期
+├─ session/                    Manager、模型、Store 端口和 Token 工具
 ├─ messaging/
 │  ├─ kafka/                   只提供 Reader/Writer 传输适配
 │  └─ outbox/                  通用 MySQL Outbox→Kafka Publisher
@@ -40,7 +49,7 @@ internal/
 
 ### Authentication、Account 和 Session
 
-- `authentication` 验证微信或手机凭据，找到或创建登录账号；
+- `authentication/manager` 验证微信或手机凭据，找到或创建登录账号；
 - `authentication/provider` 只适配微信、阿里云手机号等外部登录渠道，并把已验证的外部身份交给认证 Manager；
 - `account/manager` 管理账号状态、医生身份、科室和展示资料；
 - `session` 读取最新 Principal，签发/刷新 Token，维护 Refresh Session。
@@ -49,9 +58,8 @@ Provider 不创建 Session、不签发 Token，也不负责账号管理。`svc/l
 
 ### Authorization Manager 和 Version Consumer
 
-- `authorization/manager` 只读取账号类型、角色、权限、科室和版本；
-- `authorization/version/event.go` 定义授权版本发生变化时的集成事件；
-- `authorization/version/consumer.go` 完成 Kafka 拉取、Redis 单调更新和 Offset 提交；
+- `authorization/context` 只读取账号类型、角色、权限、科室和版本；
+- `authorization/version` 定义授权版本事件，并完成 Kafka 拉取、Redis 单调更新和 Offset 提交；
 - 角色、权限、科室和账号状态的修改仍由 `account/manager` 完成。
 
 ### Outbox

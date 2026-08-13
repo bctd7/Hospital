@@ -5,8 +5,8 @@ import (
 	"time"
 
 	accountmanager "hospital/service/identity/rpc/internal/account/manager"
-	"hospital/service/identity/rpc/internal/authentication"
-	authorizationmanager "hospital/service/identity/rpc/internal/authorization/manager"
+	authenticationmanager "hospital/service/identity/rpc/internal/authentication/manager"
+	authorizationcontext "hospital/service/identity/rpc/internal/authorization/context"
 	"hospital/service/identity/rpc/internal/config"
 	organizationmanager "hospital/service/identity/rpc/internal/organization/manager"
 	"hospital/service/identity/rpc/internal/session"
@@ -30,7 +30,7 @@ func wireManagers(
 	if err != nil {
 		return Managers{}, fmt.Errorf("create identity session manager: %w", err)
 	}
-	authenticationManager, err := authentication.NewManager(
+	authenticationManager, err := authenticationmanager.NewManager(
 		resourceSet.identityStore,
 		providers.weChat,
 		sessionManager,
@@ -40,7 +40,7 @@ func wireManagers(
 	if err != nil {
 		return Managers{}, fmt.Errorf("create identity authentication manager: %w", err)
 	}
-	phoneLoginManager, err := authentication.NewPhoneLoginManager(
+	phoneLoginManager, err := authenticationmanager.NewPhoneLoginManager(
 		resourceSet.identityStore,
 		providers.phone,
 		sessionManager,
@@ -50,7 +50,7 @@ func wireManagers(
 	if err != nil {
 		return Managers{}, fmt.Errorf("create phone login manager: %w", err)
 	}
-	authorizationManager, err := authorizationmanager.NewManager(resourceSet.identityStore)
+	authorizationManager, err := authorizationcontext.NewManager(resourceSet.identityStore)
 	if err != nil {
 		return Managers{}, fmt.Errorf("create identity authorization manager: %w", err)
 	}

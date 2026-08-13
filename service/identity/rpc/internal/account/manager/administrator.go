@@ -9,94 +9,95 @@ import (
 
 	"hospital/common/authn"
 	contractauthz "hospital/contracts/authz"
+	"hospital/service/identity/rpc/internal/account"
 )
 
-func (m *Manager) ListAccounts(ctx context.Context, operator authn.Principal, filter AccountFilter) (AccountPage, error) {
+func (m *Manager) ListAccounts(ctx context.Context, operator authn.Principal, filter account.AccountFilter) (account.AccountPage, error) {
 	if !canReadAccounts(operator) {
-		return AccountPage{}, ErrForbidden
+		return account.AccountPage{}, account.ErrForbidden
 	}
 	page, pageSize, err := normalizedPage(filter.Page, filter.PageSize)
 	if err != nil {
-		return AccountPage{}, err
+		return account.AccountPage{}, err
 	}
 	filter.Page, filter.PageSize = page, pageSize
 	filter.Nickname, err = normalizedText(filter.Nickname, "nickname", maxDisplayNameRunes, true)
 	if err != nil {
-		return AccountPage{}, err
+		return account.AccountPage{}, err
 	}
 	filter.IdentityType = strings.TrimSpace(filter.IdentityType)
-	if filter.IdentityType != "" && filter.IdentityType != IdentityTypePatient &&
-		filter.IdentityType != IdentityTypeDoctor && filter.IdentityType != IdentityTypeSuperAdmin {
-		return AccountPage{}, fmt.Errorf("%w: unsupported identity_type %q", ErrInvalid, filter.IdentityType)
+	if filter.IdentityType != "" && filter.IdentityType != account.IdentityTypePatient &&
+		filter.IdentityType != account.IdentityTypeDoctor && filter.IdentityType != account.IdentityTypeSuperAdmin {
+		return account.AccountPage{}, fmt.Errorf("%w: unsupported identity_type %q", account.ErrInvalid, filter.IdentityType)
 	}
 	filter.Status = strings.TrimSpace(filter.Status)
 	if filter.Status != "" && filter.Status != authn.AccountStatusActive && filter.Status != authn.AccountStatusDisabled {
-		return AccountPage{}, fmt.Errorf("%w: unsupported status %q", ErrInvalid, filter.Status)
+		return account.AccountPage{}, fmt.Errorf("%w: unsupported status %q", account.ErrInvalid, filter.Status)
 	}
 	if strings.TrimSpace(filter.DepartmentID) != "" {
 		filter.DepartmentID, err = normalizedUUID(filter.DepartmentID, "department_id")
 		if err != nil {
-			return AccountPage{}, err
+			return account.AccountPage{}, err
 		}
 	}
 	return m.store.ListAccounts(ctx, filter)
 }
 
-func (m *Manager) GetAccount(ctx context.Context, operator authn.Principal, accountID string) (Account, []string, error) {
+func (m *Manager) GetAccount(ctx context.Context, operator authn.Principal, accountID string) (account.Account, []string, error) {
 	if !canReadAccounts(operator) {
-		return Account{}, nil, ErrForbidden
+		return account.Account{}, nil, account.ErrForbidden
 	}
 	accountID, err := normalizedUUID(accountID, "account_id")
 	if err != nil {
-		return Account{}, nil, err
+		return account.Account{}, nil, err
 	}
-	account, err := m.store.GetAccount(ctx, accountID)
+	managedAccount, err := m.store.GetAccount(ctx, accountID)
 	if err != nil {
-		return Account{}, nil, err
+		return account.Account{}, nil, err
 	}
-	return account, availableActions(operator, account), nil
+	return managedAccount, availableActions(operator, managedAccount), nil
 }
 
-func (m *Manager) SearchByPhone(ctx context.Context, operator authn.Principal, phone string) (Account, string, string, string, error) {
+func (m *Manager) SearchByPhone(ctx context.Context, operator authn.Principal, phone string) (account.Account, string, string, string, error) {
 	if !canReadAccounts(operator) {
-		return Account{}, "", "", "", ErrForbidden
+		return account.Account{}, "", "", "", account.ErrForbidden
 	}
 	normalized, err := normalizePhone(phone)
 	if err != nil {
-		return Account{}, "", "", "", err
+		return account.Account{}, "", "", "", err
 	}
 	fingerprint := hmac.New(sha256.New, m.phoneKey)
 	_, _ = fingerprint.Write([]byte(normalized))
 	accountID, err := m.store.FindAccountIDByPhone(ctx, fingerprint.Sum(nil))
 	if err != nil {
-		return Account{}, "", "", "", err
+		return account.Account{}, "", "", "", err
 	}
-	account, err := m.store.GetAccount(ctx, accountID)
+	managedAccount, err := m.store.GetAccount(ctx, accountID)
 	if err != nil {
-		return Account{}, "", "", "", err
+		return account.Account{}, "", "", "", err
 	}
-	return account, account.MaskedPhone, account.PhoneVerificationStatus, account.PhoneVerificationSource, nil
+	return managedAccount, managedAccount.MaskedPhone, managedAccount.PhoneVerificationStatus, managedAccount.PhoneVerificationSource, nil
 }
 
-func (m *Manager) SetAccountEnabled(ctx context.Context, operator authn.Principal, accountID string, enabled bool, expectedVersion int64, operationID, requestID string) (Account, []string, error) {
+func (m *Manager) SetAccountEnabled(ctx context.Context, operator authn.Principal, accountID string, enabled bool, expectedVersion int64, operationID, requestID string) (account.Account, []string, error) {
 	status := authn.AccountStatusDisabled
-	action := ActionDisableAccount
+	action := account.ActionDisableAccount
 	if enabled {
 		status = authn.AccountStatusActive
-		action = ActionEnableAccount
+		action = account.ActionEnableAccount
 	}
 	return m.mutate(ctx, operator, accountID, expectedVersion, operationID, requestID,
 		action, contractauthz.PermissionIdentityAccountManage,
-		func(tx TxStore, before Account) error {
+		func(tx account.TxStore, before account.Account) error {
 			if before.AccountStatus == status {
-				return fmt.Errorf("%w: account already has requested status", ErrInvalidState)
+				return fmt.Errorf("%w: account already has requested status", account.ErrInvalidState)
 			}
 			return tx.SetManagedAccountStatus(ctx, before.ID, status, expectedVersion)
 		})
 }
 
-func availableActions(operator authn.Principal, target Account) []string {
-	if operator.AccountID == target.ID || target.IdentityType() == IdentityTypeSuperAdmin {
+func availableActions(operator authn.Principal, target account.Account) []string {
+	if operator.AccountID == target.ID || target.IdentityType() == account.IdentityTypeSuperAdmin {
 		return []string{}
 	}
 	if target.AccountStatus == authn.AccountStatusDisabled {
@@ -107,7 +108,7 @@ func availableActions(operator authn.Principal, target Account) []string {
 	}
 	actions := make([]string, 0, 4)
 	if operator.HasPermission(contractauthz.PermissionIdentityAuthorizationManage) {
-		if target.IdentityType() == IdentityTypeDoctor {
+		if target.IdentityType() == account.IdentityTypeDoctor {
 			actions = append(actions, "edit_doctor", "change_department", "revoke_doctor")
 		} else {
 			actions = append(actions, "promote_doctor")

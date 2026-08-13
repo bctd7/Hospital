@@ -4,7 +4,7 @@ import (
 	"context"
 
 	identityv1 "hospital/contracts/gen/identity/v1"
-	accountmanager "hospital/service/identity/rpc/internal/account/manager"
+	"hospital/service/identity/rpc/internal/account"
 	"hospital/service/identity/rpc/internal/svc"
 )
 
@@ -23,7 +23,7 @@ func (l *ListAdminAccountsLogic) ListAdminAccounts(in *identityv1.ListAdminAccou
 	if err != nil {
 		return nil, err
 	}
-	page, err := l.svc.Managers.Account.ListAccounts(ctx, operator, accountmanager.AccountFilter{
+	page, err := l.svc.Managers.Account.ListAccounts(ctx, operator, account.AccountFilter{
 		Page: in.GetPage(), PageSize: in.GetPageSize(), Nickname: in.GetNickname(),
 		IdentityType: in.GetIdentityType(), Status: in.GetStatus(), DepartmentID: in.GetDepartmentId(),
 	})

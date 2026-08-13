@@ -1,9 +1,7 @@
-package authentication
+package manager
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
 	"errors"
 	"regexp"
 	"strings"
@@ -72,10 +70,4 @@ func (m *PhoneLoginManager) Login(ctx context.Context, rawPhone, rawCode string)
 		return session.TokenPair{}, err
 	}
 	return m.sessions.Start(ctx, accountID)
-}
-
-func phoneFingerprint(key []byte, phone string) []byte {
-	digest := hmac.New(sha256.New, key)
-	_, _ = digest.Write([]byte(phone))
-	return digest.Sum(nil)
 }

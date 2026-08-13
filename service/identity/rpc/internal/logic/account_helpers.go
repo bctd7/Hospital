@@ -6,9 +6,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	account "hospital/service/identity/rpc/internal/authentication"
+	authenticationmanager "hospital/service/identity/rpc/internal/authentication/manager"
 	login "hospital/service/identity/rpc/internal/authentication/provider"
-	authorization "hospital/service/identity/rpc/internal/authorization/manager"
+	authorizationcontext "hospital/service/identity/rpc/internal/authorization/context"
 )
 
 func accountRPCError(err error) error {
@@ -21,15 +21,15 @@ func accountRPCError(err error) error {
 		return status.Error(codes.Unavailable, "login provider is unavailable")
 	case errors.Is(err, login.ErrRateLimited):
 		return status.Error(codes.ResourceExhausted, "verification requests are too frequent")
-	case errors.Is(err, account.ErrInvalidPhone), errors.Is(err, account.ErrInvalidExternalIdentity):
+	case errors.Is(err, authenticationmanager.ErrInvalidPhone), errors.Is(err, authenticationmanager.ErrInvalidExternalIdentity):
 		return status.Error(codes.InvalidArgument, err.Error())
-	case errors.Is(err, account.ErrPhoneInUse):
+	case errors.Is(err, authenticationmanager.ErrPhoneInUse):
 		return status.Error(codes.AlreadyExists, err.Error())
-	case errors.Is(err, account.ErrVerifiedPhoneChange):
+	case errors.Is(err, authenticationmanager.ErrVerifiedPhoneChange):
 		return status.Error(codes.FailedPrecondition, "verified login phone requires a dedicated change flow")
-	case errors.Is(err, authorization.ErrNotFound):
+	case errors.Is(err, authorizationcontext.ErrNotFound):
 		return status.Error(codes.NotFound, "identity account not found")
-	case errors.Is(err, authorization.ErrForbidden):
+	case errors.Is(err, authorizationcontext.ErrForbidden):
 		return status.Error(codes.PermissionDenied, "permission denied")
 	default:
 		return status.Error(codes.Internal, "identity account operation failed")

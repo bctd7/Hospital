@@ -4,9 +4,9 @@ import (
 	"hospital/common/authn"
 	commonauthversion "hospital/common/authz/version"
 	accountmanager "hospital/service/identity/rpc/internal/account/manager"
-	"hospital/service/identity/rpc/internal/authentication"
-	authorizationmanager "hospital/service/identity/rpc/internal/authorization/manager"
-	identityauthversion "hospital/service/identity/rpc/internal/authorization/version"
+	authenticationmanager "hospital/service/identity/rpc/internal/authentication/manager"
+	authorizationcontext "hospital/service/identity/rpc/internal/authorization/context"
+	authorizationversion "hospital/service/identity/rpc/internal/authorization/version"
 	"hospital/service/identity/rpc/internal/config"
 	"hospital/service/identity/rpc/internal/messaging/kafka"
 	"hospital/service/identity/rpc/internal/messaging/outbox"
@@ -17,10 +17,10 @@ import (
 // Managers 是 RPC Logic 可以调用的业务入口集合。
 // ServiceContext 只保存这些入口，不在这里实现账号、授权或会话规则。
 type Managers struct {
-	Authentication        *authentication.Manager
-	PhoneLogin            *authentication.PhoneLoginManager
+	Authentication        *authenticationmanager.Manager
+	PhoneLogin            *authenticationmanager.PhoneLoginManager
 	Session               *session.Manager
-	Authorization         *authorizationmanager.Manager
+	Authorization         *authorizationcontext.Manager
 	Account               *accountmanager.Manager
 	OrganizationUnit      *organizationmanager.UnitManager
 	OrganizationDirectory *organizationmanager.DirectoryManager
@@ -35,7 +35,7 @@ type Security struct {
 // Workers 是可选的后台消息任务；Kafka 未启用时对应字段为 nil。
 type Workers struct {
 	OutboxPublisher              *outbox.Publisher
-	AuthorizationVersionConsumer *identityauthversion.Consumer
+	AuthorizationVersionConsumer *authorizationversion.Consumer
 }
 
 // ServiceContext 是 Identity 的唯一依赖装配入口，由所有生成的 Logic 共享。

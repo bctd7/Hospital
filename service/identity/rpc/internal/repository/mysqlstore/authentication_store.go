@@ -8,17 +8,17 @@ import (
 
 	"github.com/google/uuid"
 
-	account "hospital/service/identity/rpc/internal/authentication"
+	authenticationmanager "hospital/service/identity/rpc/internal/authentication/manager"
 )
 
 var (
-	_ account.Store           = (*Store)(nil)
-	_ account.PhoneLoginStore = (*Store)(nil)
+	_ authenticationmanager.Store           = (*Store)(nil)
+	_ authenticationmanager.PhoneLoginStore = (*Store)(nil)
 )
 
 func (s *Store) FindOrCreateWeChatAccount(ctx context.Context, appID, openID string) (string, error) {
 	if appID == "" || openID == "" {
-		return "", account.ErrInvalidExternalIdentity
+		return "", authenticationmanager.ErrInvalidExternalIdentity
 	}
 	var accountID string
 	err := s.db.QueryRowContext(ctx, `
@@ -144,17 +144,17 @@ WHERE provider = 'wechat' AND provider_app_id = ? AND provider_subject = ?`, app
 	return accountID, nil
 }
 
-func (s *Store) SetSelfReportedPhone(ctx context.Context, accountID string, fingerprint []byte, masked string) (account.PhoneBinding, error) {
+func (s *Store) SetSelfReportedPhone(ctx context.Context, accountID string, fingerprint []byte, masked string) (authenticationmanager.PhoneBinding, error) {
 	var currentStatus string
 	err := s.db.QueryRowContext(ctx, `
 SELECT verification_status
 FROM identity_account_phones
 WHERE account_id = ?`, accountID).Scan(&currentStatus)
-	if err == nil && currentStatus == account.PhoneStatusVerified {
-		return account.PhoneBinding{}, account.ErrVerifiedPhoneChange
+	if err == nil && currentStatus == authenticationmanager.PhoneStatusVerified {
+		return authenticationmanager.PhoneBinding{}, authenticationmanager.ErrVerifiedPhoneChange
 	}
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return account.PhoneBinding{}, fmt.Errorf("read current phone binding: %w", err)
+		return authenticationmanager.PhoneBinding{}, fmt.Errorf("read current phone binding: %w", err)
 	}
 
 	result, err := s.db.ExecContext(ctx, `
@@ -165,24 +165,24 @@ SET phone_fingerprint = ?, phone_masked = ?, verification_status = 'self_reporte
 WHERE account_id = ?`, fingerprint, masked, accountID)
 	if err != nil {
 		if isDuplicateEntry(err) {
-			return account.PhoneBinding{}, account.ErrPhoneInUse
+			return authenticationmanager.PhoneBinding{}, authenticationmanager.ErrPhoneInUse
 		}
-		return account.PhoneBinding{}, fmt.Errorf("save self-reported phone: %w", err)
+		return authenticationmanager.PhoneBinding{}, fmt.Errorf("save self-reported phone: %w", err)
 	}
 	affected, err := result.RowsAffected()
 	if err != nil {
-		return account.PhoneBinding{}, fmt.Errorf("read phone update result: %w", err)
+		return authenticationmanager.PhoneBinding{}, fmt.Errorf("read phone update result: %w", err)
 	}
 	if affected == 0 {
 		var exists bool
 		if err := s.db.QueryRowContext(ctx, `
 SELECT EXISTS(SELECT 1 FROM identity_account_phones WHERE account_id = ?)`, accountID).Scan(&exists); err != nil {
-			return account.PhoneBinding{}, fmt.Errorf("check existing phone binding: %w", err)
+			return authenticationmanager.PhoneBinding{}, fmt.Errorf("check existing phone binding: %w", err)
 		}
 		if exists {
-			return account.PhoneBinding{
-				Masked: masked, VerificationStatus: account.PhoneStatusSelfReported,
-				VerificationSource: account.PhoneSourceSelfReported,
+			return authenticationmanager.PhoneBinding{
+				Masked: masked, VerificationStatus: authenticationmanager.PhoneStatusSelfReported,
+				VerificationSource: authenticationmanager.PhoneSourceSelfReported,
 			}, nil
 		}
 		_, err = s.db.ExecContext(ctx, `
@@ -191,13 +191,13 @@ INSERT INTO identity_account_phones
 VALUES (?, ?, ?, 'self_reported', 'self_reported', NULL)`, accountID, fingerprint, masked)
 		if err != nil {
 			if isDuplicateEntry(err) {
-				return account.PhoneBinding{}, account.ErrPhoneInUse
+				return authenticationmanager.PhoneBinding{}, authenticationmanager.ErrPhoneInUse
 			}
-			return account.PhoneBinding{}, fmt.Errorf("insert self-reported phone: %w", err)
+			return authenticationmanager.PhoneBinding{}, fmt.Errorf("insert self-reported phone: %w", err)
 		}
 	}
-	return account.PhoneBinding{
-		Masked: masked, VerificationStatus: account.PhoneStatusSelfReported,
-		VerificationSource: account.PhoneSourceSelfReported,
+	return authenticationmanager.PhoneBinding{
+		Masked: masked, VerificationStatus: authenticationmanager.PhoneStatusSelfReported,
+		VerificationSource: authenticationmanager.PhoneSourceSelfReported,
 	}, nil
 }

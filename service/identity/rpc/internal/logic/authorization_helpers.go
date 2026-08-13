@@ -10,7 +10,7 @@ import (
 	"hospital/common/authn"
 	"hospital/common/observability/logging"
 	identityv1 "hospital/contracts/gen/identity/v1"
-	authorization "hospital/service/identity/rpc/internal/authorization/manager"
+	authorizationcontext "hospital/service/identity/rpc/internal/authorization/context"
 )
 
 func authorizationRequestContext(ctx context.Context, requestID string) context.Context {
@@ -42,11 +42,11 @@ func authorizationContextResponse(principal authn.Principal) *identityv1.Authori
 
 func authorizationRPCError(err error) error {
 	switch {
-	case errors.Is(err, authorization.ErrInvalid):
+	case errors.Is(err, authorizationcontext.ErrInvalid):
 		return status.Error(codes.InvalidArgument, err.Error())
-	case errors.Is(err, authorization.ErrForbidden):
+	case errors.Is(err, authorizationcontext.ErrForbidden):
 		return status.Error(codes.PermissionDenied, "permission denied")
-	case errors.Is(err, authorization.ErrNotFound):
+	case errors.Is(err, authorizationcontext.ErrNotFound):
 		return status.Error(codes.NotFound, "identity resource not found")
 	default:
 		return status.Error(codes.Internal, "identity authorization operation failed")

@@ -27,14 +27,6 @@ type Manager struct {
 	now        func() time.Time
 }
 
-// TokenPair 是一次登录或刷新后返回给客户端的完整凭证及其绝对过期时间。
-type TokenPair struct {
-	AccessToken      string
-	RefreshToken     string
-	AccessExpiresAt  time.Time
-	RefreshExpiresAt time.Time
-}
-
 // NewManager 组装会话管理器；refreshTTL 控制一条登录会话的绝对生命周期。
 func NewManager(
 	store Store,

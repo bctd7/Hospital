@@ -8,19 +8,19 @@ import (
 	"fmt"
 	"time"
 
-	accountmanager "hospital/service/identity/rpc/internal/account/manager"
+	"hospital/service/identity/rpc/internal/account"
 	authorizationversion "hospital/service/identity/rpc/internal/authorization/version"
 
 	"github.com/google/uuid"
 )
 
-var _ accountmanager.TxStore = (*mysqlAccountTxStore)(nil)
+var _ account.TxStore = (*mysqlAccountTxStore)(nil)
 
 type mysqlAccountTxStore struct {
 	tx *sql.Tx
 }
 
-func (s *Store) WithinAccountTransaction(ctx context.Context, fn func(accountmanager.TxStore) error) error {
+func (s *Store) WithinAccountTransaction(ctx context.Context, fn func(account.TxStore) error) error {
 	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 	if err != nil {
 		return fmt.Errorf("begin account management transaction: %w", err)
@@ -35,8 +35,8 @@ func (s *Store) WithinAccountTransaction(ctx context.Context, fn func(accountman
 	return nil
 }
 
-func (s *mysqlAccountTxStore) FindAccountOperation(ctx context.Context, operationID string) (accountmanager.Operation, bool, error) {
-	var operation accountmanager.Operation
+func (s *mysqlAccountTxStore) FindAccountOperation(ctx context.Context, operationID string) (account.Operation, bool, error) {
+	var operation account.Operation
 	err := s.tx.QueryRowContext(ctx, `
 SELECT operator_account_id, target_account_id, action
 FROM identity_authorization_audit
@@ -44,22 +44,22 @@ WHERE operation_id = ?`, operationID).Scan(
 		&operation.OperatorAccountID, &operation.TargetAccountID, &operation.Action,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
-		return accountmanager.Operation{}, false, nil
+		return account.Operation{}, false, nil
 	}
 	if err != nil {
-		return accountmanager.Operation{}, false, fmt.Errorf("find account management operation: %w", err)
+		return account.Operation{}, false, fmt.Errorf("find account management operation: %w", err)
 	}
 	return operation, true, nil
 }
 
-func (s *mysqlAccountTxStore) GetAccountForUpdate(ctx context.Context, accountID string) (accountmanager.Account, error) {
+func (s *mysqlAccountTxStore) GetAccountForUpdate(ctx context.Context, accountID string) (account.Account, error) {
 	return scanManagedAccount(s.tx.QueryRowContext(ctx, managedAccountSelect+" WHERE a.id = ? FOR UPDATE", accountID))
 }
 
 func (s *mysqlAccountTxStore) PromoteDoctor(
 	ctx context.Context,
 	accountID, departmentID string,
-	profile accountmanager.DoctorProfileInput,
+	profile account.DoctorProfileInput,
 	expectedVersion int64,
 	verifyPhone bool,
 ) error {
@@ -73,13 +73,13 @@ FROM identity_account_phones
 WHERE account_id = ?
 FOR UPDATE`, accountID).Scan(&phoneStatus)
 	if errors.Is(err, sql.ErrNoRows) {
-		return fmt.Errorf("%w: account phone", accountmanager.ErrNotFound)
+		return fmt.Errorf("%w: account phone", account.ErrNotFound)
 	}
 	if err != nil {
 		return fmt.Errorf("lock promoted doctor phone: %w", err)
 	}
 	if phoneStatus != "verified" && !verifyPhone {
-		return fmt.Errorf("%w: verified phone is required", accountmanager.ErrInvalidState)
+		return fmt.Errorf("%w: verified phone is required", account.ErrInvalidState)
 	}
 	if verifyPhone {
 		if _, err := s.tx.ExecContext(ctx, `
@@ -117,7 +117,7 @@ ON DUPLICATE KEY UPDATE role_id = VALUES(role_id), created_at = CURRENT_TIMESTAM
 	return nil
 }
 
-func (s *mysqlAccountTxStore) UpdateDoctor(ctx context.Context, accountID string, profile accountmanager.OptionalDoctorProfileInput, expectedVersion int64) error {
+func (s *mysqlAccountTxStore) UpdateDoctor(ctx context.Context, accountID string, profile account.OptionalDoctorProfileInput, expectedVersion int64) error {
 	if err := s.bumpManagedAccount(ctx, accountID, expectedVersion, false, "account_type"); err != nil {
 		return err
 	}
@@ -190,7 +190,7 @@ WHERE id = ? AND management_version = ?`, status, accountID, expectedVersion)
 	return requireAccountVersionedMutation(result)
 }
 
-func (s *mysqlAccountTxStore) RecordAccountChange(ctx context.Context, change accountmanager.Change) error {
+func (s *mysqlAccountTxStore) RecordAccountChange(ctx context.Context, change account.Change) error {
 	beforeData, err := json.Marshal(change.Before)
 	if err != nil {
 		return fmt.Errorf("marshal account management before state: %w", err)
@@ -218,7 +218,7 @@ VALUES (?, ?, ?, ?, ?, ?, ?, NULLIF(?, ''))`,
 		change.Action, beforeData, afterData, change.RequestID)
 	if err != nil {
 		if isDuplicateEntry(err) {
-			return fmt.Errorf("%w: operation_id already exists", accountmanager.ErrConflict)
+			return fmt.Errorf("%w: operation_id already exists", account.ErrConflict)
 		}
 		return fmt.Errorf("insert account management audit: %w", err)
 	}
@@ -251,7 +251,7 @@ SELECT EXISTS(
 		return fmt.Errorf("check managed doctor department: %w", err)
 	}
 	if !exists {
-		return fmt.Errorf("%w: active department", accountmanager.ErrNotFound)
+		return fmt.Errorf("%w: active department", account.ErrNotFound)
 	}
 	return nil
 }
@@ -281,7 +281,7 @@ func requireAccountVersionedMutation(result sql.Result) error {
 		return fmt.Errorf("read account management affected rows: %w", err)
 	}
 	if affected == 0 {
-		return accountmanager.ErrVersionConflict
+		return account.ErrVersionConflict
 	}
 	return nil
 }
@@ -292,7 +292,7 @@ func requireAccountAffected(result sql.Result, resource string) error {
 		return fmt.Errorf("read account management affected rows: %w", err)
 	}
 	if affected == 0 {
-		return fmt.Errorf("%w: %s", accountmanager.ErrNotFound, resource)
+		return fmt.Errorf("%w: %s", account.ErrNotFound, resource)
 	}
 	return nil
 }

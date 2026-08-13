@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"strings"
 
-	accountmanager "hospital/service/identity/rpc/internal/account/manager"
+	"hospital/service/identity/rpc/internal/account"
 )
 
-var _ accountmanager.Store = (*Store)(nil)
+var _ account.Store = (*Store)(nil)
 
 const managedAccountSelect = `
 SELECT a.id,
@@ -40,26 +40,26 @@ LEFT JOIN identity_account_phones ph ON ph.account_id = a.id
 LEFT JOIN identity_account_roles ar ON ar.account_id = a.id
 LEFT JOIN identity_roles r ON r.id = ar.role_id`
 
-func (s *Store) GetDisplayProfile(ctx context.Context, accountID string) (accountmanager.DisplayProfile, error) {
-	var profile accountmanager.DisplayProfile
+func (s *Store) GetDisplayProfile(ctx context.Context, accountID string) (account.DisplayProfile, error) {
+	var profile account.DisplayProfile
 	err := s.db.QueryRowContext(ctx, `
 SELECT COALESCE(ap.nickname, ''), a.management_version
 FROM identity_accounts a
 LEFT JOIN identity_account_profiles ap ON ap.account_id = a.id
 WHERE a.id = ?`, accountID).Scan(&profile.Nickname, &profile.ManagementVersion)
 	if errors.Is(err, sql.ErrNoRows) {
-		return accountmanager.DisplayProfile{}, accountmanager.ErrNotFound
+		return account.DisplayProfile{}, account.ErrNotFound
 	}
 	if err != nil {
-		return accountmanager.DisplayProfile{}, fmt.Errorf("get account display profile: %w", err)
+		return account.DisplayProfile{}, fmt.Errorf("get account display profile: %w", err)
 	}
 	return profile, nil
 }
 
-func (s *Store) UpdateDisplayProfile(ctx context.Context, accountID, nickname string) (accountmanager.DisplayProfile, error) {
+func (s *Store) UpdateDisplayProfile(ctx context.Context, accountID, nickname string) (account.DisplayProfile, error) {
 	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 	if err != nil {
-		return accountmanager.DisplayProfile{}, fmt.Errorf("begin display profile update: %w", err)
+		return account.DisplayProfile{}, fmt.Errorf("begin display profile update: %w", err)
 	}
 	defer tx.Rollback()
 
@@ -69,46 +69,46 @@ SET management_version = management_version + 1,
     updated_at = CURRENT_TIMESTAMP(3)
 WHERE id = ?`, accountID)
 	if err != nil {
-		return accountmanager.DisplayProfile{}, fmt.Errorf("bump display profile version: %w", err)
+		return account.DisplayProfile{}, fmt.Errorf("bump display profile version: %w", err)
 	}
 	affected, err := result.RowsAffected()
 	if err != nil {
-		return accountmanager.DisplayProfile{}, fmt.Errorf("read display profile update result: %w", err)
+		return account.DisplayProfile{}, fmt.Errorf("read display profile update result: %w", err)
 	}
 	if affected == 0 {
-		return accountmanager.DisplayProfile{}, accountmanager.ErrNotFound
+		return account.DisplayProfile{}, account.ErrNotFound
 	}
 	if _, err := tx.ExecContext(ctx, `
 INSERT INTO identity_account_profiles (account_id, nickname)
 VALUES (?, NULLIF(?, ''))
 ON DUPLICATE KEY UPDATE nickname = VALUES(nickname), updated_at = CURRENT_TIMESTAMP(3)`, accountID, nickname); err != nil {
-		return accountmanager.DisplayProfile{}, fmt.Errorf("save account display profile: %w", err)
+		return account.DisplayProfile{}, fmt.Errorf("save account display profile: %w", err)
 	}
-	var profile accountmanager.DisplayProfile
+	var profile account.DisplayProfile
 	if err := tx.QueryRowContext(ctx, `
 SELECT COALESCE(ap.nickname, ''), a.management_version
 FROM identity_accounts a
 LEFT JOIN identity_account_profiles ap ON ap.account_id = a.id
 WHERE a.id = ?`, accountID).Scan(&profile.Nickname, &profile.ManagementVersion); err != nil {
-		return accountmanager.DisplayProfile{}, fmt.Errorf("read updated display profile: %w", err)
+		return account.DisplayProfile{}, fmt.Errorf("read updated display profile: %w", err)
 	}
 	if err := tx.Commit(); err != nil {
-		return accountmanager.DisplayProfile{}, fmt.Errorf("commit display profile update: %w", err)
+		return account.DisplayProfile{}, fmt.Errorf("commit display profile update: %w", err)
 	}
 	return profile, nil
 }
 
-func (s *Store) ListDoctors(ctx context.Context, departmentID string, page, pageSize int64) (accountmanager.DoctorPage, error) {
+func (s *Store) ListDoctors(ctx context.Context, departmentID string, page, pageSize int64) (account.DoctorPage, error) {
 	var activeDepartment bool
 	if err := s.db.QueryRowContext(ctx, `
 SELECT EXISTS(
     SELECT 1 FROM identity_organization_units
     WHERE id = ? AND unit_type = 'department' AND status = 'active'
 )`, departmentID).Scan(&activeDepartment); err != nil {
-		return accountmanager.DoctorPage{}, fmt.Errorf("check public doctor department: %w", err)
+		return account.DoctorPage{}, fmt.Errorf("check public doctor department: %w", err)
 	}
 	if !activeDepartment {
-		return accountmanager.DoctorPage{}, accountmanager.ErrNotFound
+		return account.DoctorPage{}, account.ErrNotFound
 	}
 
 	var total int64
@@ -119,7 +119,7 @@ JOIN identity_accounts a ON a.id = sp.account_id AND a.status = 'active'
 JOIN identity_account_roles ar ON ar.account_id = a.id
 JOIN identity_roles r ON r.id = ar.role_id AND r.code = 'department_doctor' AND r.status = 'active'
 WHERE sp.department_id = ? AND sp.staff_status = 'active'`, departmentID).Scan(&total); err != nil {
-		return accountmanager.DoctorPage{}, fmt.Errorf("count public doctors: %w", err)
+		return account.DoctorPage{}, fmt.Errorf("count public doctors: %w", err)
 	}
 	rows, err := s.db.QueryContext(ctx, `
 SELECT sp.account_id, sp.display_name, sp.department_id,
@@ -132,25 +132,25 @@ WHERE sp.department_id = ? AND sp.staff_status = 'active'
 ORDER BY sp.display_name, COALESCE(sp.staff_no, ''), sp.account_id
 LIMIT ? OFFSET ?`, departmentID, pageSize, (page-1)*pageSize)
 	if err != nil {
-		return accountmanager.DoctorPage{}, fmt.Errorf("list public doctors: %w", err)
+		return account.DoctorPage{}, fmt.Errorf("list public doctors: %w", err)
 	}
 	defer rows.Close()
-	items := make([]accountmanager.DoctorSummary, 0)
+	items := make([]account.DoctorSummary, 0)
 	for rows.Next() {
-		var item accountmanager.DoctorSummary
+		var item account.DoctorSummary
 		if err := rows.Scan(&item.AccountID, &item.DisplayName, &item.DepartmentID,
 			&item.AvatarURL, &item.Description, &item.ManagementVersion); err != nil {
-			return accountmanager.DoctorPage{}, fmt.Errorf("scan public doctor: %w", err)
+			return account.DoctorPage{}, fmt.Errorf("scan public doctor: %w", err)
 		}
 		items = append(items, item)
 	}
 	if err := rows.Err(); err != nil {
-		return accountmanager.DoctorPage{}, fmt.Errorf("iterate public doctors: %w", err)
+		return account.DoctorPage{}, fmt.Errorf("iterate public doctors: %w", err)
 	}
-	return accountmanager.DoctorPage{Items: items, Page: page, PageSize: pageSize, Total: total}, nil
+	return account.DoctorPage{Items: items, Page: page, PageSize: pageSize, Total: total}, nil
 }
 
-func (s *Store) GetAccount(ctx context.Context, accountID string) (accountmanager.Account, error) {
+func (s *Store) GetAccount(ctx context.Context, accountID string) (account.Account, error) {
 	return scanManagedAccount(s.db.QueryRowContext(ctx, managedAccountSelect+" WHERE a.id = ?", accountID))
 }
 
@@ -159,7 +159,7 @@ func (s *Store) FindAccountIDByPhone(ctx context.Context, fingerprint []byte) (s
 	err := s.db.QueryRowContext(ctx, `
 SELECT account_id FROM identity_account_phones WHERE phone_fingerprint = ?`, fingerprint).Scan(&accountID)
 	if errors.Is(err, sql.ErrNoRows) {
-		return "", accountmanager.ErrNotFound
+		return "", account.ErrNotFound
 	}
 	if err != nil {
 		return "", fmt.Errorf("find managed account by phone: %w", err)
@@ -167,7 +167,7 @@ SELECT account_id FROM identity_account_phones WHERE phone_fingerprint = ?`, fin
 	return accountID, nil
 }
 
-func (s *Store) ListAccounts(ctx context.Context, filter accountmanager.AccountFilter) (accountmanager.AccountPage, error) {
+func (s *Store) ListAccounts(ctx context.Context, filter account.AccountFilter) (account.AccountPage, error) {
 	where := make([]string, 0, 4)
 	args := make([]any, 0, 8)
 	if filter.Nickname != "" {
@@ -184,11 +184,11 @@ func (s *Store) ListAccounts(ctx context.Context, filter accountmanager.AccountF
 		args = append(args, filter.DepartmentID)
 	}
 	switch filter.IdentityType {
-	case accountmanager.IdentityTypeSuperAdmin:
+	case account.IdentityTypeSuperAdmin:
 		where = append(where, "r.code = 'super_admin'")
-	case accountmanager.IdentityTypeDoctor:
+	case account.IdentityTypeDoctor:
 		where = append(where, "r.code = 'department_doctor' AND sp.staff_status = 'active'")
-	case accountmanager.IdentityTypePatient:
+	case account.IdentityTypePatient:
 		where = append(where, "(r.code IS NULL OR r.code <> 'super_admin') AND (r.code IS NULL OR r.code <> 'department_doctor' OR sp.staff_status <> 'active')")
 	}
 	whereSQL := ""
@@ -205,7 +205,7 @@ LEFT JOIN identity_staff_profiles sp ON sp.account_id = a.id
 LEFT JOIN identity_account_roles ar ON ar.account_id = a.id
 LEFT JOIN identity_roles r ON r.id = ar.role_id` + whereSQL
 	if err := s.db.QueryRowContext(ctx, countQuery, args...).Scan(&total); err != nil {
-		return accountmanager.AccountPage{}, fmt.Errorf("count managed accounts: %w", err)
+		return account.AccountPage{}, fmt.Errorf("count managed accounts: %w", err)
 	}
 
 	queryArgs := append(append([]any{}, args...), filter.PageSize, (filter.Page-1)*filter.PageSize)
@@ -213,50 +213,50 @@ LEFT JOIN identity_roles r ON r.id = ar.role_id` + whereSQL
 ORDER BY COALESCE(NULLIF(sp.display_name, ''), NULLIF(ap.nickname, ''), a.id), a.id
 LIMIT ? OFFSET ?`, queryArgs...)
 	if err != nil {
-		return accountmanager.AccountPage{}, fmt.Errorf("list managed accounts: %w", err)
+		return account.AccountPage{}, fmt.Errorf("list managed accounts: %w", err)
 	}
 	defer rows.Close()
-	items := make([]accountmanager.Account, 0)
+	items := make([]account.Account, 0)
 	for rows.Next() {
-		account, err := scanManagedAccount(rows)
+		managedAccount, err := scanManagedAccount(rows)
 		if err != nil {
-			return accountmanager.AccountPage{}, err
+			return account.AccountPage{}, err
 		}
-		items = append(items, account)
+		items = append(items, managedAccount)
 	}
 	if err := rows.Err(); err != nil {
-		return accountmanager.AccountPage{}, fmt.Errorf("iterate managed accounts: %w", err)
+		return account.AccountPage{}, fmt.Errorf("iterate managed accounts: %w", err)
 	}
-	return accountmanager.AccountPage{Items: items, Page: filter.Page, PageSize: filter.PageSize, Total: total}, nil
+	return account.AccountPage{Items: items, Page: filter.Page, PageSize: filter.PageSize, Total: total}, nil
 }
 
 type accountScanner interface {
 	Scan(dest ...any) error
 }
 
-func scanManagedAccount(scanner accountScanner) (accountmanager.Account, error) {
-	var account accountmanager.Account
+func scanManagedAccount(scanner accountScanner) (account.Account, error) {
+	var managedAccount account.Account
 	var role string
 	err := scanner.Scan(
-		&account.ID, &account.Nickname, &account.DisplayName, &account.AvatarURL,
-		&account.MaskedPhone, &account.AccountStatus, &account.AccountType,
-		&account.StaffStatus, &account.DepartmentID, &account.DepartmentName,
-		&account.ManagementVersion, &account.PhoneVerificationStatus,
-		&account.PhoneVerificationSource, &account.StaffNo, &account.Description,
-		&role, &account.AuthorizationVersion, &account.CreatedAt, &account.UpdatedAt,
+		&managedAccount.ID, &managedAccount.Nickname, &managedAccount.DisplayName, &managedAccount.AvatarURL,
+		&managedAccount.MaskedPhone, &managedAccount.AccountStatus, &managedAccount.AccountType,
+		&managedAccount.StaffStatus, &managedAccount.DepartmentID, &managedAccount.DepartmentName,
+		&managedAccount.ManagementVersion, &managedAccount.PhoneVerificationStatus,
+		&managedAccount.PhoneVerificationSource, &managedAccount.StaffNo, &managedAccount.Description,
+		&role, &managedAccount.AuthorizationVersion, &managedAccount.CreatedAt, &managedAccount.UpdatedAt,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
-		return accountmanager.Account{}, accountmanager.ErrNotFound
+		return account.Account{}, account.ErrNotFound
 	}
 	if err != nil {
-		return accountmanager.Account{}, fmt.Errorf("scan managed account: %w", err)
+		return account.Account{}, fmt.Errorf("scan managed account: %w", err)
 	}
 	if role != "" {
-		account.Roles = []string{role}
+		managedAccount.Roles = []string{role}
 	} else {
-		account.Roles = []string{}
+		managedAccount.Roles = []string{}
 	}
-	return account, nil
+	return managedAccount, nil
 }
 
 func escapedLikePrefix(value string) string {

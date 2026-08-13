@@ -7,10 +7,10 @@ import (
 	"sort"
 
 	"hospital/common/authn"
-	authorization "hospital/service/identity/rpc/internal/authorization/manager"
+	authorizationcontext "hospital/service/identity/rpc/internal/authorization/context"
 )
 
-var _ authorization.Store = (*Store)(nil)
+var _ authorizationcontext.Store = (*Store)(nil)
 
 func (s *Store) GetAuthorizationContext(ctx context.Context, accountID string) (authn.Principal, error) {
 	return readAuthorizationContext(ctx, s.db, accountID)
@@ -67,7 +67,7 @@ WHERE a.id = ?`
 		return authn.Principal{}, fmt.Errorf("iterate identity authorization context: %w", err)
 	}
 	if !found {
-		return authn.Principal{}, authorization.ErrNotFound
+		return authn.Principal{}, authorizationcontext.ErrNotFound
 	}
 	principal.Roles = sortedKeys(roles)
 	principal.Permissions = sortedKeys(permissions)

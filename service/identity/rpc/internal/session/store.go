@@ -2,36 +2,9 @@ package session
 
 import (
 	"context"
-	"errors"
-	"time"
 
 	"hospital/common/authn"
 )
-
-var (
-	ErrInvalidRefreshToken  = errors.New("invalid refresh token")
-	ErrSessionNotFound      = errors.New("refresh session not found")
-	ErrSessionExpired       = errors.New("refresh session expired")
-	ErrRefreshTokenReused   = errors.New("refresh token was already used")
-	ErrAuthorizationChanged = errors.New("authorization changed; login is required")
-)
-
-// Session 是一条保存在服务端的刷新会话。
-// 客户端只持有原始 Refresh Token；Redis 只保存 TokenHash，避免 Redis 数据泄漏后凭证被直接使用。
-type Session struct {
-	// ID 同时是 Redis Key 的一部分，也是 Refresh Token 中可公开的会话定位符。
-	ID string
-	// FamilyID 标识同一次登录产生的 Token 链，预留给多次轮换和重放追踪使用。
-	FamilyID string
-	// AccountID 指向 MySQL 中的账号；刷新时需要用它重新读取最新权限。
-	AccountID string
-	// TokenHash 是完整 Refresh Token 的 SHA-256 哈希，不保存 Token 原文。
-	TokenHash string
-	// AuthorizationVersion 记录创建或刷新会话时的授权版本，便于后续失效策略扩展。
-	AuthorizationVersion int64
-	// ExpiresAt 是绝对过期时间；Token 轮换不会延长它。
-	ExpiresAt time.Time
-}
 
 // Store 是 Refresh Session 的存储端口。
 // Manager 只依赖这个接口，不直接依赖 Redis；生产环境由 repository.RedisSessionStore 实现，单元测试可使用内存实现。

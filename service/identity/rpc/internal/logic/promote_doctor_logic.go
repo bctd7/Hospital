@@ -4,7 +4,7 @@ import (
 	"context"
 
 	identityv1 "hospital/contracts/gen/identity/v1"
-	accountmanager "hospital/service/identity/rpc/internal/account/manager"
+	"hospital/service/identity/rpc/internal/account"
 	"hospital/service/identity/rpc/internal/svc"
 )
 
@@ -24,7 +24,7 @@ func (l *PromoteDoctorLogic) PromoteDoctor(in *identityv1.PromoteDoctorRequest) 
 		return nil, err
 	}
 	account, actions, err := l.svc.Managers.Account.PromoteDoctor(ctx, operator,
-		in.GetAccountId(), in.GetDepartmentId(), accountmanager.DoctorProfileInput{
+		in.GetAccountId(), in.GetDepartmentId(), account.DoctorProfileInput{
 			DisplayName: in.GetDisplayName(), StaffNo: in.GetStaffNo(), AvatarURL: in.GetAvatarUrl(), Description: in.GetDescription(),
 		}, in.GetManagementVersion(), in.GetOfflineVerified(), in.GetOperationId(), in.GetRequestId())
 	if err != nil {

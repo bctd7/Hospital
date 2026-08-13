@@ -1,4 +1,6 @@
-package manager
+// Package account 定义账号、医生和本人资料领域的模型、错误以及持久化端口。
+// 具体业务流程位于子包 manager，MySQL 实现位于 repository/mysqlstore。
+package account
 
 import "time"
 

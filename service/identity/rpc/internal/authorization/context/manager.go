@@ -1,9 +1,7 @@
-// Package manager reads an account's effective authorization context.
-// It does not mutate roles, permissions, account status, or department scope.
-package manager
+package context
 
 import (
-	"context"
+	stdcontext "context"
 	"errors"
 	"fmt"
 	"strings"
@@ -26,7 +24,7 @@ func NewManager(store Store) (*Manager, error) {
 	return &Manager{store: store}, nil
 }
 
-func (m *Manager) GetAuthorizationContext(ctx context.Context, operator authn.Principal, accountID string) (authn.Principal, error) {
+func (m *Manager) GetAuthorizationContext(ctx stdcontext.Context, operator authn.Principal, accountID string) (authn.Principal, error) {
 	if err := validateID(operator.AccountID, "operator_account_id"); err != nil {
 		return authn.Principal{}, err
 	}

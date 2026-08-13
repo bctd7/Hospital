@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"hospital/common/authn"
+	"hospital/service/identity/rpc/internal/account"
 	accountmanager "hospital/service/identity/rpc/internal/account/manager"
 )
 
@@ -74,19 +75,19 @@ VALUES (?, 'department', 'login-test', 'Login Test')`, departmentID); err != nil
 	if err != nil {
 		t.Fatal(err)
 	}
-	account, _, err := manager.PromoteDoctor(
+	managedAccount, _, err := manager.PromoteDoctor(
 		ctx, admin, patientID, departmentID,
-		accountmanager.DoctorProfileInput{DisplayName: "集成测试医生"},
+		account.DoctorProfileInput{DisplayName: "集成测试医生"},
 		patient.ManagementVersion, true, operationID, "integration-login-request",
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if account.AccountType != authn.AccountTypeStaff || account.IdentityType() != accountmanager.IdentityTypeDoctor || account.DepartmentID != departmentID {
-		t.Fatalf("unexpected promoted identity: %#v", account)
+	if managedAccount.AccountType != authn.AccountTypeStaff || managedAccount.IdentityType() != account.IdentityTypeDoctor || managedAccount.DepartmentID != departmentID {
+		t.Fatalf("unexpected promoted identity: %#v", managedAccount)
 	}
-	if account.PhoneVerificationStatus != "verified" || account.PhoneVerificationSource != "admin" {
-		t.Fatalf("phone was not admin verified: %#v", account)
+	if managedAccount.PhoneVerificationStatus != "verified" || managedAccount.PhoneVerificationSource != "admin" {
+		t.Fatalf("phone was not admin verified: %#v", managedAccount)
 	}
 }
 

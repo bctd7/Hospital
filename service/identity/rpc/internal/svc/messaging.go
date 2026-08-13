@@ -8,7 +8,7 @@ import (
 
 	commonauthversion "hospital/common/authz/version"
 	contractevents "hospital/contracts/events"
-	identityauthversion "hospital/service/identity/rpc/internal/authorization/version"
+	authorizationversion "hospital/service/identity/rpc/internal/authorization/version"
 	"hospital/service/identity/rpc/internal/config"
 	"hospital/service/identity/rpc/internal/messaging/kafka"
 	"hospital/service/identity/rpc/internal/messaging/outbox"
@@ -50,7 +50,7 @@ func buildMessaging(c config.Config, store *mysqlstore.Store, versions commonaut
 		writer.Close()
 		return messagingRuntime{}, fmt.Errorf("create identity kafka reader: %w", err)
 	}
-	consumer, err := identityauthversion.NewConsumer(reader, versions)
+	consumer, err := authorizationversion.NewConsumer(reader, versions)
 	if err != nil {
 		reader.Close()
 		writer.Close()

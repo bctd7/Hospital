@@ -8,26 +8,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/zeromicro/go-zero/core/logx"
-	authversion "hospital/common/authz/version"
 	contractevents "hospital/contracts/events"
 )
-
-// MessageReader is the small Kafka boundary required by Consumer.
-type MessageReader interface {
-	FetchMessage(ctx context.Context) (*kgo.Record, error)
-	CommitMessage(ctx context.Context, record *kgo.Record) error
-}
 
 // Consumer owns the complete Kafka -> Redis -> offset-commit workflow for
 // authorization-version events.
 type Consumer struct {
 	messages MessageReader
-	versions authversion.AuthorizationVersionAdvancer
+	versions Store
 }
 
-func NewConsumer(messages MessageReader, versions authversion.AuthorizationVersionAdvancer) (*Consumer, error) {
+func NewConsumer(messages MessageReader, versions Store) (*Consumer, error) {
 	if messages == nil || versions == nil {
 		return nil, errors.New("authorization version consumer dependencies are required")
 	}

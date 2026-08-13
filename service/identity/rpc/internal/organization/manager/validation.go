@@ -1,13 +1,18 @@
 package manager
 
 import (
+	"context"
 	"fmt"
-	"hospital/service/identity/rpc/internal/organization"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
 	"github.com/google/uuid"
+
+	"hospital/common/authn"
+	commonauthz "hospital/common/authz"
+	contractauthz "hospital/contracts/authz"
+	"hospital/service/identity/rpc/internal/organization"
 )
 
 const (
@@ -61,4 +66,49 @@ func generatedUnitCode(unitType organization.UnitType, operationID string) strin
 
 func operationConflict() error {
 	return fmt.Errorf("%w: operation_id was already used for a different organization change", organization.ErrConflict)
+}
+
+func requireManagePermission(operator authn.Principal) error {
+	if err := commonauthz.RequirePermission(operator, contractauthz.PermissionIdentityDepartmentManage); err != nil {
+		return fmt.Errorf("%w: %v", organization.ErrForbidden, err)
+	}
+	if _, err := uuid.Parse(operator.AccountID); err != nil {
+		return fmt.Errorf("%w: invalid operator identity", organization.ErrForbidden)
+	}
+	return nil
+}
+
+func requireActiveParent(parent organization.Unit, childType organization.UnitType) error {
+	requiredType, hasParent := childType.RequiredParentType()
+	if !hasParent || parent.Type != requiredType {
+		return fmt.Errorf("%w: %s requires an active %s parent", organization.ErrInvalidHierarchy, childType, requiredType)
+	}
+	if parent.Status != organization.StatusActive {
+		return fmt.Errorf("%w: parent organization unit is disabled", organization.ErrInvalidHierarchy)
+	}
+	return nil
+}
+
+func ensureUnitCanBeDisabled(ctx context.Context, tx organization.TxStore, unit organization.Unit) error {
+	switch unit.Type {
+	case organization.UnitTypeCampus:
+		count, err := tx.CountActiveChildren(ctx, unit.ID)
+		if err != nil {
+			return err
+		}
+		if count > 0 {
+			return organization.ErrActiveChildren
+		}
+	case organization.UnitTypeDepartment:
+		count, err := tx.CountActiveDoctors(ctx, unit.ID)
+		if err != nil {
+			return err
+		}
+		if count > 0 {
+			return organization.ErrActiveDoctors
+		}
+	default:
+		return fmt.Errorf("%w: unsupported unit type %q", organization.ErrInvalid, unit.Type)
+	}
+	return nil
 }

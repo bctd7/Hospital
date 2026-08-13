@@ -13,7 +13,7 @@ import (
 
 	"hospital/common/authn"
 	identityv1 "hospital/contracts/gen/identity/v1"
-	authorization "hospital/service/identity/rpc/internal/authorization/manager"
+	authorizationcontext "hospital/service/identity/rpc/internal/authorization/context"
 	"hospital/service/identity/rpc/internal/svc"
 )
 
@@ -21,7 +21,7 @@ func TestAuthorizationContextReadFailureUsesFunctionalLogging(t *testing.T) {
 	var logs bytes.Buffer
 	restoreIdentityLogWriter(t, &logs)
 
-	manager, err := authorization.NewManager(deniedAuthorizationReadStore{})
+	manager, err := authorizationcontext.NewManager(deniedAuthorizationReadStore{})
 	if err != nil {
 		t.Fatal(err)
 	}

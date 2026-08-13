@@ -1,11 +1,10 @@
-// Package authentication verifies login credentials, resolves the matching
-// account, and starts a session. Account administration lives in account/manager.
-package authentication
+// Package manager 负责验证登录凭据、解析对应账号并开始会话。
+// 外部渠道调用属于 provider，账号管理属于 account/manager，会话生命周期属于 session。
+package manager
 
 import (
 	"context"
 	"errors"
-	"regexp"
 	"strings"
 
 	"hospital/service/identity/rpc/internal/authentication/provider"
@@ -23,7 +22,6 @@ var (
 	ErrPhoneInUse              = errors.New("phone number is already registered")
 	ErrVerifiedPhoneChange     = errors.New("verified login phone must be changed through verification")
 	ErrInvalidExternalIdentity = errors.New("invalid external identity")
-	mainlandPhone              = regexp.MustCompile(`^1[3-9][0-9]{9}$`)
 )
 
 type PhoneBinding struct {
@@ -84,19 +82,4 @@ func (m *Manager) SetMyPhone(ctx context.Context, accountID, rawPhone string) (P
 
 func (m *Manager) fingerprint(phone string) []byte {
 	return phoneFingerprint(m.phoneKey, phone)
-}
-
-func normalizePhone(value string) (string, error) {
-	value = strings.TrimSpace(value)
-	value = strings.NewReplacer(" ", "", "-", "").Replace(value)
-	value = strings.TrimPrefix(value, "+86")
-	if !mainlandPhone.MatchString(value) {
-		return "", ErrInvalidPhone
-	}
-	return "+86" + value, nil
-}
-
-func maskPhone(normalized string) string {
-	digits := strings.TrimPrefix(normalized, "+86")
-	return digits[:3] + "****" + digits[7:]
 }
