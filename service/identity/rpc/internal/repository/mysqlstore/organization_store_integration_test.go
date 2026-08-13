@@ -36,7 +36,7 @@ func TestMySQLOrganizationStoreLifecycle(t *testing.T) {
 	seedOrganizationTestData(t, store, ctx)
 	defer cleanupOrganizationTestData(t, store, ctx)
 
-	admin, err := store.GetAuthorizationContext(ctx, organizationTestAdminID)
+	admin, err := store.GetPrincipal(ctx, organizationTestAdminID)
 	if err != nil {
 		t.Fatal(err)
 	}

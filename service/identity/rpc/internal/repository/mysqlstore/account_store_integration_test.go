@@ -46,7 +46,7 @@ func TestMySQLAccountManagerLifecycle(t *testing.T) {
 	defer cleanupAccountManagerTestData(t, store, ctx)
 	seedAccountManagerTestData(t, store, ctx, phoneKey)
 
-	admin, err := store.GetAuthorizationContext(ctx, identityAdminTestAdminID)
+	admin, err := store.GetPrincipal(ctx, identityAdminTestAdminID)
 	if err != nil {
 		t.Fatal(err)
 	}

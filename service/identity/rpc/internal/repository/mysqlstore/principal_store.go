@@ -7,20 +7,21 @@ import (
 	"sort"
 
 	"hospital/common/authn"
-	authorizationcontext "hospital/service/identity/rpc/internal/authorization/context"
+	"hospital/service/identity/rpc/internal/account"
+	"hospital/service/identity/rpc/internal/session"
 )
 
-var _ authorizationcontext.Store = (*Store)(nil)
+var _ session.PrincipalStore = (*Store)(nil)
 
-func (s *Store) GetAuthorizationContext(ctx context.Context, accountID string) (authn.Principal, error) {
-	return readAuthorizationContext(ctx, s.db, accountID)
+func (s *Store) GetPrincipal(ctx context.Context, accountID string) (authn.Principal, error) {
+	return readPrincipal(ctx, s.db, accountID)
 }
 
 type queryer interface {
 	QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
 }
 
-func readAuthorizationContext(ctx context.Context, db queryer, accountID string) (authn.Principal, error) {
+func readPrincipal(ctx context.Context, db queryer, accountID string) (authn.Principal, error) {
 	query := `
 SELECT
     a.id,
@@ -39,7 +40,7 @@ LEFT JOIN identity_permissions p ON p.id = rp.permission_id AND p.status = 'acti
 WHERE a.id = ?`
 	rows, err := db.QueryContext(ctx, query, accountID)
 	if err != nil {
-		return authn.Principal{}, fmt.Errorf("query identity authorization context: %w", err)
+		return authn.Principal{}, fmt.Errorf("query identity principal: %w", err)
 	}
 	defer rows.Close()
 
@@ -53,7 +54,7 @@ WHERE a.id = ?`
 			&principal.AccountID, &principal.AccountType, &principal.Status,
 			&principal.AuthorizationVersion, &principal.DepartmentID, &role, &permission,
 		); err != nil {
-			return authn.Principal{}, fmt.Errorf("scan identity authorization context: %w", err)
+			return authn.Principal{}, fmt.Errorf("scan identity principal: %w", err)
 		}
 		found = true
 		if role != "" {
@@ -64,10 +65,10 @@ WHERE a.id = ?`
 		}
 	}
 	if err := rows.Err(); err != nil {
-		return authn.Principal{}, fmt.Errorf("iterate identity authorization context: %w", err)
+		return authn.Principal{}, fmt.Errorf("iterate identity principal: %w", err)
 	}
 	if !found {
-		return authn.Principal{}, authorizationcontext.ErrNotFound
+		return authn.Principal{}, account.ErrNotFound
 	}
 	principal.Roles = sortedKeys(roles)
 	principal.Permissions = sortedKeys(permissions)

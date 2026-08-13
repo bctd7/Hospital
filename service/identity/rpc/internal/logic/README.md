@@ -19,16 +19,16 @@
 
 公共登录错误转换位于 `account_helpers.go`，Token 响应转换位于 `session_helpers.go`。
 
-## 授权上下文
+## 请求上下文
 
-`get_authorization_context_logic.go` 调用只读的 `Managers.Authorization`，返回当前账号的 Principal。账号状态、医生身份、科室和权限变更不在授权读取模块写入，而由账号管理模块完成。
+Identity 不提供单独的授权资料查询 RPC。需要认证的请求由统一 Interceptor 校验 Access Token 和授权版本，并把 Principal 注入 Go Context。
 
-`authorization_helpers.go` 负责：
+`request_context_helpers.go` 只负责：
 
 - 从请求上下文取得调用者；
 - 传递合法的 `request_id`；
-- 将内部 Principal 转为 protobuf；
-- 将授权读取错误转为稳定的 gRPC 状态码。
+
+业务 Logic 直接使用当前调用者，不再绕行 Identity 内部的授权查询 Manager。
 
 ## 账号、医生与本人资料
 

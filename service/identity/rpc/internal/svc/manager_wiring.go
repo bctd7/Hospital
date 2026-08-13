@@ -6,7 +6,6 @@ import (
 
 	accountmanager "hospital/service/identity/rpc/internal/account/manager"
 	authenticationmanager "hospital/service/identity/rpc/internal/authentication/manager"
-	authorizationcontext "hospital/service/identity/rpc/internal/authorization/context"
 	"hospital/service/identity/rpc/internal/config"
 	organizationmanager "hospital/service/identity/rpc/internal/organization/manager"
 	"hospital/service/identity/rpc/internal/session"
@@ -50,10 +49,6 @@ func wireManagers(
 	if err != nil {
 		return Managers{}, fmt.Errorf("create phone login manager: %w", err)
 	}
-	authorizationManager, err := authorizationcontext.NewManager(resourceSet.identityStore)
-	if err != nil {
-		return Managers{}, fmt.Errorf("create identity authorization manager: %w", err)
-	}
 	accountManager, err := accountmanager.NewManager(resourceSet.identityStore, tokens.phoneLookupKey)
 	if err != nil {
 		return Managers{}, fmt.Errorf("create identity account manager: %w", err)
@@ -63,7 +58,6 @@ func wireManagers(
 		Authentication:        authenticationManager,
 		PhoneLogin:            phoneLoginManager,
 		Session:               sessionManager,
-		Authorization:         authorizationManager,
 		Account:               accountManager,
 		OrganizationUnit:      organizationmanager.NewUnitManager(resourceSet.identityStore),
 		OrganizationDirectory: organizationmanager.NewDirectoryManager(resourceSet.identityStore),

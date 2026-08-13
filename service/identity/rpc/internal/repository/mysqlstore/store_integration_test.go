@@ -63,7 +63,7 @@ VALUES (?, 'department', 'login-test', 'Login Test')`, departmentID); err != nil
 		t.Fatal(err)
 	}
 
-	admin, err := store.GetAuthorizationContext(ctx, adminID)
+	admin, err := store.GetPrincipal(ctx, adminID)
 	if err != nil {
 		t.Fatal(err)
 	}

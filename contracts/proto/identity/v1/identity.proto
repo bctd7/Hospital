@@ -9,7 +9,6 @@ service IdentityService {
   rpc PhoneLogin(PhoneLoginRequest) returns (TokenPair);
   rpc WeChatLogin(WeChatLoginRequest) returns (TokenPair);
   rpc SetMyPhone(SetMyPhoneRequest) returns (PhoneBinding);
-  rpc GetAuthorizationContext(GetAuthorizationContextRequest) returns (AuthorizationContext);
   rpc RefreshAccessToken(RefreshAccessTokenRequest) returns (TokenPair);
   rpc RevokeRefreshToken(RevokeRefreshTokenRequest) returns (RevokeRefreshTokenResponse);
 
@@ -72,21 +71,6 @@ message PhoneBinding {
   string phone_masked = 1;
   string verification_status = 2;
   string verification_source = 3;
-}
-
-message GetAuthorizationContextRequest {
-  string account_id = 1;
-  string request_id = 2;
-}
-
-message AuthorizationContext {
-  string account_id = 1;
-  string account_type = 2;
-  string status = 3;
-  repeated string roles = 4;
-  string department_id = 5;
-  repeated string permissions = 6;
-  int64 authorization_version = 7;
 }
 
 message RefreshAccessTokenRequest {

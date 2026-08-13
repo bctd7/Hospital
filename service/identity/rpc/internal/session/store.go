@@ -22,5 +22,5 @@ type Store interface {
 // PrincipalStore 提供刷新 Token 时所需的最新账号授权事实。
 // 当前由 MySQLStore 实现，确保新 Access Token 不继续携带过期的角色、科室或账号状态。
 type PrincipalStore interface {
-	GetAuthorizationContext(ctx context.Context, accountID string) (authn.Principal, error)
+	GetPrincipal(ctx context.Context, accountID string) (authn.Principal, error)
 }

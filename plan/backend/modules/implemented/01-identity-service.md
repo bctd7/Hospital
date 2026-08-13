@@ -167,7 +167,7 @@ Hospital
 管理员安全边界固定为：App API 校验 → Identity RPC 再校验 → Logic 取得 Principal → Manager 校验
 permission 和状态 → Store 持久化。账号/医生写入统一由 `account/manager` 管理，组织单元写入统一由
 `OrganizationUnitManager` 管理，公共组织目录读取由 `OrganizationDirectoryManager` 管理；
-`authorization/context` 只读取授权上下文，不得恢复第二套授权写接口。
+最新 Principal 仅供 `session` 在登录和刷新 Token 时内部读取；普通请求使用拦截器注入的 Principal，不提供独立的授权资料查询 RPC。
 
 ## 8. 幂等、并发与事务
 

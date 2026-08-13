@@ -195,7 +195,7 @@ type fakePrincipalStore struct {
 	principal authn.Principal
 }
 
-func (s *fakePrincipalStore) GetAuthorizationContext(context.Context, string) (authn.Principal, error) {
+func (s *fakePrincipalStore) GetPrincipal(context.Context, string) (authn.Principal, error) {
 	return s.principal, nil
 }
 

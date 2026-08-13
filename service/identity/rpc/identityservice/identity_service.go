@@ -15,27 +15,27 @@ import (
 
 type (
 	AccountDisplayProfile               = identityv1.AccountDisplayProfile
+	AccountMutationRequest              = identityv1.AccountMutationRequest
 	AdminAccountDetail                  = identityv1.AdminAccountDetail
 	AdminAccountSummary                 = identityv1.AdminAccountSummary
 	AdminOrganizationUnit               = identityv1.AdminOrganizationUnit
-	AuthorizationContext                = identityv1.AuthorizationContext
 	CampusSummary                       = identityv1.CampusSummary
-	ChangeOrganizationUnitStatusRequest = identityv1.ChangeOrganizationUnitStatusRequest
 	ChangeDoctorDepartmentRequest       = identityv1.ChangeDoctorDepartmentRequest
+	ChangeOrganizationUnitStatusRequest = identityv1.ChangeOrganizationUnitStatusRequest
 	CreateOrganizationUnitRequest       = identityv1.CreateOrganizationUnitRequest
 	DepartmentSummary                   = identityv1.DepartmentSummary
-	GetAuthorizationContextRequest      = identityv1.GetAuthorizationContextRequest
+	DoctorSummary                       = identityv1.DoctorSummary
 	GetAccountDisplayProfileRequest     = identityv1.GetAccountDisplayProfileRequest
 	GetAdminAccountRequest              = identityv1.GetAdminAccountRequest
 	GetOrganizationContextRequest       = identityv1.GetOrganizationContextRequest
 	GetOrganizationUnitRequest          = identityv1.GetOrganizationUnitRequest
 	HospitalSummary                     = identityv1.HospitalSummary
+	ListAdminAccountsRequest            = identityv1.ListAdminAccountsRequest
+	ListAdminAccountsResponse           = identityv1.ListAdminAccountsResponse
 	ListDepartmentsRequest              = identityv1.ListDepartmentsRequest
 	ListDepartmentsResponse             = identityv1.ListDepartmentsResponse
 	ListDoctorsByDepartmentRequest      = identityv1.ListDoctorsByDepartmentRequest
 	ListDoctorsByDepartmentResponse     = identityv1.ListDoctorsByDepartmentResponse
-	ListAdminAccountsRequest            = identityv1.ListAdminAccountsRequest
-	ListAdminAccountsResponse           = identityv1.ListAdminAccountsResponse
 	ListOrganizationUnitsRequest        = identityv1.ListOrganizationUnitsRequest
 	ListOrganizationUnitsResponse       = identityv1.ListOrganizationUnitsResponse
 	OrganizationContext                 = identityv1.OrganizationContext
@@ -45,16 +45,15 @@ type (
 	RefreshAccessTokenRequest           = identityv1.RefreshAccessTokenRequest
 	RevokeRefreshTokenRequest           = identityv1.RevokeRefreshTokenRequest
 	RevokeRefreshTokenResponse          = identityv1.RevokeRefreshTokenResponse
+	SearchAdminAccountByPhoneRequest    = identityv1.SearchAdminAccountByPhoneRequest
+	SearchAdminAccountByPhoneResponse   = identityv1.SearchAdminAccountByPhoneResponse
 	SendPhoneLoginCodeRequest           = identityv1.SendPhoneLoginCodeRequest
 	SendPhoneLoginCodeResponse          = identityv1.SendPhoneLoginCodeResponse
 	SetMyPhoneRequest                   = identityv1.SetMyPhoneRequest
-	SearchAdminAccountByPhoneRequest    = identityv1.SearchAdminAccountByPhoneRequest
-	SearchAdminAccountByPhoneResponse   = identityv1.SearchAdminAccountByPhoneResponse
-	AccountMutationRequest              = identityv1.AccountMutationRequest
 	TokenPair                           = identityv1.TokenPair
-	UpdateOrganizationUnitRequest       = identityv1.UpdateOrganizationUnitRequest
 	UpdateAccountDisplayProfileRequest  = identityv1.UpdateAccountDisplayProfileRequest
 	UpdateDoctorRequest                 = identityv1.UpdateDoctorRequest
+	UpdateOrganizationUnitRequest       = identityv1.UpdateOrganizationUnitRequest
 	WeChatLoginRequest                  = identityv1.WeChatLoginRequest
 
 	IdentityService interface {
@@ -62,7 +61,6 @@ type (
 		PhoneLogin(ctx context.Context, in *PhoneLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
 		WeChatLogin(ctx context.Context, in *WeChatLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
 		SetMyPhone(ctx context.Context, in *SetMyPhoneRequest, opts ...grpc.CallOption) (*PhoneBinding, error)
-		GetAuthorizationContext(ctx context.Context, in *GetAuthorizationContextRequest, opts ...grpc.CallOption) (*AuthorizationContext, error)
 		RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*TokenPair, error)
 		RevokeRefreshToken(ctx context.Context, in *RevokeRefreshTokenRequest, opts ...grpc.CallOption) (*RevokeRefreshTokenResponse, error)
 		GetAccountDisplayProfile(ctx context.Context, in *GetAccountDisplayProfileRequest, opts ...grpc.CallOption) (*AccountDisplayProfile, error)
@@ -78,6 +76,7 @@ type (
 		UpdateOrganizationUnit(ctx context.Context, in *UpdateOrganizationUnitRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
 		DisableOrganizationUnit(ctx context.Context, in *ChangeOrganizationUnitStatusRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
 		EnableOrganizationUnit(ctx context.Context, in *ChangeOrganizationUnitStatusRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
+		// Administrator account and doctor management.
 		ListAdminAccounts(ctx context.Context, in *ListAdminAccountsRequest, opts ...grpc.CallOption) (*ListAdminAccountsResponse, error)
 		GetAdminAccount(ctx context.Context, in *GetAdminAccountRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error)
 		SearchAdminAccountByPhone(ctx context.Context, in *SearchAdminAccountByPhoneRequest, opts ...grpc.CallOption) (*SearchAdminAccountByPhoneResponse, error)
@@ -118,11 +117,6 @@ func (m *defaultIdentityService) WeChatLogin(ctx context.Context, in *WeChatLogi
 func (m *defaultIdentityService) SetMyPhone(ctx context.Context, in *SetMyPhoneRequest, opts ...grpc.CallOption) (*PhoneBinding, error) {
 	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
 	return client.SetMyPhone(ctx, in, opts...)
-}
-
-func (m *defaultIdentityService) GetAuthorizationContext(ctx context.Context, in *GetAuthorizationContextRequest, opts ...grpc.CallOption) (*AuthorizationContext, error) {
-	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
-	return client.GetAuthorizationContext(ctx, in, opts...)
 }
 
 func (m *defaultIdentityService) RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*TokenPair, error) {
@@ -192,6 +186,7 @@ func (m *defaultIdentityService) EnableOrganizationUnit(ctx context.Context, in 
 	return client.EnableOrganizationUnit(ctx, in, opts...)
 }
 
+// Administrator account and doctor management.
 func (m *defaultIdentityService) ListAdminAccounts(ctx context.Context, in *ListAdminAccountsRequest, opts ...grpc.CallOption) (*ListAdminAccountsResponse, error) {
 	client := identityv1.NewIdentityServiceClient(m.cli.Conn())
 	return client.ListAdminAccounts(ctx, in, opts...)

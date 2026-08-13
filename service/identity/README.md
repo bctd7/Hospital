@@ -57,7 +57,7 @@ MySQL Outbox -> Kafka -> Authorization Version Consumer -> Redis -> Commit Offse
 - `mysqlstore`：Store 的 MySQL 实现和具体 SQL；
 - Interceptor：在进入需要认证的 RPC Logic 前校验 JWT 与授权版本，并把 Principal 写入 Context。
 
-`authorization/context` 只读取授权上下文；账号和医生写操作统一进入 `account/manager`，不存在第二套授权写链路。
+最新 Principal 只在登录和刷新会话时由 `session` 内部读取；普通请求直接使用 Interceptor 注入的 Principal，不提供额外的授权资料查询 RPC。
 
 ## 目录
 
@@ -70,7 +70,6 @@ service/identity/rpc/
     ├── authentication/manager/    # 微信登录、手机号登录与认证校验
     ├── authentication/provider/   # 微信、阿里云与本地测试 Provider
     ├── account/                   # 账号领域模型、Store 端口与 manager
-    ├── authorization/context/     # 只读取有效 Principal
     ├── authorization/version/     # 授权版本事件与 Kafka→Redis Consumer
     ├── messaging/kafka/           # transport-only Reader/Writer
     ├── messaging/outbox/          # 通用 MySQL Outbox→Kafka Publisher
@@ -149,7 +148,7 @@ MySQL 集成测试通过 `IDENTITY_TEST_MYSQL_DSN` 显式启用。阶段收尾�
 ## 后续扩展规则
 
 1. 先更新 `plan/` 和 `contracts/`，不要从 Handler 直接开始写；
-2. 新账号管理能力进入 `account/manager`，新组织管理能力进入 `organization/manager`；不要把写操作放进只读的 `authorization/context`；
+2. 新账号管理能力进入 `account/manager`，新组织管理能力进入 `organization/manager`；不要为没有业务调用方的授权资料查询新增 RPC；
 3. 写操作必须在同一事务中更新主数据、审计和 Outbox；
 4. 涉及授权的变化必须递增 `authorization_version`，在同一事务写入 Outbox，并由 Consumer 从 Kafka 同步到 Redis；
 5. 涉及手机号、验证码或 Token 的新 RPC 必须加入客户端和服务端正文日志屏蔽名单；

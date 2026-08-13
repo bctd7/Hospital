@@ -50,7 +50,7 @@ func NewManager(
 // Start 在微信或短信等登录方式已经确认账号身份后，首次签发 Access Token 和 Refresh Token。
 // 它只供 Identity 内部登录逻辑调用，不开放“传账号 ID 直接领 Token”的公共 RPC。
 func (m *Manager) Start(ctx context.Context, accountID string) (TokenPair, error) {
-	principal, err := m.principals.GetAuthorizationContext(ctx, accountID)
+	principal, err := m.principals.GetPrincipal(ctx, accountID)
 	if err != nil {
 		return TokenPair{}, err
 	}
@@ -106,7 +106,7 @@ func (m *Manager) Refresh(ctx context.Context, rawRefresh string) (TokenPair, er
 		return TokenPair{}, ErrSessionExpired
 	}
 
-	principal, err := m.principals.GetAuthorizationContext(ctx, current.AccountID)
+	principal, err := m.principals.GetPrincipal(ctx, current.AccountID)
 	if err != nil {
 		return TokenPair{}, err
 	}

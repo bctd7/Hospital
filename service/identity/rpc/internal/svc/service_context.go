@@ -5,7 +5,6 @@ import (
 	commonauthversion "hospital/common/authz/version"
 	accountmanager "hospital/service/identity/rpc/internal/account/manager"
 	authenticationmanager "hospital/service/identity/rpc/internal/authentication/manager"
-	authorizationcontext "hospital/service/identity/rpc/internal/authorization/context"
 	authorizationversion "hospital/service/identity/rpc/internal/authorization/version"
 	"hospital/service/identity/rpc/internal/config"
 	"hospital/service/identity/rpc/internal/messaging/kafka"
@@ -20,7 +19,6 @@ type Managers struct {
 	Authentication        *authenticationmanager.Manager
 	PhoneLogin            *authenticationmanager.PhoneLoginManager
 	Session               *session.Manager
-	Authorization         *authorizationcontext.Manager
 	Account               *accountmanager.Manager
 	OrganizationUnit      *organizationmanager.UnitManager
 	OrganizationDirectory *organizationmanager.DirectoryManager

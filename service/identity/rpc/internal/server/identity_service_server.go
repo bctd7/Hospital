@@ -43,11 +43,6 @@ func (s *IdentityServiceServer) SetMyPhone(ctx context.Context, in *identityv1.S
 	return l.SetMyPhone(in)
 }
 
-func (s *IdentityServiceServer) GetAuthorizationContext(ctx context.Context, in *identityv1.GetAuthorizationContextRequest) (*identityv1.AuthorizationContext, error) {
-	l := logic.NewGetAuthorizationContextLogic(ctx, s.svcCtx)
-	return l.GetAuthorizationContext(in)
-}
-
 func (s *IdentityServiceServer) RefreshAccessToken(ctx context.Context, in *identityv1.RefreshAccessTokenRequest) (*identityv1.TokenPair, error) {
 	l := logic.NewRefreshAccessTokenLogic(ctx, s.svcCtx)
 	return l.RefreshAccessToken(in)
@@ -115,6 +110,7 @@ func (s *IdentityServiceServer) EnableOrganizationUnit(ctx context.Context, in *
 	return l.EnableOrganizationUnit(in)
 }
 
+// Administrator account and doctor management.
 func (s *IdentityServiceServer) ListAdminAccounts(ctx context.Context, in *identityv1.ListAdminAccountsRequest) (*identityv1.ListAdminAccountsResponse, error) {
 	l := logic.NewListAdminAccountsLogic(ctx, s.svcCtx)
 	return l.ListAdminAccounts(in)

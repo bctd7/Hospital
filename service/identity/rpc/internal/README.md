@@ -56,11 +56,11 @@ internal/
 
 Provider 不创建 Session、不签发 Token，也不负责账号管理。`svc/login_providers.go` 只根据配置选择 Provider，`svc/manager_wiring.go` 负责注入，渠道差异不会进入 RPC Logic。
 
-### Authorization Manager 和 Version Consumer
+### Authorization Version Consumer
 
-- `authorization/context` 只读取账号类型、角色、权限、科室和版本；
 - `authorization/version` 定义授权版本事件，并完成 Kafka 拉取、Redis 单调更新和 Offset 提交；
-- 角色、权限、科室和账号状态的修改仍由 `account/manager` 完成。
+- `session` 仅在登录和刷新时从 MySQL 读取最新 Principal；普通请求使用 Interceptor 从 Token 恢复并注入的 Principal；
+- 角色、权限、科室和账号状态的修改由 `account/manager` 完成。
 
 ### Outbox
 
@@ -96,7 +96,7 @@ Logic 通过以下分组访问依赖：
 ```go
 svcCtx.Managers.Account
 svcCtx.Managers.Authentication
-svcCtx.Managers.Authorization
+svcCtx.Managers.Session
 svcCtx.Security.Token
 svcCtx.Workers.AuthorizationVersionConsumer
 ```

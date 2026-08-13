@@ -8,7 +8,6 @@ import (
 
 	authenticationmanager "hospital/service/identity/rpc/internal/authentication/manager"
 	login "hospital/service/identity/rpc/internal/authentication/provider"
-	authorizationcontext "hospital/service/identity/rpc/internal/authorization/context"
 )
 
 func accountRPCError(err error) error {
@@ -27,10 +26,6 @@ func accountRPCError(err error) error {
 		return status.Error(codes.AlreadyExists, err.Error())
 	case errors.Is(err, authenticationmanager.ErrVerifiedPhoneChange):
 		return status.Error(codes.FailedPrecondition, "verified login phone requires a dedicated change flow")
-	case errors.Is(err, authorizationcontext.ErrNotFound):
-		return status.Error(codes.NotFound, "identity account not found")
-	case errors.Is(err, authorizationcontext.ErrForbidden):
-		return status.Error(codes.PermissionDenied, "permission denied")
 	default:
 		return status.Error(codes.Internal, "identity account operation failed")
 	}
