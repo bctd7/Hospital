@@ -51,7 +51,7 @@ const hasDepartment = computed(() => departmentView.value.departmentId.length > 
       </view>
     </view>
 
-    <scroll-view class="doctor-list" scroll-y>
+    <view class="doctor-list">
       <view v-if="!hasDepartment" class="panel-state">请选择部门</view>
       <view v-else-if="departmentView.status === 'disabled'" class="panel-state">
         恢复部门后才能重新关联医生
@@ -76,14 +76,11 @@ const hasDepartment = computed(() => departmentView.value.departmentId.length > 
           <view class="doctor-avatar">{{ doctor.displayName.slice(0, 1) }}</view>
           <view class="doctor-item__body">
             <text class="doctor-item__name">{{ doctor.displayName }}</text>
-            <text class="doctor-item__description">
-              {{ doctor.description || "暂无擅长描述" }}
-            </text>
           </view>
           <text v-if="canOpenDoctor" class="doctor-item__arrow">›</text>
         </view>
       </template>
-    </scroll-view>
+    </view>
   </view>
 </template>
 
@@ -152,7 +149,7 @@ const hasDepartment = computed(() => departmentView.value.departmentId.length > 
 
 .doctor-list {
   flex: 1;
-  height: 0;
+  min-height: 0;
 }
 
 .doctor-item {
@@ -160,11 +157,17 @@ const hasDepartment = computed(() => departmentView.value.departmentId.length > 
   align-items: center;
   width: 100%;
   margin: 0;
-  padding: 24rpx;
+  min-height: 112rpx;
+  padding: 20rpx 24rpx;
+  box-sizing: border-box;
   text-align: left;
   background: #ffffff;
   border-radius: 0;
   border-bottom: 1rpx solid #f0f2f6;
+}
+
+.doctor-item:last-child {
+  border-bottom: 0;
 }
 
 .doctor-item--interactive:active {
@@ -191,22 +194,12 @@ const hasDepartment = computed(() => departmentView.value.departmentId.length > 
   margin-left: 18rpx;
 }
 
-.doctor-item__name,
-.doctor-item__description {
-  display: block;
-}
-
 .doctor-item__name {
+  display: block;
+  overflow: hidden;
   color: #27334a;
   font-size: 28rpx;
   font-weight: 650;
-}
-
-.doctor-item__description {
-  margin-top: 8rpx;
-  overflow: hidden;
-  color: #929bab;
-  font-size: 21rpx;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

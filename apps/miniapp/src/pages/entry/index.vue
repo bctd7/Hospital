@@ -4,7 +4,12 @@ import { onUnmounted, ref } from "vue";
 
 import { sendPhoneLoginCode } from "@/api/auth";
 import ProfileAvatar from "@/components/profile/ProfileAvatar.vue";
-import { initializeFromPhone, sessionState } from "@/stores/session";
+import { DEV_AUTH_BYPASS_ENABLED } from "@/config/environment";
+import {
+  initializeDevelopmentSession,
+  initializeFromPhone,
+  sessionState,
+} from "@/stores/session";
 import { openAppVariant } from "@/utils/appShell";
 import {
   getDisplayProfile,
@@ -35,6 +40,10 @@ const countdown = ref(0);
 let countdownTimer: ReturnType<typeof setInterval> | null = null;
 
 onLoad(() => {
+  if (DEV_AUTH_BYPASS_ENABLED && initializeDevelopmentSession()) {
+    openAppVariant(sessionState.appVariant);
+    return;
+  }
   const profile = getDisplayProfile();
   avatarUrl.value = profile.avatarUrl;
   nickname.value = profile.nickname === "微信用户" ? "" : profile.nickname;
@@ -154,7 +163,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <view class="entry-page">
+  <view v-if="!DEV_AUTH_BYPASS_ENABLED" class="entry-page">
     <view class="entry-page__safe-top" />
     <text class="entry-page__brand">Hospital</text>
 

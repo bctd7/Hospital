@@ -35,22 +35,19 @@ const isStaffApp = computed(() => sessionState.appVariant === "staff");
 const isSuperAdmin = computed(
   () => sessionState.principal?.roles.includes("super_admin") ?? false,
 );
-const canManageDepartments = computed(
-  () =>
-    isStaffApp.value &&
-    isSuperAdmin.value &&
-    hasIdentityPermission(sessionState.principal, "identity.department.manage"),
-);
+const canManageDepartments = computed(() => false);
 const canOpenUserManagement = computed(
   () =>
     isStaffApp.value &&
     isSuperAdmin.value &&
-    (hasIdentityPermission(
-      sessionState.principal,
-      "identity.authorization.manage",
-    ) ||
+    (hasIdentityPermission(sessionState.principal, "identity.authorization.manage") ||
       hasIdentityPermission(sessionState.principal, "identity.account.manage")),
 );
+const isPatientView = computed(() => sessionState.appVariant === "patient");
+const pageTitle = computed(() => isPatientView.value ? "医生名录" : "人员管理");
+const pageSubtitle = computed(() => canOpenUserManagement.value
+  ? "按院区和科室查看医生，用户及医生身份在用户管理中维护"
+  : "按院区和科室查看医生信息");
 
 const departments = ref<DepartmentSummary[]>([]);
 const hospitalId = ref("");
@@ -88,7 +85,7 @@ const visibleDepartments = computed(() =>
 
 onShow(() => {
   navigationPending.value = false;
-  uni.setNavigationBarTitle({ title: isStaffApp.value ? "部门管理" : "挂号" });
+  uni.setNavigationBarTitle({ title: pageTitle.value });
   void refreshOrganization(false);
 });
 
@@ -422,15 +419,24 @@ function openUserManagement() {
 }
 
 function openDoctor(doctor: DoctorSummary) {
-  if (!canOpenUserManagement.value || navigationPending.value) {
+  if (navigationPending.value) {
     return;
   }
+  const department = selectedDepartment.value;
+  const campus = campuses.value.find((item) => item.campusId === selectedCampusId.value);
+  const query = [
+    `account_id=${encodeURIComponent(doctor.accountId)}`,
+    `department_id=${encodeURIComponent(department.departmentId)}`,
+    `department_name=${encodeURIComponent(department.name)}`,
+    `campus_name=${encodeURIComponent(campus?.name ?? "")}`,
+    `hospital_name=${encodeURIComponent(hospitalName.value)}`,
+  ].join("&");
   navigationPending.value = true;
   uni.navigateTo({
-    url: `/pages/admin/users/detail?account_id=${encodeURIComponent(doctor.accountId)}`,
+    url: `/pages/directory/doctors/detail?${query}`,
     fail: () => {
       navigationPending.value = false;
-      uni.showToast({ title: "用户详情打开失败", icon: "none" });
+      uni.showToast({ title: "医生详情打开失败", icon: "none" });
     },
   });
 }
@@ -449,9 +455,9 @@ function messageOf(error: unknown, fallback: string): string {
     <view class="department-page__header">
       <view>
         <view class="department-page__title-row">
-          <text class="department-page__title">科室与医生</text>
+          <text class="department-page__title">{{ pageTitle }}</text>
         </view>
-        <text class="department-page__subtitle">选择院区和科室查看当前医生</text>
+        <text class="department-page__subtitle">{{ pageSubtitle }}</text>
       </view>
       <button
         v-if="canOpenUserManagement"
@@ -507,28 +513,28 @@ function messageOf(error: unknown, fallback: string): string {
       </view>
 
       <view v-else class="department-board">
-      <DepartmentSidebar
-        :departments="visibleDepartments"
-        :selected-id="selectedDepartmentId"
-        :loading="departmentLoading"
-        :show-disabled="showDisabled"
-        :can-manage="canManageDepartments && Boolean(selectedCampusId)"
-        @select="selectDepartment"
-        @toggle-view="toggleDepartmentView"
-        @create="openCreateDepartment"
-      />
-      <DepartmentDoctorPanel
-        :department="selectedDepartment"
-        :doctors="doctors"
-        :loading="doctorLoading"
-        :error="doctorError"
-        :can-manage="canManageDepartments"
-        :can-open-doctor="canOpenUserManagement"
-        @edit="openEditDepartment"
-        @set-enabled="changeDepartmentStatus"
-        @retry="retryDoctors"
-        @open-doctor="openDoctor"
-      />
+        <DepartmentSidebar
+          :departments="visibleDepartments"
+          :selected-id="selectedDepartmentId"
+          :loading="departmentLoading"
+          :show-disabled="showDisabled"
+          :can-manage="canManageDepartments && Boolean(selectedCampusId)"
+          @select="selectDepartment"
+          @toggle-view="toggleDepartmentView"
+          @create="openCreateDepartment"
+        />
+        <DepartmentDoctorPanel
+          :department="selectedDepartment"
+          :doctors="doctors"
+          :loading="doctorLoading"
+          :error="doctorError"
+          :can-manage="canManageDepartments"
+          :can-open-doctor="true"
+          @edit="openEditDepartment"
+          @set-enabled="changeDepartmentStatus"
+          @retry="retryDoctors"
+          @open-doctor="openDoctor"
+        />
       </view>
     </template>
 
@@ -699,8 +705,7 @@ button::after {
 
 .department-board {
   display: flex;
-  height: calc(100vh - 290rpx);
-  min-height: 720rpx;
+  align-items: stretch;
   overflow: hidden;
   background: #ffffff;
   border: 1rpx solid #e8edf4;

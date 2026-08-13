@@ -11,6 +11,7 @@
 - [认证、会话与身份接口](./api/01-authentication-and-session.md)
 - [部门目录与医生管理接口](./api/02-department-directory-and-management.md)
 - [超级管理员用户接口](./api/03-admin-user-management.md)
+- [Appointment 检查目录、房间与周配置接口](./api/04-appointment-resources.md)
 
 ## 页面设计
 
@@ -19,6 +20,8 @@
 - [本人就诊信息](./pages/03-self-patient.md)
 - [工作人员部门管理](./pages/04-department-management.md)
 - [超级管理员用户管理](./pages/05-admin-user-management.md)
+- [工作人员检查项目与预约资源管理](./pages/06-admin-appointment-resource-management.md)
+- [患者检查项目展示与预约占位](./pages/07-patient-examination-item-browser.md)
 
 ## 当前基线
 
@@ -30,12 +33,13 @@
 - 授权或身份变化使旧会话失效时，统一清理状态、重置到登录页并允许立即重新登录；
 - 应用版本：患者端与工作人员端复用四个 Tab 页面，工作人员可主动切回患者端；
 - 工作人员：医生与超级管理员共享页面框架，具体入口按 permissions 区分；
-- 工作人员第二页：名称为“部门管理”，动态展示唯一医院、多个院区、院区直属科室和医生；
+- 工作人员第二页：名称为“部门管理”，组织管理与 Appointment 房间/项目配置按权限分区展示；
 - 组织范围：医院根节点只读；患者和医生切换有效院区；超级管理员管理院区和科室；首期无子科室；
 - 超级管理员：从部门管理进入独立用户管理页，底栏仍保持四项；
 - 管理员选择科室时按“园区 / 科室”展示，允许不同园区存在同名科室，写操作只使用稳定科室 ID；
-- 预约、消息等未接入业务保持真实空状态；部门和用户管理已经统一使用真实 HTTP Adapter，运行时 Mock、
-  Mock 缓存和演示账号数据已经删除。
+- Appointment 管理端检查项目、房间、项目关系和独立周配置接口均已完成，工作人员端开始接真实 API；
+- 患者端项目浏览和预约与管理端分开实现。预约写接口完成前允许使用隔离且明确标识的 Patient Mock
+  Adapter，但不得伪造真实预约记录或把 Mock 数据带入管理端。
 
 新增前端需求时，接口契约先进入 `contracts/`；`plan/frontend/api/` 只补客户端消费策略，页面交互进入
 `pages/`。不再创建混合接口字段、后端实现和页面截图的超长文档。

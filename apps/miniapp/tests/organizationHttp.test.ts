@@ -39,6 +39,7 @@ describe("organization HTTP adapters", () => {
 
     expect(requestMock).toHaveBeenCalledWith({
       path: "/api/v1/directory/organization-context",
+      authenticated: false,
     });
     expect(context.hospital.hospitalId).toBe("hospital-a");
     expect(context.campuses[0]?.campusId).toBe("campus-a");
@@ -90,6 +91,10 @@ describe("organization HTTP adapters", () => {
     );
     const doctors = await httpOrganizationDirectoryApi.listDoctors("department-a");
 
+    expect(requestMock).toHaveBeenCalledWith({
+      path: "/api/v1/directory/departments/department-a/doctors?page=1&page_size=100",
+      authenticated: false,
+    });
     expect(doctors[0]?.accountId).toBe("account-a");
   });
 

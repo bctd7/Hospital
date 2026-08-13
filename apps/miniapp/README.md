@@ -14,10 +14,11 @@ README 只说明当前源码和运行方式。页面业务规则见 `plan/fronte
 - 医院院区上下文、科室和医生公共目录；
 - 超级管理员院区/科室管理；
 - 超级管理员账号查询、医生开通、资料编辑、调岗、撤销和账号启停；
+- 工作人员检查项目、房间、房间可执行项目及两套周配置管理；
 - 本人展示昵称同步；
-- 管理功能使用真实 HTTP，运行时 Mock 和 Mock 缓存已经删除。
+- 管理功能使用真实 HTTP；患者检查预约在后端患者目录与预约接口补齐前使用明确标识的页面内 Mock。
 
-预约、消息、就诊人等尚未接入的业务只显示真实空状态，不伪造后端数据。
+患者预约 Mock 不写入本地预约记录，也不会进入管理端数据链路。消息、就诊人等尚未接入的业务只显示真实空状态。
 
 ## 源码结构
 
@@ -25,7 +26,7 @@ README 只说明当前源码和运行方式。页面业务规则见 `plan/fronte
 apps/miniapp/
 ├── src/
 │   ├── api/management/   # Identity/Organization HTTP Adapter
-│   ├── api/              # 登录、会话和共享 HTTP Client
+│   ├── api/              # 登录、Appointment 与共享 HTTP Client
 │   ├── services/         # 页面可复用的业务数据编排
 │   ├── components/       # 可复用组件
 │   ├── pages/            # 页面
@@ -43,6 +44,7 @@ apps/miniapp/
 
 - `api/client.ts` 只负责传输、Bearer Token、统一错误和单次刷新；
 - `api/management/` 按公共组织目录、组织管理、账号管理拆分契约与 HTTP Adapter，不再提供聚合全部能力的兼容接口；
+- `api/appointment.ts` 只连接 Appointment HTTP API，科室来源仍由 Identity 会话和公共目录提供；
 - `services/` 负责跨页面查询编排、短期缓存和失效，不包含页面跳转或弹窗；
 - `stores/` 保存会话等跨页面状态；授权变化后的清理、回登录页和并发保护集中在 Session Store；
 - `pages/` 组合用例和交互，组件通过 props/emit 复用，不根据名称反查业务主键；
@@ -91,6 +93,22 @@ VITE_API_BASE_URL=http://192.168.x.x:8888
 必须评审并修改 `release.config.json`，确保本地发包和 GitHub CI 使用相同配置。
 
 ## 登录联调
+
+本地只查看前端时，`.env.local` 可以开启开发登录旁路：
+
+```dotenv
+VITE_DEV_AUTH_BYPASS=true
+VITE_DEV_AUTH_ROLE=patient
+```
+
+`VITE_DEV_AUTH_ROLE` 支持 `patient`、`doctor` 和 `admin`。修改后重启开发构建即可直接进入对应首页，
+无需启动后端。关闭 `VITE_DEV_AUTH_BYPASS` 后恢复手机号登录。该开关同时受 Vite `DEV` 模式约束，
+生产构建即使误配为 `true` 也不会生效；开发 Mock Token 不能用于任何后端接口。
+
+检查项目管理必须关闭开发登录旁路并使用真实工作人员账号联调；页面会将会话或 Identity 目录返回的稳定
+`department_id` 传给 Appointment，不会按科室名称建立关系。
+
+需要联调真实登录时：
 
 ```text
 POST /api/v1/auth/phone/code

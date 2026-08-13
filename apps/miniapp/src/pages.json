@@ -16,7 +16,19 @@
     {
       "path": "pages/registration/index",
       "style": {
-        "navigationBarTitleText": "挂号"
+        "navigationBarTitleText": "科室医生"
+      }
+    },
+    {
+      "path": "pages/appointment/create/index",
+      "style": {
+        "navigationBarTitleText": "预约挂号"
+      }
+    },
+    {
+      "path": "pages/directory/doctors/detail",
+      "style": {
+        "navigationBarTitleText": "医生详情"
       }
     },
     {
@@ -78,6 +90,24 @@
           "style": {
             "navigationBarTitleText": "用户详情"
           }
+        },
+        {
+          "path": "appointment/index",
+          "style": {
+            "navigationBarTitleText": "检查项目管理"
+          }
+        },
+        {
+          "path": "appointment/item-detail",
+          "style": {
+            "navigationBarTitleText": "检查项目详情"
+          }
+        },
+        {
+          "path": "appointment/room-detail",
+          "style": {
+            "navigationBarTitleText": "房间资源详情"
+          }
         }
       ]
     }
@@ -101,7 +131,7 @@
       },
       {
         "pagePath": "pages/registration/index",
-        "text": "挂号"
+        "text": "科室医生"
       },
       {
         "pagePath": "pages/messages/index",

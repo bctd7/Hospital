@@ -93,6 +93,7 @@ export const httpOrganizationDirectoryApi: OrganizationDirectoryApi = {
   async getOrganizationContext() {
     const response = await request<OrganizationContextResponse>({
       path: "/api/v1/directory/organization-context",
+      authenticated: false,
     });
     return organizationContextFromResponse(response);
   },
@@ -113,6 +114,7 @@ export const httpOrganizationDirectoryApi: OrganizationDirectoryApi = {
       total: number;
     }>({
       path: `/api/v1/directory/departments/${encodeURIComponent(departmentId)}/doctors?page=1&page_size=100`,
+      authenticated: false,
     });
     return response.items.map(doctorFromResponse);
   },

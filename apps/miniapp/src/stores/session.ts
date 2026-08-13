@@ -8,6 +8,12 @@ import {
   wechatLogin,
 } from "@/api/auth";
 import { configureAuthAdapter } from "@/api/client";
+import {
+  DEV_AUTH_BYPASS_ENABLED,
+  DEV_AUTH_ROLE,
+  type DevAuthRole,
+} from "@/config/environment";
+import { developmentPrincipal } from "@/mocks/developmentIdentity";
 import type {
   AppVariant,
   CurrentIdentityResponse,
@@ -141,6 +147,27 @@ export function restoreSession() {
   }
 }
 
+export function initializeDevelopmentSession(
+  role: DevAuthRole = DEV_AUTH_ROLE,
+): boolean {
+  if (!DEV_AUTH_BYPASS_ENABLED) {
+    return false;
+  }
+
+  const now = Date.now();
+  const principal = developmentPrincipal(role);
+  tokens = {
+    accessToken: "development-auth-bypass",
+    refreshToken: "development-auth-bypass",
+    accessExpiresAt: now + 24 * 60 * 60 * 1000,
+    refreshExpiresAt: now + 24 * 60 * 60 * 1000,
+  };
+  state.principal = principal;
+  state.appVariant = resolveAppVariant(principal);
+  state.status = "authenticated";
+  return true;
+}
+
 export function getAccessToken(): string {
   return tokens?.accessToken ?? "";
 }
@@ -188,6 +215,9 @@ async function performRefresh(): Promise<boolean> {
 }
 
 export function refreshOnce(): Promise<boolean> {
+  if (DEV_AUTH_BYPASS_ENABLED) {
+    return Promise.resolve(false);
+  }
   if (refreshTask) {
     return refreshTask;
   }
@@ -200,6 +230,9 @@ export function refreshOnce(): Promise<boolean> {
 }
 
 export function handleUnauthorized(rejectedAccessToken: string): Promise<void> {
+  if (DEV_AUTH_BYPASS_ENABLED) {
+    return Promise.resolve();
+  }
   const currentAccessToken = getAccessToken();
   if (currentAccessToken && currentAccessToken !== rejectedAccessToken) {
     return Promise.resolve();
@@ -230,6 +263,9 @@ export function handleUnauthorized(rejectedAccessToken: string): Promise<void> {
 }
 
 export async function initializeFromWechat(): Promise<boolean> {
+  if (initializeDevelopmentSession()) {
+    return true;
+  }
   if (state.status === "authenticated" && hasUsableAccessToken() && state.principal) {
     return true;
   }
@@ -255,6 +291,9 @@ export async function initializeFromWechat(): Promise<boolean> {
 }
 
 export async function initializeFromPhone(phone: string, verificationCode: string): Promise<boolean> {
+  if (initializeDevelopmentSession()) {
+    return true;
+  }
   if (state.status === "authenticated" && hasUsableAccessToken() && state.principal) {
     return true;
   }
@@ -276,6 +315,10 @@ export async function initializeFromPhone(phone: string, verificationCode: strin
 export async function logout(): Promise<void> {
   const currentRefreshToken = tokens?.refreshToken;
   setGuestSession();
+
+  if (DEV_AUTH_BYPASS_ENABLED) {
+    return;
+  }
 
   if (!currentRefreshToken) {
     return;

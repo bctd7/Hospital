@@ -53,10 +53,13 @@ describe("app shell identity resolution", () => {
     );
     expect(reLaunch).not.toHaveBeenCalled();
     expect(setTabBarItem).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 0, text: "工作台" }),
+      expect.objectContaining({ index: 0, text: "首页" }),
     );
     expect(setTabBarItem).toHaveBeenCalledWith(
       expect.objectContaining({ index: 1, text: "部门管理" }),
+    );
+    expect(setTabBarItem).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 2, text: "消息" }),
     );
   });
 

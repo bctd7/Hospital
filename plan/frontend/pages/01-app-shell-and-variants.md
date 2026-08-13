@@ -37,9 +37,12 @@ department_doctor / super_admin
 
 ## 3. 当前页面状态
 
-- 患者首页、挂号、消息显示真实空状态；
+- 患者首页和消息显示真实空状态；挂号页按 Appointment 页面 Plan 逐步接入“科室—项目—房间—本周窗口”；
 - 工作台和工作人员消息暂时显示建设中，不伪造数据；
-- 工作人员“部门管理”按[独立页面文档](./04-department-management.md)接入后端动态数据；
+- 工作人员“部门管理”保留[组织与医生管理](./04-department-management.md)，并按
+  [工作人员 Appointment 页面文档](./06-admin-appointment-resource-management.md)接入检查项目、房间、项目关系与周配置；
+- 首页同一服务卡按版本分流：患者端显示“检查项目”，工作人员端显示“检查项目管理”，分别进入
+  [患者展示页](./07-patient-examination-item-browser.md)和管理页；
 - 超级管理员从部门管理页进入[用户管理二级页](./05-admin-user-management.md)，医生不显示入口；
 - “我的”使用同一资料头部与菜单组件，并显示可用版本切换入口；
 - 二级页面使用 `navigateTo`，Tab 页面使用 `switchTab`；

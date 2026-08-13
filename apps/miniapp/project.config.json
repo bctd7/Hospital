@@ -1,7 +1,7 @@
 {
   "description": "Hospital 微信小程序开发工程",
   "compileType": "miniprogram",
-  "miniprogramRoot": "dist/build/mp-weixin/",
+  "miniprogramRoot": "dist/dev/mp-weixin/",
   "appid": "wx8ba66b98c93423fd",
   "projectname": "Hospital",
   "setting": {
