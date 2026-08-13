@@ -1,6 +1,6 @@
 # Identity 数据库
 
-`hospital_identity` 是 Identity 的业务事实库。当前迁移版本为 `000005`，最终包含 13 张表；账号、登录、
+`hospital_identity` 是 Identity 的业务事实库。当前尚未发布且没有需要保留的正式业务数据，迁移已压平为单一最新初始版本 `000001`，共包含 13 张表；账号、登录、
 组织、RBAC、审计和 Outbox 分开保存，但只有 `identity_accounts` 是账号主表。
 
 ## 当前表
@@ -38,15 +38,9 @@ identity_outbox_events
 账号不等于患者就诊人。手机号验证码只证明号码控制权，不证明医疗实名；姓名、身份证、医保、预约和报告
 不得进入 Identity 账号表。
 
-## 迁移历史
+## 当前初始迁移
 
-| 版本 | 内容 |
-|---|---|
-| `000001_identity_authorization` | 账号、旧科室基线、工作人员、RBAC、授权审计和 Outbox |
-| `000002_identity_login` | 外部身份和手机号登录绑定 |
-| `000003_identity_organization_units` | 科室表演进为医院/院区/科室统一组织单元 |
-| `000004_identity_organization_audit` | 组织写操作审计与幂等记录 |
-| `000005_identity_account_doctor_management` | 账号管理版本、展示昵称和完整医生公开资料 |
+`000001_identity_initial_schema` 直接创建当前代码需要的最终结构，包括统一组织单元、账号管理版本、展示昵称、完整医生资料、手机号与外部身份、RBAC、审计和 Outbox，不再创建旧 `identity_departments` 后再执行重命名和字段回填。
 
 ## 修改要求
 
@@ -56,3 +50,4 @@ identity_outbox_events
 - `operation_id` 唯一约束和资源版本字段不得绕开；
 - 审计、Outbox 和主数据在同一 MySQL 事务中写入；
 - 空库必须完成 `up`，测试环境验证需要时执行 `down → up`。
+- 正式发布后不得修改已执行迁移，必须新增版本。

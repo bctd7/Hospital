@@ -1,9 +1,13 @@
 DROP TABLE IF EXISTS identity_outbox_events;
+DROP TABLE IF EXISTS identity_organization_audit;
 DROP TABLE IF EXISTS identity_authorization_audit;
 DROP TABLE IF EXISTS identity_account_roles;
 DROP TABLE IF EXISTS identity_role_permissions;
 DROP TABLE IF EXISTS identity_permissions;
 DROP TABLE IF EXISTS identity_roles;
+DROP TABLE IF EXISTS identity_account_phones;
+DROP TABLE IF EXISTS identity_external_identities;
+DROP TABLE IF EXISTS identity_account_profiles;
 DROP TABLE IF EXISTS identity_staff_profiles;
-DROP TABLE IF EXISTS identity_departments;
+DROP TABLE IF EXISTS identity_organization_units;
 DROP TABLE IF EXISTS identity_accounts;
