@@ -4,6 +4,8 @@ type (
     AccountDisplayProfileResponse {
         Nickname          *string `json:"nickname,optional"`
         ManagementVersion int64   `json:"management_version"`
+        MaskedPhone       *string `json:"masked_phone,optional"`
+        StaffDisplayName  *string `json:"staff_display_name,optional"`
     }
 
     UpdateAccountDisplayProfileRequest {

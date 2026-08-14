@@ -98,8 +98,7 @@ function patientHome(): HomeWorkbenchView {
             description: "查询检验检查报告",
             symbol: "查",
             tone: "blue",
-            badge: "建设中",
-            target: { type: "unavailable", message: "报告查询功能正在建设中" },
+            target: { type: "navigate", url: "/pages/profile/reports/index" },
           },
           {
             id: "invoice",
@@ -167,7 +166,20 @@ export function buildHomeWorkbench(
         type: "navigate",
         url: departmentId
           ? `/pages/admin/appointment/bookings?department_id=${encodeURIComponent(departmentId)}&department_label=${encodeURIComponent("科室预约")}`
-          : "/pages/admin/appointment/index",
+          : "/pages/admin/appointment/bookings",
+      },
+    };
+    const departmentHistoryAction: HomeAction = {
+      id: "appointment-history",
+      title: "检查记录",
+      description: departmentId ? "查看当前科室已完成检查" : "选择科室查看已完成检查",
+      symbol: "记",
+      tone: "cyan",
+      target: {
+        type: "navigate",
+        url: departmentId
+          ? `/pages/admin/appointment/bookings?view=completed&department_id=${encodeURIComponent(departmentId)}&department_label=${encodeURIComponent("检查记录")}`
+          : "/pages/admin/appointment/bookings?view=completed&department_label=%E6%A3%80%E6%9F%A5%E8%AE%B0%E5%BD%95",
       },
     };
     view.serviceGroups = view.serviceGroups.map((group) =>
@@ -178,7 +190,15 @@ export function buildHomeWorkbench(
               action.id === "my-appointments" ? departmentBookingAction : action,
             ),
           }
-        : group,
+        : group.id === "after-visit"
+          ? {
+              ...group,
+              actions: [
+                departmentHistoryAction,
+                ...group.actions.filter((action) => action.id !== "reports"),
+              ],
+            }
+          : group,
     );
     view.notice = "检查项目、房间和每周配置已接入真实 Appointment 数据。";
     view.mock = false;

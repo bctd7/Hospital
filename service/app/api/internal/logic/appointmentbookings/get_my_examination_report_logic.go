@@ -13,28 +13,28 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type CheckInBookingLogic struct {
+type GetMyExaminationReportLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewCheckInBookingLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CheckInBookingLogic {
-	return &CheckInBookingLogic{
+func NewGetMyExaminationReportLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetMyExaminationReportLogic {
+	return &GetMyExaminationReportLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *CheckInBookingLogic) CheckInBooking(req *types.CheckInBookingAPIRequest) (resp *types.BookingResponse, err error) {
+func (l *GetMyExaminationReportLogic) GetMyExaminationReport(req *types.BookingPathRequest) (resp *types.ExaminationReportResponse, err error) {
 	rpcCtx, requestID, err := bookingRPCContext(l.ctx, l.svcCtx)
 	if err != nil {
 		return nil, err
 	}
-	value, err := l.svcCtx.Appointment.CheckInBooking(rpcCtx, &appointmentv1.CheckInBookingRequest{BookingId: req.BookingID, ExpectedVersion: req.ExpectedVersion, OperationId: req.OperationID, RequestId: requestID})
+	value, err := l.svcCtx.Appointment.GetMyExaminationReport(rpcCtx, &appointmentv1.GetExaminationReportRequest{BookingId: req.BookingID, RequestId: requestID})
 	if err != nil {
 		return nil, err
 	}
-	return booking(value), nil
+	return examinationReport(value), nil
 }

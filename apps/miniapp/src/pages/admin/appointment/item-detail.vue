@@ -3,6 +3,7 @@ import { onLoad } from "@dcloudio/uni-app";
 import { computed, ref } from "vue";
 
 import { appointmentManagementApi } from "@/api/appointment";
+import { ApiError } from "@/api/client";
 import {
   invalidateItemAppointment,
   loadItemWeeklyWindows,
@@ -11,6 +12,7 @@ import { sessionState } from "@/stores/session";
 import type {
   AppointmentSession,
   ExaminationItem,
+  ExaminationItemReportTemplate,
   ItemWeeklyWindow,
 } from "@/types/appointment";
 import {
@@ -20,6 +22,7 @@ import {
   messageOf,
   SESSION_LABELS,
   WEEKDAY_LABELS,
+  windowFitsSession,
 } from "@/utils/appointmentManagement";
 
 const departmentId = ref("");
@@ -29,6 +32,7 @@ const item = ref<ExaminationItem>();
 const name = ref("");
 const description = ref("");
 const windows = ref<ItemWeeklyWindow[]>([]);
+const reportTemplate = ref<ExaminationItemReportTemplate>();
 const loading = ref(false);
 const saving = ref(false);
 const error = ref("");
@@ -65,19 +69,40 @@ async function loadDetail(force = false) {
   loading.value = true;
   error.value = "";
   try {
-    const [detail, configured] = await Promise.all([
+    const [detail, configured, configuredTemplate] = await Promise.all([
       appointmentManagementApi.getItem(itemId.value),
       loadItemWeeklyWindows(itemId.value, force),
+      appointmentManagementApi.getItemReportTemplate(itemId.value),
     ]);
     item.value = detail;
     departmentId.value = detail.ownerDepartmentId;
     name.value = detail.name;
     description.value = detail.description;
     windows.value = configured;
+    reportTemplate.value = configuredTemplate;
   } catch (cause) {
     error.value = messageOf(cause, "检查项目加载失败，请重试");
   } finally {
     loading.value = false;
+  }
+}
+
+async function saveReportTemplate() {
+  if (!reportTemplate.value || saving.value || !canUpdate.value) return;
+  saving.value = true;
+  try {
+    reportTemplate.value = await appointmentManagementApi.saveItemReportTemplate({
+      ...reportTemplate.value,
+      objectiveFindings: reportTemplate.value.objectiveFindings.trim(),
+      impression: reportTemplate.value.impression.trim(),
+      recommendation: reportTemplate.value.recommendation.trim(),
+      notes: reportTemplate.value.notes.trim(),
+    });
+    uni.showToast({ title: "报告模板已保存" });
+  } catch (cause) {
+    uni.showToast({ title: messageOf(cause, "报告模板保存失败"), icon: "none" });
+  } finally {
+    saving.value = false;
   }
 }
 
@@ -97,6 +122,9 @@ async function saveItem() {
     itemId.value = saved.itemId;
     name.value = saved.name;
     description.value = saved.description;
+    if (!reportTemplate.value) {
+      reportTemplate.value = await appointmentManagementApi.getItemReportTemplate(saved.itemId);
+    }
     invalidateItemAppointment(saved.itemId, saved.ownerDepartmentId);
     uni.setNavigationBarTitle({ title: "检查项目详情" });
     uni.showToast({ title: "项目已保存" });
@@ -134,12 +162,17 @@ function changeItemStatus() {
 }
 
 function openWindowEditor(value?: ItemWeeklyWindow) {
+  const fallback = firstAvailableSlot();
   editingWindow.value = value;
-  windowWeekday.value = value?.weekday ?? firstAvailableSlot().weekday;
-  windowSession.value = value?.session ?? firstAvailableSlot().session;
-  startTime.value = value?.startTime ?? "09:00";
-  cutoffTime.value = value?.bookingCutoffTime ?? "11:30";
-  endTime.value = value?.endTime ?? "12:00";
+  windowWeekday.value = value?.weekday ?? fallback.weekday;
+  windowSession.value = value?.session ?? fallback.session;
+  if (value) {
+    startTime.value = value.startTime;
+    cutoffTime.value = value.bookingCutoffTime;
+    endTime.value = value.endTime;
+  } else {
+    applySessionTimeDefaults();
+  }
   editorVisible.value = true;
 }
 
@@ -160,12 +193,35 @@ function selectWeekday(event: { detail: { value: string | number } }) {
 
 function selectSession(event: { detail: { value: string | number } }) {
   windowSession.value = Number(event.detail.value) === 0 ? "morning" : "afternoon";
+  applySessionTimeDefaults();
+}
+
+function applySessionTimeDefaults() {
+  if (windowSession.value === "morning") {
+    startTime.value = "09:00";
+    cutoffTime.value = "11:30";
+    endTime.value = "12:00";
+  } else {
+    startTime.value = "13:00";
+    cutoffTime.value = "17:30";
+    endTime.value = "18:00";
+  }
 }
 
 async function saveWindow() {
   if (!item.value || saving.value) return;
   if (!itemWindowTimeValid(startTime.value, cutoffTime.value, endTime.value)) {
     uni.showToast({ title: "请检查开始、停止新增和结束时间", icon: "none" });
+    return;
+  }
+  if (!windowFitsSession(windowSession.value, startTime.value, endTime.value)) {
+    uni.showModal({
+      title: "时段与时间不一致",
+      content: windowSession.value === "morning"
+        ? "上午窗口必须完整设置在 12:00 以前，12:00 可以作为结束时间。"
+        : "下午窗口必须从 12:00 或之后开始。",
+      showCancel: false,
+    });
     return;
   }
   const duplicate = windows.value.find((value) =>
@@ -192,7 +248,15 @@ async function saveWindow() {
     editorVisible.value = false;
     uni.showToast({ title: "项目窗口已保存" });
   } catch (cause) {
-    uni.showToast({ title: messageOf(cause, "窗口保存失败"), icon: "none" });
+    if (cause instanceof ApiError && cause.code === "ITEM_ROOM_WINDOW_CONFLICT") {
+      uni.showModal({
+        title: "项目时间超出房间开放范围",
+        content: "项目预约时间必须完整落在所有已关联房间同一天、同时段的开放窗口内。请先扩大房间开放时间，或缩短项目预约时间。",
+        showCancel: false,
+      });
+    } else {
+      uni.showToast({ title: messageOf(cause, "窗口保存失败"), icon: "none" });
+    }
   } finally {
     saving.value = false;
   }
@@ -252,6 +316,25 @@ function disableWindow(value: ItemWeeklyWindow) {
       </view>
 
       <view v-if="item" class="section">
+        <view class="section__heading">
+          <text>检查报告模板</text>
+          <text class="template-version">版本 {{ reportTemplate?.version ?? 0 }}</text>
+        </view>
+        <text class="section__hint">开始填写首份报告时可带入以下内容；已生成的报告不会随模板修改。</text>
+        <template v-if="reportTemplate">
+          <text class="field-label">客观所见</text>
+          <textarea v-model="reportTemplate.objectiveFindings" class="field-textarea report-field" maxlength="8000" placeholder="预设客观检查所见，可留空" />
+          <text class="field-label">检查结论</text>
+          <textarea v-model="reportTemplate.impression" class="field-textarea report-field" maxlength="4000" placeholder="预设检查结论，可留空" />
+          <text class="field-label">建议</text>
+          <textarea v-model="reportTemplate.recommendation" class="field-textarea report-field" maxlength="4000" placeholder="预设后续建议，可留空" />
+          <text class="field-label">备注</text>
+          <textarea v-model="reportTemplate.notes" class="field-textarea report-field" maxlength="4000" placeholder="预设备注，可留空" />
+          <button v-if="canUpdate" class="primary-button" :disabled="saving" @tap="saveReportTemplate">保存报告模板</button>
+        </template>
+      </view>
+
+      <view v-if="item" class="section">
         <view class="section__heading"><text>项目周预约窗口</text><button v-if="canUpdate" @tap="openWindowEditor()">＋ 配置</button></view>
         <view v-if="!sortedWindows.length" class="inline-empty">尚未配置预约窗口</view>
         <view v-for="value in sortedWindows" :key="value.windowId" class="window-row">
@@ -268,7 +351,7 @@ function disableWindow(value: ItemWeeklyWindow) {
       </view>
     </template>
 
-    <view v-if="editorVisible" class="dialog-mask" @tap.self="editorVisible = false">
+    <view v-if="editorVisible" class="dialog-mask">
       <view class="dialog">
         <text class="dialog__title">{{ editingWindow ? '编辑项目窗口' : '新增项目窗口' }}</text>
         <view class="picker-row">
@@ -285,5 +368,5 @@ function disableWindow(value: ItemWeeklyWindow) {
 </template>
 
 <style scoped>
-button::after{display:none}.detail-page{min-height:100vh;padding:24rpx;box-sizing:border-box;background:#f2f6fa}.context-card,.section{padding:26rpx;background:#fff;border:1rpx solid #e6ecf2;border-radius:24rpx}.context-card__label,.context-card__value{display:block}.context-card__label{color:#99a3b2;font-size:20rpx}.context-card__value{margin-top:7rpx;color:#344157;font-size:26rpx;font-weight:680}.section{margin-top:20rpx}.section__heading{display:flex;align-items:center;justify-content:space-between;color:#273449;font-size:28rpx;font-weight:700}.section__heading button,.window-row button{width:auto;margin:0;padding:0 16rpx;color:#1684ca;font-size:21rpx;line-height:50rpx;background:#e9f5fc;border-radius:25rpx}.section__hint{display:block;margin-top:12rpx;color:#8d98a8;font-size:20rpx;line-height:1.6}.field-label{display:block;margin-top:22rpx;color:#657287;font-size:21rpx}.field-input,.field-textarea{width:100%;margin-top:10rpx;padding:0 20rpx;box-sizing:border-box;color:#28364a;font-size:24rpx;background:#f6f8fa;border:1rpx solid #e4eaf0;border-radius:16rpx}.field-input{height:72rpx}.field-textarea{height:190rpx;padding-top:18rpx}.primary-button,.danger-button{width:100%;margin:22rpx 0 0;font-size:24rpx;line-height:72rpx;border-radius:36rpx}.primary-button{color:#fff;background:linear-gradient(135deg,#168bd7,#1db4b2)}.danger-button{color:#c94b5e;background:#fbecef}.status{padding:5rpx 11rpx;font-size:18rpx;border-radius:13rpx}.status--active{color:#138766;background:#e1f7ef}.status--disabled{color:#a0616b;background:#f7e8eb}.inline-empty,.state{margin-top:18rpx;padding:48rpx 20rpx;color:#8d98a8;font-size:22rpx;text-align:center;background:#f7f9fb;border-radius:18rpx}.state{display:flex;flex-direction:column;gap:18rpx}.state--error{color:#c44f61}.state button{margin:auto;color:#1684ca;background:#e9f5fc}.window-row{display:flex;align-items:center;justify-content:space-between;gap:18rpx;margin-top:14rpx;padding:18rpx;background:#f7f9fb;border-radius:18rpx}.window-row__title,.window-row__time{display:block}.window-row__title{color:#344157;font-size:23rpx;font-weight:650}.window-row__time{margin-top:6rpx;color:#8390a3;font-size:19rpx}.window-row__actions{display:flex;align-items:center;gap:8rpx}.window-row__actions .text-danger{color:#c94b5e;background:#fbecef}.dialog-mask{position:fixed;inset:0;display:flex;align-items:flex-end;z-index:20;background:rgba(19,29,43,.48)}.dialog{width:100%;padding:30rpx 26rpx calc(30rpx + env(safe-area-inset-bottom));box-sizing:border-box;background:#fff;border-radius:30rpx 30rpx 0 0}.dialog__title{color:#263348;font-size:30rpx;font-weight:720}.picker-row{display:grid;grid-template-columns:1fr 1fr;gap:14rpx;margin-top:22rpx}.picker-row view{padding:0 20rpx;color:#425067;font-size:23rpx;line-height:68rpx;background:#f4f7fa;border-radius:16rpx}.dialog__notice{display:block;margin-top:20rpx;color:#bb7838;font-size:20rpx}.dialog__buttons{display:grid;grid-template-columns:1fr 1fr;gap:16rpx;margin-top:20rpx}.dialog__buttons button{margin:0;line-height:68rpx;border-radius:34rpx}.dialog__buttons .primary-button{margin:0}.primary-button[disabled]{opacity:.55}
+button::after{display:none}.detail-page{min-height:100vh;padding:24rpx;box-sizing:border-box;background:#f2f6fa}.context-card,.section{padding:26rpx;background:#fff;border:1rpx solid #e6ecf2;border-radius:24rpx}.context-card__label,.context-card__value{display:block}.context-card__label{color:#99a3b2;font-size:20rpx}.context-card__value{margin-top:7rpx;color:#344157;font-size:26rpx;font-weight:680}.section{margin-top:20rpx}.section__heading{display:flex;align-items:center;justify-content:space-between;color:#273449;font-size:28rpx;font-weight:700}.section__heading button,.window-row button{width:auto;margin:0;padding:0 16rpx;color:#1684ca;font-size:21rpx;line-height:50rpx;background:#e9f5fc;border-radius:25rpx}.section__hint{display:block;margin-top:12rpx;color:#8d98a8;font-size:20rpx;line-height:1.6}.field-label{display:block;margin-top:22rpx;color:#657287;font-size:21rpx}.field-input,.field-textarea{width:100%;margin-top:10rpx;padding:0 20rpx;box-sizing:border-box;color:#28364a;font-size:24rpx;background:#f6f8fa;border:1rpx solid #e4eaf0;border-radius:16rpx}.field-input{height:72rpx}.field-textarea{height:190rpx;padding-top:18rpx}.report-field{height:150rpx}.template-version{color:#77869a;font-size:20rpx;font-weight:500}.primary-button,.danger-button{width:100%;margin:22rpx 0 0;font-size:24rpx;line-height:72rpx;border-radius:36rpx}.primary-button{color:#fff;background:#168bd7}.danger-button{color:#c94b5e;background:#fbecef}.status{padding:5rpx 11rpx;font-size:18rpx;border-radius:13rpx}.status--active{color:#138766;background:#e1f7ef}.status--disabled{color:#a0616b;background:#f7e8eb}.inline-empty,.state{margin-top:18rpx;padding:48rpx 20rpx;color:#8d98a8;font-size:22rpx;text-align:center;background:#f7f9fb;border-radius:18rpx}.state{display:flex;flex-direction:column;gap:18rpx}.state--error{color:#c44f61}.state button{margin:auto;color:#1684ca;background:#e9f5fc}.window-row{display:flex;align-items:center;justify-content:space-between;gap:18rpx;margin-top:14rpx;padding:18rpx;background:#f7f9fb;border-radius:18rpx}.window-row__title,.window-row__time{display:block}.window-row__title{color:#344157;font-size:23rpx;font-weight:650}.window-row__time{margin-top:6rpx;color:#8390a3;font-size:19rpx}.window-row__actions{display:flex;align-items:center;gap:8rpx}.window-row__actions .text-danger{color:#c94b5e;background:#fbecef}.dialog-mask{position:fixed;inset:0;display:flex;align-items:flex-end;z-index:20;background:rgba(19,29,43,.48)}.dialog{width:100%;padding:30rpx 26rpx calc(30rpx + env(safe-area-inset-bottom));box-sizing:border-box;background:#fff;border-radius:30rpx 30rpx 0 0}.dialog__title{color:#263348;font-size:30rpx;font-weight:720}.picker-row{display:grid;grid-template-columns:1fr 1fr;gap:14rpx;margin-top:22rpx}.picker-row view{padding:0 20rpx;color:#425067;font-size:23rpx;line-height:68rpx;background:#f4f7fa;border-radius:16rpx}.dialog__notice{display:block;margin-top:20rpx;color:#bb7838;font-size:20rpx}.dialog__buttons{display:grid;grid-template-columns:1fr 1fr;gap:16rpx;margin-top:20rpx}.dialog__buttons button{margin:0;line-height:68rpx;border-radius:34rpx}.dialog__buttons .primary-button{margin:0}.primary-button[disabled]{opacity:.55}
 </style>

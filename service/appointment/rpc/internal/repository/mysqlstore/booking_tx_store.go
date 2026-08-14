@@ -119,6 +119,41 @@ WHERE booking_id = ?`, bookingID)
 	return nil
 }
 
+func (s *bookingTxStore) ConsumePatientWeeklyQuota(ctx context.Context, patientAccountID string, weekStartDate time.Time, limit int64, now time.Time) error {
+	if limit < 1 {
+		return fmt.Errorf("%w: weekly quota limit must be positive", appointmentmanager.ErrInvalid)
+	}
+	_, err := s.tx.ExecContext(ctx, `
+INSERT INTO appointment_patient_weekly_quota_usage
+    (patient_account_id, week_start_date, used_count, version, created_at, updated_at)
+VALUES (?, ?, 0, 1, ?, ?)
+ON DUPLICATE KEY UPDATE patient_account_id = patient_account_id`,
+		patientAccountID, weekStartDate.Format("2006-01-02"), now, now,
+	)
+	if err != nil {
+		return fmt.Errorf("ensure patient weekly quota: %w", err)
+	}
+	result, err := s.tx.ExecContext(ctx, `
+UPDATE appointment_patient_weekly_quota_usage
+SET used_count = used_count + 1,
+    version = version + 1,
+    updated_at = ?
+WHERE patient_account_id = ? AND week_start_date = ? AND used_count < ?`,
+		now, patientAccountID, weekStartDate.Format("2006-01-02"), limit,
+	)
+	if err != nil {
+		return fmt.Errorf("consume patient weekly quota: %w", err)
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("read patient weekly quota result: %w", err)
+	}
+	if affected != 1 {
+		return appointmentmanager.ErrPatientWeeklyQuotaFull
+	}
+	return nil
+}
+
 func (s *bookingTxStore) RecordBookingOperation(ctx context.Context, change appointmentmanager.BookingOperationChange) error {
 	result, err := json.Marshal(change.Result)
 	if err != nil {
@@ -184,6 +219,7 @@ FOR UPDATE`, roomID, serviceDate.Format("2006-01-02"), session, itemID).Scan(
 		return appointmentmanager.BookingSelection{}, fmt.Errorf("lock booking selection: %w", err)
 	}
 	value.RoomDisplayName = appointmentmanager.FormatRoomDisplayName(building, floorNumber, roomNumber)
+	value.Building, value.FloorNumber, value.RoomNumber = building, floorNumber, roomNumber
 	return value, nil
 }
 
@@ -295,12 +331,14 @@ func (s *bookingTxStore) GetBookingForUpdate(ctx context.Context, bookingID stri
 func (s *bookingTxStore) CreateBooking(ctx context.Context, value appointmentmanager.Booking) error {
 	_, err := s.tx.ExecContext(ctx, `
 INSERT INTO appointment_bookings
-    (id, patient_account_id, department_id, item_id, room_id, service_date, session, status,
+    (id, patient_account_id, patient_display_name_snapshot, patient_phone_masked_snapshot,
+     patient_phone_last4_snapshot, department_id, item_id, room_id, service_date, session, status,
      room_open_time_snapshot, room_close_time_snapshot, item_start_time_snapshot,
-     item_end_time_snapshot, item_cutoff_time_snapshot, checked_in_at, checked_in_by,
+     item_end_time_snapshot, item_cutoff_time_snapshot,
      version, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?)`,
-		value.BookingID, value.PatientAccountID, value.DepartmentID, value.ItemID, value.RoomID,
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		value.BookingID, value.PatientAccountID, value.PatientDisplayName, value.PatientPhoneMasked,
+		value.PatientPhoneLast4, value.DepartmentID, value.ItemID, value.RoomID,
 		value.ServiceDate.Format("2006-01-02"), value.Session, value.Status,
 		value.RoomOpenTime, value.RoomCloseTime, value.ItemStartTime,
 		value.ItemEndTime, value.BookingCutoffTime, value.Version, value.CreatedAt, value.UpdatedAt,
@@ -308,20 +346,61 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?)`,
 	return mapWriteError(err, "create booking")
 }
 
-func (s *bookingTxStore) CheckInBooking(ctx context.Context, value appointmentmanager.Booking, expectedVersion int64) error {
+func (s *bookingTxStore) StartExamination(ctx context.Context, value appointmentmanager.Booking, expectedVersion int64) error {
 	result, err := s.tx.ExecContext(ctx, `
 UPDATE appointment_bookings
-SET status = 'checked_in', checked_in_at = ?, checked_in_by = ?,
+SET status = 'in_progress', started_at = ?, started_by = ?, started_by_display_name_snapshot = ?,
     version = version + 1, updated_at = ?
 WHERE id = ? AND status = 'confirmed' AND version = ?`,
-		value.CheckedInAt, value.CheckedInBy, value.UpdatedAt, value.BookingID, expectedVersion,
+		value.StartedAt, value.StartedBy, value.StartedByDisplayName, value.UpdatedAt, value.BookingID, expectedVersion,
 	)
 	if err != nil {
-		return fmt.Errorf("check in booking: %w", err)
+		return fmt.Errorf("start examination: %w", err)
 	}
 	affected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("read check-in result: %w", err)
+		return fmt.Errorf("read start examination result: %w", err)
+	}
+	if affected != 1 {
+		return appointmentmanager.ErrVersionConflict
+	}
+	return nil
+}
+
+func (s *bookingTxStore) MarkBookingNoShow(ctx context.Context, value appointmentmanager.Booking, expectedVersion int64) error {
+	result, err := s.tx.ExecContext(ctx, `
+UPDATE appointment_bookings
+SET status = 'no_show', version = version + 1, updated_at = ?
+WHERE id = ? AND status = 'confirmed' AND version = ?`,
+		value.UpdatedAt, value.BookingID, expectedVersion,
+	)
+	if err != nil {
+		return fmt.Errorf("mark booking no-show: %w", err)
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("read no-show result: %w", err)
+	}
+	if affected != 1 {
+		return appointmentmanager.ErrVersionConflict
+	}
+	return nil
+}
+
+func (s *bookingTxStore) CompleteBooking(ctx context.Context, value appointmentmanager.Booking, expectedVersion int64) error {
+	result, err := s.tx.ExecContext(ctx, `
+UPDATE appointment_bookings
+SET status = 'completed', completed_at = ?, completed_by = ?, completed_by_display_name_snapshot = ?,
+    version = version + 1, updated_at = ?
+WHERE id = ? AND status = 'in_progress' AND version = ?`,
+		value.CompletedAt, value.CompletedBy, value.CompletedByDisplayName, value.UpdatedAt, value.BookingID, expectedVersion,
+	)
+	if err != nil {
+		return fmt.Errorf("complete examination: %w", err)
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("read complete examination result: %w", err)
 	}
 	if affected != 1 {
 		return appointmentmanager.ErrVersionConflict

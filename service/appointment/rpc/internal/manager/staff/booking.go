@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -18,7 +17,6 @@ import (
 )
 
 const (
-	bookingActionCheckIn       = "check_in"
 	bookingActionDeleteByStaff = "delete_by_staff"
 	bookingDateLayout          = "2006-01-02"
 )
@@ -64,6 +62,17 @@ func (m *Manager) ListBookings(ctx context.Context, operator authn.Principal, qu
 		return Page[Booking]{}, err
 	}
 	filter := BookingListFilter{DepartmentID: departmentID, Offset: offset, Limit: pageSize}
+	if query.View == "" {
+		query.View = BookingListViewActive
+	}
+	if !query.View.Valid() {
+		return Page[Booking]{}, fmt.Errorf("%w: view must be active or completed", ErrInvalid)
+	}
+	filter.View = query.View
+	filter.PatientKeyword = strings.TrimSpace(query.PatientKeyword)
+	if len([]rune(filter.PatientKeyword)) > 128 {
+		return Page[Booking]{}, fmt.Errorf("%w: patient_keyword is too long", ErrInvalid)
+	}
 	if strings.TrimSpace(query.ServiceDate) != "" {
 		date, parseErr := time.ParseInLocation(bookingDateLayout, strings.TrimSpace(query.ServiceDate), bookingHospitalLocation)
 		if parseErr != nil {
@@ -104,78 +113,17 @@ func (m *Manager) ListBookings(ctx context.Context, operator authn.Principal, qu
 	return Page[Booking]{Items: values, Page: page, PageSize: pageSize, Total: total}, nil
 }
 
-// CheckInBooking 核销预约，并记录实际操作人员和核销时间。
-func (m *Manager) CheckInBooking(ctx context.Context, operator authn.Principal, command staffinput.CheckInBooking) (Booking, error) {
-	if err := staffsupport.RequirePermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
-		return Booking{}, err
-	}
-	var err error
-	command.BookingID, err = staffsupport.NormalizeUUID(command.BookingID, "booking_id")
+func bookingSnapshotDateTime(serviceDate time.Time, clock string) (time.Time, error) {
+	parsed, err := time.Parse("15:04:05", strings.TrimSpace(clock))
 	if err != nil {
-		return Booking{}, err
+		return time.Time{}, fmt.Errorf("%w: invalid stored examination time", ErrInvalidState)
 	}
-	command.OperationID, err = staffsupport.NormalizeUUID(command.OperationID, "operation_id")
-	if err != nil {
-		return Booking{}, err
-	}
-	if command.ExpectedVersion < 1 {
-		return Booking{}, fmt.Errorf("%w: expected_version must be positive", ErrInvalid)
-	}
-	command.RequestID = strings.TrimSpace(command.RequestID)
-	fingerprintValue := staffsupport.Fingerprint(bookingActionCheckIn, struct {
-		BookingID       string
-		ExpectedVersion int64
-		OperationID     string
-	}{command.BookingID, command.ExpectedVersion, command.OperationID})
-	var result Booking
-	err = m.bookings.WithinBookingTransaction(ctx, func(tx BookingTxStore) error {
-		operation, found, findErr := tx.FindBookingOperation(ctx, command.OperationID)
-		if findErr != nil {
-			return findErr
-		}
-		if found {
-			if operation.OperatorAccountID != operator.AccountID || operation.BookingID != command.BookingID || operation.Action != bookingActionCheckIn || operation.RequestFingerprint != fingerprintValue {
-				return ErrConflict
-			}
-			return json.Unmarshal(operation.ResultData, &result)
-		}
-		booking, lockErr := tx.GetBookingForUpdate(ctx, command.BookingID)
-		if lockErr != nil {
-			return lockErr
-		}
-		if err := staffsupport.RequireDepartmentScope(operator, booking.DepartmentID); err != nil {
-			return err
-		}
-		if booking.Status != BookingStatusConfirmed {
-			return ErrInvalidState
-		}
-		now := time.Now().In(bookingHospitalLocation)
-		if booking.ServiceDate.In(bookingHospitalLocation).Format(bookingDateLayout) != now.Format(bookingDateLayout) {
-			return fmt.Errorf("%w: booking can only be checked in on its service date", ErrInvalidState)
-		}
-		booking.Status = BookingStatusCheckedIn
-		booking.CheckedInAt = &now
-		booking.CheckedInBy = operator.AccountID
-		booking.UpdatedAt = now
-		booking.Version = command.ExpectedVersion + 1
-		if err := tx.CheckInBooking(ctx, booking, command.ExpectedVersion); err != nil {
-			return err
-		}
-		if err := tx.ReleasePatientSession(ctx, booking.BookingID); err != nil {
-			return err
-		}
-		result = booking
-		return tx.RecordBookingOperation(ctx, BookingOperationChange{
-			OperationID: command.OperationID, OperatorAccountID: operator.AccountID,
-			BookingID: booking.BookingID, Action: bookingActionCheckIn,
-			RequestFingerprint: fingerprintValue, Result: result,
-		})
-	})
-	if err != nil {
-		return Booking{}, err
-	}
-	m.invalidateBookingReads(ctx, result.DepartmentID)
-	return result, nil
+	serviceDate = serviceDate.In(bookingHospitalLocation)
+	return time.Date(
+		serviceDate.Year(), serviceDate.Month(), serviceDate.Day(),
+		parsed.Hour(), parsed.Minute(), parsed.Second(), 0,
+		bookingHospitalLocation,
+	), nil
 }
 
 // DeleteBooking 由工作人员删除预约，并在同一事务中释放容量和患者时段。
@@ -222,6 +170,9 @@ func (m *Manager) DeleteBooking(ctx context.Context, operator authn.Principal, c
 		if err := staffsupport.RequireDepartmentScope(operator, booking.DepartmentID); err != nil {
 			return err
 		}
+		if booking.Status != BookingStatusConfirmed {
+			return ErrInvalidState
+		}
 		capacity, found, capacityErr := tx.FindDateCapacityForUpdate(ctx, booking.RoomID, booking.ServiceDate, booking.Session)
 		if capacityErr != nil {
 			return capacityErr
@@ -232,10 +183,8 @@ func (m *Manager) DeleteBooking(ctx context.Context, operator authn.Principal, c
 		if err := tx.DecreaseOccupiedCapacity(ctx, capacity.CapacityID); err != nil {
 			return err
 		}
-		if booking.Status == BookingStatusConfirmed {
-			if err := tx.ReleasePatientSession(ctx, booking.BookingID); err != nil {
-				return err
-			}
+		if err := tx.ReleasePatientSession(ctx, booking.BookingID); err != nil {
+			return err
 		}
 		if err := tx.DeleteBooking(ctx, booking.BookingID); err != nil {
 			return err
@@ -290,8 +239,8 @@ func deleteBookingsForConfiguration(
 		return nil, err
 	}
 	for _, booking := range bookings {
-		if booking.Status == BookingStatusCheckedIn {
-			return nil, fmt.Errorf("%w: checked-in booking %s blocks configuration change", ErrInvalidState, booking.BookingID)
+		if booking.Status == BookingStatusInProgress {
+			return nil, fmt.Errorf("%w: started booking %s blocks configuration change", ErrInvalidState, booking.BookingID)
 		}
 	}
 	deleted := make([]Booking, 0, len(bookings))
@@ -354,22 +303,22 @@ func reconcileRoomWindowCapacity(
 	if err != nil {
 		return err
 	}
-	checkedIn := 0
+	started := 0
 	confirmed := make([]Booking, 0, len(bookings))
 	for _, booking := range bookings {
 		switch booking.Status {
-		case BookingStatusCheckedIn:
-			checkedIn++
+		case BookingStatusInProgress:
+			started++
 		case BookingStatusConfirmed:
 			confirmed = append(confirmed, booking)
 		}
 	}
-	if int64(checkedIn) > window.ActiveCapacity {
-		return fmt.Errorf("%w: checked-in bookings exceed requested capacity", ErrInvalidState)
+	if int64(started) > window.ActiveCapacity {
+		return fmt.Errorf("%w: started bookings exceed requested capacity", ErrInvalidState)
 	}
 	excess := capacity.OccupiedCapacity - window.ActiveCapacity
 	if excess > int64(len(confirmed)) {
-		return fmt.Errorf("%w: checked-in bookings block capacity reduction", ErrInvalidState)
+		return fmt.Errorf("%w: started bookings block capacity reduction", ErrInvalidState)
 	}
 	for index := int64(0); index < excess; index++ {
 		if err := deleteBookingForConfiguration(ctx, tx, operatorAccountID, configurationOperationID, confirmed[index]); err != nil {

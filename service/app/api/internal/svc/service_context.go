@@ -16,6 +16,7 @@ import (
 	authversion "hospital/common/authz/version"
 	"hospital/common/authz/version/redisstore"
 	"hospital/common/observability/logging"
+	appointmentv1 "hospital/contracts/gen/appointment/v1"
 	identityv1 "hospital/contracts/gen/identity/v1"
 	"hospital/service/app/api/internal/config"
 	"hospital/service/app/api/internal/middleware"
@@ -73,6 +74,9 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 	for _, method := range identityRPCMethodsWithSensitiveContent() {
 		zrpc.DontLogClientContentForMethod(method)
 	}
+	for _, method := range appointmentRPCMethodsWithSensitiveContent() {
+		zrpc.DontLogClientContentForMethod(method)
+	}
 
 	return &ServiceContext{
 		Config: c,
@@ -94,6 +98,22 @@ func identityRPCMethodsWithSensitiveContent() []string {
 		identityv1.IdentityService_SearchAdminAccountByPhone_FullMethodName,
 		identityv1.IdentityService_RefreshAccessToken_FullMethodName,
 		identityv1.IdentityService_RevokeRefreshToken_FullMethodName,
+	}
+}
+
+// 报告正文属于医疗敏感信息，网关调用 Appointment RPC 时不记录请求或响应正文。
+func appointmentRPCMethodsWithSensitiveContent() []string {
+	return []string{
+		appointmentv1.AppointmentService_GetExaminationItemReportTemplate_FullMethodName,
+		appointmentv1.AppointmentService_SaveExaminationItemReportTemplate_FullMethodName,
+		appointmentv1.AppointmentService_SaveExaminationReportDraft_FullMethodName,
+		appointmentv1.AppointmentService_CompleteAndPublishExaminationReport_FullMethodName,
+		appointmentv1.AppointmentService_CorrectExaminationReport_FullMethodName,
+		appointmentv1.AppointmentService_GetExaminationReport_FullMethodName,
+		appointmentv1.AppointmentService_ListExaminationReports_FullMethodName,
+		appointmentv1.AppointmentService_ListExaminationReportVersions_FullMethodName,
+		appointmentv1.AppointmentService_GetMyExaminationReport_FullMethodName,
+		appointmentv1.AppointmentService_ListMyExaminationReports_FullMethodName,
 	}
 }
 

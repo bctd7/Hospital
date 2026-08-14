@@ -38,7 +38,8 @@ func identityDirectoryRPCError(err error) error {
 
 func accountDisplayProfileResponse(value account.DisplayProfile) *identityv1.AccountDisplayProfile {
 	return &identityv1.AccountDisplayProfile{
-		Nickname: optionalProtoString(value.Nickname), ManagementVersion: value.ManagementVersion,
+		Nickname: optionalProtoString(value.Nickname), MaskedPhone: optionalProtoString(value.MaskedPhone),
+		StaffDisplayName: optionalProtoString(value.StaffDisplayName), ManagementVersion: value.ManagementVersion,
 	}
 }
 

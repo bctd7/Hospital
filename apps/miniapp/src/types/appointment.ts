@@ -1,6 +1,9 @@
 export type AppointmentStatus = "active" | "disabled";
 export type AppointmentSession = "morning" | "afternoon";
-export type PatientBookingStatus = "confirmed" | "checked_in";
+export type PatientBookingStatus = "confirmed" | "in_progress" | "completed" | "no_show";
+export type AppointmentListView = "active" | "completed";
+export type ExaminationReportStatus = "draft" | "published";
+export type ExaminationReportVersionKind = "original" | "correction";
 
 export interface ExaminationItem {
   itemId: string;
@@ -10,6 +13,19 @@ export interface ExaminationItem {
   status: AppointmentStatus;
   version: number;
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExaminationReportContent {
+  objectiveFindings: string;
+  impression: string;
+  recommendation: string;
+  notes: string;
+}
+
+export interface ExaminationItemReportTemplate extends ExaminationReportContent {
+  itemId: string;
+  version: number;
   updatedAt: string;
 }
 
@@ -110,6 +126,8 @@ export interface AppointmentManagementApi {
   createItem(departmentId: string, name: string, description: string): Promise<ExaminationItem>;
   updateItem(item: ExaminationItem, name: string, description: string): Promise<ExaminationItem>;
   setItemEnabled(item: ExaminationItem, enabled: boolean): Promise<ExaminationItem>;
+  getItemReportTemplate(itemId: string): Promise<ExaminationItemReportTemplate>;
+  saveItemReportTemplate(template: ExaminationItemReportTemplate): Promise<ExaminationItemReportTemplate>;
   listRooms(departmentId: string, page?: number, pageSize?: number): Promise<AppointmentPage<AppointmentRoom>>;
   getRoom(roomId: string): Promise<AppointmentRoom>;
   createRoom(departmentId: string, location: RoomLocationInput): Promise<AppointmentRoom>;
@@ -149,12 +167,19 @@ export interface BookingOption {
 export interface PatientBooking {
   bookingId: string;
   patientAccountId: string;
+  patientDisplayName: string;
+  patientPhoneMasked: string;
   departmentId: string;
+  departmentName: string;
   itemId: string;
   itemName: string;
   roomId: string;
   roomDisplayName: string;
   campusId: string;
+  campusName: string;
+  building: string;
+  floorNumber: number;
+  roomNumber: string;
   serviceDate: string;
   session: AppointmentSession;
   status: PatientBookingStatus;
@@ -166,8 +191,55 @@ export interface PatientBooking {
   version: number;
   createdAt: string;
   updatedAt: string;
-  checkedInAt?: string;
-  checkedInBy?: string;
+  startedAt?: string;
+  startedBy?: string;
+  startedByDisplayName?: string;
+  completedAt?: string;
+  completedBy?: string;
+  completedByDisplayName?: string;
+}
+
+export interface ExaminationReportVersion extends ExaminationReportContent {
+  versionId: string;
+  versionNo: number;
+  versionKind: ExaminationReportVersionKind;
+  status: ExaminationReportStatus;
+  correctionReason?: string;
+  authoredBy: string;
+  authoredByDisplayName: string;
+  publishedBy?: string;
+  publishedByDisplayName?: string;
+  publishedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ExaminationReport {
+  reportId: string;
+  bookingId: string;
+  patientAccountId: string;
+  patientDisplayName: string;
+  patientPhoneMasked: string;
+  departmentId: string;
+  departmentName: string;
+  itemId: string;
+  itemName: string;
+  roomId: string;
+  campusId: string;
+  campusName: string;
+  building: string;
+  floorNumber: number;
+  roomNumber: string;
+  roomDisplayName: string;
+  status: ExaminationReportStatus;
+  performedBy?: string;
+  performedByDisplayName?: string;
+  examinationStartedAt?: string;
+  examinationCompletedAt?: string;
+  version: number;
+  currentVersion: ExaminationReportVersion;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface BookingOptionsResult {
@@ -178,15 +250,35 @@ export interface BookingOptionsResult {
 
 export interface PatientAppointmentApi {
   listItems(departmentId: string): Promise<ExaminationItem[]>;
+  listItemRooms(itemId: string): Promise<RoomExaminationItem[]>;
   listBookingOptions(itemId: string): Promise<BookingOptionsResult>;
   createBooking(itemId: string, roomId: string, serviceDate: string, session: AppointmentSession): Promise<PatientBooking>;
-  listMyBookings(page?: number, pageSize?: number): Promise<AppointmentPage<PatientBooking>>;
+  listMyBookings(page?: number, pageSize?: number, view?: AppointmentListView): Promise<AppointmentPage<PatientBooking>>;
   getMyBooking(bookingId: string): Promise<PatientBooking>;
   deleteMyBooking(bookingId: string, reason?: string): Promise<void>;
+  listMyReports(page?: number, pageSize?: number): Promise<AppointmentPage<ExaminationReport>>;
+  getMyReport(bookingId: string): Promise<ExaminationReport>;
+}
+
+export interface StaffBookingFilters {
+  patientKeyword?: string;
+  status?: PatientBookingStatus;
+  view?: AppointmentListView;
+}
+
+export interface StaffReportFilters {
+  keyword?: string;
 }
 
 export interface StaffBookingApi {
-  listBookings(departmentId: string, page?: number, pageSize?: number): Promise<AppointmentPage<PatientBooking>>;
-  checkInBooking(booking: PatientBooking): Promise<PatientBooking>;
+  listBookings(departmentId: string, filters?: StaffBookingFilters, page?: number, pageSize?: number): Promise<AppointmentPage<PatientBooking>>;
+  listReports(departmentId: string, filters?: StaffReportFilters, page?: number, pageSize?: number): Promise<AppointmentPage<ExaminationReport>>;
+  getBooking(bookingId: string): Promise<PatientBooking>;
+  startExamination(booking: PatientBooking): Promise<PatientBooking>;
+  getReport(bookingId: string): Promise<ExaminationReport>;
+  saveReportDraft(bookingId: string, content: ExaminationReportContent, expectedReportVersion: number): Promise<ExaminationReport>;
+  completeAndPublishReport(booking: PatientBooking, content: ExaminationReportContent, expectedReportVersion: number): Promise<ExaminationReport>;
+  correctReport(report: ExaminationReport, content: ExaminationReportContent, correctionReason: string): Promise<ExaminationReport>;
+  listReportVersions(reportId: string): Promise<ExaminationReportVersion[]>;
   deleteBooking(bookingId: string, reason?: string): Promise<void>;
 }

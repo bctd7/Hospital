@@ -18,14 +18,21 @@ type (
 	BookingOperation       = common.BookingOperation
 	BookingOperationChange = common.BookingOperationChange
 	BookingStatus          = common.BookingStatus
+	BookingListView        = common.BookingListView
+	ExaminationReport      = common.ExaminationReport
+	ReportListFilter       = common.ReportListFilter
 	Session                = common.Session
 	Page[T any]            = common.Page[T]
 	flightGroup            = common.FlightGroup
 )
 
 const (
-	StatusActive           = common.StatusActive
-	BookingStatusConfirmed = common.BookingStatusConfirmed
+	StatusActive             = common.StatusActive
+	BookingStatusConfirmed   = common.BookingStatusConfirmed
+	BookingStatusNoShow      = common.BookingStatusNoShow
+	BookingListViewActive    = common.BookingListViewActive
+	BookingListViewCompleted = common.BookingListViewCompleted
+	ReportStatusPublished    = common.ReportStatusPublished
 )
 
 var (
@@ -37,6 +44,7 @@ var (
 	ErrCapacityFull           = common.ErrCapacityFull
 	ErrBookingClosed          = common.ErrBookingClosed
 	ErrPatientSessionOccupied = common.ErrPatientSessionOccupied
+	ErrPatientWeeklyQuotaFull = common.ErrPatientWeeklyQuotaFull
 )
 
 func loadCached[T any](ctx context.Context, cache Cache, flights *flightGroup, key string, ttl time.Duration, loader func() (T, bool, error)) (T, bool, error) {

@@ -50,6 +50,26 @@ type (
 		ExpectedVersion int64  `json:"expected_version"`
 		OperationID     string `json:"operation_id"`
 	}
+
+	ExaminationItemReportTemplateResponse {
+		ItemID             string `json:"item_id"`
+		ObjectiveFindings  string `json:"objective_findings"`
+		Impression         string `json:"impression"`
+		Recommendation     string `json:"recommendation"`
+		Notes              string `json:"notes"`
+		Version            int64  `json:"version"`
+		UpdatedAt          string `json:"updated_at"`
+	}
+
+	SaveExaminationItemReportTemplateRequest {
+		ItemID                  string `path:"itemId"`
+		ObjectiveFindings       string `json:"objective_findings,optional"`
+		Impression              string `json:"impression,optional"`
+		Recommendation          string `json:"recommendation,optional"`
+		Notes                   string `json:"notes,optional"`
+		ExpectedTemplateVersion int64  `json:"expected_template_version"`
+		OperationID             string `json:"operation_id"`
+	}
 )
 
 @server (
@@ -79,4 +99,10 @@ service app-api {
 
 	@handler enableExaminationItem
 	post /admin/appointment/examination-items/:itemId/enable (ChangeExaminationItemStatusRequest) returns (ExaminationItemResponse)
+
+	@handler getExaminationItemReportTemplate
+	get /admin/appointment/examination-items/:itemId/report-template (ExaminationItemPathRequest) returns (ExaminationItemReportTemplateResponse)
+
+	@handler saveExaminationItemReportTemplate
+	put /admin/appointment/examination-items/:itemId/report-template (SaveExaminationItemReportTemplateRequest) returns (ExaminationItemReportTemplateResponse)
 }

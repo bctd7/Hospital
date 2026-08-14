@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -29,12 +30,24 @@ func roomProjectRPCError(err error) error {
 	case errors.Is(err, common.ErrVersionConflict):
 		return status.Error(codes.Aborted, "room or project configuration version conflict")
 	case errors.Is(err, common.ErrWindowConflict):
-		return status.Error(codes.FailedPrecondition, "item window must be fully contained by every active room window")
+		return roomProjectStatusError(codes.FailedPrecondition, "item window must be fully contained by every active room window", "ITEM_ROOM_WINDOW_CONFLICT")
 	case errors.Is(err, common.ErrInvalidState):
 		return status.Error(codes.FailedPrecondition, "room or project configuration state does not allow the operation")
 	default:
 		return status.Error(codes.Internal, "internal server error")
 	}
+}
+
+func roomProjectStatusError(code codes.Code, message, reason string) error {
+	value := status.New(code, message)
+	withDetails, err := value.WithDetails(&errdetails.ErrorInfo{
+		Reason: reason,
+		Domain: "hospital.appointment",
+	})
+	if err != nil {
+		return value.Err()
+	}
+	return withDetails.Err()
 }
 
 func operationInput(operationID, requestID string) staffinput.Operation {

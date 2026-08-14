@@ -23,6 +23,7 @@ import {
   roomWindowTimeValid,
   SESSION_LABELS,
   WEEKDAY_LABELS,
+  windowFitsSession,
 } from "@/utils/appointmentManagement";
 
 const departmentId = ref("");
@@ -220,8 +221,8 @@ function openWindowEditor(value?: RoomWeeklyWindow) {
   editingWindow.value = value;
   windowWeekday.value = value?.weekday ?? fallback.weekday;
   windowSession.value = value?.session ?? fallback.session;
-  openTime.value = value?.openTime ?? (windowSession.value === "morning" ? "08:00" : "14:00");
-  closeTime.value = value?.closeTime ?? (windowSession.value === "morning" ? "12:00" : "17:00");
+  openTime.value = value?.openTime ?? (windowSession.value === "morning" ? "09:00" : "13:00");
+  closeTime.value = value?.closeTime ?? (windowSession.value === "morning" ? "12:00" : "18:00");
   activeCapacity.value = String(value?.activeCapacity ?? 20);
   editorVisible.value = true;
 }
@@ -236,13 +237,27 @@ function firstAvailableSlot(): { weekday: number; session: AppointmentSession } 
 }
 
 function selectWeekday(event: { detail: { value: string | number } }) { windowWeekday.value = Number(event.detail.value) + 1; }
-function selectSession(event: { detail: { value: string | number } }) { windowSession.value = Number(event.detail.value) === 0 ? "morning" : "afternoon"; }
+function selectSession(event: { detail: { value: string | number } }) {
+  windowSession.value = Number(event.detail.value) === 0 ? "morning" : "afternoon";
+  openTime.value = windowSession.value === "morning" ? "09:00" : "13:00";
+  closeTime.value = windowSession.value === "morning" ? "12:00" : "18:00";
+}
 
 async function saveWindow() {
   if (!room.value || saving.value) return;
   const capacity = Number(activeCapacity.value);
   if (!roomWindowTimeValid(openTime.value, closeTime.value) || !Number.isInteger(capacity) || capacity < 1) {
     uni.showToast({ title: "请检查开放时间和共享容量", icon: "none" });
+    return;
+  }
+  if (!windowFitsSession(windowSession.value, openTime.value, closeTime.value)) {
+    uni.showModal({
+      title: "时段与时间不一致",
+      content: windowSession.value === "morning"
+        ? "上午窗口必须完整设置在 12:00 以前，12:00 可以作为结束时间。"
+        : "下午窗口必须从 12:00 或之后开始。",
+      showCancel: false,
+    });
     return;
   }
   const duplicate = windows.value.find((value) => value.windowId !== editingWindow.value?.windowId && value.weekday === windowWeekday.value && value.session === windowSession.value);
@@ -331,7 +346,7 @@ function disableWindow(value: RoomWeeklyWindow) {
       </view>
     </template>
 
-    <view v-if="editorVisible" class="dialog-mask" @tap.self="editorVisible = false">
+    <view v-if="editorVisible" class="dialog-mask">
       <view class="dialog">
         <text class="dialog__title">{{ editingWindow ? '编辑房间窗口' : '新增房间窗口' }}</text>
         <view class="picker-row"><picker :value="windowWeekday - 1" :range="WEEKDAY_LABELS" @change="selectWeekday"><view>{{ WEEKDAY_LABELS[windowWeekday - 1] }} ›</view></picker><picker :value="windowSession === 'morning' ? 0 : 1" :range="['上午', '下午']" @change="selectSession"><view>{{ SESSION_LABELS[windowSession] }} ›</view></picker></view>

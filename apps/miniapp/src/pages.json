@@ -57,6 +57,18 @@
       }
     },
     {
+      "path": "pages/profile/reports/index",
+      "style": {
+        "navigationBarTitleText": "检验报告查询"
+      }
+    },
+    {
+      "path": "pages/profile/reports/detail",
+      "style": {
+        "navigationBarTitleText": "检查报告"
+      }
+    },
+    {
       "path": "pages/profile/favorites/index",
       "style": {
         "navigationBarTitleText": "我的关注"
@@ -113,6 +125,18 @@
           "path": "appointment/bookings",
           "style": {
             "navigationBarTitleText": "科室预约"
+          }
+        },
+        {
+          "path": "appointment/booking-detail",
+          "style": {
+            "navigationBarTitleText": "预约与检查报告"
+          }
+        },
+        {
+          "path": "appointment/report-history",
+          "style": {
+            "navigationBarTitleText": "报告版本记录"
           }
         }
       ]

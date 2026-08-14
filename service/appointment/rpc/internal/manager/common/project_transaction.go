@@ -36,6 +36,7 @@ type ProjectTxStore interface {
 	GetItemForUpdate(ctx context.Context, itemID string) (ExaminationItem, error)
 	CreateItem(ctx context.Context, item ExaminationItem) error
 	UpdateItem(ctx context.Context, item ExaminationItem, expectedVersion int64) error
+	UpdateItemReportTemplate(ctx context.Context, item ExaminationItem, expectedTemplateVersion int64) error
 	SetItemStatus(ctx context.Context, item ExaminationItem, expectedVersion int64) error
 	RecordChange(ctx context.Context, change ProjectChange) error
 }

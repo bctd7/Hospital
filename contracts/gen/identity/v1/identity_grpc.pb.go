@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v7.34.1
-// source: contracts/proto/identity/v1/identity.proto
+// source: identity/v1/identity.proto
 
 package identityv1
 
@@ -999,5 +999,5 @@ var IdentityService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "contracts/proto/identity/v1/identity.proto",
+	Metadata: "identity/v1/identity.proto",
 }

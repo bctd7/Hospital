@@ -8,6 +8,12 @@ import type {
   AppointmentStatus,
   BookingOption,
   BookingOptionsResult,
+  ExaminationItemReportTemplate,
+  ExaminationReport,
+  ExaminationReportContent,
+  ExaminationReportStatus,
+  ExaminationReportVersion,
+  ExaminationReportVersionKind,
   ExaminationItem,
   ItemWeeklyWindow,
   RoomExaminationItem,
@@ -18,6 +24,7 @@ import type {
   PatientAppointmentApi,
   PatientBooking,
   StaffBookingApi,
+  PatientBookingStatus,
 } from "@/types/appointment";
 
 interface ItemResponse {
@@ -110,15 +117,22 @@ interface BookingOptionResponse {
 interface BookingResponse {
   booking_id: string;
   patient_account_id: string;
+  patient_display_name: string;
+  patient_phone_masked: string;
   department_id: string;
+  department_name: string;
   item_id: string;
   item_name: string;
   room_id: string;
   room_display_name: string;
   campus_id: string;
+  campus_name: string;
+  building: string;
+  floor_number: number;
+  room_number: string;
   service_date: string;
   session: AppointmentSession;
-  status: "confirmed" | "checked_in";
+  status: PatientBookingStatus;
   room_open_time: string;
   room_close_time: string;
   item_start_time: string;
@@ -127,8 +141,68 @@ interface BookingResponse {
   version: number;
   created_at: string;
   updated_at: string;
-  checked_in_at?: string;
-  checked_in_by?: string;
+  started_at?: string;
+  started_by?: string;
+  started_by_display_name?: string;
+  completed_at?: string;
+  completed_by?: string;
+  completed_by_display_name?: string;
+}
+
+interface ReportContentResponse {
+  objective_findings: string;
+  impression: string;
+  recommendation: string;
+  notes: string;
+}
+
+interface ItemReportTemplateResponse extends ReportContentResponse {
+  item_id: string;
+  version: number;
+  updated_at: string;
+}
+
+interface ReportVersionResponse extends ReportContentResponse {
+  version_id: string;
+  version_no: number;
+  version_kind: ExaminationReportVersionKind;
+  status: ExaminationReportStatus;
+  correction_reason?: string;
+  authored_by: string;
+  authored_by_display_name: string;
+  published_by?: string;
+  published_by_display_name?: string;
+  published_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ExaminationReportResponse {
+  report_id: string;
+  booking_id: string;
+  patient_account_id: string;
+  patient_display_name: string;
+  patient_phone_masked: string;
+  department_id: string;
+  department_name: string;
+  item_id: string;
+  item_name: string;
+  room_id: string;
+  campus_id: string;
+  campus_name: string;
+  building: string;
+  floor_number: number;
+  room_number: string;
+  room_display_name: string;
+  status: ExaminationReportStatus;
+  performed_by?: string;
+  performed_by_display_name?: string;
+  examination_started_at?: string;
+  examination_completed_at?: string;
+  version: number;
+  current_version: ReportVersionResponse;
+  created_at: string;
+  updated_at: string;
 }
 
 const item = (value: ItemResponse): ExaminationItem => ({
@@ -138,6 +212,63 @@ const item = (value: ItemResponse): ExaminationItem => ({
   description: value.description,
   status: value.status,
   version: value.version,
+  createdAt: value.created_at,
+  updatedAt: value.updated_at,
+});
+
+const itemReportTemplate = (value: ItemReportTemplateResponse): ExaminationItemReportTemplate => ({
+  itemId: value.item_id,
+  objectiveFindings: value.objective_findings,
+  impression: value.impression,
+  recommendation: value.recommendation,
+  notes: value.notes,
+  version: value.version,
+  updatedAt: value.updated_at,
+});
+
+const reportVersion = (value: ReportVersionResponse): ExaminationReportVersion => ({
+  versionId: value.version_id,
+  versionNo: value.version_no,
+  versionKind: value.version_kind,
+  status: value.status,
+  objectiveFindings: value.objective_findings,
+  impression: value.impression,
+  recommendation: value.recommendation,
+  notes: value.notes,
+  correctionReason: value.correction_reason,
+  authoredBy: value.authored_by,
+  authoredByDisplayName: value.authored_by_display_name,
+  publishedBy: value.published_by,
+  publishedByDisplayName: value.published_by_display_name,
+  publishedAt: value.published_at,
+  createdAt: value.created_at,
+  updatedAt: value.updated_at,
+});
+
+const examinationReport = (value: ExaminationReportResponse): ExaminationReport => ({
+  reportId: value.report_id,
+  bookingId: value.booking_id,
+  patientAccountId: value.patient_account_id,
+  patientDisplayName: value.patient_display_name,
+  patientPhoneMasked: value.patient_phone_masked,
+  departmentId: value.department_id,
+  departmentName: value.department_name,
+  itemId: value.item_id,
+  itemName: value.item_name,
+  roomId: value.room_id,
+  campusId: value.campus_id,
+  campusName: value.campus_name,
+  building: value.building,
+  floorNumber: value.floor_number,
+  roomNumber: value.room_number,
+  roomDisplayName: value.room_display_name,
+  status: value.status,
+  performedBy: value.performed_by,
+  performedByDisplayName: value.performed_by_display_name,
+  examinationStartedAt: value.examination_started_at,
+  examinationCompletedAt: value.examination_completed_at,
+  version: value.version,
+  currentVersion: reportVersion(value.current_version),
   createdAt: value.created_at,
   updatedAt: value.updated_at,
 });
@@ -221,12 +352,19 @@ const bookingOption = (value: BookingOptionResponse): BookingOption => ({
 const booking = (value: BookingResponse): PatientBooking => ({
   bookingId: value.booking_id,
   patientAccountId: value.patient_account_id,
+  patientDisplayName: value.patient_display_name,
+  patientPhoneMasked: value.patient_phone_masked,
   departmentId: value.department_id,
+  departmentName: value.department_name,
   itemId: value.item_id,
   itemName: value.item_name,
   roomId: value.room_id,
   roomDisplayName: value.room_display_name,
   campusId: value.campus_id,
+  campusName: value.campus_name,
+  building: value.building,
+  floorNumber: value.floor_number,
+  roomNumber: value.room_number,
   serviceDate: value.service_date,
   session: value.session,
   status: value.status,
@@ -238,8 +376,12 @@ const booking = (value: BookingResponse): PatientBooking => ({
   version: value.version,
   createdAt: value.created_at,
   updatedAt: value.updated_at,
-  checkedInAt: value.checked_in_at,
-  checkedInBy: value.checked_in_by,
+  startedAt: value.started_at,
+  startedBy: value.started_by,
+  startedByDisplayName: value.started_by_display_name,
+  completedAt: value.completed_at,
+  completedBy: value.completed_by,
+  completedByDisplayName: value.completed_by_display_name,
 });
 
 const retryOperationIds = new Map<string, string>();
@@ -309,6 +451,29 @@ export const appointmentManagementApi: AppointmentManagementApi = {
   async setItemEnabled(value, enabled) {
     const key = `item:status:${value.itemId}:${value.version}:${enabled}`;
     return item(await mutation<ItemResponse>(key, `/api/v1/admin/appointment/examination-items/${encodeURIComponent(value.itemId)}/${enabled ? "enable" : "disable"}`, "POST", statusBody(value.itemId, value.version)));
+  },
+
+  async getItemReportTemplate(itemId) {
+    return itemReportTemplate(await request<ItemReportTemplateResponse>({
+      path: `/api/v1/admin/appointment/examination-items/${encodeURIComponent(itemId)}/report-template`,
+      authenticated: true,
+    }));
+  },
+
+  async saveItemReportTemplate(value) {
+    const data = {
+      objective_findings: value.objectiveFindings,
+      impression: value.impression,
+      recommendation: value.recommendation,
+      notes: value.notes,
+      expected_template_version: value.version,
+    };
+    return itemReportTemplate(await mutation<ItemReportTemplateResponse>(
+      `item-report-template:${value.itemId}:${value.version}:${JSON.stringify(data)}`,
+      `/api/v1/admin/appointment/examination-items/${encodeURIComponent(value.itemId)}/report-template`,
+      "PUT",
+      data,
+    ));
   },
 
   async listRooms(departmentId, currentPage = 1, pageSize = 50) {
@@ -421,6 +586,14 @@ export const patientAppointmentApi: PatientAppointmentApi = {
     return arrayOrEmpty(value.items).map(item);
   },
 
+  async listItemRooms(itemId) {
+    const value = await request<{ relations: RelationResponse[] | null }>({
+      path: `/api/v1/appointment/examination-items/${encodeURIComponent(itemId)}/rooms`,
+      authenticated: true,
+    });
+    return arrayOrEmpty(value.relations).map(relation);
+  },
+
   async listBookingOptions(itemId): Promise<BookingOptionsResult> {
     const value = await request<{
       options: BookingOptionResponse[] | null;
@@ -447,9 +620,9 @@ export const patientAppointmentApi: PatientAppointmentApi = {
     ));
   },
 
-  async listMyBookings(currentPage = 1, pageSize = 20) {
+  async listMyBookings(currentPage = 1, pageSize = 20, view = "active") {
     const value = await request<{ bookings: BookingResponse[] | null; page: number; page_size: number; total: number }>({
-      path: queryPath("/api/v1/appointment/bookings", { page: currentPage, page_size: pageSize }),
+      path: queryPath("/api/v1/appointment/bookings", { view, page: currentPage, page_size: pageSize }),
       authenticated: true,
     });
     return page(arrayOrEmpty(value.bookings).map(booking), value);
@@ -470,13 +643,31 @@ export const patientAppointmentApi: PatientAppointmentApi = {
       data: { operation_id: operationId(), reason },
     });
   },
+
+  async listMyReports(currentPage = 1, pageSize = 20) {
+    const value = await request<{ reports: ExaminationReportResponse[] | null; page: number; page_size: number; total: number }>({
+      path: queryPath("/api/v1/appointment/reports", { page: currentPage, page_size: pageSize }),
+      authenticated: true,
+    });
+    return page(arrayOrEmpty(value.reports).map(examinationReport), value);
+  },
+
+  async getMyReport(bookingId) {
+    return examinationReport(await request<ExaminationReportResponse>({
+      path: `/api/v1/appointment/bookings/${encodeURIComponent(bookingId)}/report`,
+      authenticated: true,
+    }));
+  },
 };
 
 export const staffBookingApi: StaffBookingApi = {
-  async listBookings(departmentId, currentPage = 1, pageSize = 100) {
+  async listBookings(departmentId, filters = {}, currentPage = 1, pageSize = 100) {
     const value = await request<{ bookings: BookingResponse[] | null; page: number; page_size: number; total: number }>({
       path: queryPath("/api/v1/admin/appointment/bookings", {
         department_id: departmentId,
+        patient_keyword: filters.patientKeyword,
+        status: filters.status,
+        view: filters.view ?? "active",
         page: currentPage,
         page_size: pageSize,
       }),
@@ -485,13 +676,84 @@ export const staffBookingApi: StaffBookingApi = {
     return page(arrayOrEmpty(value.bookings).map(booking), value);
   },
 
-  async checkInBooking(value) {
+  async listReports(departmentId, filters = {}, currentPage = 1, pageSize = 50) {
+    const value = await request<{ reports: ExaminationReportResponse[] | null; page: number; page_size: number; total: number }>({
+      path: queryPath("/api/v1/admin/appointment/reports", {
+        department_id: departmentId,
+        keyword: filters.keyword,
+        page: currentPage,
+        page_size: pageSize,
+      }),
+      authenticated: true,
+    });
+    return page(arrayOrEmpty(value.reports).map(examinationReport), value);
+  },
+
+  async getBooking(bookingId) {
+    return booking(await request<BookingResponse>({
+      path: `/api/v1/admin/appointment/bookings/${encodeURIComponent(bookingId)}`,
+      authenticated: true,
+    }));
+  },
+
+  async startExamination(value) {
     return booking(await mutation<BookingResponse>(
-      `booking:check-in:${value.bookingId}:${value.version}`,
-      `/api/v1/admin/appointment/bookings/${encodeURIComponent(value.bookingId)}/check-in`,
+      `booking:start:${value.bookingId}:${value.version}`,
+      `/api/v1/admin/appointment/bookings/${encodeURIComponent(value.bookingId)}/start-examination`,
       "POST",
       { expected_version: value.version },
     ));
+  },
+
+  async getReport(bookingId) {
+    return examinationReport(await request<ExaminationReportResponse>({
+      path: `/api/v1/admin/appointment/bookings/${encodeURIComponent(bookingId)}/report`,
+      authenticated: true,
+    }));
+  },
+
+  async saveReportDraft(bookingId, content, expectedReportVersion) {
+    const data = reportContentBody(content, { expected_report_version: expectedReportVersion });
+    return examinationReport(await mutation<ExaminationReportResponse>(
+      `report:draft:${bookingId}:${expectedReportVersion}:${JSON.stringify(data)}`,
+      `/api/v1/admin/appointment/bookings/${encodeURIComponent(bookingId)}/report/draft`,
+      "PUT",
+      data,
+    ));
+  },
+
+  async completeAndPublishReport(value, content, expectedReportVersion) {
+    const data = reportContentBody(content, {
+      expected_booking_version: value.version,
+      expected_report_version: expectedReportVersion,
+    });
+    return examinationReport(await mutation<ExaminationReportResponse>(
+      `report:publish:${value.bookingId}:${value.version}:${expectedReportVersion}:${JSON.stringify(data)}`,
+      `/api/v1/admin/appointment/bookings/${encodeURIComponent(value.bookingId)}/report/complete-and-publish`,
+      "POST",
+      data,
+    ));
+  },
+
+  async correctReport(value, content, correctionReason) {
+    const data = reportContentBody(content, {
+      correction_reason: correctionReason,
+      expected_report_version: value.version,
+    });
+    return examinationReport(await mutation<ExaminationReportResponse>(
+      `report:correct:${value.reportId}:${value.version}:${JSON.stringify(data)}`,
+      `/api/v1/admin/appointment/reports/${encodeURIComponent(value.reportId)}/corrections`,
+      "POST",
+      data,
+    ));
+  },
+
+  async listReportVersions(reportId) {
+    const value = await request<{ versions: ReportVersionResponse[] | null }>({
+      path: `/api/v1/admin/appointment/reports/${encodeURIComponent(reportId)}/versions`,
+      authenticated: true,
+    });
+    return arrayOrEmpty(value.versions).map(reportVersion);
   },
 
   async deleteBooking(bookingId, reason = "工作人员删除") {
@@ -503,3 +765,13 @@ export const staffBookingApi: StaffBookingApi = {
     });
   },
 };
+
+function reportContentBody(content: ExaminationReportContent, extra: Record<string, unknown>): Record<string, unknown> {
+  return {
+    objective_findings: content.objectiveFindings,
+    impression: content.impression,
+    recommendation: content.recommendation,
+    notes: content.notes,
+    ...extra,
+  };
+}

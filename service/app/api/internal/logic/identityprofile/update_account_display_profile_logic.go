@@ -27,5 +27,8 @@ func (l *UpdateAccountDisplayProfileLogic) UpdateAccountDisplayProfile(req *type
 	if err != nil {
 		return nil, err
 	}
-	return &types.AccountDisplayProfileResponse{Nickname: value.Nickname, ManagementVersion: value.GetManagementVersion()}, nil
+	return &types.AccountDisplayProfileResponse{
+		Nickname: value.Nickname, MaskedPhone: value.MaskedPhone, StaffDisplayName: value.StaffDisplayName,
+		ManagementVersion: value.GetManagementVersion(),
+	}, nil
 }

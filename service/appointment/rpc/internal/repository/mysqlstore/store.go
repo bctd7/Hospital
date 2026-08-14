@@ -46,7 +46,10 @@ func (s *Store) Close() error {
 }
 
 const examinationItemSelect = `
-SELECT id, owner_department_id, name, description, status, version, created_at, updated_at
+SELECT id, owner_department_id, name, description,
+       report_template_objective_findings, report_template_impression,
+       report_template_recommendation, report_template_notes, report_template_version,
+       status, version, created_at, updated_at
 FROM appointment_examination_items`
 
 func (s *Store) GetItem(ctx context.Context, itemID string) (appointmentmanager.ExaminationItem, error) {
@@ -142,6 +145,11 @@ func scanExaminationItem(scanner examinationItemScanner) (appointmentmanager.Exa
 		&item.OwnerDepartmentID,
 		&item.Name,
 		&item.Description,
+		&item.ReportTemplate.ObjectiveFindings,
+		&item.ReportTemplate.Impression,
+		&item.ReportTemplate.Recommendation,
+		&item.ReportTemplate.Notes,
+		&item.ReportTemplate.Version,
 		&item.Status,
 		&item.Version,
 		&item.CreatedAt,

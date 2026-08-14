@@ -38,9 +38,8 @@ func (s *ServiceContext) cleanupExpiredBookings(ctx context.Context) {
 		location = time.FixedZone("Asia/Shanghai", 8*60*60)
 	}
 	now := time.Now().In(location)
-	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, location)
 	for {
-		result, err := s.appointmentStore.CleanupExpiredBookings(ctx, today, bookingCleanupBatch)
+		result, err := s.appointmentStore.CleanupExpiredBookings(ctx, now, bookingCleanupBatch)
 		if err != nil {
 			if ctx.Err() == nil {
 				logx.Errorf("cleanup expired bookings: %v", err)
@@ -52,7 +51,7 @@ func (s *ServiceContext) cleanupExpiredBookings(ctx context.Context) {
 				_ = s.bookingCache.BumpDepartment(ctx, departmentID)
 			}
 		}
-		if result.Deleted < bookingCleanupBatch {
+		if result.MarkedNoShow < bookingCleanupBatch {
 			return
 		}
 	}

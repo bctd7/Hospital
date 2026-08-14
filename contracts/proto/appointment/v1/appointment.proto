@@ -11,6 +11,8 @@ service AppointmentService {
   rpc UpdateExaminationItem(UpdateExaminationItemRequest) returns (ExaminationItem);
   rpc DisableExaminationItem(ChangeExaminationItemStatusRequest) returns (ExaminationItem);
   rpc EnableExaminationItem(ChangeExaminationItemStatusRequest) returns (ExaminationItem);
+  rpc GetExaminationItemReportTemplate(GetExaminationItemRequest) returns (ExaminationItemReportTemplate);
+  rpc SaveExaminationItemReportTemplate(SaveExaminationItemReportTemplateRequest) returns (ExaminationItemReportTemplate);
 
   rpc CreateRoom(CreateRoomRequest) returns (Room);
   rpc GetRoom(GetRoomRequest) returns (Room);
@@ -38,8 +40,17 @@ service AppointmentService {
   rpc DeleteMyBooking(DeleteBookingRequest) returns (DeleteBookingResponse);
   rpc GetBooking(GetBookingRequest) returns (Booking);
   rpc ListBookings(ListBookingsRequest) returns (ListBookingsResponse);
-  rpc CheckInBooking(CheckInBookingRequest) returns (Booking);
+  rpc StartExamination(StartExaminationRequest) returns (Booking);
   rpc DeleteBooking(DeleteBookingRequest) returns (DeleteBookingResponse);
+
+  rpc SaveExaminationReportDraft(SaveExaminationReportDraftRequest) returns (ExaminationReport);
+  rpc CompleteAndPublishExaminationReport(CompleteAndPublishExaminationReportRequest) returns (ExaminationReport);
+  rpc CorrectExaminationReport(CorrectExaminationReportRequest) returns (ExaminationReport);
+  rpc GetExaminationReport(GetExaminationReportRequest) returns (ExaminationReport);
+  rpc ListExaminationReports(ListExaminationReportsRequest) returns (ListExaminationReportsResponse);
+  rpc ListExaminationReportVersions(ListExaminationReportVersionsRequest) returns (ListExaminationReportVersionsResponse);
+  rpc GetMyExaminationReport(GetExaminationReportRequest) returns (ExaminationReport);
+  rpc ListMyExaminationReports(ListMyExaminationReportsRequest) returns (ListExaminationReportsResponse);
 }
 
 // ExaminationItemInput contains only fields controlled by the caller when
@@ -103,6 +114,21 @@ message ExaminationItem {
   int64 version = 6;
   string created_at = 7;
   string updated_at = 8;
+}
+
+message ExaminationItemReportTemplate {
+  string item_id = 1;
+  ExaminationReportContent content = 2;
+  int64 version = 3;
+  string updated_at = 4;
+}
+
+message SaveExaminationItemReportTemplateRequest {
+  string item_id = 1;
+  ExaminationReportContent content = 2;
+  int64 expected_template_version = 3;
+  string operation_id = 4;
+  string request_id = 5;
 }
 
 message CreateRoomRequest {
@@ -293,6 +319,8 @@ message CreateBookingRequest {
   string session = 4;
   string operation_id = 5;
   string request_id = 6;
+  string patient_display_name = 7;
+  string patient_phone_masked = 8;
 }
 
 message GetBookingRequest {
@@ -304,6 +332,7 @@ message ListMyBookingsRequest {
   int64 page = 1;
   int64 page_size = 2;
   string request_id = 3;
+  string view = 4;
 }
 
 message ListBookingsRequest {
@@ -316,6 +345,8 @@ message ListBookingsRequest {
   int64 page = 7;
   int64 page_size = 8;
   string request_id = 9;
+  string patient_keyword = 10;
+  string view = 11;
 }
 
 message DeleteBookingRequest {
@@ -330,11 +361,12 @@ message DeleteBookingResponse {
   bool deleted = 2;
 }
 
-message CheckInBookingRequest {
+message StartExaminationRequest {
   string booking_id = 1;
   int64 expected_version = 2;
   string operation_id = 3;
   string request_id = 4;
+  string actor_display_name = 5;
 }
 
 message Booking {
@@ -357,12 +389,141 @@ message Booking {
   int64 version = 17;
   string created_at = 18;
   string updated_at = 19;
-  string checked_in_at = 20;
-  string checked_in_by = 21;
+  string started_at = 22;
+  string started_by = 23;
+  string completed_at = 24;
+  string completed_by = 25;
+  string building = 26;
+  int32 floor_number = 27;
+  string room_number = 28;
+  string patient_display_name = 29;
+  string patient_phone_masked = 30;
+  string started_by_display_name = 31;
+  string completed_by_display_name = 32;
 }
 
 message ListBookingsResponse {
   repeated Booking bookings = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  int64 total = 4;
+}
+
+message ExaminationReportContent {
+  string objective_findings = 1;
+  string impression = 2;
+  string recommendation = 3;
+  string notes = 4;
+}
+
+message SaveExaminationReportDraftRequest {
+  string booking_id = 1;
+  ExaminationReportContent content = 2;
+  int64 expected_report_version = 3;
+  string operation_id = 4;
+  string request_id = 5;
+  string actor_display_name = 6;
+}
+
+message CompleteAndPublishExaminationReportRequest {
+  string booking_id = 1;
+  ExaminationReportContent content = 2;
+  int64 expected_booking_version = 3;
+  int64 expected_report_version = 4;
+  string operation_id = 5;
+  string request_id = 6;
+  string actor_display_name = 7;
+  string department_name = 8;
+  string campus_name = 9;
+}
+
+message CorrectExaminationReportRequest {
+  string report_id = 1;
+  ExaminationReportContent content = 2;
+  string correction_reason = 3;
+  int64 expected_report_version = 4;
+  string operation_id = 5;
+  string request_id = 6;
+  string actor_display_name = 7;
+}
+
+message GetExaminationReportRequest {
+  string booking_id = 1;
+  string request_id = 2;
+}
+
+message ListExaminationReportsRequest {
+  string department_id = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  string request_id = 4;
+  string keyword = 5;
+}
+
+message ListExaminationReportVersionsRequest {
+  string report_id = 1;
+  string request_id = 2;
+}
+
+message ListMyExaminationReportsRequest {
+  int64 page = 1;
+  int64 page_size = 2;
+  string request_id = 3;
+}
+
+message ExaminationReportVersion {
+  string version_id = 1;
+  int64 version_no = 2;
+  string version_kind = 3;
+  string status = 4;
+  string objective_findings = 5;
+  string impression = 6;
+  string recommendation = 7;
+  string notes = 8;
+  string correction_reason = 9;
+  string authored_by = 10;
+  string published_by = 11;
+  string published_at = 12;
+  string created_at = 13;
+  string updated_at = 14;
+  string authored_by_display_name = 15;
+  string published_by_display_name = 16;
+}
+
+message ExaminationReport {
+  string report_id = 1;
+  string booking_id = 2;
+  string patient_account_id = 3;
+  string department_id = 4;
+  string item_id = 5;
+  string item_name = 6;
+  string room_id = 7;
+  string campus_id = 8;
+  string building = 9;
+  int32 floor_number = 10;
+  string room_number = 11;
+  string room_display_name = 12;
+  string status = 13;
+  string performed_by = 14;
+  string examination_started_at = 15;
+  string examination_completed_at = 16;
+  int64 version = 17;
+  ExaminationReportVersion current_version = 18;
+  string created_at = 19;
+  string updated_at = 20;
+  string patient_display_name = 21;
+  string patient_phone_masked = 22;
+  string department_name = 23;
+  string campus_name = 24;
+  string performed_by_display_name = 25;
+}
+
+message ListExaminationReportVersionsResponse {
+  repeated ExaminationReportVersion versions = 1;
+}
+
+message ListExaminationReportsResponse {
+  repeated ExaminationReport reports = 1;
   int64 page = 2;
   int64 page_size = 3;
   int64 total = 4;

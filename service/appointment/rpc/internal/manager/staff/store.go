@@ -26,9 +26,18 @@ type RoomStore interface {
 	WithinConfigurationTransaction(ctx context.Context, fn func(ConfigurationTxStore) error) error
 }
 
-// BookingStore 是工作人员查询、核销和删除预约所需的入口。
+// BookingStore 是工作人员查询、开始检查和删除预约所需的入口。
 type BookingStore interface {
 	GetBooking(ctx context.Context, bookingID string) (Booking, error)
 	ListBookings(ctx context.Context, filter BookingListFilter) ([]Booking, int64, error)
 	WithinBookingTransaction(ctx context.Context, fn func(BookingTxStore) error) error
+}
+
+// ReportStore 是工作人员执行检查、维护报告草稿、发布和更正所需的入口。
+type ReportStore interface {
+	GetReportByBooking(ctx context.Context, bookingID string, publishedOnly bool) (ExaminationReport, error)
+	GetReportByID(ctx context.Context, reportID string) (ExaminationReport, error)
+	ListReports(ctx context.Context, filter ReportListFilter, publishedOnly bool) ([]ExaminationReport, int64, error)
+	ListReportVersions(ctx context.Context, reportID string) ([]ReportVersion, error)
+	WithinReportTransaction(ctx context.Context, fn func(ReportTxStore) error) error
 }

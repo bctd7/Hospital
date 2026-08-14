@@ -4,6 +4,7 @@ import (
 	"context"
 
 	appointmentv1 "hospital/contracts/gen/appointment/v1"
+	patientmanager "hospital/service/appointment/rpc/internal/manager/patient"
 	"hospital/service/appointment/rpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -28,7 +29,7 @@ func (l *ListMyBookingsLogic) ListMyBookings(in *appointmentv1.ListMyBookingsReq
 	if err != nil {
 		return nil, err
 	}
-	page, err := l.svcCtx.PatientManager.ListMyBookings(l.ctx, principal, in.GetPage(), in.GetPageSize())
+	page, err := l.svcCtx.PatientManager.ListMyBookings(l.ctx, principal, patientmanager.BookingListView(in.GetView()), in.GetPage(), in.GetPageSize())
 	if err != nil {
 		return nil, bookingRPCError(err)
 	}

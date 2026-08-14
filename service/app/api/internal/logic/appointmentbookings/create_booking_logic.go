@@ -32,12 +32,17 @@ func (l *CreateBookingLogic) CreateBooking(req *types.CreateBookingAPIRequest) (
 	if err != nil {
 		return nil, err
 	}
+	display, err := currentDisplaySnapshots(rpcCtx, l.svcCtx, requestID)
+	if err != nil {
+		return nil, err
+	}
 	value, err := l.svcCtx.Appointment.CreateBooking(rpcCtx, &appointmentv1.CreateBookingRequest{
 		ItemId: req.ItemID, RoomId: req.RoomID, ServiceDate: req.ServiceDate,
 		Session: req.Session, OperationId: req.OperationID, RequestId: requestID,
+		PatientDisplayName: display.PatientName, PatientPhoneMasked: display.MaskedPhone,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return booking(value), nil
+	return bookingWithOrganization(rpcCtx, l.svcCtx, requestID, value), nil
 }

@@ -14,7 +14,9 @@ import (
 )
 
 const bookingSelect = `
-SELECT b.id, b.patient_account_id, b.department_id, b.item_id, i.name,
+SELECT b.id, b.patient_account_id, b.patient_display_name_snapshot,
+       b.patient_phone_masked_snapshot, b.patient_phone_last4_snapshot,
+       b.department_id, b.item_id, i.name,
        b.room_id, r.campus_id, r.building, r.floor_number, r.room_number,
        b.service_date, b.session, b.status,
        TIME_FORMAT(b.room_open_time_snapshot, '%H:%i:%s'),
@@ -22,7 +24,9 @@ SELECT b.id, b.patient_account_id, b.department_id, b.item_id, i.name,
        TIME_FORMAT(b.item_start_time_snapshot, '%H:%i:%s'),
        TIME_FORMAT(b.item_end_time_snapshot, '%H:%i:%s'),
        TIME_FORMAT(b.item_cutoff_time_snapshot, '%H:%i:%s'),
-       b.checked_in_at, COALESCE(b.checked_in_by, ''), b.version, b.created_at, b.updated_at
+       b.started_at, COALESCE(b.started_by, ''), COALESCE(b.started_by_display_name_snapshot, ''),
+       b.completed_at, COALESCE(b.completed_by, ''), COALESCE(b.completed_by_display_name_snapshot, ''),
+       b.version, b.created_at, b.updated_at
 FROM appointment_bookings b
 JOIN appointment_examination_items i ON i.id = b.item_id
 JOIN appointment_rooms r ON r.id = b.room_id`
@@ -121,6 +125,11 @@ func (s *Store) ListBookings(ctx context.Context, filter appointmentmanager.Book
 	if filter.PatientAccountID != "" {
 		appendCondition("b.patient_account_id = ?", filter.PatientAccountID)
 	}
+	if filter.PatientKeyword != "" {
+		keyword := strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(filter.PatientKeyword, `\`, `\\`), `%`, `\%`), `_`, `\_`)
+		conditions = append(conditions, "(b.patient_display_name_snapshot LIKE ? ESCAPE '\\\\' OR b.patient_phone_last4_snapshot = ?)")
+		args = append(args, "%"+keyword+"%", filter.PatientKeyword)
+	}
 	if filter.DepartmentID != "" {
 		appendCondition("b.department_id = ?", filter.DepartmentID)
 	}
@@ -144,6 +153,12 @@ func (s *Store) ListBookings(ctx context.Context, filter appointmentmanager.Book
 	}
 	if filter.Status != "" {
 		appendCondition("b.status = ?", filter.Status)
+	}
+	switch filter.View {
+	case appointmentmanager.BookingListViewActive:
+		conditions = append(conditions, "b.status IN ('confirmed', 'in_progress')")
+	case appointmentmanager.BookingListViewCompleted:
+		conditions = append(conditions, "b.status IN ('completed', 'no_show')")
 	}
 	where := ""
 	if len(conditions) > 0 {
@@ -199,23 +214,31 @@ type bookingScanner interface{ Scan(dest ...any) error }
 
 func scanBooking(scanner bookingScanner) (appointmentmanager.Booking, error) {
 	var value appointmentmanager.Booking
-	var checkedInAt sql.NullTime
+	var startedAt, completedAt sql.NullTime
 	var building, roomNumber string
 	var floorNumber int32
 	err := scanner.Scan(
-		&value.BookingID, &value.PatientAccountID, &value.DepartmentID, &value.ItemID, &value.ItemName,
+		&value.BookingID, &value.PatientAccountID, &value.PatientDisplayName,
+		&value.PatientPhoneMasked, &value.PatientPhoneLast4,
+		&value.DepartmentID, &value.ItemID, &value.ItemName,
 		&value.RoomID, &value.CampusID, &building, &floorNumber, &roomNumber,
 		&value.ServiceDate, &value.Session, &value.Status,
 		&value.RoomOpenTime, &value.RoomCloseTime,
 		&value.ItemStartTime, &value.ItemEndTime, &value.BookingCutoffTime,
-		&checkedInAt, &value.CheckedInBy, &value.Version, &value.CreatedAt, &value.UpdatedAt,
+		&startedAt, &value.StartedBy, &value.StartedByDisplayName,
+		&completedAt, &value.CompletedBy, &value.CompletedByDisplayName,
+		&value.Version, &value.CreatedAt, &value.UpdatedAt,
 	)
 	if err != nil {
 		return appointmentmanager.Booking{}, err
 	}
 	value.RoomDisplayName = appointmentmanager.FormatRoomDisplayName(building, floorNumber, roomNumber)
-	if checkedInAt.Valid {
-		value.CheckedInAt = &checkedInAt.Time
+	value.Building, value.FloorNumber, value.RoomNumber = building, floorNumber, roomNumber
+	if startedAt.Valid {
+		value.StartedAt = &startedAt.Time
+	}
+	if completedAt.Valid {
+		value.CompletedAt = &completedAt.Time
 	}
 	return value, nil
 }

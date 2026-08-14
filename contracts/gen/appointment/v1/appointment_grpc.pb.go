@@ -25,6 +25,8 @@ const (
 	AppointmentService_UpdateExaminationItem_FullMethodName               = "/hospital.appointment.v1.AppointmentService/UpdateExaminationItem"
 	AppointmentService_DisableExaminationItem_FullMethodName              = "/hospital.appointment.v1.AppointmentService/DisableExaminationItem"
 	AppointmentService_EnableExaminationItem_FullMethodName               = "/hospital.appointment.v1.AppointmentService/EnableExaminationItem"
+	AppointmentService_GetExaminationItemReportTemplate_FullMethodName    = "/hospital.appointment.v1.AppointmentService/GetExaminationItemReportTemplate"
+	AppointmentService_SaveExaminationItemReportTemplate_FullMethodName   = "/hospital.appointment.v1.AppointmentService/SaveExaminationItemReportTemplate"
 	AppointmentService_CreateRoom_FullMethodName                          = "/hospital.appointment.v1.AppointmentService/CreateRoom"
 	AppointmentService_GetRoom_FullMethodName                             = "/hospital.appointment.v1.AppointmentService/GetRoom"
 	AppointmentService_ListRooms_FullMethodName                           = "/hospital.appointment.v1.AppointmentService/ListRooms"
@@ -48,8 +50,16 @@ const (
 	AppointmentService_DeleteMyBooking_FullMethodName                     = "/hospital.appointment.v1.AppointmentService/DeleteMyBooking"
 	AppointmentService_GetBooking_FullMethodName                          = "/hospital.appointment.v1.AppointmentService/GetBooking"
 	AppointmentService_ListBookings_FullMethodName                        = "/hospital.appointment.v1.AppointmentService/ListBookings"
-	AppointmentService_CheckInBooking_FullMethodName                      = "/hospital.appointment.v1.AppointmentService/CheckInBooking"
+	AppointmentService_StartExamination_FullMethodName                    = "/hospital.appointment.v1.AppointmentService/StartExamination"
 	AppointmentService_DeleteBooking_FullMethodName                       = "/hospital.appointment.v1.AppointmentService/DeleteBooking"
+	AppointmentService_SaveExaminationReportDraft_FullMethodName          = "/hospital.appointment.v1.AppointmentService/SaveExaminationReportDraft"
+	AppointmentService_CompleteAndPublishExaminationReport_FullMethodName = "/hospital.appointment.v1.AppointmentService/CompleteAndPublishExaminationReport"
+	AppointmentService_CorrectExaminationReport_FullMethodName            = "/hospital.appointment.v1.AppointmentService/CorrectExaminationReport"
+	AppointmentService_GetExaminationReport_FullMethodName                = "/hospital.appointment.v1.AppointmentService/GetExaminationReport"
+	AppointmentService_ListExaminationReports_FullMethodName              = "/hospital.appointment.v1.AppointmentService/ListExaminationReports"
+	AppointmentService_ListExaminationReportVersions_FullMethodName       = "/hospital.appointment.v1.AppointmentService/ListExaminationReportVersions"
+	AppointmentService_GetMyExaminationReport_FullMethodName              = "/hospital.appointment.v1.AppointmentService/GetMyExaminationReport"
+	AppointmentService_ListMyExaminationReports_FullMethodName            = "/hospital.appointment.v1.AppointmentService/ListMyExaminationReports"
 )
 
 // AppointmentServiceClient is the client API for AppointmentService service.
@@ -62,6 +72,8 @@ type AppointmentServiceClient interface {
 	UpdateExaminationItem(ctx context.Context, in *UpdateExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 	DisableExaminationItem(ctx context.Context, in *ChangeExaminationItemStatusRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 	EnableExaminationItem(ctx context.Context, in *ChangeExaminationItemStatusRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
+	GetExaminationItemReportTemplate(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItemReportTemplate, error)
+	SaveExaminationItemReportTemplate(ctx context.Context, in *SaveExaminationItemReportTemplateRequest, opts ...grpc.CallOption) (*ExaminationItemReportTemplate, error)
 	CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*Room, error)
 	GetRoom(ctx context.Context, in *GetRoomRequest, opts ...grpc.CallOption) (*Room, error)
 	ListRooms(ctx context.Context, in *ListRoomsRequest, opts ...grpc.CallOption) (*ListRoomsResponse, error)
@@ -85,8 +97,16 @@ type AppointmentServiceClient interface {
 	DeleteMyBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
 	GetBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 	ListBookings(ctx context.Context, in *ListBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
-	CheckInBooking(ctx context.Context, in *CheckInBookingRequest, opts ...grpc.CallOption) (*Booking, error)
+	StartExamination(ctx context.Context, in *StartExaminationRequest, opts ...grpc.CallOption) (*Booking, error)
 	DeleteBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
+	SaveExaminationReportDraft(ctx context.Context, in *SaveExaminationReportDraftRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
+	CompleteAndPublishExaminationReport(ctx context.Context, in *CompleteAndPublishExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
+	CorrectExaminationReport(ctx context.Context, in *CorrectExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
+	GetExaminationReport(ctx context.Context, in *GetExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
+	ListExaminationReports(ctx context.Context, in *ListExaminationReportsRequest, opts ...grpc.CallOption) (*ListExaminationReportsResponse, error)
+	ListExaminationReportVersions(ctx context.Context, in *ListExaminationReportVersionsRequest, opts ...grpc.CallOption) (*ListExaminationReportVersionsResponse, error)
+	GetMyExaminationReport(ctx context.Context, in *GetExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
+	ListMyExaminationReports(ctx context.Context, in *ListMyExaminationReportsRequest, opts ...grpc.CallOption) (*ListExaminationReportsResponse, error)
 }
 
 type appointmentServiceClient struct {
@@ -151,6 +171,26 @@ func (c *appointmentServiceClient) EnableExaminationItem(ctx context.Context, in
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ExaminationItem)
 	err := c.cc.Invoke(ctx, AppointmentService_EnableExaminationItem_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) GetExaminationItemReportTemplate(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItemReportTemplate, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExaminationItemReportTemplate)
+	err := c.cc.Invoke(ctx, AppointmentService_GetExaminationItemReportTemplate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) SaveExaminationItemReportTemplate(ctx context.Context, in *SaveExaminationItemReportTemplateRequest, opts ...grpc.CallOption) (*ExaminationItemReportTemplate, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExaminationItemReportTemplate)
+	err := c.cc.Invoke(ctx, AppointmentService_SaveExaminationItemReportTemplate_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -387,10 +427,10 @@ func (c *appointmentServiceClient) ListBookings(ctx context.Context, in *ListBoo
 	return out, nil
 }
 
-func (c *appointmentServiceClient) CheckInBooking(ctx context.Context, in *CheckInBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
+func (c *appointmentServiceClient) StartExamination(ctx context.Context, in *StartExaminationRequest, opts ...grpc.CallOption) (*Booking, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Booking)
-	err := c.cc.Invoke(ctx, AppointmentService_CheckInBooking_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, AppointmentService_StartExamination_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -407,6 +447,86 @@ func (c *appointmentServiceClient) DeleteBooking(ctx context.Context, in *Delete
 	return out, nil
 }
 
+func (c *appointmentServiceClient) SaveExaminationReportDraft(ctx context.Context, in *SaveExaminationReportDraftRequest, opts ...grpc.CallOption) (*ExaminationReport, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExaminationReport)
+	err := c.cc.Invoke(ctx, AppointmentService_SaveExaminationReportDraft_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) CompleteAndPublishExaminationReport(ctx context.Context, in *CompleteAndPublishExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExaminationReport)
+	err := c.cc.Invoke(ctx, AppointmentService_CompleteAndPublishExaminationReport_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) CorrectExaminationReport(ctx context.Context, in *CorrectExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExaminationReport)
+	err := c.cc.Invoke(ctx, AppointmentService_CorrectExaminationReport_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) GetExaminationReport(ctx context.Context, in *GetExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExaminationReport)
+	err := c.cc.Invoke(ctx, AppointmentService_GetExaminationReport_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) ListExaminationReports(ctx context.Context, in *ListExaminationReportsRequest, opts ...grpc.CallOption) (*ListExaminationReportsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListExaminationReportsResponse)
+	err := c.cc.Invoke(ctx, AppointmentService_ListExaminationReports_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) ListExaminationReportVersions(ctx context.Context, in *ListExaminationReportVersionsRequest, opts ...grpc.CallOption) (*ListExaminationReportVersionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListExaminationReportVersionsResponse)
+	err := c.cc.Invoke(ctx, AppointmentService_ListExaminationReportVersions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) GetMyExaminationReport(ctx context.Context, in *GetExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExaminationReport)
+	err := c.cc.Invoke(ctx, AppointmentService_GetMyExaminationReport_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) ListMyExaminationReports(ctx context.Context, in *ListMyExaminationReportsRequest, opts ...grpc.CallOption) (*ListExaminationReportsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListExaminationReportsResponse)
+	err := c.cc.Invoke(ctx, AppointmentService_ListMyExaminationReports_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AppointmentServiceServer is the server API for AppointmentService service.
 // All implementations must embed UnimplementedAppointmentServiceServer
 // for forward compatibility.
@@ -417,6 +537,8 @@ type AppointmentServiceServer interface {
 	UpdateExaminationItem(context.Context, *UpdateExaminationItemRequest) (*ExaminationItem, error)
 	DisableExaminationItem(context.Context, *ChangeExaminationItemStatusRequest) (*ExaminationItem, error)
 	EnableExaminationItem(context.Context, *ChangeExaminationItemStatusRequest) (*ExaminationItem, error)
+	GetExaminationItemReportTemplate(context.Context, *GetExaminationItemRequest) (*ExaminationItemReportTemplate, error)
+	SaveExaminationItemReportTemplate(context.Context, *SaveExaminationItemReportTemplateRequest) (*ExaminationItemReportTemplate, error)
 	CreateRoom(context.Context, *CreateRoomRequest) (*Room, error)
 	GetRoom(context.Context, *GetRoomRequest) (*Room, error)
 	ListRooms(context.Context, *ListRoomsRequest) (*ListRoomsResponse, error)
@@ -440,8 +562,16 @@ type AppointmentServiceServer interface {
 	DeleteMyBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error)
 	GetBooking(context.Context, *GetBookingRequest) (*Booking, error)
 	ListBookings(context.Context, *ListBookingsRequest) (*ListBookingsResponse, error)
-	CheckInBooking(context.Context, *CheckInBookingRequest) (*Booking, error)
+	StartExamination(context.Context, *StartExaminationRequest) (*Booking, error)
 	DeleteBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error)
+	SaveExaminationReportDraft(context.Context, *SaveExaminationReportDraftRequest) (*ExaminationReport, error)
+	CompleteAndPublishExaminationReport(context.Context, *CompleteAndPublishExaminationReportRequest) (*ExaminationReport, error)
+	CorrectExaminationReport(context.Context, *CorrectExaminationReportRequest) (*ExaminationReport, error)
+	GetExaminationReport(context.Context, *GetExaminationReportRequest) (*ExaminationReport, error)
+	ListExaminationReports(context.Context, *ListExaminationReportsRequest) (*ListExaminationReportsResponse, error)
+	ListExaminationReportVersions(context.Context, *ListExaminationReportVersionsRequest) (*ListExaminationReportVersionsResponse, error)
+	GetMyExaminationReport(context.Context, *GetExaminationReportRequest) (*ExaminationReport, error)
+	ListMyExaminationReports(context.Context, *ListMyExaminationReportsRequest) (*ListExaminationReportsResponse, error)
 	mustEmbedUnimplementedAppointmentServiceServer()
 }
 
@@ -469,6 +599,12 @@ func (UnimplementedAppointmentServiceServer) DisableExaminationItem(context.Cont
 }
 func (UnimplementedAppointmentServiceServer) EnableExaminationItem(context.Context, *ChangeExaminationItemStatusRequest) (*ExaminationItem, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method EnableExaminationItem not implemented")
+}
+func (UnimplementedAppointmentServiceServer) GetExaminationItemReportTemplate(context.Context, *GetExaminationItemRequest) (*ExaminationItemReportTemplate, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetExaminationItemReportTemplate not implemented")
+}
+func (UnimplementedAppointmentServiceServer) SaveExaminationItemReportTemplate(context.Context, *SaveExaminationItemReportTemplateRequest) (*ExaminationItemReportTemplate, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveExaminationItemReportTemplate not implemented")
 }
 func (UnimplementedAppointmentServiceServer) CreateRoom(context.Context, *CreateRoomRequest) (*Room, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRoom not implemented")
@@ -539,11 +675,35 @@ func (UnimplementedAppointmentServiceServer) GetBooking(context.Context, *GetBoo
 func (UnimplementedAppointmentServiceServer) ListBookings(context.Context, *ListBookingsRequest) (*ListBookingsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListBookings not implemented")
 }
-func (UnimplementedAppointmentServiceServer) CheckInBooking(context.Context, *CheckInBookingRequest) (*Booking, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CheckInBooking not implemented")
+func (UnimplementedAppointmentServiceServer) StartExamination(context.Context, *StartExaminationRequest) (*Booking, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StartExamination not implemented")
 }
 func (UnimplementedAppointmentServiceServer) DeleteBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteBooking not implemented")
+}
+func (UnimplementedAppointmentServiceServer) SaveExaminationReportDraft(context.Context, *SaveExaminationReportDraftRequest) (*ExaminationReport, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveExaminationReportDraft not implemented")
+}
+func (UnimplementedAppointmentServiceServer) CompleteAndPublishExaminationReport(context.Context, *CompleteAndPublishExaminationReportRequest) (*ExaminationReport, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CompleteAndPublishExaminationReport not implemented")
+}
+func (UnimplementedAppointmentServiceServer) CorrectExaminationReport(context.Context, *CorrectExaminationReportRequest) (*ExaminationReport, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CorrectExaminationReport not implemented")
+}
+func (UnimplementedAppointmentServiceServer) GetExaminationReport(context.Context, *GetExaminationReportRequest) (*ExaminationReport, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetExaminationReport not implemented")
+}
+func (UnimplementedAppointmentServiceServer) ListExaminationReports(context.Context, *ListExaminationReportsRequest) (*ListExaminationReportsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListExaminationReports not implemented")
+}
+func (UnimplementedAppointmentServiceServer) ListExaminationReportVersions(context.Context, *ListExaminationReportVersionsRequest) (*ListExaminationReportVersionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListExaminationReportVersions not implemented")
+}
+func (UnimplementedAppointmentServiceServer) GetMyExaminationReport(context.Context, *GetExaminationReportRequest) (*ExaminationReport, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMyExaminationReport not implemented")
+}
+func (UnimplementedAppointmentServiceServer) ListMyExaminationReports(context.Context, *ListMyExaminationReportsRequest) (*ListExaminationReportsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMyExaminationReports not implemented")
 }
 func (UnimplementedAppointmentServiceServer) mustEmbedUnimplementedAppointmentServiceServer() {}
 func (UnimplementedAppointmentServiceServer) testEmbeddedByValue()                            {}
@@ -670,6 +830,42 @@ func _AppointmentService_EnableExaminationItem_Handler(srv interface{}, ctx cont
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppointmentServiceServer).EnableExaminationItem(ctx, req.(*ChangeExaminationItemStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_GetExaminationItemReportTemplate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetExaminationItemRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).GetExaminationItemReportTemplate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_GetExaminationItemReportTemplate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).GetExaminationItemReportTemplate(ctx, req.(*GetExaminationItemRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_SaveExaminationItemReportTemplate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveExaminationItemReportTemplateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).SaveExaminationItemReportTemplate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_SaveExaminationItemReportTemplate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).SaveExaminationItemReportTemplate(ctx, req.(*SaveExaminationItemReportTemplateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1088,20 +1284,20 @@ func _AppointmentService_ListBookings_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AppointmentService_CheckInBooking_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CheckInBookingRequest)
+func _AppointmentService_StartExamination_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StartExaminationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AppointmentServiceServer).CheckInBooking(ctx, in)
+		return srv.(AppointmentServiceServer).StartExamination(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AppointmentService_CheckInBooking_FullMethodName,
+		FullMethod: AppointmentService_StartExamination_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppointmentServiceServer).CheckInBooking(ctx, req.(*CheckInBookingRequest))
+		return srv.(AppointmentServiceServer).StartExamination(ctx, req.(*StartExaminationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1120,6 +1316,150 @@ func _AppointmentService_DeleteBooking_Handler(srv interface{}, ctx context.Cont
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppointmentServiceServer).DeleteBooking(ctx, req.(*DeleteBookingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_SaveExaminationReportDraft_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveExaminationReportDraftRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).SaveExaminationReportDraft(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_SaveExaminationReportDraft_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).SaveExaminationReportDraft(ctx, req.(*SaveExaminationReportDraftRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_CompleteAndPublishExaminationReport_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CompleteAndPublishExaminationReportRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).CompleteAndPublishExaminationReport(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_CompleteAndPublishExaminationReport_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).CompleteAndPublishExaminationReport(ctx, req.(*CompleteAndPublishExaminationReportRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_CorrectExaminationReport_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CorrectExaminationReportRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).CorrectExaminationReport(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_CorrectExaminationReport_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).CorrectExaminationReport(ctx, req.(*CorrectExaminationReportRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_GetExaminationReport_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetExaminationReportRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).GetExaminationReport(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_GetExaminationReport_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).GetExaminationReport(ctx, req.(*GetExaminationReportRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_ListExaminationReports_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListExaminationReportsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).ListExaminationReports(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_ListExaminationReports_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).ListExaminationReports(ctx, req.(*ListExaminationReportsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_ListExaminationReportVersions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListExaminationReportVersionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).ListExaminationReportVersions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_ListExaminationReportVersions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).ListExaminationReportVersions(ctx, req.(*ListExaminationReportVersionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_GetMyExaminationReport_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetExaminationReportRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).GetMyExaminationReport(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_GetMyExaminationReport_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).GetMyExaminationReport(ctx, req.(*GetExaminationReportRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_ListMyExaminationReports_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMyExaminationReportsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).ListMyExaminationReports(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_ListMyExaminationReports_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).ListMyExaminationReports(ctx, req.(*ListMyExaminationReportsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1154,6 +1494,14 @@ var AppointmentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "EnableExaminationItem",
 			Handler:    _AppointmentService_EnableExaminationItem_Handler,
+		},
+		{
+			MethodName: "GetExaminationItemReportTemplate",
+			Handler:    _AppointmentService_GetExaminationItemReportTemplate_Handler,
+		},
+		{
+			MethodName: "SaveExaminationItemReportTemplate",
+			Handler:    _AppointmentService_SaveExaminationItemReportTemplate_Handler,
 		},
 		{
 			MethodName: "CreateRoom",
@@ -1248,12 +1596,44 @@ var AppointmentService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AppointmentService_ListBookings_Handler,
 		},
 		{
-			MethodName: "CheckInBooking",
-			Handler:    _AppointmentService_CheckInBooking_Handler,
+			MethodName: "StartExamination",
+			Handler:    _AppointmentService_StartExamination_Handler,
 		},
 		{
 			MethodName: "DeleteBooking",
 			Handler:    _AppointmentService_DeleteBooking_Handler,
+		},
+		{
+			MethodName: "SaveExaminationReportDraft",
+			Handler:    _AppointmentService_SaveExaminationReportDraft_Handler,
+		},
+		{
+			MethodName: "CompleteAndPublishExaminationReport",
+			Handler:    _AppointmentService_CompleteAndPublishExaminationReport_Handler,
+		},
+		{
+			MethodName: "CorrectExaminationReport",
+			Handler:    _AppointmentService_CorrectExaminationReport_Handler,
+		},
+		{
+			MethodName: "GetExaminationReport",
+			Handler:    _AppointmentService_GetExaminationReport_Handler,
+		},
+		{
+			MethodName: "ListExaminationReports",
+			Handler:    _AppointmentService_ListExaminationReports_Handler,
+		},
+		{
+			MethodName: "ListExaminationReportVersions",
+			Handler:    _AppointmentService_ListExaminationReportVersions_Handler,
+		},
+		{
+			MethodName: "GetMyExaminationReport",
+			Handler:    _AppointmentService_GetMyExaminationReport_Handler,
+		},
+		{
+			MethodName: "ListMyExaminationReports",
+			Handler:    _AppointmentService_ListMyExaminationReports_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

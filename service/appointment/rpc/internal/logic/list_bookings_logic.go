@@ -34,6 +34,7 @@ func (l *ListBookingsLogic) ListBookings(in *appointmentv1.ListBookingsRequest) 
 		DepartmentID: in.GetDepartmentId(), ServiceDate: in.GetServiceDate(),
 		Session: common.Session(in.GetSession()), ItemID: in.GetItemId(), RoomID: in.GetRoomId(),
 		Status: common.BookingStatus(in.GetStatus()), Page: in.GetPage(), PageSize: in.GetPageSize(),
+		PatientKeyword: in.GetPatientKeyword(), View: common.BookingListView(in.GetView()),
 	})
 	if err != nil {
 		return nil, bookingRPCError(err)

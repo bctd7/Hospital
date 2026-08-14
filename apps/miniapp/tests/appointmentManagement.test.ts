@@ -3,9 +3,11 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
+  examinationWindowRelation,
   canReadAppointmentManagement,
   itemWindowTimeValid,
   roomWindowTimeValid,
+  windowFitsSession,
 } from "@/utils/appointmentManagement";
 
 describe("appointment management view rules", () => {
@@ -15,11 +17,54 @@ describe("appointment management view rules", () => {
     expect(canReadAppointmentManagement({ roles: ["department_doctor"], permissions: [] })).toBe(false);
   });
 
+  it("only allows examination start inside the booked project window", () => {
+    expect(examinationWindowRelation("2026-08-15", "09:00", "12:00", new Date(2026, 7, 15, 8, 59, 59))).toBe("before");
+    expect(examinationWindowRelation("2026-08-15", "09:00", "12:00", new Date(2026, 7, 15, 9, 0, 0))).toBe("open");
+    expect(examinationWindowRelation("2026-08-15", "09:00:00", "12:00:00", new Date(2026, 7, 15, 11, 59, 59))).toBe("open");
+    expect(examinationWindowRelation("2026-08-15", "09:00", "12:00", new Date(2026, 7, 15, 12, 0, 0))).toBe("after");
+    expect(examinationWindowRelation("2026-02-30", "09:00", "12:00", new Date(2026, 2, 2, 10, 0, 0))).toBe("invalid");
+  });
+
+  it("explains why examination cannot start outside the project window", () => {
+    for (const page of ["bookings.vue", "booking-detail.vue"]) {
+      const source = readFileSync(
+        new URL(`../src/pages/admin/appointment/${page}`, import.meta.url),
+        "utf8",
+      );
+      expect(source).toContain("暂不能开始检查");
+      expect(source).toContain("examinationWindowDescription");
+      expect(source).toContain("内开始检查");
+    }
+  });
+
   it("validates the two different weekly time models", () => {
     expect(roomWindowTimeValid("08:00", "12:00")).toBe(true);
     expect(roomWindowTimeValid("12:00", "08:00")).toBe(false);
     expect(itemWindowTimeValid("09:00", "11:30", "12:00")).toBe(true);
     expect(itemWindowTimeValid("09:00", "12:00", "12:00")).toBe(false);
+    expect(windowFitsSession("morning", "09:00", "12:00")).toBe(true);
+    expect(windowFitsSession("morning", "13:00", "18:00")).toBe(false);
+    expect(windowFitsSession("afternoon", "13:00", "18:00")).toBe(true);
+    expect(windowFitsSession("afternoon", "09:00", "12:00")).toBe(false);
+  });
+
+  it("resets weekly-window times when the selected session changes", () => {
+    const itemDetail = readFileSync(
+      new URL("../src/pages/admin/appointment/item-detail.vue", import.meta.url),
+      "utf8",
+    );
+    const roomDetail = readFileSync(
+      new URL("../src/pages/admin/appointment/room-detail.vue", import.meta.url),
+      "utf8",
+    );
+
+    for (const source of [itemDetail, roomDetail]) {
+      expect(source).toContain('"09:00"');
+      expect(source).toContain('"12:00"');
+      expect(source).toContain('"13:00"');
+      expect(source).toContain('"18:00"');
+      expect(source).toContain("时段与时间不一致");
+    }
   });
 
   it("keeps the admin resource workspace progressive and free of removed actions", () => {
@@ -42,5 +87,32 @@ describe("appointment management view rules", () => {
     expect(source).not.toContain("停用房间");
     expect(source).not.toContain("恢复房间");
     expect(source).not.toContain("grid-template-columns: 190rpx 220rpx");
+  });
+
+  it("explains room-window conflicts when saving an item window", () => {
+    const source = readFileSync(
+      new URL("../src/pages/admin/appointment/item-detail.vue", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).toContain("ITEM_ROOM_WINDOW_CONFLICT");
+    expect(source).toContain("项目时间超出房间开放范围");
+    expect(source).toContain("项目预约时间必须完整落在所有已关联房间");
+  });
+
+  it("keeps weekly-window editors open after native picker confirmation", () => {
+    const itemDetail = readFileSync(
+      new URL("../src/pages/admin/appointment/item-detail.vue", import.meta.url),
+      "utf8",
+    );
+    const roomDetail = readFileSync(
+      new URL("../src/pages/admin/appointment/room-detail.vue", import.meta.url),
+      "utf8",
+    );
+
+    expect(itemDetail).not.toContain('class="dialog-mask" @tap.self');
+    expect(roomDetail).not.toContain('class="dialog-mask" @tap.self');
+    expect(itemDetail).toContain('@tap="editorVisible = false">取消');
+    expect(roomDetail).toContain('@tap="editorVisible = false">取消');
   });
 });

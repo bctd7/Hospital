@@ -3,6 +3,11 @@ CREATE TABLE appointment_examination_items (
     owner_department_id CHAR(36)      NOT NULL,
     name                VARCHAR(128)  NOT NULL,
     description         TEXT          NOT NULL,
+    report_template_objective_findings TEXT NOT NULL,
+    report_template_impression          TEXT NOT NULL,
+    report_template_recommendation      TEXT NOT NULL,
+    report_template_notes               TEXT NOT NULL,
+    report_template_version             BIGINT UNSIGNED NOT NULL DEFAULT 0,
     status              VARCHAR(16)   NOT NULL,
     version             BIGINT UNSIGNED NOT NULL,
     created_at          DATETIME(3)   NOT NULL,
@@ -15,7 +20,9 @@ CREATE TABLE appointment_examination_items (
     CONSTRAINT chk_appointment_examination_items_status
         CHECK (status IN ('active', 'disabled')),
     CONSTRAINT chk_appointment_examination_items_version
-        CHECK (version > 0)
+        CHECK (version > 0),
+    CONSTRAINT chk_appointment_examination_items_report_template_version
+        CHECK (report_template_version >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE appointment_examination_item_operations (
@@ -220,9 +227,26 @@ CREATE TABLE appointment_room_date_capacity (
     CONSTRAINT chk_appointment_room_date_capacity_version CHECK (version > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- 每次成功预约永久占用患者当周一次额度；取消、完成和失约均不递减。
+-- 使用周一日期作为分区键后无需定时重置，进入下一周自然创建新记录。
+CREATE TABLE appointment_patient_weekly_quota_usage (
+    patient_account_id CHAR(36)       NOT NULL,
+    week_start_date    DATE           NOT NULL,
+    used_count         INT UNSIGNED   NOT NULL,
+    version            BIGINT UNSIGNED NOT NULL,
+    created_at         DATETIME(3)    NOT NULL,
+    updated_at         DATETIME(3)    NOT NULL,
+    PRIMARY KEY (patient_account_id, week_start_date),
+    CONSTRAINT chk_appointment_patient_weekly_quota_usage_count CHECK (used_count >= 0),
+    CONSTRAINT chk_appointment_patient_weekly_quota_usage_version CHECK (version > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE appointment_bookings (
     id                           CHAR(36)        NOT NULL,
     patient_account_id           CHAR(36)        NOT NULL,
+    patient_display_name_snapshot VARCHAR(128)   NOT NULL,
+    patient_phone_masked_snapshot VARCHAR(32)    NOT NULL,
+    patient_phone_last4_snapshot  CHAR(4)        NOT NULL,
     department_id                CHAR(36)        NOT NULL,
     item_id                      CHAR(36)        NOT NULL,
     room_id                      CHAR(36)        NOT NULL,
@@ -234,8 +258,12 @@ CREATE TABLE appointment_bookings (
     item_start_time_snapshot     TIME            NOT NULL,
     item_end_time_snapshot       TIME            NOT NULL,
     item_cutoff_time_snapshot    TIME            NOT NULL,
-    checked_in_at                DATETIME(3)      NULL,
-    checked_in_by                CHAR(36)         NULL,
+    started_at                   DATETIME(3)      NULL,
+    started_by                   CHAR(36)         NULL,
+    started_by_display_name_snapshot VARCHAR(128) NULL,
+    completed_at                 DATETIME(3)      NULL,
+    completed_by                 CHAR(36)         NULL,
+    completed_by_display_name_snapshot VARCHAR(128) NULL,
     version                      BIGINT UNSIGNED  NOT NULL,
     created_at                   DATETIME(3)      NOT NULL,
     updated_at                   DATETIME(3)      NOT NULL,
@@ -244,10 +272,14 @@ CREATE TABLE appointment_bookings (
         (patient_account_id, service_date DESC, created_at DESC, id),
     KEY idx_appointment_bookings_department
         (department_id, service_date, session, created_at, id),
+    KEY idx_appointment_bookings_department_patient_name
+        (department_id, patient_display_name_snapshot, service_date, id),
+    KEY idx_appointment_bookings_department_patient_phone
+        (department_id, patient_phone_last4_snapshot, service_date, id),
     KEY idx_appointment_bookings_room_capacity
         (room_id, service_date, session, status, created_at, id),
     KEY idx_appointment_bookings_cleanup
-        (status, service_date, id),
+        (status, service_date, item_end_time_snapshot, id),
     CONSTRAINT fk_appointment_bookings_item
         FOREIGN KEY (item_id) REFERENCES appointment_examination_items (id),
     CONSTRAINT fk_appointment_bookings_room
@@ -255,7 +287,7 @@ CREATE TABLE appointment_bookings (
     CONSTRAINT chk_appointment_bookings_session
         CHECK (session IN ('morning', 'afternoon')),
     CONSTRAINT chk_appointment_bookings_status
-        CHECK (status IN ('confirmed', 'checked_in')),
+        CHECK (status IN ('confirmed', 'in_progress', 'completed', 'no_show')),
     CONSTRAINT chk_appointment_bookings_room_time
         CHECK (room_open_time_snapshot < room_close_time_snapshot),
     CONSTRAINT chk_appointment_bookings_item_time
@@ -265,16 +297,19 @@ CREATE TABLE appointment_bookings (
             AND room_open_time_snapshot <= item_start_time_snapshot
             AND item_end_time_snapshot <= room_close_time_snapshot
         ),
-    CONSTRAINT chk_appointment_bookings_check_in CHECK (
-        (status = 'confirmed' AND checked_in_at IS NULL AND checked_in_by IS NULL)
-        OR (status = 'checked_in' AND checked_in_at IS NOT NULL AND checked_in_by IS NOT NULL)
+    CONSTRAINT chk_appointment_bookings_lifecycle CHECK (
+        (status IN ('confirmed', 'no_show') AND started_at IS NULL AND started_by IS NULL
+            AND completed_at IS NULL AND completed_by IS NULL)
+        OR (status = 'in_progress' AND started_at IS NOT NULL AND started_by IS NOT NULL
+            AND completed_at IS NULL AND completed_by IS NULL)
+        OR (status = 'completed' AND started_at IS NOT NULL AND started_by IS NOT NULL
+            AND completed_at IS NOT NULL AND completed_by IS NOT NULL)
     ),
     CONSTRAINT chk_appointment_bookings_version CHECK (version > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- A patient may hold only one un-checked-in booking in a concrete date/session.
--- This small transactional guard is released at check-in or deletion. Keeping it
--- separate from appointment_bookings allows checked-in history to remain stored.
+-- A patient may hold only one not-yet-started booking in a concrete date/session.
+-- This guard is released when the examination starts, the booking is cancelled, or it becomes no_show.
 CREATE TABLE appointment_patient_session_claims (
     patient_account_id CHAR(36)    NOT NULL,
     service_date       DATE        NOT NULL,
@@ -300,6 +335,88 @@ CREATE TABLE appointment_booking_operations (
     KEY idx_appointment_booking_operations_operator (operator_account_id, created_at),
     CONSTRAINT chk_appointment_booking_operations_action CHECK (
         action IN ('create', 'delete_by_patient', 'delete_by_staff', 'delete_by_configuration',
-                   'delete_by_cleanup', 'check_in')
+                   'mark_no_show', 'start_examination',
+                   'save_report_draft', 'complete_and_publish_report', 'correct_report')
     )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 一次预约只产生一份报告主体。检查项目和房间信息在首次建档时快照，
+-- 避免后续目录改名或房间地址调整改变既有正式报告。
+CREATE TABLE appointment_examination_reports (
+    id                           CHAR(36)        NOT NULL,
+    booking_id                   CHAR(36)        NOT NULL,
+    patient_account_id           CHAR(36)        NOT NULL,
+    patient_display_name_snapshot VARCHAR(128)   NOT NULL,
+    patient_phone_masked_snapshot VARCHAR(32)    NOT NULL,
+    department_id                CHAR(36)        NOT NULL,
+    department_name_snapshot     VARCHAR(128)    NOT NULL,
+    item_id                      CHAR(36)        NOT NULL,
+    item_name_snapshot           VARCHAR(128)    NOT NULL,
+    room_id                      CHAR(36)        NOT NULL,
+    campus_id_snapshot           CHAR(36)        NOT NULL,
+    campus_name_snapshot         VARCHAR(128)    NOT NULL,
+    building_snapshot            VARCHAR(64)     NOT NULL,
+    floor_number_snapshot        SMALLINT        NOT NULL,
+    room_number_snapshot         VARCHAR(32)     NOT NULL,
+    status                       VARCHAR(16)      NOT NULL,
+    performed_by                 CHAR(36)        NULL,
+    performed_by_display_name_snapshot VARCHAR(128) NULL,
+    examination_started_at       DATETIME(3)      NULL,
+    examination_completed_at     DATETIME(3)      NULL,
+    current_version_id           CHAR(36)        NULL,
+    version                      BIGINT UNSIGNED NOT NULL,
+    created_at                   DATETIME(3)      NOT NULL,
+    updated_at                   DATETIME(3)      NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_appointment_examination_reports_booking (booking_id),
+    KEY idx_appointment_examination_reports_patient (patient_account_id, status, updated_at DESC, id),
+    KEY idx_appointment_examination_reports_department (department_id, status, updated_at DESC, id),
+    CONSTRAINT fk_appointment_examination_reports_booking
+        FOREIGN KEY (booking_id) REFERENCES appointment_bookings (id),
+    CONSTRAINT chk_appointment_examination_reports_status
+        CHECK (status IN ('draft', 'published')),
+    CONSTRAINT chk_appointment_examination_reports_version CHECK (version > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 草稿版本允许原地编辑；正式版本发布后只读。更正始终新增版本，旧版仅改为 superseded。
+CREATE TABLE appointment_examination_report_versions (
+    id                  CHAR(36)        NOT NULL,
+    report_id           CHAR(36)        NOT NULL,
+    version_no          BIGINT UNSIGNED NOT NULL,
+    version_kind        VARCHAR(16)     NOT NULL,
+    status              VARCHAR(16)     NOT NULL,
+    objective_findings  TEXT            NOT NULL,
+    impression          TEXT            NOT NULL,
+    recommendation      TEXT            NOT NULL,
+    notes               TEXT            NOT NULL,
+    correction_reason   VARCHAR(512)    NULL,
+    authored_by         CHAR(36)        NOT NULL,
+    authored_by_display_name_snapshot VARCHAR(128) NOT NULL,
+    published_by        CHAR(36)        NULL,
+    published_by_display_name_snapshot VARCHAR(128) NULL,
+    published_at        DATETIME(3)      NULL,
+    created_at          DATETIME(3)      NOT NULL,
+    updated_at          DATETIME(3)      NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_appointment_examination_report_versions_no (report_id, version_no),
+    KEY idx_appointment_examination_report_versions_status (report_id, status, version_no DESC),
+    CONSTRAINT fk_appointment_examination_report_versions_report
+        FOREIGN KEY (report_id) REFERENCES appointment_examination_reports (id),
+    CONSTRAINT chk_appointment_examination_report_versions_kind
+        CHECK (version_kind IN ('initial', 'correction')),
+    CONSTRAINT chk_appointment_examination_report_versions_status
+        CHECK (status IN ('draft', 'published', 'superseded')),
+    CONSTRAINT chk_appointment_examination_report_versions_publish CHECK (
+        (status = 'draft' AND published_by IS NULL AND published_at IS NULL)
+        OR (status IN ('published', 'superseded') AND published_by IS NOT NULL AND published_at IS NOT NULL)
+    ),
+    CONSTRAINT chk_appointment_examination_report_versions_correction CHECK (
+        (version_kind = 'initial' AND correction_reason IS NULL)
+        OR (version_kind = 'correction' AND CHAR_LENGTH(TRIM(correction_reason)) > 0)
+    )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+ALTER TABLE appointment_examination_reports
+    ADD CONSTRAINT fk_appointment_examination_reports_current_version
+        FOREIGN KEY (current_version_id)
+        REFERENCES appointment_examination_report_versions (id);

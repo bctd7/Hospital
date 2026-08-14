@@ -25,6 +25,10 @@ func bookingRPCError(err error) error {
 		return status.Error(codes.ResourceExhausted, "booking capacity is full")
 	case errors.Is(err, common.ErrPatientSessionOccupied):
 		return bookingStatusError(codes.FailedPrecondition, "patient already has a pending booking in this date and session", "PATIENT_SESSION_OCCUPIED")
+	case errors.Is(err, common.ErrPatientWeeklyQuotaFull):
+		return bookingStatusError(codes.ResourceExhausted, "weekly booking quota is exhausted", "PATIENT_WEEKLY_QUOTA_EXHAUSTED")
+	case errors.Is(err, common.ErrExaminationWindowClosed):
+		return bookingStatusError(codes.FailedPrecondition, "examination can only start during the booked examination window", "EXAMINATION_WINDOW_CLOSED")
 	case errors.Is(err, common.ErrBookingClosed), errors.Is(err, common.ErrInvalidState):
 		return status.Error(codes.FailedPrecondition, "booking state does not allow the operation")
 	case errors.Is(err, common.ErrConflict), errors.Is(err, common.ErrVersionConflict):
@@ -49,17 +53,23 @@ func bookingStatusError(code codes.Code, message, reason string) error {
 func bookingResponse(value common.Booking) *appointmentv1.Booking {
 	response := &appointmentv1.Booking{
 		BookingId: value.BookingID, PatientAccountId: value.PatientAccountID,
+		PatientDisplayName: value.PatientDisplayName, PatientPhoneMasked: value.PatientPhoneMasked,
 		DepartmentId: value.DepartmentID, ItemId: value.ItemID, ItemName: value.ItemName,
 		RoomId: value.RoomID, RoomDisplayName: value.RoomDisplayName, CampusId: value.CampusID,
+		Building: value.Building, FloorNumber: value.FloorNumber, RoomNumber: value.RoomNumber,
 		ServiceDate: value.ServiceDate.Format("2006-01-02"), Session: string(value.Session),
 		Status: string(value.Status), RoomOpenTime: value.RoomOpenTime, RoomCloseTime: value.RoomCloseTime,
 		ItemStartTime: value.ItemStartTime, ItemEndTime: value.ItemEndTime,
 		BookingCutoffTime: value.BookingCutoffTime, Version: value.Version,
 		CreatedAt: value.CreatedAt.UTC().Format(timeLayout), UpdatedAt: value.UpdatedAt.UTC().Format(timeLayout),
-		CheckedInBy: value.CheckedInBy,
+		StartedBy: value.StartedBy, CompletedBy: value.CompletedBy,
+		StartedByDisplayName: value.StartedByDisplayName, CompletedByDisplayName: value.CompletedByDisplayName,
 	}
-	if value.CheckedInAt != nil {
-		response.CheckedInAt = value.CheckedInAt.UTC().Format(timeLayout)
+	if value.StartedAt != nil {
+		response.StartedAt = value.StartedAt.UTC().Format(timeLayout)
+	}
+	if value.CompletedAt != nil {
+		response.CompletedAt = value.CompletedAt.UTC().Format(timeLayout)
 	}
 	return response
 }

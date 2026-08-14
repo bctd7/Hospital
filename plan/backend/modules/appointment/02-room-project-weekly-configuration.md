@@ -5,7 +5,7 @@
 > 上位文档：[Appointment 预约检查服务总 Plan](../01-appointment-and-examination-booking.md)。
 >
 > 本阶段扩展第一阶段检查项目目录，交付检查房间、房间与项目关系、房间周开放配置、项目周预约配置及
-> 管理端/患者端查询方向。患者预约、容量占用和核销状态机仍在下一阶段实现，但其已经确认的约束在本文固定。
+> 管理端/患者端查询方向。患者预约、容量占用和检查执行状态机仍在下一阶段实现，但其已经确认的约束在本文固定。
 
 ## 1. 已确认的业务模型
 
@@ -261,14 +261,14 @@ item.end_time <= room.close_time
 available_capacity = active_capacity - active_occupancy
 ```
 
-同一房间、具体服务日期和 session 下的所有项目共同占用该房间窗口容量。`confirmed`、`checked_in`、
-`queued`、`called`、`in_progress` 占用容量；患者取消、医院取消、确认失约或医生完成检查最多释放一次容量。
+同一房间、具体服务日期和 session 下的所有项目共同占用该房间窗口容量。`confirmed`、`in_progress`
+占用容量；患者取消、配置联动删除、转为 `no_show` 或完成检查时最多释放一次容量。
 
 容量真实占用按具体日期隔离。例如连续两个周一都沿用容量上限 20，但各自的实际预约数独立计算；这属于
 系统运行数据，不要求管理员每天创建配置。
 
-项目窗口结束后仍处于 `confirmed`、没有报到核销的预约自动进入 `no_show` 并释放容量。已经报到、排队、
-叫号或检查中的预约不按未核销清理。
+项目窗口结束后仍处于 `confirmed` 的预约自动进入 `no_show` 并释放容量。`in_progress` 表示检查已经开始，
+不会因项目窗口结束被自动处理。
 
 ### 6.4 配置修改和医院取消
 
@@ -281,7 +281,7 @@ available_capacity = active_capacity - active_occupancy
 created_at DESC, appointment_id DESC
 ```
 
-已经报到、排队、叫号或检查中的预约不能自动取消。如果取消全部 `confirmed` 后占用仍高于新容量，则拒绝
+已经进入 `in_progress` 的预约不能自动取消。如果取消全部 `confirmed` 后占用仍高于新容量，则拒绝
 容量调整。
 
 ## 7. 权限、幂等和审计
@@ -402,5 +402,5 @@ appointment_resource_audit
 - 具体日期活动占用的原子增加和最多一次释放；
 - 窗口结束后的自动失约任务；
 - 方案 A 额度；
-- 报到、排队、叫号、开始和完成；
+- 开始检查、完成检查和报告；
 - 检查顺序、移动时间和报告。

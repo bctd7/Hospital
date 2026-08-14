@@ -68,6 +68,20 @@
             "allowEmptyValue": true
           },
           {
+            "type": "string",
+            "name": "patient_keyword",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "string",
+            "default": "active",
+            "example": "active",
+            "name": "view",
+            "in": "query",
+            "required": true
+          },
+          {
             "type": "integer",
             "default": 1,
             "example": 1,
@@ -97,12 +111,16 @@
                     "required": [
                       "booking_id",
                       "patient_account_id",
+                      "patient_display_name",
+                      "patient_phone_masked",
                       "department_id",
+                      "department_name",
                       "item_id",
                       "item_name",
                       "room_id",
                       "room_display_name",
                       "campus_id",
+                      "campus_name",
                       "service_date",
                       "session",
                       "status",
@@ -114,8 +132,15 @@
                       "version",
                       "created_at",
                       "updated_at",
-                      "checked_in_at",
-                      "checked_in_by"
+                      "started_at",
+                      "started_by",
+                      "started_by_display_name",
+                      "completed_at",
+                      "completed_by",
+                      "completed_by_display_name",
+                      "building",
+                      "floor_number",
+                      "room_number"
                     ],
                     "properties": {
                       "booking_cutoff_time": {
@@ -124,13 +149,22 @@
                       "booking_id": {
                         "type": "string"
                       },
+                      "building": {
+                        "type": "string"
+                      },
                       "campus_id": {
                         "type": "string"
                       },
-                      "checked_in_at": {
+                      "campus_name": {
                         "type": "string"
                       },
-                      "checked_in_by": {
+                      "completed_at": {
+                        "type": "string"
+                      },
+                      "completed_by": {
+                        "type": "string"
+                      },
+                      "completed_by_display_name": {
                         "type": "string"
                       },
                       "created_at": {
@@ -138,6 +172,12 @@
                       },
                       "department_id": {
                         "type": "string"
+                      },
+                      "department_name": {
+                        "type": "string"
+                      },
+                      "floor_number": {
+                        "type": "integer"
                       },
                       "item_end_time": {
                         "type": "string"
@@ -154,6 +194,12 @@
                       "patient_account_id": {
                         "type": "string"
                       },
+                      "patient_display_name": {
+                        "type": "string"
+                      },
+                      "patient_phone_masked": {
+                        "type": "string"
+                      },
                       "room_close_time": {
                         "type": "string"
                       },
@@ -163,6 +209,9 @@
                       "room_id": {
                         "type": "string"
                       },
+                      "room_number": {
+                        "type": "string"
+                      },
                       "room_open_time": {
                         "type": "string"
                       },
@@ -170,6 +219,15 @@
                         "type": "string"
                       },
                       "session": {
+                        "type": "string"
+                      },
+                      "started_at": {
+                        "type": "string"
+                      },
+                      "started_by": {
+                        "type": "string"
+                      },
+                      "started_by_display_name": {
                         "type": "string"
                       },
                       "status": {
@@ -234,13 +292,22 @@
                 "booking_id": {
                   "type": "string"
                 },
+                "building": {
+                  "type": "string"
+                },
                 "campus_id": {
                   "type": "string"
                 },
-                "checked_in_at": {
+                "campus_name": {
                   "type": "string"
                 },
-                "checked_in_by": {
+                "completed_at": {
+                  "type": "string"
+                },
+                "completed_by": {
+                  "type": "string"
+                },
+                "completed_by_display_name": {
                   "type": "string"
                 },
                 "created_at": {
@@ -248,6 +315,12 @@
                 },
                 "department_id": {
                   "type": "string"
+                },
+                "department_name": {
+                  "type": "string"
+                },
+                "floor_number": {
+                  "type": "integer"
                 },
                 "item_end_time": {
                   "type": "string"
@@ -264,6 +337,12 @@
                 "patient_account_id": {
                   "type": "string"
                 },
+                "patient_display_name": {
+                  "type": "string"
+                },
+                "patient_phone_masked": {
+                  "type": "string"
+                },
                 "room_close_time": {
                   "type": "string"
                 },
@@ -273,6 +352,9 @@
                 "room_id": {
                   "type": "string"
                 },
+                "room_number": {
+                  "type": "string"
+                },
                 "room_open_time": {
                   "type": "string"
                 },
@@ -280,6 +362,15 @@
                   "type": "string"
                 },
                 "session": {
+                  "type": "string"
+                },
+                "started_at": {
+                  "type": "string"
+                },
+                "started_by": {
+                  "type": "string"
+                },
+                "started_by_display_name": {
                   "type": "string"
                 },
                 "status": {
@@ -358,7 +449,185 @@
         }
       }
     },
-    "/api/v1/admin/appointment/bookings/{bookingId}/check-in": {
+    "/api/v1/admin/appointment/bookings/{bookingId}/report": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "getExaminationReport",
+        "operationId": "appointmentbookingsGetExaminationReport",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "bookingId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "booking_id": {
+                  "type": "string"
+                },
+                "building": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
+                "campus_name": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "current_version": {
+                  "type": "object",
+                  "required": [
+                    "version_id",
+                    "version_no",
+                    "version_kind",
+                    "status",
+                    "objective_findings",
+                    "impression",
+                    "recommendation",
+                    "notes",
+                    "correction_reason",
+                    "authored_by",
+                    "authored_by_display_name",
+                    "published_by",
+                    "published_by_display_name",
+                    "published_at",
+                    "created_at",
+                    "updated_at"
+                  ],
+                  "properties": {
+                    "authored_by": {
+                      "type": "string"
+                    },
+                    "authored_by_display_name": {
+                      "type": "string"
+                    },
+                    "correction_reason": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "impression": {
+                      "type": "string"
+                    },
+                    "notes": {
+                      "type": "string"
+                    },
+                    "objective_findings": {
+                      "type": "string"
+                    },
+                    "published_at": {
+                      "type": "string"
+                    },
+                    "published_by": {
+                      "type": "string"
+                    },
+                    "published_by_display_name": {
+                      "type": "string"
+                    },
+                    "recommendation": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "version_id": {
+                      "type": "string"
+                    },
+                    "version_kind": {
+                      "type": "string"
+                    },
+                    "version_no": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "department_name": {
+                  "type": "string"
+                },
+                "examination_completed_at": {
+                  "type": "string"
+                },
+                "examination_started_at": {
+                  "type": "string"
+                },
+                "floor_number": {
+                  "type": "integer"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "patient_account_id": {
+                  "type": "string"
+                },
+                "patient_display_name": {
+                  "type": "string"
+                },
+                "patient_phone_masked": {
+                  "type": "string"
+                },
+                "performed_by": {
+                  "type": "string"
+                },
+                "performed_by_display_name": {
+                  "type": "string"
+                },
+                "report_id": {
+                  "type": "string"
+                },
+                "room_display_name": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "room_number": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/bookings/{bookingId}/report/complete-and-publish": {
       "post": {
         "security": [
           {
@@ -374,8 +643,440 @@
         "schemes": [
           "https"
         ],
-        "summary": "checkInBooking",
-        "operationId": "appointmentbookingsCheckInBooking",
+        "summary": "completeAndPublishExaminationReport",
+        "operationId": "appointmentbookingsCompleteAndPublishExaminationReport",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "bookingId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "objective_findings",
+                "impression",
+                "expected_booking_version",
+                "expected_report_version",
+                "operation_id"
+              ],
+              "properties": {
+                "expected_booking_version": {
+                  "type": "integer"
+                },
+                "expected_report_version": {
+                  "type": "integer"
+                },
+                "impression": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "objective_findings": {
+                  "type": "string"
+                },
+                "operation_id": {
+                  "type": "string"
+                },
+                "recommendation": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "booking_id": {
+                  "type": "string"
+                },
+                "building": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
+                "campus_name": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "current_version": {
+                  "type": "object",
+                  "required": [
+                    "version_id",
+                    "version_no",
+                    "version_kind",
+                    "status",
+                    "objective_findings",
+                    "impression",
+                    "recommendation",
+                    "notes",
+                    "correction_reason",
+                    "authored_by",
+                    "authored_by_display_name",
+                    "published_by",
+                    "published_by_display_name",
+                    "published_at",
+                    "created_at",
+                    "updated_at"
+                  ],
+                  "properties": {
+                    "authored_by": {
+                      "type": "string"
+                    },
+                    "authored_by_display_name": {
+                      "type": "string"
+                    },
+                    "correction_reason": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "impression": {
+                      "type": "string"
+                    },
+                    "notes": {
+                      "type": "string"
+                    },
+                    "objective_findings": {
+                      "type": "string"
+                    },
+                    "published_at": {
+                      "type": "string"
+                    },
+                    "published_by": {
+                      "type": "string"
+                    },
+                    "published_by_display_name": {
+                      "type": "string"
+                    },
+                    "recommendation": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "version_id": {
+                      "type": "string"
+                    },
+                    "version_kind": {
+                      "type": "string"
+                    },
+                    "version_no": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "department_name": {
+                  "type": "string"
+                },
+                "examination_completed_at": {
+                  "type": "string"
+                },
+                "examination_started_at": {
+                  "type": "string"
+                },
+                "floor_number": {
+                  "type": "integer"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "patient_account_id": {
+                  "type": "string"
+                },
+                "patient_display_name": {
+                  "type": "string"
+                },
+                "patient_phone_masked": {
+                  "type": "string"
+                },
+                "performed_by": {
+                  "type": "string"
+                },
+                "performed_by_display_name": {
+                  "type": "string"
+                },
+                "report_id": {
+                  "type": "string"
+                },
+                "room_display_name": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "room_number": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/bookings/{bookingId}/report/draft": {
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "saveExaminationReportDraft",
+        "operationId": "appointmentbookingsSaveExaminationReportDraft",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "bookingId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "expected_report_version",
+                "operation_id"
+              ],
+              "properties": {
+                "expected_report_version": {
+                  "type": "integer"
+                },
+                "impression": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "objective_findings": {
+                  "type": "string"
+                },
+                "operation_id": {
+                  "type": "string"
+                },
+                "recommendation": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "booking_id": {
+                  "type": "string"
+                },
+                "building": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
+                "campus_name": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "current_version": {
+                  "type": "object",
+                  "required": [
+                    "version_id",
+                    "version_no",
+                    "version_kind",
+                    "status",
+                    "objective_findings",
+                    "impression",
+                    "recommendation",
+                    "notes",
+                    "correction_reason",
+                    "authored_by",
+                    "authored_by_display_name",
+                    "published_by",
+                    "published_by_display_name",
+                    "published_at",
+                    "created_at",
+                    "updated_at"
+                  ],
+                  "properties": {
+                    "authored_by": {
+                      "type": "string"
+                    },
+                    "authored_by_display_name": {
+                      "type": "string"
+                    },
+                    "correction_reason": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "impression": {
+                      "type": "string"
+                    },
+                    "notes": {
+                      "type": "string"
+                    },
+                    "objective_findings": {
+                      "type": "string"
+                    },
+                    "published_at": {
+                      "type": "string"
+                    },
+                    "published_by": {
+                      "type": "string"
+                    },
+                    "published_by_display_name": {
+                      "type": "string"
+                    },
+                    "recommendation": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "version_id": {
+                      "type": "string"
+                    },
+                    "version_kind": {
+                      "type": "string"
+                    },
+                    "version_no": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "department_name": {
+                  "type": "string"
+                },
+                "examination_completed_at": {
+                  "type": "string"
+                },
+                "examination_started_at": {
+                  "type": "string"
+                },
+                "floor_number": {
+                  "type": "integer"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "patient_account_id": {
+                  "type": "string"
+                },
+                "patient_display_name": {
+                  "type": "string"
+                },
+                "patient_phone_masked": {
+                  "type": "string"
+                },
+                "performed_by": {
+                  "type": "string"
+                },
+                "performed_by_display_name": {
+                  "type": "string"
+                },
+                "report_id": {
+                  "type": "string"
+                },
+                "room_display_name": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "room_number": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/bookings/{bookingId}/start-examination": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "startExamination",
+        "operationId": "appointmentbookingsStartExamination",
         "parameters": [
           {
             "type": "string",
@@ -416,13 +1117,22 @@
                 "booking_id": {
                   "type": "string"
                 },
+                "building": {
+                  "type": "string"
+                },
                 "campus_id": {
                   "type": "string"
                 },
-                "checked_in_at": {
+                "campus_name": {
                   "type": "string"
                 },
-                "checked_in_by": {
+                "completed_at": {
+                  "type": "string"
+                },
+                "completed_by": {
+                  "type": "string"
+                },
+                "completed_by_display_name": {
                   "type": "string"
                 },
                 "created_at": {
@@ -430,6 +1140,12 @@
                 },
                 "department_id": {
                   "type": "string"
+                },
+                "department_name": {
+                  "type": "string"
+                },
+                "floor_number": {
+                  "type": "integer"
                 },
                 "item_end_time": {
                   "type": "string"
@@ -446,6 +1162,12 @@
                 "patient_account_id": {
                   "type": "string"
                 },
+                "patient_display_name": {
+                  "type": "string"
+                },
+                "patient_phone_masked": {
+                  "type": "string"
+                },
                 "room_close_time": {
                   "type": "string"
                 },
@@ -455,6 +1177,9 @@
                 "room_id": {
                   "type": "string"
                 },
+                "room_number": {
+                  "type": "string"
+                },
                 "room_open_time": {
                   "type": "string"
                 },
@@ -462,6 +1187,15 @@
                   "type": "string"
                 },
                 "session": {
+                  "type": "string"
+                },
+                "started_at": {
+                  "type": "string"
+                },
+                "started_by": {
+                  "type": "string"
+                },
+                "started_by_display_name": {
                   "type": "string"
                 },
                 "status": {
@@ -978,6 +1712,151 @@
         }
       }
     },
+    "/api/v1/admin/appointment/examination-items/{itemId}/report-template": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "getExaminationItemReportTemplate",
+        "operationId": "appointmentcatalogGetExaminationItemReportTemplate",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "itemId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "impression": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "objective_findings": {
+                  "type": "string"
+                },
+                "recommendation": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "saveExaminationItemReportTemplate",
+        "operationId": "appointmentcatalogSaveExaminationItemReportTemplate",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "itemId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "expected_template_version",
+                "operation_id"
+              ],
+              "properties": {
+                "expected_template_version": {
+                  "type": "integer"
+                },
+                "impression": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "objective_findings": {
+                  "type": "string"
+                },
+                "operation_id": {
+                  "type": "string"
+                },
+                "recommendation": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "impression": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "objective_findings": {
+                  "type": "string"
+                },
+                "recommendation": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/appointment/examination-items/{itemId}/weekly-window": {
       "put": {
         "security": [
@@ -1265,6 +2144,578 @@
                 },
                 "window_id": {
                   "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/reports": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listExaminationReports",
+        "operationId": "appointmentbookingsListExaminationReports",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "department_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "keyword",
+            "in": "query",
+            "allowEmptyValue": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "page": {
+                  "type": "integer"
+                },
+                "page_size": {
+                  "type": "integer"
+                },
+                "reports": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "report_id",
+                      "booking_id",
+                      "patient_account_id",
+                      "patient_display_name",
+                      "patient_phone_masked",
+                      "department_id",
+                      "department_name",
+                      "item_id",
+                      "item_name",
+                      "room_id",
+                      "campus_id",
+                      "campus_name",
+                      "building",
+                      "floor_number",
+                      "room_number",
+                      "room_display_name",
+                      "status",
+                      "performed_by",
+                      "performed_by_display_name",
+                      "examination_started_at",
+                      "examination_completed_at",
+                      "version",
+                      "current_version",
+                      "created_at",
+                      "updated_at"
+                    ],
+                    "properties": {
+                      "booking_id": {
+                        "type": "string"
+                      },
+                      "building": {
+                        "type": "string"
+                      },
+                      "campus_id": {
+                        "type": "string"
+                      },
+                      "campus_name": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "current_version": {
+                        "type": "object",
+                        "required": [
+                          "version_id",
+                          "version_no",
+                          "version_kind",
+                          "status",
+                          "objective_findings",
+                          "impression",
+                          "recommendation",
+                          "notes",
+                          "correction_reason",
+                          "authored_by",
+                          "authored_by_display_name",
+                          "published_by",
+                          "published_by_display_name",
+                          "published_at",
+                          "created_at",
+                          "updated_at"
+                        ],
+                        "properties": {
+                          "authored_by": {
+                            "type": "string"
+                          },
+                          "authored_by_display_name": {
+                            "type": "string"
+                          },
+                          "correction_reason": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "impression": {
+                            "type": "string"
+                          },
+                          "notes": {
+                            "type": "string"
+                          },
+                          "objective_findings": {
+                            "type": "string"
+                          },
+                          "published_at": {
+                            "type": "string"
+                          },
+                          "published_by": {
+                            "type": "string"
+                          },
+                          "published_by_display_name": {
+                            "type": "string"
+                          },
+                          "recommendation": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "version_id": {
+                            "type": "string"
+                          },
+                          "version_kind": {
+                            "type": "string"
+                          },
+                          "version_no": {
+                            "type": "integer"
+                          }
+                        }
+                      },
+                      "department_id": {
+                        "type": "string"
+                      },
+                      "department_name": {
+                        "type": "string"
+                      },
+                      "examination_completed_at": {
+                        "type": "string"
+                      },
+                      "examination_started_at": {
+                        "type": "string"
+                      },
+                      "floor_number": {
+                        "type": "integer"
+                      },
+                      "item_id": {
+                        "type": "string"
+                      },
+                      "item_name": {
+                        "type": "string"
+                      },
+                      "patient_account_id": {
+                        "type": "string"
+                      },
+                      "patient_display_name": {
+                        "type": "string"
+                      },
+                      "patient_phone_masked": {
+                        "type": "string"
+                      },
+                      "performed_by": {
+                        "type": "string"
+                      },
+                      "performed_by_display_name": {
+                        "type": "string"
+                      },
+                      "report_id": {
+                        "type": "string"
+                      },
+                      "room_display_name": {
+                        "type": "string"
+                      },
+                      "room_id": {
+                        "type": "string"
+                      },
+                      "room_number": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "total": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/reports/{reportId}/corrections": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "correctExaminationReport",
+        "operationId": "appointmentbookingsCorrectExaminationReport",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "reportId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "objective_findings",
+                "impression",
+                "correction_reason",
+                "expected_report_version",
+                "operation_id"
+              ],
+              "properties": {
+                "correction_reason": {
+                  "type": "string"
+                },
+                "expected_report_version": {
+                  "type": "integer"
+                },
+                "impression": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "objective_findings": {
+                  "type": "string"
+                },
+                "operation_id": {
+                  "type": "string"
+                },
+                "recommendation": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "booking_id": {
+                  "type": "string"
+                },
+                "building": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
+                "campus_name": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "current_version": {
+                  "type": "object",
+                  "required": [
+                    "version_id",
+                    "version_no",
+                    "version_kind",
+                    "status",
+                    "objective_findings",
+                    "impression",
+                    "recommendation",
+                    "notes",
+                    "correction_reason",
+                    "authored_by",
+                    "authored_by_display_name",
+                    "published_by",
+                    "published_by_display_name",
+                    "published_at",
+                    "created_at",
+                    "updated_at"
+                  ],
+                  "properties": {
+                    "authored_by": {
+                      "type": "string"
+                    },
+                    "authored_by_display_name": {
+                      "type": "string"
+                    },
+                    "correction_reason": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "impression": {
+                      "type": "string"
+                    },
+                    "notes": {
+                      "type": "string"
+                    },
+                    "objective_findings": {
+                      "type": "string"
+                    },
+                    "published_at": {
+                      "type": "string"
+                    },
+                    "published_by": {
+                      "type": "string"
+                    },
+                    "published_by_display_name": {
+                      "type": "string"
+                    },
+                    "recommendation": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "version_id": {
+                      "type": "string"
+                    },
+                    "version_kind": {
+                      "type": "string"
+                    },
+                    "version_no": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "department_name": {
+                  "type": "string"
+                },
+                "examination_completed_at": {
+                  "type": "string"
+                },
+                "examination_started_at": {
+                  "type": "string"
+                },
+                "floor_number": {
+                  "type": "integer"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "patient_account_id": {
+                  "type": "string"
+                },
+                "patient_display_name": {
+                  "type": "string"
+                },
+                "patient_phone_masked": {
+                  "type": "string"
+                },
+                "performed_by": {
+                  "type": "string"
+                },
+                "performed_by_display_name": {
+                  "type": "string"
+                },
+                "report_id": {
+                  "type": "string"
+                },
+                "room_display_name": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "room_number": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/reports/{reportId}/versions": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listExaminationReportVersions",
+        "operationId": "appointmentbookingsListExaminationReportVersions",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "reportId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "versions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "version_id",
+                      "version_no",
+                      "version_kind",
+                      "status",
+                      "objective_findings",
+                      "impression",
+                      "recommendation",
+                      "notes",
+                      "correction_reason",
+                      "authored_by",
+                      "authored_by_display_name",
+                      "published_by",
+                      "published_by_display_name",
+                      "published_at",
+                      "created_at",
+                      "updated_at"
+                    ],
+                    "properties": {
+                      "authored_by": {
+                        "type": "string"
+                      },
+                      "authored_by_display_name": {
+                        "type": "string"
+                      },
+                      "correction_reason": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "impression": {
+                        "type": "string"
+                      },
+                      "notes": {
+                        "type": "string"
+                      },
+                      "objective_findings": {
+                        "type": "string"
+                      },
+                      "published_at": {
+                        "type": "string"
+                      },
+                      "published_by": {
+                        "type": "string"
+                      },
+                      "published_by_display_name": {
+                        "type": "string"
+                      },
+                      "recommendation": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "version_id": {
+                        "type": "string"
+                      },
+                      "version_kind": {
+                        "type": "string"
+                      },
+                      "version_no": {
+                        "type": "integer"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -4064,6 +5515,14 @@
             "name": "page_size",
             "in": "query",
             "required": true
+          },
+          {
+            "type": "string",
+            "default": "active",
+            "example": "active",
+            "name": "view",
+            "in": "query",
+            "required": true
           }
         ],
         "responses": {
@@ -4079,12 +5538,16 @@
                     "required": [
                       "booking_id",
                       "patient_account_id",
+                      "patient_display_name",
+                      "patient_phone_masked",
                       "department_id",
+                      "department_name",
                       "item_id",
                       "item_name",
                       "room_id",
                       "room_display_name",
                       "campus_id",
+                      "campus_name",
                       "service_date",
                       "session",
                       "status",
@@ -4096,8 +5559,15 @@
                       "version",
                       "created_at",
                       "updated_at",
-                      "checked_in_at",
-                      "checked_in_by"
+                      "started_at",
+                      "started_by",
+                      "started_by_display_name",
+                      "completed_at",
+                      "completed_by",
+                      "completed_by_display_name",
+                      "building",
+                      "floor_number",
+                      "room_number"
                     ],
                     "properties": {
                       "booking_cutoff_time": {
@@ -4106,13 +5576,22 @@
                       "booking_id": {
                         "type": "string"
                       },
+                      "building": {
+                        "type": "string"
+                      },
                       "campus_id": {
                         "type": "string"
                       },
-                      "checked_in_at": {
+                      "campus_name": {
                         "type": "string"
                       },
-                      "checked_in_by": {
+                      "completed_at": {
+                        "type": "string"
+                      },
+                      "completed_by": {
+                        "type": "string"
+                      },
+                      "completed_by_display_name": {
                         "type": "string"
                       },
                       "created_at": {
@@ -4120,6 +5599,12 @@
                       },
                       "department_id": {
                         "type": "string"
+                      },
+                      "department_name": {
+                        "type": "string"
+                      },
+                      "floor_number": {
+                        "type": "integer"
                       },
                       "item_end_time": {
                         "type": "string"
@@ -4136,6 +5621,12 @@
                       "patient_account_id": {
                         "type": "string"
                       },
+                      "patient_display_name": {
+                        "type": "string"
+                      },
+                      "patient_phone_masked": {
+                        "type": "string"
+                      },
                       "room_close_time": {
                         "type": "string"
                       },
@@ -4145,6 +5636,9 @@
                       "room_id": {
                         "type": "string"
                       },
+                      "room_number": {
+                        "type": "string"
+                      },
                       "room_open_time": {
                         "type": "string"
                       },
@@ -4152,6 +5646,15 @@
                         "type": "string"
                       },
                       "session": {
+                        "type": "string"
+                      },
+                      "started_at": {
+                        "type": "string"
+                      },
+                      "started_by": {
+                        "type": "string"
+                      },
+                      "started_by_display_name": {
                         "type": "string"
                       },
                       "status": {
@@ -4243,13 +5746,22 @@
                 "booking_id": {
                   "type": "string"
                 },
+                "building": {
+                  "type": "string"
+                },
                 "campus_id": {
                   "type": "string"
                 },
-                "checked_in_at": {
+                "campus_name": {
                   "type": "string"
                 },
-                "checked_in_by": {
+                "completed_at": {
+                  "type": "string"
+                },
+                "completed_by": {
+                  "type": "string"
+                },
+                "completed_by_display_name": {
                   "type": "string"
                 },
                 "created_at": {
@@ -4257,6 +5769,12 @@
                 },
                 "department_id": {
                   "type": "string"
+                },
+                "department_name": {
+                  "type": "string"
+                },
+                "floor_number": {
+                  "type": "integer"
                 },
                 "item_end_time": {
                   "type": "string"
@@ -4273,6 +5791,12 @@
                 "patient_account_id": {
                   "type": "string"
                 },
+                "patient_display_name": {
+                  "type": "string"
+                },
+                "patient_phone_masked": {
+                  "type": "string"
+                },
                 "room_close_time": {
                   "type": "string"
                 },
@@ -4282,6 +5806,9 @@
                 "room_id": {
                   "type": "string"
                 },
+                "room_number": {
+                  "type": "string"
+                },
                 "room_open_time": {
                   "type": "string"
                 },
@@ -4289,6 +5816,15 @@
                   "type": "string"
                 },
                 "session": {
+                  "type": "string"
+                },
+                "started_at": {
+                  "type": "string"
+                },
+                "started_by": {
+                  "type": "string"
+                },
+                "started_by_display_name": {
                   "type": "string"
                 },
                 "status": {
@@ -4341,13 +5877,22 @@
                 "booking_id": {
                   "type": "string"
                 },
+                "building": {
+                  "type": "string"
+                },
                 "campus_id": {
                   "type": "string"
                 },
-                "checked_in_at": {
+                "campus_name": {
                   "type": "string"
                 },
-                "checked_in_by": {
+                "completed_at": {
+                  "type": "string"
+                },
+                "completed_by": {
+                  "type": "string"
+                },
+                "completed_by_display_name": {
                   "type": "string"
                 },
                 "created_at": {
@@ -4355,6 +5900,12 @@
                 },
                 "department_id": {
                   "type": "string"
+                },
+                "department_name": {
+                  "type": "string"
+                },
+                "floor_number": {
+                  "type": "integer"
                 },
                 "item_end_time": {
                   "type": "string"
@@ -4371,6 +5922,12 @@
                 "patient_account_id": {
                   "type": "string"
                 },
+                "patient_display_name": {
+                  "type": "string"
+                },
+                "patient_phone_masked": {
+                  "type": "string"
+                },
                 "room_close_time": {
                   "type": "string"
                 },
@@ -4380,6 +5937,9 @@
                 "room_id": {
                   "type": "string"
                 },
+                "room_number": {
+                  "type": "string"
+                },
                 "room_open_time": {
                   "type": "string"
                 },
@@ -4387,6 +5947,15 @@
                   "type": "string"
                 },
                 "session": {
+                  "type": "string"
+                },
+                "started_at": {
+                  "type": "string"
+                },
+                "started_by": {
+                  "type": "string"
+                },
+                "started_by_display_name": {
                   "type": "string"
                 },
                 "status": {
@@ -4458,6 +6027,184 @@
                 },
                 "deleted": {
                   "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/appointment/bookings/{bookingId}/report": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "getMyExaminationReport",
+        "operationId": "appointmentbookingsGetMyExaminationReport",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "bookingId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "booking_id": {
+                  "type": "string"
+                },
+                "building": {
+                  "type": "string"
+                },
+                "campus_id": {
+                  "type": "string"
+                },
+                "campus_name": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "current_version": {
+                  "type": "object",
+                  "required": [
+                    "version_id",
+                    "version_no",
+                    "version_kind",
+                    "status",
+                    "objective_findings",
+                    "impression",
+                    "recommendation",
+                    "notes",
+                    "correction_reason",
+                    "authored_by",
+                    "authored_by_display_name",
+                    "published_by",
+                    "published_by_display_name",
+                    "published_at",
+                    "created_at",
+                    "updated_at"
+                  ],
+                  "properties": {
+                    "authored_by": {
+                      "type": "string"
+                    },
+                    "authored_by_display_name": {
+                      "type": "string"
+                    },
+                    "correction_reason": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "impression": {
+                      "type": "string"
+                    },
+                    "notes": {
+                      "type": "string"
+                    },
+                    "objective_findings": {
+                      "type": "string"
+                    },
+                    "published_at": {
+                      "type": "string"
+                    },
+                    "published_by": {
+                      "type": "string"
+                    },
+                    "published_by_display_name": {
+                      "type": "string"
+                    },
+                    "recommendation": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "version_id": {
+                      "type": "string"
+                    },
+                    "version_kind": {
+                      "type": "string"
+                    },
+                    "version_no": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "department_id": {
+                  "type": "string"
+                },
+                "department_name": {
+                  "type": "string"
+                },
+                "examination_completed_at": {
+                  "type": "string"
+                },
+                "examination_started_at": {
+                  "type": "string"
+                },
+                "floor_number": {
+                  "type": "integer"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "item_name": {
+                  "type": "string"
+                },
+                "patient_account_id": {
+                  "type": "string"
+                },
+                "patient_display_name": {
+                  "type": "string"
+                },
+                "patient_phone_masked": {
+                  "type": "string"
+                },
+                "performed_by": {
+                  "type": "string"
+                },
+                "performed_by_display_name": {
+                  "type": "string"
+                },
+                "report_id": {
+                  "type": "string"
+                },
+                "room_display_name": {
+                  "type": "string"
+                },
+                "room_id": {
+                  "type": "string"
+                },
+                "room_number": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                },
+                "version": {
+                  "type": "integer"
                 }
               }
             }
@@ -4794,6 +6541,238 @@
         }
       }
     },
+    "/api/v1/appointment/reports": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listMyExaminationReports",
+        "operationId": "appointmentbookingsListMyExaminationReports",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "page": {
+                  "type": "integer"
+                },
+                "page_size": {
+                  "type": "integer"
+                },
+                "reports": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "report_id",
+                      "booking_id",
+                      "patient_account_id",
+                      "patient_display_name",
+                      "patient_phone_masked",
+                      "department_id",
+                      "department_name",
+                      "item_id",
+                      "item_name",
+                      "room_id",
+                      "campus_id",
+                      "campus_name",
+                      "building",
+                      "floor_number",
+                      "room_number",
+                      "room_display_name",
+                      "status",
+                      "performed_by",
+                      "performed_by_display_name",
+                      "examination_started_at",
+                      "examination_completed_at",
+                      "version",
+                      "current_version",
+                      "created_at",
+                      "updated_at"
+                    ],
+                    "properties": {
+                      "booking_id": {
+                        "type": "string"
+                      },
+                      "building": {
+                        "type": "string"
+                      },
+                      "campus_id": {
+                        "type": "string"
+                      },
+                      "campus_name": {
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "type": "string"
+                      },
+                      "current_version": {
+                        "type": "object",
+                        "required": [
+                          "version_id",
+                          "version_no",
+                          "version_kind",
+                          "status",
+                          "objective_findings",
+                          "impression",
+                          "recommendation",
+                          "notes",
+                          "correction_reason",
+                          "authored_by",
+                          "authored_by_display_name",
+                          "published_by",
+                          "published_by_display_name",
+                          "published_at",
+                          "created_at",
+                          "updated_at"
+                        ],
+                        "properties": {
+                          "authored_by": {
+                            "type": "string"
+                          },
+                          "authored_by_display_name": {
+                            "type": "string"
+                          },
+                          "correction_reason": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "impression": {
+                            "type": "string"
+                          },
+                          "notes": {
+                            "type": "string"
+                          },
+                          "objective_findings": {
+                            "type": "string"
+                          },
+                          "published_at": {
+                            "type": "string"
+                          },
+                          "published_by": {
+                            "type": "string"
+                          },
+                          "published_by_display_name": {
+                            "type": "string"
+                          },
+                          "recommendation": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "version_id": {
+                            "type": "string"
+                          },
+                          "version_kind": {
+                            "type": "string"
+                          },
+                          "version_no": {
+                            "type": "integer"
+                          }
+                        }
+                      },
+                      "department_id": {
+                        "type": "string"
+                      },
+                      "department_name": {
+                        "type": "string"
+                      },
+                      "examination_completed_at": {
+                        "type": "string"
+                      },
+                      "examination_started_at": {
+                        "type": "string"
+                      },
+                      "floor_number": {
+                        "type": "integer"
+                      },
+                      "item_id": {
+                        "type": "string"
+                      },
+                      "item_name": {
+                        "type": "string"
+                      },
+                      "patient_account_id": {
+                        "type": "string"
+                      },
+                      "patient_display_name": {
+                        "type": "string"
+                      },
+                      "patient_phone_masked": {
+                        "type": "string"
+                      },
+                      "performed_by": {
+                        "type": "string"
+                      },
+                      "performed_by_display_name": {
+                        "type": "string"
+                      },
+                      "report_id": {
+                        "type": "string"
+                      },
+                      "room_display_name": {
+                        "type": "string"
+                      },
+                      "room_id": {
+                        "type": "string"
+                      },
+                      "room_number": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "updated_at": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "total": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/me": {
       "get": {
         "security": [
@@ -4872,7 +6851,13 @@
                 "management_version": {
                   "type": "integer"
                 },
+                "masked_phone": {
+                  "type": "string"
+                },
                 "nickname": {
+                  "type": "string"
+                },
+                "staff_display_name": {
                   "type": "string"
                 }
               }
@@ -4924,7 +6909,13 @@
                 "management_version": {
                   "type": "integer"
                 },
+                "masked_phone": {
+                  "type": "string"
+                },
                 "nickname": {
+                  "type": "string"
+                },
+                "staff_display_name": {
                   "type": "string"
                 }
               }
@@ -5424,7 +7415,7 @@
       "in": "header"
     }
   },
-  "x-date": "2026-08-14 02:43:45",
+  "x-date": "2026-08-15 02:51:10",
   "x-description": "This is a goctl generated swagger file.",
   "x-github": "https://github.com/zeromicro/go-zero",
   "x-go-zero-doc": "https://go-zero.dev/",

@@ -8,10 +8,17 @@ type ExaminationItem struct {
 	OwnerDepartmentID string
 	Name              string
 	Description       string
+	ReportTemplate    ReportTemplate
 	Status            Status
 	Version           int64
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
+}
+
+// ReportTemplate 是检查项目为新报告提供的固定四字段初始正文；版本 0 表示尚未配置。
+type ReportTemplate struct {
+	ReportContent
+	Version int64 `json:"version"`
 }
 
 // ItemSummary 是校验项目归属和状态时使用的最小数据。

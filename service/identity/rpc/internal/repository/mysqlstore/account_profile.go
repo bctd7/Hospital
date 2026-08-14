@@ -12,10 +12,15 @@ import (
 func (s *Store) GetDisplayProfile(ctx context.Context, accountID string) (account.DisplayProfile, error) {
 	var profile account.DisplayProfile
 	err := s.db.QueryRowContext(ctx, `
-SELECT COALESCE(ap.nickname, ''), a.management_version
+SELECT COALESCE(ap.nickname, ''), COALESCE(ph.phone_masked, ''),
+       COALESCE(NULLIF(sp.display_name, ''), ''), a.management_version
 FROM identity_accounts a
 LEFT JOIN identity_account_profiles ap ON ap.account_id = a.id
-WHERE a.id = ?`, accountID).Scan(&profile.Nickname, &profile.ManagementVersion)
+LEFT JOIN identity_account_phones ph ON ph.account_id = a.id
+LEFT JOIN identity_staff_profiles sp ON sp.account_id = a.id AND sp.staff_status = 'active'
+WHERE a.id = ?`, accountID).Scan(
+		&profile.Nickname, &profile.MaskedPhone, &profile.StaffDisplayName, &profile.ManagementVersion,
+	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return account.DisplayProfile{}, account.ErrNotFound
 	}
@@ -55,10 +60,15 @@ ON DUPLICATE KEY UPDATE nickname = VALUES(nickname), updated_at = CURRENT_TIMEST
 	}
 	var profile account.DisplayProfile
 	if err := tx.QueryRowContext(ctx, `
-SELECT COALESCE(ap.nickname, ''), a.management_version
+SELECT COALESCE(ap.nickname, ''), COALESCE(ph.phone_masked, ''),
+       COALESCE(NULLIF(sp.display_name, ''), ''), a.management_version
 FROM identity_accounts a
 LEFT JOIN identity_account_profiles ap ON ap.account_id = a.id
-WHERE a.id = ?`, accountID).Scan(&profile.Nickname, &profile.ManagementVersion); err != nil {
+LEFT JOIN identity_account_phones ph ON ph.account_id = a.id
+LEFT JOIN identity_staff_profiles sp ON sp.account_id = a.id AND sp.staff_status = 'active'
+WHERE a.id = ?`, accountID).Scan(
+		&profile.Nickname, &profile.MaskedPhone, &profile.StaffDisplayName, &profile.ManagementVersion,
+	); err != nil {
 		return account.DisplayProfile{}, fmt.Errorf("read updated display profile: %w", err)
 	}
 	if err := tx.Commit(); err != nil {

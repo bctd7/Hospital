@@ -1,15 +1,22 @@
 <script setup lang="ts">
-import { onShow } from "@dcloudio/uni-app";
-import { ref } from "vue";
+import { onLoad, onShow } from "@dcloudio/uni-app";
+import { computed, ref } from "vue";
 
 import { patientAppointmentApi } from "@/api/appointment";
 import AppPage from "@/components/layout/AppPage.vue";
-import type { PatientBooking } from "@/types/appointment";
+import type { AppointmentListView, PatientBooking, PatientBookingStatus } from "@/types/appointment";
 
 const bookings = ref<PatientBooking[]>([]);
 const loading = ref(false);
 const errorMessage = ref("");
 const deletingId = ref("");
+const view = ref<AppointmentListView>("active");
+const isCompletedView = computed(() => view.value === "completed");
+
+onLoad((query) => {
+  view.value = query?.view === "completed" ? "completed" : "active";
+  uni.setNavigationBarTitle({ title: isCompletedView.value ? "检查记录" : "我的预约" });
+});
 
 onShow(() => void loadBookings());
 
@@ -18,7 +25,7 @@ async function loadBookings() {
   loading.value = true;
   errorMessage.value = "";
   try {
-    bookings.value = (await patientAppointmentApi.listMyBookings(1, 100)).items;
+    bookings.value = (await patientAppointmentApi.listMyBookings(1, 100, view.value)).items;
   } catch (error) {
     errorMessage.value = messageOf(error, "预约记录加载失败，请重试");
   } finally {
@@ -52,18 +59,21 @@ function messageOf(error: unknown, fallback: string) {
   return error instanceof Error && error.message.trim() ? error.message : fallback;
 }
 function sessionLabel(value: string) { return value === "morning" ? "上午" : "下午"; }
+function statusLabel(value: PatientBookingStatus) {
+  return ({ confirmed: "待检查", in_progress: "检查中", completed: "已完成", no_show: "未到场" } as const)[value];
+}
 </script>
 
 <template>
-  <AppPage title="我的预约" description="查看本周检查预约；项目窗口开始前可以主动删除。">
+  <AppPage :title="isCompletedView ? '检查记录' : '我的预约'" :description="isCompletedView ? '查看已完成和未到场的历史记录。' : '查看待检查和检查中的预约；项目窗口开始前可以主动删除。'">
     <view v-if="loading" class="state-card">正在加载预约…</view>
     <view v-else-if="errorMessage" class="state-card state-card--error" @tap="loadBookings">{{ errorMessage }}</view>
-    <view v-else-if="!bookings.length" class="state-card">暂无预约</view>
+    <view v-else-if="!bookings.length" class="state-card">{{ isCompletedView ? "暂无检查记录" : "暂无待检查或检查中的预约" }}</view>
     <view v-else class="booking-list">
       <view v-for="booking in bookings" :key="booking.bookingId" class="booking-card">
         <view class="booking-card__heading">
           <text class="booking-card__item">{{ booking.itemName }}</text>
-          <text class="booking-card__status" :class="{ checked: booking.status === 'checked_in' }">{{ booking.status === 'checked_in' ? '已核销' : '已预约' }}</text>
+          <text class="booking-card__status" :class="`status--${booking.status}`">{{ statusLabel(booking.status) }}</text>
         </view>
         <text class="booking-card__time">{{ booking.serviceDate }} · {{ sessionLabel(booking.session) }} · {{ booking.itemStartTime }}–{{ booking.itemEndTime }}</text>
         <text class="booking-card__room">{{ booking.roomDisplayName }}</text>
@@ -74,5 +84,5 @@ function sessionLabel(value: string) { return value === "morning" ? "上午" : "
 </template>
 
 <style scoped>
-button::after{display:none}.state-card,.booking-card{margin-bottom:20rpx;padding:28rpx;color:#718096;font-size:24rpx;background:#fff;border:1rpx solid #e4eaf1;border-radius:18rpx}.state-card{text-align:center}.state-card--error{color:#c34c4c}.booking-card__heading{display:flex;align-items:center;justify-content:space-between}.booking-card__item{color:#263348;font-size:29rpx;font-weight:700}.booking-card__status{padding:6rpx 13rpx;color:#2379da;font-size:19rpx;background:#eaf4ff;border-radius:16rpx}.booking-card__status.checked{color:#27855f;background:#e9f8f1}.booking-card__time,.booking-card__room{display:block;margin-top:15rpx;color:#66758a;font-size:22rpx}.booking-card__room{color:#8793a3}.delete-button{margin:24rpx 0 0;padding:0;color:#d14e4e;font-size:22rpx;line-height:64rpx;background:#fff4f4;border:1rpx solid #f1cccc;border-radius:32rpx}
+button::after{display:none}.state-card,.booking-card{margin-bottom:20rpx;padding:28rpx;color:#718096;font-size:24rpx;background:#fff;border:1rpx solid #e4eaf1;border-radius:18rpx}.state-card{text-align:center}.state-card--error{color:#c34c4c}.booking-card__heading{display:flex;align-items:center;justify-content:space-between}.booking-card__item{color:#263348;font-size:29rpx;font-weight:700}.booking-card__status{padding:6rpx 13rpx;color:#2379da;font-size:19rpx;background:#eaf4ff;border-radius:16rpx}.booking-card__status.status--in_progress,.booking-card__status.status--completed{color:#27855f;background:#e9f8f1}.booking-card__status.status--no_show{color:#8a5b35;background:#f8efe6}.booking-card__time,.booking-card__room{display:block;margin-top:15rpx;color:#66758a;font-size:22rpx}.booking-card__room{color:#8793a3}.delete-button{margin:24rpx 0 0;padding:0;color:#d14e4e;font-size:22rpx;line-height:64rpx;background:#fff4f4;border:1rpx solid #f1cccc;border-radius:32rpx}
 </style>

@@ -32,9 +32,9 @@ func (l *ListMyBookingsLogic) ListMyBookings(req *types.ListMyBookingsAPIRequest
 	if err != nil {
 		return nil, err
 	}
-	value, err := l.svcCtx.Appointment.ListMyBookings(rpcCtx, &appointmentv1.ListMyBookingsRequest{Page: req.Page, PageSize: req.PageSize, RequestId: requestID})
+	value, err := l.svcCtx.Appointment.ListMyBookings(rpcCtx, &appointmentv1.ListMyBookingsRequest{Page: req.Page, PageSize: req.PageSize, View: req.View, RequestId: requestID})
 	if err != nil {
 		return nil, err
 	}
-	return bookingList(value), nil
+	return bookingListWithOrganizations(rpcCtx, l.svcCtx, requestID, value), nil
 }

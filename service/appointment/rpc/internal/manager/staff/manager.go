@@ -11,12 +11,13 @@ import (
 )
 
 // Manager 是管理员和授权科室工作人员的唯一 Appointment 业务入口。
-// 根层只按项目、房间、房间项目关系和预约四个业务方向拆文件，不形成并列 Manager。
+// 根层按项目、房间、房间项目关系、预约、检查执行和报告拆文件，不形成并列 Manager。
 type Manager struct {
 	projectWrites ProjectWriteStore
 	projects      ProjectStore
 	rooms         RoomStore
 	bookings      BookingStore
+	reports       ReportStore
 	cache         staffsupport.Cache
 	flights       staffsupport.FlightGroup
 }
@@ -48,7 +49,7 @@ func (m *Manager) InvalidateItem(ctx context.Context, departmentID, itemID strin
 }
 
 // NewManager 组装工作人员写操作、房间开放时间配置和预约处理所需的最小持久化端口。
-func NewManager(projects ProjectStore, rooms RoomStore, bookingStore BookingStore, cache staffsupport.Cache) (*Manager, error) {
+func NewManager(projects ProjectStore, rooms RoomStore, bookingStore BookingStore, reportStore ReportStore, cache staffsupport.Cache) (*Manager, error) {
 	if projects == nil {
 		return nil, errors.New("appointment project store is required")
 	}
@@ -58,5 +59,8 @@ func NewManager(projects ProjectStore, rooms RoomStore, bookingStore BookingStor
 	if bookingStore == nil {
 		return nil, errors.New("appointment booking store is required")
 	}
-	return &Manager{projectWrites: projects, projects: projects, rooms: rooms, bookings: bookingStore, cache: cache}, nil
+	if reportStore == nil {
+		return nil, errors.New("appointment report store is required")
+	}
+	return &Manager{projectWrites: projects, projects: projects, rooms: rooms, bookings: bookingStore, reports: reportStore, cache: cache}, nil
 }

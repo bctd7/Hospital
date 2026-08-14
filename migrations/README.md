@@ -10,7 +10,12 @@ migrations/
     └── 000001_name.down.sql
 ```
 
-当前只有 Identity 拥有独立数据库迁移，版本为 `000001` 至 `000005`。
+当前 Identity 与 Appointment 各自拥有独立数据库，并均已在首次发布前压平为单一最新初始版本：
+
+- `identity/000001_identity_initial_schema`：12 张业务表；
+- `appointment/000001_appointment_initial_schema`：15 张业务表。
+
+`schema_migrations` 由迁移工具维护，不属于业务模型。仓库中已经不存在需要按顺序回放的旧业务迁移。
 
 ## 执行器
 
@@ -20,6 +25,8 @@ migrations/
 ```powershell
 .\scripts\migrate.ps1 -Service identity -Direction up
 .\scripts\migrate.ps1 -Service identity -Direction version
+.\scripts\migrate.ps1 -Service appointment -Direction up
+.\scripts\migrate.ps1 -Service appointment -Direction version
 ```
 
 本地首次初始化使用：

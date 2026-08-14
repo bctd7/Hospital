@@ -28,7 +28,7 @@ function persistentProfile(profile: DisplayProfile): DisplayProfile {
 
   return {
     ...profile,
-    // chooseAvatar 返回的是临时文件地址。它只在当前运行期间有效，不能跨会话缓存。
+    // 本地临时文件地址只在当前运行期间有效，不能跨会话缓存。
     avatarUrl: isRemoteAvatar && !LOCAL_AVATAR_HOST_PATTERN.test(avatarUrl) ? avatarUrl : "",
   };
 }

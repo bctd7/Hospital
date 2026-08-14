@@ -100,14 +100,14 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		store.Close()
 		return nil, fmt.Errorf("create appointment query cache: %w", err)
 	}
-	staffManager, err := staffmanager.NewManager(store, store, store, appointmentCache)
+	staffManager, err := staffmanager.NewManager(store, store, store, store, appointmentCache)
 	if err != nil {
 		appointmentRedisClient.Close()
 		authorizationRedisClient.Close()
 		store.Close()
 		return nil, fmt.Errorf("create staff appointment manager: %w", err)
 	}
-	patientManager, err := patientmanager.NewManager(store, store, appointmentCache)
+	patientManager, err := patientmanager.NewManager(store, store, store, appointmentCache)
 	if err != nil {
 		appointmentRedisClient.Close()
 		authorizationRedisClient.Close()

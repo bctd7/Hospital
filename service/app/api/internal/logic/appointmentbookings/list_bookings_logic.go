@@ -35,10 +35,12 @@ func (l *ListBookingsLogic) ListBookings(req *types.ListBookingsAPIRequest) (res
 	value, err := l.svcCtx.Appointment.ListBookings(rpcCtx, &appointmentv1.ListBookingsRequest{
 		DepartmentId: req.DepartmentID, ServiceDate: req.ServiceDate, Session: req.Session,
 		ItemId: req.ItemID, RoomId: req.RoomID, Status: req.Status,
-		Page: req.Page, PageSize: req.PageSize, RequestId: requestID,
+		PatientKeyword: req.PatientKeyword,
+		View:           req.View,
+		Page:           req.Page, PageSize: req.PageSize, RequestId: requestID,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return bookingList(value), nil
+	return bookingListWithOrganizations(rpcCtx, l.svcCtx, requestID, value), nil
 }

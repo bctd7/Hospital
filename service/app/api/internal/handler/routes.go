@@ -41,9 +41,39 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: appointmentbookings.DeleteBookingHandler(serverCtx),
 				},
 				{
+					Method:  http.MethodGet,
+					Path:    "/admin/appointment/bookings/:bookingId/report",
+					Handler: appointmentbookings.GetExaminationReportHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodPost,
-					Path:    "/admin/appointment/bookings/:bookingId/check-in",
-					Handler: appointmentbookings.CheckInBookingHandler(serverCtx),
+					Path:    "/admin/appointment/bookings/:bookingId/report/complete-and-publish",
+					Handler: appointmentbookings.CompleteAndPublishExaminationReportHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/admin/appointment/bookings/:bookingId/report/draft",
+					Handler: appointmentbookings.SaveExaminationReportDraftHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/appointment/bookings/:bookingId/start-examination",
+					Handler: appointmentbookings.StartExaminationHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/admin/appointment/reports",
+					Handler: appointmentbookings.ListExaminationReportsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/appointment/reports/:reportId/corrections",
+					Handler: appointmentbookings.CorrectExaminationReportHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/admin/appointment/reports/:reportId/versions",
+					Handler: appointmentbookings.ListExaminationReportVersionsHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPost,
@@ -67,8 +97,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					Method:  http.MethodGet,
+					Path:    "/appointment/bookings/:bookingId/report",
+					Handler: appointmentbookings.GetMyExaminationReportHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
 					Path:    "/appointment/examination-items/:itemId/booking-options",
 					Handler: appointmentbookings.ListBookingOptionsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/appointment/reports",
+					Handler: appointmentbookings.ListMyExaminationReportsHandler(serverCtx),
 				},
 			}...,
 		),
@@ -108,6 +148,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodPost,
 					Path:    "/admin/appointment/examination-items/:itemId/enable",
 					Handler: appointmentcatalog.EnableExaminationItemHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/admin/appointment/examination-items/:itemId/report-template",
+					Handler: appointmentcatalog.GetExaminationItemReportTemplateHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/admin/appointment/examination-items/:itemId/report-template",
+					Handler: appointmentcatalog.SaveExaminationItemReportTemplateHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodGet,
@@ -370,13 +420,8 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodGet,
-				Path:    "/directory/departments",
-				Handler: organizationdirectory.ListDepartmentsHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/directory/organization-context",
-				Handler: organizationdirectory.GetOrganizationContextHandler(serverCtx),
+				Path:    "/directory/departments/:departmentId/doctors",
+				Handler: organizationdirectory.ListDoctorsHandler(serverCtx),
 			},
 		},
 		rest.WithPrefix("/api/v1"),
@@ -386,8 +431,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodGet,
-				Path:    "/directory/departments/:departmentId/doctors",
-				Handler: organizationdirectory.ListDoctorsHandler(serverCtx),
+				Path:    "/directory/departments",
+				Handler: organizationdirectory.ListDepartmentsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/directory/organization-context",
+				Handler: organizationdirectory.GetOrganizationContextHandler(serverCtx),
 			},
 		},
 		rest.WithPrefix("/api/v1"),

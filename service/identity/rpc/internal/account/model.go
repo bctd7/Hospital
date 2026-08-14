@@ -22,6 +22,8 @@ const (
 
 type DisplayProfile struct {
 	Nickname          string
+	MaskedPhone       string
+	StaffDisplayName  string
 	ManagementVersion int64
 }
 

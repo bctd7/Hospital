@@ -16,11 +16,11 @@ import (
 const cleanupOperatorAccountID = "00000000-0000-0000-0000-000000000000"
 
 type BookingCleanupResult struct {
-	Deleted       int
+	MarkedNoShow  int
 	DepartmentIDs []string
 }
 
-func (s *Store) CleanupExpiredBookings(ctx context.Context, beforeDate time.Time, limit int) (BookingCleanupResult, error) {
+func (s *Store) CleanupExpiredBookings(ctx context.Context, before time.Time, limit int) (BookingCleanupResult, error) {
 	if limit < 1 || limit > 500 {
 		return BookingCleanupResult{}, fmt.Errorf("cleanup batch limit must be between 1 and 500")
 	}
@@ -38,10 +38,11 @@ func (s *Store) CleanupExpiredBookings(ctx context.Context, beforeDate time.Time
 	rows, err := tx.QueryContext(ctx, `
 SELECT id
 FROM appointment_bookings
-WHERE status = 'confirmed' AND service_date < ?
-ORDER BY service_date, id
+WHERE status = 'confirmed'
+  AND (service_date < ? OR (service_date = ? AND item_end_time_snapshot <= ?))
+ORDER BY service_date, item_end_time_snapshot, id
 LIMIT ?
-FOR UPDATE SKIP LOCKED`, beforeDate.Format("2006-01-02"), limit)
+FOR UPDATE SKIP LOCKED`, before.Format("2006-01-02"), before.Format("2006-01-02"), before.Format("15:04:05"), limit)
 	if err != nil {
 		return rollback(fmt.Errorf("lock expired bookings: %w", err))
 	}
@@ -81,15 +82,18 @@ FOR UPDATE SKIP LOCKED`, beforeDate.Format("2006-01-02"), limit)
 		if err := txStore.ReleasePatientSession(ctx, bookingID); err != nil {
 			return rollback(err)
 		}
-		if err := txStore.DeleteBooking(ctx, bookingID); err != nil {
+		booking.Status = appointmentmanager.BookingStatusNoShow
+		booking.UpdatedAt = before
+		booking.Version++
+		if err := txStore.MarkBookingNoShow(ctx, booking, booking.Version-1); err != nil {
 			return rollback(err)
 		}
-		fingerprint := sha256.Sum256([]byte("delete_by_cleanup:" + bookingID))
+		fingerprint := sha256.Sum256([]byte("mark_no_show:" + bookingID))
 		if err := txStore.RecordBookingOperation(ctx, appointmentmanager.BookingOperationChange{
 			OperationID: uuid.NewString(), OperatorAccountID: cleanupOperatorAccountID,
-			BookingID: bookingID, Action: "delete_by_cleanup",
+			BookingID: bookingID, Action: "mark_no_show",
 			RequestFingerprint: hex.EncodeToString(fingerprint[:]),
-			Result:             map[string]any{"booking_id": bookingID, "deleted": true},
+			Result:             booking,
 		}); err != nil {
 			return rollback(err)
 		}
@@ -98,7 +102,7 @@ FOR UPDATE SKIP LOCKED`, beforeDate.Format("2006-01-02"), limit)
 	if err := tx.Commit(); err != nil {
 		return BookingCleanupResult{}, fmt.Errorf("commit booking cleanup: %w", err)
 	}
-	result := BookingCleanupResult{Deleted: len(bookingIDs), DepartmentIDs: make([]string, 0, len(departments))}
+	result := BookingCleanupResult{MarkedNoShow: len(bookingIDs), DepartmentIDs: make([]string, 0, len(departments))}
 	for departmentID := range departments {
 		result.DepartmentIDs = append(result.DepartmentIDs, departmentID)
 	}

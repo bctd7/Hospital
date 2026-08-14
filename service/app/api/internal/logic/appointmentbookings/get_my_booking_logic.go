@@ -36,5 +36,5 @@ func (l *GetMyBookingLogic) GetMyBooking(req *types.BookingPathRequest) (resp *t
 	if err != nil {
 		return nil, err
 	}
-	return booking(value), nil
+	return bookingWithOrganization(rpcCtx, l.svcCtx, requestID, value), nil
 }

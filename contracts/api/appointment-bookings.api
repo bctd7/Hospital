@@ -40,6 +40,7 @@ type (
 	ListMyBookingsAPIRequest {
 		Page     int64 `form:"page,default=1"`
 		PageSize int64 `form:"page_size,default=20"`
+		View     string `form:"view,default=active"`
 	}
 	ListBookingsAPIRequest {
 		DepartmentID string `form:"department_id"`
@@ -48,6 +49,8 @@ type (
 		ItemID       string `form:"item_id,optional"`
 		RoomID       string `form:"room_id,optional"`
 		Status       string `form:"status,optional"`
+		PatientKeyword string `form:"patient_keyword,optional"`
+		View         string `form:"view,default=active"`
 		Page         int64  `form:"page,default=1"`
 		PageSize     int64  `form:"page_size,default=20"`
 	}
@@ -56,20 +59,24 @@ type (
 		OperationID string `json:"operation_id"`
 		Reason      string `json:"reason,optional"`
 	}
-	CheckInBookingAPIRequest {
-		BookingID      string `path:"bookingId"`
+	StartExaminationAPIRequest {
+		BookingID       string `path:"bookingId"`
 		ExpectedVersion int64  `json:"expected_version"`
-		OperationID    string `json:"operation_id"`
+		OperationID     string `json:"operation_id"`
 	}
 	BookingResponse {
 		BookingID          string `json:"booking_id"`
 		PatientAccountID   string `json:"patient_account_id"`
+		PatientDisplayName string `json:"patient_display_name"`
+		PatientPhoneMasked string `json:"patient_phone_masked"`
 		DepartmentID       string `json:"department_id"`
+		DepartmentName     string `json:"department_name"`
 		ItemID             string `json:"item_id"`
 		ItemName           string `json:"item_name"`
 		RoomID             string `json:"room_id"`
 		RoomDisplayName    string `json:"room_display_name"`
 		CampusID           string `json:"campus_id"`
+		CampusName         string `json:"campus_name"`
 		ServiceDate        string `json:"service_date"`
 		Session            string `json:"session"`
 		Status             string `json:"status"`
@@ -81,8 +88,15 @@ type (
 		Version            int64  `json:"version"`
 		CreatedAt          string `json:"created_at"`
 		UpdatedAt          string `json:"updated_at"`
-		CheckedInAt        string `json:"checked_in_at,omitempty"`
-		CheckedInBy        string `json:"checked_in_by,omitempty"`
+		StartedAt          string `json:"started_at,omitempty"`
+		StartedBy          string `json:"started_by,omitempty"`
+		StartedByDisplayName string `json:"started_by_display_name,omitempty"`
+		CompletedAt        string `json:"completed_at,omitempty"`
+		CompletedBy        string `json:"completed_by,omitempty"`
+		CompletedByDisplayName string `json:"completed_by_display_name,omitempty"`
+		Building           string `json:"building"`
+		FloorNumber        int32  `json:"floor_number"`
+		RoomNumber         string `json:"room_number"`
 	}
 	ListBookingsAPIResponse {
 		Bookings []BookingResponse `json:"bookings"`
@@ -93,6 +107,102 @@ type (
 	DeleteBookingAPIResponse {
 		BookingID string `json:"booking_id"`
 		Deleted   bool   `json:"deleted"`
+	}
+	SaveReportDraftAPIRequest {
+		BookingID             string `path:"bookingId"`
+		ObjectiveFindings     string `json:"objective_findings,optional"`
+		Impression            string `json:"impression,optional"`
+		Recommendation        string `json:"recommendation,optional"`
+		Notes                 string `json:"notes,optional"`
+		ExpectedReportVersion int64  `json:"expected_report_version"`
+		OperationID           string `json:"operation_id"`
+	}
+	CompleteAndPublishReportAPIRequest {
+		BookingID              string `path:"bookingId"`
+		ObjectiveFindings      string `json:"objective_findings"`
+		Impression             string `json:"impression"`
+		Recommendation         string `json:"recommendation,optional"`
+		Notes                  string `json:"notes,optional"`
+		ExpectedBookingVersion int64  `json:"expected_booking_version"`
+		ExpectedReportVersion  int64  `json:"expected_report_version"`
+		OperationID            string `json:"operation_id"`
+	}
+	CorrectReportAPIRequest {
+		ReportID              string `path:"reportId"`
+		ObjectiveFindings     string `json:"objective_findings"`
+		Impression            string `json:"impression"`
+		Recommendation        string `json:"recommendation,optional"`
+		Notes                 string `json:"notes,optional"`
+		CorrectionReason      string `json:"correction_reason"`
+		ExpectedReportVersion int64  `json:"expected_report_version"`
+		OperationID           string `json:"operation_id"`
+	}
+	ReportPathRequest {
+		ReportID string `path:"reportId"`
+	}
+	ListMyReportsAPIRequest {
+		Page     int64 `form:"page,default=1"`
+		PageSize int64 `form:"page_size,default=20"`
+	}
+	ListDepartmentReportsAPIRequest {
+		DepartmentID string `form:"department_id"`
+		Keyword      string `form:"keyword,optional"`
+		Page         int64  `form:"page,default=1"`
+		PageSize     int64  `form:"page_size,default=20"`
+	}
+	ReportVersionResponse {
+		VersionID        string `json:"version_id"`
+		VersionNo        int64  `json:"version_no"`
+		VersionKind      string `json:"version_kind"`
+		Status           string `json:"status"`
+		ObjectiveFindings string `json:"objective_findings"`
+		Impression        string `json:"impression"`
+		Recommendation    string `json:"recommendation"`
+		Notes             string `json:"notes"`
+		CorrectionReason string `json:"correction_reason,omitempty"`
+		AuthoredBy       string `json:"authored_by"`
+		AuthoredByDisplayName string `json:"authored_by_display_name"`
+		PublishedBy      string `json:"published_by,omitempty"`
+		PublishedByDisplayName string `json:"published_by_display_name,omitempty"`
+		PublishedAt      string `json:"published_at,omitempty"`
+		CreatedAt        string `json:"created_at"`
+		UpdatedAt        string `json:"updated_at"`
+	}
+	ExaminationReportResponse {
+		ReportID               string                `json:"report_id"`
+		BookingID              string                `json:"booking_id"`
+		PatientAccountID       string                `json:"patient_account_id"`
+		PatientDisplayName     string                `json:"patient_display_name"`
+		PatientPhoneMasked     string                `json:"patient_phone_masked"`
+		DepartmentID           string                `json:"department_id"`
+		DepartmentName         string                `json:"department_name"`
+		ItemID                 string                `json:"item_id"`
+		ItemName               string                `json:"item_name"`
+		RoomID                 string                `json:"room_id"`
+		CampusID               string                `json:"campus_id"`
+		CampusName             string                `json:"campus_name"`
+		Building               string                `json:"building"`
+		FloorNumber            int32                 `json:"floor_number"`
+		RoomNumber             string                `json:"room_number"`
+		RoomDisplayName        string                `json:"room_display_name"`
+		Status                 string                `json:"status"`
+		PerformedBy            string                `json:"performed_by,omitempty"`
+		PerformedByDisplayName string                `json:"performed_by_display_name,omitempty"`
+		ExaminationStartedAt   string                `json:"examination_started_at,omitempty"`
+		ExaminationCompletedAt string                `json:"examination_completed_at,omitempty"`
+		Version                int64                 `json:"version"`
+		CurrentVersion         ReportVersionResponse `json:"current_version"`
+		CreatedAt              string                `json:"created_at"`
+		UpdatedAt              string                `json:"updated_at"`
+	}
+	ListReportVersionsAPIResponse {
+		Versions []ReportVersionResponse `json:"versions"`
+	}
+	ListReportsAPIResponse {
+		Reports  []ExaminationReportResponse `json:"reports"`
+		Page     int64                       `json:"page"`
+		PageSize int64                       `json:"page_size"`
+		Total    int64                       `json:"total"`
 	}
 )
 
@@ -118,8 +228,25 @@ service app-api {
 	get /admin/appointment/bookings (ListBookingsAPIRequest) returns (ListBookingsAPIResponse)
 	@handler getBooking
 	get /admin/appointment/bookings/:bookingId (BookingPathRequest) returns (BookingResponse)
-	@handler checkInBooking
-	post /admin/appointment/bookings/:bookingId/check-in (CheckInBookingAPIRequest) returns (BookingResponse)
+	@handler startExamination
+	post /admin/appointment/bookings/:bookingId/start-examination (StartExaminationAPIRequest) returns (BookingResponse)
+	@handler saveExaminationReportDraft
+	put /admin/appointment/bookings/:bookingId/report/draft (SaveReportDraftAPIRequest) returns (ExaminationReportResponse)
+	@handler completeAndPublishExaminationReport
+	post /admin/appointment/bookings/:bookingId/report/complete-and-publish (CompleteAndPublishReportAPIRequest) returns (ExaminationReportResponse)
+	@handler getExaminationReport
+	get /admin/appointment/bookings/:bookingId/report (BookingPathRequest) returns (ExaminationReportResponse)
+	@handler listExaminationReports
+	get /admin/appointment/reports (ListDepartmentReportsAPIRequest) returns (ListReportsAPIResponse)
+	@handler correctExaminationReport
+	post /admin/appointment/reports/:reportId/corrections (CorrectReportAPIRequest) returns (ExaminationReportResponse)
+	@handler listExaminationReportVersions
+	get /admin/appointment/reports/:reportId/versions (ReportPathRequest) returns (ListReportVersionsAPIResponse)
 	@handler deleteBooking
 	delete /admin/appointment/bookings/:bookingId (DeleteBookingAPIRequest) returns (DeleteBookingAPIResponse)
+
+	@handler listMyExaminationReports
+	get /appointment/reports (ListMyReportsAPIRequest) returns (ListReportsAPIResponse)
+	@handler getMyExaminationReport
+	get /appointment/bookings/:bookingId/report (BookingPathRequest) returns (ExaminationReportResponse)
 }

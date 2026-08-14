@@ -31,7 +31,9 @@ func (l *CreateBookingLogic) CreateBooking(in *appointmentv1.CreateBookingReques
 	}
 	value, err := l.svcCtx.PatientManager.CreateBooking(l.ctx, principal, patientmanager.CreateBookingCommand{
 		ItemID: in.GetItemId(), RoomID: in.GetRoomId(), ServiceDate: in.GetServiceDate(),
-		Session: patientmanager.Session(in.GetSession()), OperationID: in.GetOperationId(), RequestID: in.GetRequestId(),
+		Session:            patientmanager.Session(in.GetSession()),
+		PatientDisplayName: in.GetPatientDisplayName(), PatientPhoneMasked: in.GetPatientPhoneMasked(),
+		OperationID: in.GetOperationId(), RequestID: in.GetRequestId(),
 	})
 	if err != nil {
 		return nil, bookingRPCError(err)

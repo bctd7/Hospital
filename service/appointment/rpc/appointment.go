@@ -29,6 +29,9 @@ func main() {
 		panic(err)
 	}
 	defer svcCtx.Close()
+	for _, method := range reportRPCMethodsWithSensitiveContent() {
+		zrpc.DontLogContentForMethod(method)
+	}
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		appointmentv1.RegisterAppointmentServiceServer(grpcServer, server.NewAppointmentServiceServer(svcCtx))
@@ -45,4 +48,20 @@ func main() {
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()
+}
+
+// 报告 RPC 不进入 go-zero 的请求/响应正文日志，避免医疗内容泄漏。
+func reportRPCMethodsWithSensitiveContent() []string {
+	return []string{
+		appointmentv1.AppointmentService_GetExaminationItemReportTemplate_FullMethodName,
+		appointmentv1.AppointmentService_SaveExaminationItemReportTemplate_FullMethodName,
+		appointmentv1.AppointmentService_SaveExaminationReportDraft_FullMethodName,
+		appointmentv1.AppointmentService_CompleteAndPublishExaminationReport_FullMethodName,
+		appointmentv1.AppointmentService_CorrectExaminationReport_FullMethodName,
+		appointmentv1.AppointmentService_GetExaminationReport_FullMethodName,
+		appointmentv1.AppointmentService_ListExaminationReports_FullMethodName,
+		appointmentv1.AppointmentService_ListExaminationReportVersions_FullMethodName,
+		appointmentv1.AppointmentService_GetMyExaminationReport_FullMethodName,
+		appointmentv1.AppointmentService_ListMyExaminationReports_FullMethodName,
+	}
 }

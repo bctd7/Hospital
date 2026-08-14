@@ -31,7 +31,7 @@
 ```text
 构建最新镜像
   -> MySQL 创建空数据库
-  -> identity-migrate 依次执行 000001 ~ 000005 后退出
+  -> identity-migrate 与 appointment-migrate 分别执行压平后的 000001 后退出
   -> identity-bootstrap-admin 创建医院根节点和多个超级管理员后退出
   -> Kafka 启动，kafka-init 创建授权事件 Topic 后退出
   -> Redis、identity-rpc、app-api 启动
@@ -96,6 +96,18 @@ curl --fail http://127.0.0.1:8888/api/v1/health
 ```
 
 两个管理员随后使用各自手机号接收真实短信验证码登录。登录后由管理员页面创建院区、科室和医生。
+
+体验版需要预置完整测试链路时，只能在刚完成迁移和两个管理员初始化、尚无业务数据的数据库上执行：
+
+```bash
+cd /opt/hospital/deploy/production
+EXPERIENCE_SEED_ACKNOWLEDGE=fresh-experience-database ./scripts/seed-experience.sh
+```
+
+该脚本保留 `.env.production` 中的两个超级管理员，另外创建两名医生、四名患者、两个院区、四个科室、
+六个房间、七个检查项目，以及待检查、检查中、已完成、未到场、报告草稿、正式报告和更正版本数据。
+“当日急诊 CT”会按照执行脚本时的上午或下午自动配置当前有效窗口，避免体验环境在凌晨或下午无法测试开始检查。
+检测到已有科室或 Appointment 业务数据时脚本会拒绝执行，不会覆盖现有数据。
 
 ### 3. 上传体验版
 

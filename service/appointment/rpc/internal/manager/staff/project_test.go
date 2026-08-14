@@ -34,7 +34,7 @@ func (stubStore) WithinProjectTransaction(context.Context, func(ProjectTxStore) 
 }
 
 func TestManagerRequiresProjectWriteStore(t *testing.T) {
-	if _, err := NewManager(nil, nil, nil, nil); err == nil {
+	if _, err := NewManager(nil, nil, nil, nil, nil); err == nil {
 		t.Fatal("expected nil project store to be rejected")
 	}
 	if manager, _ := projectTestManager(stubStore{}); manager == nil {
@@ -213,6 +213,38 @@ func TestProjectRejectsStaleVersion(t *testing.T) {
 	}
 }
 
+func TestProjectReportTemplateUsesIndependentVersionAndIdempotency(t *testing.T) {
+	store := newMemoryProjectStore()
+	manager, _ := projectTestManager(store)
+	operator := projectOperator()
+	operator.Permissions = append(operator.Permissions, contractauthz.PermissionAppointmentUpdate)
+	created, err := manager.CreateProject(context.Background(), operator, validCreateCommand())
+	if err != nil {
+		t.Fatal(err)
+	}
+	command := staffinput.SaveReportTemplate{
+		ItemID:                  created.ItemID,
+		Template:                ReportContent{ObjectiveFindings: "模板所见", Impression: "模板结论"},
+		ExpectedTemplateVersion: 0,
+		Operation:               staffinput.Operation{OperationID: "00000000-0000-0000-0000-000000000026"},
+	}
+	saved, err := manager.SaveProjectReportTemplate(context.Background(), operator, command)
+	if err != nil {
+		t.Fatal(err)
+	}
+	replayed, err := manager.SaveProjectReportTemplate(context.Background(), operator, command)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if saved.ReportTemplate.Version != 1 || replayed.ReportTemplate.Version != 1 || saved.Version != created.Version {
+		t.Fatalf("saved=%#v replayed=%#v", saved, replayed)
+	}
+	command.OperationID = "00000000-0000-0000-0000-000000000027"
+	if _, err := manager.SaveProjectReportTemplate(context.Background(), operator, command); !errors.Is(err, ErrVersionConflict) {
+		t.Fatalf("error=%v, want ErrVersionConflict", err)
+	}
+}
+
 func validCreateCommand() staffinput.CreateProject {
 	return staffinput.CreateProject{
 		OwnerDepartmentID: validationDepartmentID,
@@ -323,6 +355,18 @@ func (s *memoryProjectStore) UpdateItem(_ context.Context, item ExaminationItem,
 	return nil
 }
 
+func (s *memoryProjectStore) UpdateItemReportTemplate(_ context.Context, item ExaminationItem, expectedTemplateVersion int64) error {
+	current, exists := s.items[item.ItemID]
+	if !exists {
+		return ErrNotFound
+	}
+	if current.ReportTemplate.Version != expectedTemplateVersion {
+		return ErrVersionConflict
+	}
+	s.items[item.ItemID] = item
+	return nil
+}
+
 func (s *memoryProjectStore) SetItemStatus(_ context.Context, item ExaminationItem, expectedVersion int64) error {
 	current, exists := s.items[item.ItemID]
 	if !exists {
@@ -368,6 +412,10 @@ func (s *memoryProjectStore) ReleasePatientSession(context.Context, string) erro
 	return ErrNotImplemented
 }
 
+func (s *memoryProjectStore) ConsumePatientWeeklyQuota(context.Context, string, time.Time, int64, time.Time) error {
+	return ErrNotImplemented
+}
+
 func (s *memoryProjectStore) LockBookingSelection(context.Context, string, string, time.Time, Session) (BookingSelection, error) {
 	return BookingSelection{}, ErrNotImplemented
 }
@@ -400,7 +448,7 @@ func (s *memoryProjectStore) CreateBooking(context.Context, Booking) error {
 	return ErrNotImplemented
 }
 
-func (s *memoryProjectStore) CheckInBooking(context.Context, Booking, int64) error {
+func (s *memoryProjectStore) MarkBookingNoShow(context.Context, Booking, int64) error {
 	return ErrNotImplemented
 }
 

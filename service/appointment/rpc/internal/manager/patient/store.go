@@ -21,3 +21,9 @@ type BookingStore interface {
 	ListBookings(ctx context.Context, filter BookingListFilter) ([]Booking, int64, error)
 	WithinBookingTransaction(ctx context.Context, fn func(BookingTxStore) error) error
 }
+
+// ReportStore 只暴露患者读取本人已发布报告所需的查询能力。
+type ReportStore interface {
+	GetReportByBooking(ctx context.Context, bookingID string, publishedOnly bool) (ExaminationReport, error)
+	ListReports(ctx context.Context, filter ReportListFilter, publishedOnly bool) ([]ExaminationReport, int64, error)
+}

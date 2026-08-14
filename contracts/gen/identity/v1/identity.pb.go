@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v7.34.1
-// source: contracts/proto/identity/v1/identity.proto
+// source: identity/v1/identity.proto
 
 package identityv1
 
@@ -31,7 +31,7 @@ type SendPhoneLoginCodeRequest struct {
 
 func (x *SendPhoneLoginCodeRequest) Reset() {
 	*x = SendPhoneLoginCodeRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[0]
+	mi := &file_identity_v1_identity_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -43,7 +43,7 @@ func (x *SendPhoneLoginCodeRequest) String() string {
 func (*SendPhoneLoginCodeRequest) ProtoMessage() {}
 
 func (x *SendPhoneLoginCodeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[0]
+	mi := &file_identity_v1_identity_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -56,7 +56,7 @@ func (x *SendPhoneLoginCodeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendPhoneLoginCodeRequest.ProtoReflect.Descriptor instead.
 func (*SendPhoneLoginCodeRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{0}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *SendPhoneLoginCodeRequest) GetPhone() string {
@@ -83,7 +83,7 @@ type SendPhoneLoginCodeResponse struct {
 
 func (x *SendPhoneLoginCodeResponse) Reset() {
 	*x = SendPhoneLoginCodeResponse{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[1]
+	mi := &file_identity_v1_identity_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -95,7 +95,7 @@ func (x *SendPhoneLoginCodeResponse) String() string {
 func (*SendPhoneLoginCodeResponse) ProtoMessage() {}
 
 func (x *SendPhoneLoginCodeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[1]
+	mi := &file_identity_v1_identity_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -108,7 +108,7 @@ func (x *SendPhoneLoginCodeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendPhoneLoginCodeResponse.ProtoReflect.Descriptor instead.
 func (*SendPhoneLoginCodeResponse) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{1}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *SendPhoneLoginCodeResponse) GetAccepted() bool {
@@ -136,7 +136,7 @@ type PhoneLoginRequest struct {
 
 func (x *PhoneLoginRequest) Reset() {
 	*x = PhoneLoginRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[2]
+	mi := &file_identity_v1_identity_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -148,7 +148,7 @@ func (x *PhoneLoginRequest) String() string {
 func (*PhoneLoginRequest) ProtoMessage() {}
 
 func (x *PhoneLoginRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[2]
+	mi := &file_identity_v1_identity_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -161,7 +161,7 @@ func (x *PhoneLoginRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PhoneLoginRequest.ProtoReflect.Descriptor instead.
 func (*PhoneLoginRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{2}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *PhoneLoginRequest) GetPhone() string {
@@ -196,7 +196,7 @@ type PhoneBinding struct {
 
 func (x *PhoneBinding) Reset() {
 	*x = PhoneBinding{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[3]
+	mi := &file_identity_v1_identity_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -208,7 +208,7 @@ func (x *PhoneBinding) String() string {
 func (*PhoneBinding) ProtoMessage() {}
 
 func (x *PhoneBinding) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[3]
+	mi := &file_identity_v1_identity_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -221,7 +221,7 @@ func (x *PhoneBinding) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PhoneBinding.ProtoReflect.Descriptor instead.
 func (*PhoneBinding) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{3}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *PhoneBinding) GetPhoneMasked() string {
@@ -255,7 +255,7 @@ type RefreshAccessTokenRequest struct {
 
 func (x *RefreshAccessTokenRequest) Reset() {
 	*x = RefreshAccessTokenRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[4]
+	mi := &file_identity_v1_identity_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -267,7 +267,7 @@ func (x *RefreshAccessTokenRequest) String() string {
 func (*RefreshAccessTokenRequest) ProtoMessage() {}
 
 func (x *RefreshAccessTokenRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[4]
+	mi := &file_identity_v1_identity_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -280,7 +280,7 @@ func (x *RefreshAccessTokenRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RefreshAccessTokenRequest.ProtoReflect.Descriptor instead.
 func (*RefreshAccessTokenRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{4}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *RefreshAccessTokenRequest) GetRefreshToken() string {
@@ -307,7 +307,7 @@ type RevokeRefreshTokenRequest struct {
 
 func (x *RevokeRefreshTokenRequest) Reset() {
 	*x = RevokeRefreshTokenRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[5]
+	mi := &file_identity_v1_identity_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -319,7 +319,7 @@ func (x *RevokeRefreshTokenRequest) String() string {
 func (*RevokeRefreshTokenRequest) ProtoMessage() {}
 
 func (x *RevokeRefreshTokenRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[5]
+	mi := &file_identity_v1_identity_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -332,7 +332,7 @@ func (x *RevokeRefreshTokenRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeRefreshTokenRequest.ProtoReflect.Descriptor instead.
 func (*RevokeRefreshTokenRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{5}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *RevokeRefreshTokenRequest) GetRefreshToken() string {
@@ -358,7 +358,7 @@ type RevokeRefreshTokenResponse struct {
 
 func (x *RevokeRefreshTokenResponse) Reset() {
 	*x = RevokeRefreshTokenResponse{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[6]
+	mi := &file_identity_v1_identity_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -370,7 +370,7 @@ func (x *RevokeRefreshTokenResponse) String() string {
 func (*RevokeRefreshTokenResponse) ProtoMessage() {}
 
 func (x *RevokeRefreshTokenResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[6]
+	mi := &file_identity_v1_identity_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -383,7 +383,7 @@ func (x *RevokeRefreshTokenResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RevokeRefreshTokenResponse.ProtoReflect.Descriptor instead.
 func (*RevokeRefreshTokenResponse) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{6}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *RevokeRefreshTokenResponse) GetRevoked() bool {
@@ -402,7 +402,7 @@ type GetAccountDisplayProfileRequest struct {
 
 func (x *GetAccountDisplayProfileRequest) Reset() {
 	*x = GetAccountDisplayProfileRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[7]
+	mi := &file_identity_v1_identity_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -414,7 +414,7 @@ func (x *GetAccountDisplayProfileRequest) String() string {
 func (*GetAccountDisplayProfileRequest) ProtoMessage() {}
 
 func (x *GetAccountDisplayProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[7]
+	mi := &file_identity_v1_identity_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -427,7 +427,7 @@ func (x *GetAccountDisplayProfileRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAccountDisplayProfileRequest.ProtoReflect.Descriptor instead.
 func (*GetAccountDisplayProfileRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{7}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetAccountDisplayProfileRequest) GetRequestId() string {
@@ -447,7 +447,7 @@ type UpdateAccountDisplayProfileRequest struct {
 
 func (x *UpdateAccountDisplayProfileRequest) Reset() {
 	*x = UpdateAccountDisplayProfileRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[8]
+	mi := &file_identity_v1_identity_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -459,7 +459,7 @@ func (x *UpdateAccountDisplayProfileRequest) String() string {
 func (*UpdateAccountDisplayProfileRequest) ProtoMessage() {}
 
 func (x *UpdateAccountDisplayProfileRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[8]
+	mi := &file_identity_v1_identity_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -472,7 +472,7 @@ func (x *UpdateAccountDisplayProfileRequest) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use UpdateAccountDisplayProfileRequest.ProtoReflect.Descriptor instead.
 func (*UpdateAccountDisplayProfileRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{8}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *UpdateAccountDisplayProfileRequest) GetNickname() string {
@@ -493,13 +493,15 @@ type AccountDisplayProfile struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	Nickname          *string                `protobuf:"bytes,1,opt,name=nickname,proto3,oneof" json:"nickname,omitempty"`
 	ManagementVersion int64                  `protobuf:"varint,2,opt,name=management_version,json=managementVersion,proto3" json:"management_version,omitempty"`
+	MaskedPhone       *string                `protobuf:"bytes,3,opt,name=masked_phone,json=maskedPhone,proto3,oneof" json:"masked_phone,omitempty"`
+	StaffDisplayName  *string                `protobuf:"bytes,4,opt,name=staff_display_name,json=staffDisplayName,proto3,oneof" json:"staff_display_name,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
 
 func (x *AccountDisplayProfile) Reset() {
 	*x = AccountDisplayProfile{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[9]
+	mi := &file_identity_v1_identity_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -511,7 +513,7 @@ func (x *AccountDisplayProfile) String() string {
 func (*AccountDisplayProfile) ProtoMessage() {}
 
 func (x *AccountDisplayProfile) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[9]
+	mi := &file_identity_v1_identity_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -524,7 +526,7 @@ func (x *AccountDisplayProfile) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AccountDisplayProfile.ProtoReflect.Descriptor instead.
 func (*AccountDisplayProfile) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{9}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *AccountDisplayProfile) GetNickname() string {
@@ -541,6 +543,20 @@ func (x *AccountDisplayProfile) GetManagementVersion() int64 {
 	return 0
 }
 
+func (x *AccountDisplayProfile) GetMaskedPhone() string {
+	if x != nil && x.MaskedPhone != nil {
+		return *x.MaskedPhone
+	}
+	return ""
+}
+
+func (x *AccountDisplayProfile) GetStaffDisplayName() string {
+	if x != nil && x.StaffDisplayName != nil {
+		return *x.StaffDisplayName
+	}
+	return ""
+}
+
 type TokenPair struct {
 	state                   protoimpl.MessageState `protogen:"open.v1"`
 	AccessToken             string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
@@ -553,7 +569,7 @@ type TokenPair struct {
 
 func (x *TokenPair) Reset() {
 	*x = TokenPair{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[10]
+	mi := &file_identity_v1_identity_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -565,7 +581,7 @@ func (x *TokenPair) String() string {
 func (*TokenPair) ProtoMessage() {}
 
 func (x *TokenPair) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[10]
+	mi := &file_identity_v1_identity_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -578,7 +594,7 @@ func (x *TokenPair) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TokenPair.ProtoReflect.Descriptor instead.
 func (*TokenPair) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{10}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *TokenPair) GetAccessToken() string {
@@ -621,7 +637,7 @@ type HospitalSummary struct {
 
 func (x *HospitalSummary) Reset() {
 	*x = HospitalSummary{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[11]
+	mi := &file_identity_v1_identity_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -633,7 +649,7 @@ func (x *HospitalSummary) String() string {
 func (*HospitalSummary) ProtoMessage() {}
 
 func (x *HospitalSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[11]
+	mi := &file_identity_v1_identity_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -646,7 +662,7 @@ func (x *HospitalSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HospitalSummary.ProtoReflect.Descriptor instead.
 func (*HospitalSummary) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{11}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *HospitalSummary) GetHospitalId() string {
@@ -692,7 +708,7 @@ type CampusSummary struct {
 
 func (x *CampusSummary) Reset() {
 	*x = CampusSummary{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[12]
+	mi := &file_identity_v1_identity_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -704,7 +720,7 @@ func (x *CampusSummary) String() string {
 func (*CampusSummary) ProtoMessage() {}
 
 func (x *CampusSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[12]
+	mi := &file_identity_v1_identity_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -717,7 +733,7 @@ func (x *CampusSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CampusSummary.ProtoReflect.Descriptor instead.
 func (*CampusSummary) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{12}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *CampusSummary) GetCampusId() string {
@@ -785,7 +801,7 @@ type DepartmentSummary struct {
 
 func (x *DepartmentSummary) Reset() {
 	*x = DepartmentSummary{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[13]
+	mi := &file_identity_v1_identity_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -797,7 +813,7 @@ func (x *DepartmentSummary) String() string {
 func (*DepartmentSummary) ProtoMessage() {}
 
 func (x *DepartmentSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[13]
+	mi := &file_identity_v1_identity_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -810,7 +826,7 @@ func (x *DepartmentSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DepartmentSummary.ProtoReflect.Descriptor instead.
 func (*DepartmentSummary) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{13}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *DepartmentSummary) GetDepartmentId() string {
@@ -886,7 +902,7 @@ type AdminOrganizationUnit struct {
 
 func (x *AdminOrganizationUnit) Reset() {
 	*x = AdminOrganizationUnit{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[14]
+	mi := &file_identity_v1_identity_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -898,7 +914,7 @@ func (x *AdminOrganizationUnit) String() string {
 func (*AdminOrganizationUnit) ProtoMessage() {}
 
 func (x *AdminOrganizationUnit) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[14]
+	mi := &file_identity_v1_identity_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -911,7 +927,7 @@ func (x *AdminOrganizationUnit) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminOrganizationUnit.ProtoReflect.Descriptor instead.
 func (*AdminOrganizationUnit) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{14}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *AdminOrganizationUnit) GetUnitId() string {
@@ -986,7 +1002,7 @@ type GetOrganizationContextRequest struct {
 
 func (x *GetOrganizationContextRequest) Reset() {
 	*x = GetOrganizationContextRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[15]
+	mi := &file_identity_v1_identity_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -998,7 +1014,7 @@ func (x *GetOrganizationContextRequest) String() string {
 func (*GetOrganizationContextRequest) ProtoMessage() {}
 
 func (x *GetOrganizationContextRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[15]
+	mi := &file_identity_v1_identity_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1011,7 +1027,7 @@ func (x *GetOrganizationContextRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetOrganizationContextRequest.ProtoReflect.Descriptor instead.
 func (*GetOrganizationContextRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{15}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetOrganizationContextRequest) GetRequestId() string {
@@ -1031,7 +1047,7 @@ type OrganizationContext struct {
 
 func (x *OrganizationContext) Reset() {
 	*x = OrganizationContext{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[16]
+	mi := &file_identity_v1_identity_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1043,7 +1059,7 @@ func (x *OrganizationContext) String() string {
 func (*OrganizationContext) ProtoMessage() {}
 
 func (x *OrganizationContext) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[16]
+	mi := &file_identity_v1_identity_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1056,7 +1072,7 @@ func (x *OrganizationContext) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use OrganizationContext.ProtoReflect.Descriptor instead.
 func (*OrganizationContext) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{16}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *OrganizationContext) GetHospital() *HospitalSummary {
@@ -1083,7 +1099,7 @@ type ListDepartmentsRequest struct {
 
 func (x *ListDepartmentsRequest) Reset() {
 	*x = ListDepartmentsRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[17]
+	mi := &file_identity_v1_identity_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1095,7 +1111,7 @@ func (x *ListDepartmentsRequest) String() string {
 func (*ListDepartmentsRequest) ProtoMessage() {}
 
 func (x *ListDepartmentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[17]
+	mi := &file_identity_v1_identity_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1108,7 +1124,7 @@ func (x *ListDepartmentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDepartmentsRequest.ProtoReflect.Descriptor instead.
 func (*ListDepartmentsRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{17}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ListDepartmentsRequest) GetCampusId() string {
@@ -1134,7 +1150,7 @@ type ListDepartmentsResponse struct {
 
 func (x *ListDepartmentsResponse) Reset() {
 	*x = ListDepartmentsResponse{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[18]
+	mi := &file_identity_v1_identity_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1146,7 +1162,7 @@ func (x *ListDepartmentsResponse) String() string {
 func (*ListDepartmentsResponse) ProtoMessage() {}
 
 func (x *ListDepartmentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[18]
+	mi := &file_identity_v1_identity_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1159,7 +1175,7 @@ func (x *ListDepartmentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDepartmentsResponse.ProtoReflect.Descriptor instead.
 func (*ListDepartmentsResponse) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{18}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *ListDepartmentsResponse) GetItems() []*DepartmentSummary {
@@ -1184,7 +1200,7 @@ type DoctorSummary struct {
 
 func (x *DoctorSummary) Reset() {
 	*x = DoctorSummary{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[19]
+	mi := &file_identity_v1_identity_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1196,7 +1212,7 @@ func (x *DoctorSummary) String() string {
 func (*DoctorSummary) ProtoMessage() {}
 
 func (x *DoctorSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[19]
+	mi := &file_identity_v1_identity_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1209,7 +1225,7 @@ func (x *DoctorSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DoctorSummary.ProtoReflect.Descriptor instead.
 func (*DoctorSummary) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{19}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *DoctorSummary) GetAccountId() string {
@@ -1266,7 +1282,7 @@ type ListDoctorsByDepartmentRequest struct {
 
 func (x *ListDoctorsByDepartmentRequest) Reset() {
 	*x = ListDoctorsByDepartmentRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[20]
+	mi := &file_identity_v1_identity_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1278,7 +1294,7 @@ func (x *ListDoctorsByDepartmentRequest) String() string {
 func (*ListDoctorsByDepartmentRequest) ProtoMessage() {}
 
 func (x *ListDoctorsByDepartmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[20]
+	mi := &file_identity_v1_identity_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1291,7 +1307,7 @@ func (x *ListDoctorsByDepartmentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDoctorsByDepartmentRequest.ProtoReflect.Descriptor instead.
 func (*ListDoctorsByDepartmentRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{20}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ListDoctorsByDepartmentRequest) GetDepartmentId() string {
@@ -1334,7 +1350,7 @@ type ListDoctorsByDepartmentResponse struct {
 
 func (x *ListDoctorsByDepartmentResponse) Reset() {
 	*x = ListDoctorsByDepartmentResponse{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[21]
+	mi := &file_identity_v1_identity_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1346,7 +1362,7 @@ func (x *ListDoctorsByDepartmentResponse) String() string {
 func (*ListDoctorsByDepartmentResponse) ProtoMessage() {}
 
 func (x *ListDoctorsByDepartmentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[21]
+	mi := &file_identity_v1_identity_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1359,7 +1375,7 @@ func (x *ListDoctorsByDepartmentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDoctorsByDepartmentResponse.ProtoReflect.Descriptor instead.
 func (*ListDoctorsByDepartmentResponse) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{21}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ListDoctorsByDepartmentResponse) GetItems() []*DoctorSummary {
@@ -1402,7 +1418,7 @@ type ListOrganizationUnitsRequest struct {
 
 func (x *ListOrganizationUnitsRequest) Reset() {
 	*x = ListOrganizationUnitsRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[22]
+	mi := &file_identity_v1_identity_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1414,7 +1430,7 @@ func (x *ListOrganizationUnitsRequest) String() string {
 func (*ListOrganizationUnitsRequest) ProtoMessage() {}
 
 func (x *ListOrganizationUnitsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[22]
+	mi := &file_identity_v1_identity_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1427,7 +1443,7 @@ func (x *ListOrganizationUnitsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListOrganizationUnitsRequest.ProtoReflect.Descriptor instead.
 func (*ListOrganizationUnitsRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{22}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *ListOrganizationUnitsRequest) GetUnitType() string {
@@ -1467,7 +1483,7 @@ type ListOrganizationUnitsResponse struct {
 
 func (x *ListOrganizationUnitsResponse) Reset() {
 	*x = ListOrganizationUnitsResponse{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[23]
+	mi := &file_identity_v1_identity_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1479,7 +1495,7 @@ func (x *ListOrganizationUnitsResponse) String() string {
 func (*ListOrganizationUnitsResponse) ProtoMessage() {}
 
 func (x *ListOrganizationUnitsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[23]
+	mi := &file_identity_v1_identity_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1492,7 +1508,7 @@ func (x *ListOrganizationUnitsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListOrganizationUnitsResponse.ProtoReflect.Descriptor instead.
 func (*ListOrganizationUnitsResponse) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{23}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *ListOrganizationUnitsResponse) GetItems() []*AdminOrganizationUnit {
@@ -1512,7 +1528,7 @@ type GetOrganizationUnitRequest struct {
 
 func (x *GetOrganizationUnitRequest) Reset() {
 	*x = GetOrganizationUnitRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[24]
+	mi := &file_identity_v1_identity_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1524,7 +1540,7 @@ func (x *GetOrganizationUnitRequest) String() string {
 func (*GetOrganizationUnitRequest) ProtoMessage() {}
 
 func (x *GetOrganizationUnitRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[24]
+	mi := &file_identity_v1_identity_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1537,7 +1553,7 @@ func (x *GetOrganizationUnitRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetOrganizationUnitRequest.ProtoReflect.Descriptor instead.
 func (*GetOrganizationUnitRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{24}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *GetOrganizationUnitRequest) GetUnitId() string {
@@ -1567,7 +1583,7 @@ type CreateOrganizationUnitRequest struct {
 
 func (x *CreateOrganizationUnitRequest) Reset() {
 	*x = CreateOrganizationUnitRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[25]
+	mi := &file_identity_v1_identity_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1579,7 +1595,7 @@ func (x *CreateOrganizationUnitRequest) String() string {
 func (*CreateOrganizationUnitRequest) ProtoMessage() {}
 
 func (x *CreateOrganizationUnitRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[25]
+	mi := &file_identity_v1_identity_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1592,7 +1608,7 @@ func (x *CreateOrganizationUnitRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateOrganizationUnitRequest.ProtoReflect.Descriptor instead.
 func (*CreateOrganizationUnitRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{25}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *CreateOrganizationUnitRequest) GetUnitType() string {
@@ -1644,7 +1660,7 @@ type UpdateOrganizationUnitRequest struct {
 
 func (x *UpdateOrganizationUnitRequest) Reset() {
 	*x = UpdateOrganizationUnitRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[26]
+	mi := &file_identity_v1_identity_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1656,7 +1672,7 @@ func (x *UpdateOrganizationUnitRequest) String() string {
 func (*UpdateOrganizationUnitRequest) ProtoMessage() {}
 
 func (x *UpdateOrganizationUnitRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[26]
+	mi := &file_identity_v1_identity_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1669,7 +1685,7 @@ func (x *UpdateOrganizationUnitRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateOrganizationUnitRequest.ProtoReflect.Descriptor instead.
 func (*UpdateOrganizationUnitRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{26}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *UpdateOrganizationUnitRequest) GetUnitId() string {
@@ -1726,7 +1742,7 @@ type ChangeOrganizationUnitStatusRequest struct {
 
 func (x *ChangeOrganizationUnitStatusRequest) Reset() {
 	*x = ChangeOrganizationUnitStatusRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[27]
+	mi := &file_identity_v1_identity_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1738,7 +1754,7 @@ func (x *ChangeOrganizationUnitStatusRequest) String() string {
 func (*ChangeOrganizationUnitStatusRequest) ProtoMessage() {}
 
 func (x *ChangeOrganizationUnitStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[27]
+	mi := &file_identity_v1_identity_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1751,7 +1767,7 @@ func (x *ChangeOrganizationUnitStatusRequest) ProtoReflect() protoreflect.Messag
 
 // Deprecated: Use ChangeOrganizationUnitStatusRequest.ProtoReflect.Descriptor instead.
 func (*ChangeOrganizationUnitStatusRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{27}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *ChangeOrganizationUnitStatusRequest) GetUnitId() string {
@@ -1800,7 +1816,7 @@ type AdminAccountSummary struct {
 
 func (x *AdminAccountSummary) Reset() {
 	*x = AdminAccountSummary{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[28]
+	mi := &file_identity_v1_identity_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1812,7 +1828,7 @@ func (x *AdminAccountSummary) String() string {
 func (*AdminAccountSummary) ProtoMessage() {}
 
 func (x *AdminAccountSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[28]
+	mi := &file_identity_v1_identity_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1825,7 +1841,7 @@ func (x *AdminAccountSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminAccountSummary.ProtoReflect.Descriptor instead.
 func (*AdminAccountSummary) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{28}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *AdminAccountSummary) GetAccountId() string {
@@ -1916,7 +1932,7 @@ type AdminAccountDetail struct {
 
 func (x *AdminAccountDetail) Reset() {
 	*x = AdminAccountDetail{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[29]
+	mi := &file_identity_v1_identity_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1928,7 +1944,7 @@ func (x *AdminAccountDetail) String() string {
 func (*AdminAccountDetail) ProtoMessage() {}
 
 func (x *AdminAccountDetail) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[29]
+	mi := &file_identity_v1_identity_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1941,7 +1957,7 @@ func (x *AdminAccountDetail) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminAccountDetail.ProtoReflect.Descriptor instead.
 func (*AdminAccountDetail) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{29}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *AdminAccountDetail) GetSummary() *AdminAccountSummary {
@@ -2029,7 +2045,7 @@ type ListAdminAccountsRequest struct {
 
 func (x *ListAdminAccountsRequest) Reset() {
 	*x = ListAdminAccountsRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[30]
+	mi := &file_identity_v1_identity_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2041,7 +2057,7 @@ func (x *ListAdminAccountsRequest) String() string {
 func (*ListAdminAccountsRequest) ProtoMessage() {}
 
 func (x *ListAdminAccountsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[30]
+	mi := &file_identity_v1_identity_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2054,7 +2070,7 @@ func (x *ListAdminAccountsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAdminAccountsRequest.ProtoReflect.Descriptor instead.
 func (*ListAdminAccountsRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{30}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *ListAdminAccountsRequest) GetPage() int64 {
@@ -2118,7 +2134,7 @@ type ListAdminAccountsResponse struct {
 
 func (x *ListAdminAccountsResponse) Reset() {
 	*x = ListAdminAccountsResponse{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[31]
+	mi := &file_identity_v1_identity_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2130,7 +2146,7 @@ func (x *ListAdminAccountsResponse) String() string {
 func (*ListAdminAccountsResponse) ProtoMessage() {}
 
 func (x *ListAdminAccountsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[31]
+	mi := &file_identity_v1_identity_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2143,7 +2159,7 @@ func (x *ListAdminAccountsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAdminAccountsResponse.ProtoReflect.Descriptor instead.
 func (*ListAdminAccountsResponse) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{31}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *ListAdminAccountsResponse) GetItems() []*AdminAccountSummary {
@@ -2184,7 +2200,7 @@ type GetAdminAccountRequest struct {
 
 func (x *GetAdminAccountRequest) Reset() {
 	*x = GetAdminAccountRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[32]
+	mi := &file_identity_v1_identity_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2196,7 +2212,7 @@ func (x *GetAdminAccountRequest) String() string {
 func (*GetAdminAccountRequest) ProtoMessage() {}
 
 func (x *GetAdminAccountRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[32]
+	mi := &file_identity_v1_identity_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2209,7 +2225,7 @@ func (x *GetAdminAccountRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAdminAccountRequest.ProtoReflect.Descriptor instead.
 func (*GetAdminAccountRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{32}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *GetAdminAccountRequest) GetAccountId() string {
@@ -2236,7 +2252,7 @@ type SearchAdminAccountByPhoneRequest struct {
 
 func (x *SearchAdminAccountByPhoneRequest) Reset() {
 	*x = SearchAdminAccountByPhoneRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[33]
+	mi := &file_identity_v1_identity_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2248,7 +2264,7 @@ func (x *SearchAdminAccountByPhoneRequest) String() string {
 func (*SearchAdminAccountByPhoneRequest) ProtoMessage() {}
 
 func (x *SearchAdminAccountByPhoneRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[33]
+	mi := &file_identity_v1_identity_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2261,7 +2277,7 @@ func (x *SearchAdminAccountByPhoneRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchAdminAccountByPhoneRequest.ProtoReflect.Descriptor instead.
 func (*SearchAdminAccountByPhoneRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{33}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *SearchAdminAccountByPhoneRequest) GetPhone() string {
@@ -2288,7 +2304,7 @@ type SearchAdminAccountByPhoneResponse struct {
 
 func (x *SearchAdminAccountByPhoneResponse) Reset() {
 	*x = SearchAdminAccountByPhoneResponse{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[34]
+	mi := &file_identity_v1_identity_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2300,7 +2316,7 @@ func (x *SearchAdminAccountByPhoneResponse) String() string {
 func (*SearchAdminAccountByPhoneResponse) ProtoMessage() {}
 
 func (x *SearchAdminAccountByPhoneResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[34]
+	mi := &file_identity_v1_identity_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2313,7 +2329,7 @@ func (x *SearchAdminAccountByPhoneResponse) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use SearchAdminAccountByPhoneResponse.ProtoReflect.Descriptor instead.
 func (*SearchAdminAccountByPhoneResponse) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{34}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *SearchAdminAccountByPhoneResponse) GetIdentity() *AdminAccountSummary {
@@ -2348,7 +2364,7 @@ type PromoteDoctorRequest struct {
 
 func (x *PromoteDoctorRequest) Reset() {
 	*x = PromoteDoctorRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[35]
+	mi := &file_identity_v1_identity_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2360,7 +2376,7 @@ func (x *PromoteDoctorRequest) String() string {
 func (*PromoteDoctorRequest) ProtoMessage() {}
 
 func (x *PromoteDoctorRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[35]
+	mi := &file_identity_v1_identity_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2373,7 +2389,7 @@ func (x *PromoteDoctorRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PromoteDoctorRequest.ProtoReflect.Descriptor instead.
 func (*PromoteDoctorRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{35}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *PromoteDoctorRequest) GetAccountId() string {
@@ -2462,7 +2478,7 @@ type UpdateDoctorRequest struct {
 
 func (x *UpdateDoctorRequest) Reset() {
 	*x = UpdateDoctorRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[36]
+	mi := &file_identity_v1_identity_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2474,7 +2490,7 @@ func (x *UpdateDoctorRequest) String() string {
 func (*UpdateDoctorRequest) ProtoMessage() {}
 
 func (x *UpdateDoctorRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[36]
+	mi := &file_identity_v1_identity_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2487,7 +2503,7 @@ func (x *UpdateDoctorRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateDoctorRequest.ProtoReflect.Descriptor instead.
 func (*UpdateDoctorRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{36}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *UpdateDoctorRequest) GetAccountId() string {
@@ -2559,7 +2575,7 @@ type ChangeDoctorDepartmentRequest struct {
 
 func (x *ChangeDoctorDepartmentRequest) Reset() {
 	*x = ChangeDoctorDepartmentRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[37]
+	mi := &file_identity_v1_identity_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2571,7 +2587,7 @@ func (x *ChangeDoctorDepartmentRequest) String() string {
 func (*ChangeDoctorDepartmentRequest) ProtoMessage() {}
 
 func (x *ChangeDoctorDepartmentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[37]
+	mi := &file_identity_v1_identity_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2584,7 +2600,7 @@ func (x *ChangeDoctorDepartmentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChangeDoctorDepartmentRequest.ProtoReflect.Descriptor instead.
 func (*ChangeDoctorDepartmentRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{37}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *ChangeDoctorDepartmentRequest) GetAccountId() string {
@@ -2634,7 +2650,7 @@ type AccountMutationRequest struct {
 
 func (x *AccountMutationRequest) Reset() {
 	*x = AccountMutationRequest{}
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[38]
+	mi := &file_identity_v1_identity_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2646,7 +2662,7 @@ func (x *AccountMutationRequest) String() string {
 func (*AccountMutationRequest) ProtoMessage() {}
 
 func (x *AccountMutationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_contracts_proto_identity_v1_identity_proto_msgTypes[38]
+	mi := &file_identity_v1_identity_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2659,7 +2675,7 @@ func (x *AccountMutationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AccountMutationRequest.ProtoReflect.Descriptor instead.
 func (*AccountMutationRequest) Descriptor() ([]byte, []int) {
-	return file_contracts_proto_identity_v1_identity_proto_rawDescGZIP(), []int{38}
+	return file_identity_v1_identity_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *AccountMutationRequest) GetAccountId() string {
@@ -2690,11 +2706,11 @@ func (x *AccountMutationRequest) GetRequestId() string {
 	return ""
 }
 
-var File_contracts_proto_identity_v1_identity_proto protoreflect.FileDescriptor
+var File_identity_v1_identity_proto protoreflect.FileDescriptor
 
-const file_contracts_proto_identity_v1_identity_proto_rawDesc = "" +
+const file_identity_v1_identity_proto_rawDesc = "" +
 	"\n" +
-	"*contracts/proto/identity/v1/identity.proto\x12\x14hospital.identity.v1\"P\n" +
+	"\x1aidentity/v1/identity.proto\x12\x14hospital.identity.v1\"P\n" +
 	"\x19SendPhoneLoginCodeRequest\x12\x14\n" +
 	"\x05phone\x18\x01 \x01(\tR\x05phone\x12\x1d\n" +
 	"\n" +
@@ -2727,11 +2743,15 @@ const file_contracts_proto_identity_v1_identity_proto_rawDesc = "" +
 	"\"UpdateAccountDisplayProfileRequest\x12\x1a\n" +
 	"\bnickname\x18\x01 \x01(\tR\bnickname\x12\x1d\n" +
 	"\n" +
-	"request_id\x18\x02 \x01(\tR\trequestId\"t\n" +
+	"request_id\x18\x02 \x01(\tR\trequestId\"\xf7\x01\n" +
 	"\x15AccountDisplayProfile\x12\x1f\n" +
 	"\bnickname\x18\x01 \x01(\tH\x00R\bnickname\x88\x01\x01\x12-\n" +
-	"\x12management_version\x18\x02 \x01(\x03R\x11managementVersionB\v\n" +
-	"\t_nickname\"\xcb\x01\n" +
+	"\x12management_version\x18\x02 \x01(\x03R\x11managementVersion\x12&\n" +
+	"\fmasked_phone\x18\x03 \x01(\tH\x01R\vmaskedPhone\x88\x01\x01\x121\n" +
+	"\x12staff_display_name\x18\x04 \x01(\tH\x02R\x10staffDisplayName\x88\x01\x01B\v\n" +
+	"\t_nicknameB\x0f\n" +
+	"\r_masked_phoneB\x15\n" +
+	"\x13_staff_display_name\"\xcb\x01\n" +
 	"\tTokenPair\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x129\n" +
@@ -2984,19 +3004,19 @@ const file_contracts_proto_identity_v1_identity_proto_rawDesc = "" +
 	"\rEnableAccount\x12,.hospital.identity.v1.AccountMutationRequest\x1a(.hospital.identity.v1.AdminAccountDetailB/Z-hospital/contracts/gen/identity/v1;identityv1b\x06proto3"
 
 var (
-	file_contracts_proto_identity_v1_identity_proto_rawDescOnce sync.Once
-	file_contracts_proto_identity_v1_identity_proto_rawDescData []byte
+	file_identity_v1_identity_proto_rawDescOnce sync.Once
+	file_identity_v1_identity_proto_rawDescData []byte
 )
 
-func file_contracts_proto_identity_v1_identity_proto_rawDescGZIP() []byte {
-	file_contracts_proto_identity_v1_identity_proto_rawDescOnce.Do(func() {
-		file_contracts_proto_identity_v1_identity_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_contracts_proto_identity_v1_identity_proto_rawDesc), len(file_contracts_proto_identity_v1_identity_proto_rawDesc)))
+func file_identity_v1_identity_proto_rawDescGZIP() []byte {
+	file_identity_v1_identity_proto_rawDescOnce.Do(func() {
+		file_identity_v1_identity_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_identity_v1_identity_proto_rawDesc), len(file_identity_v1_identity_proto_rawDesc)))
 	})
-	return file_contracts_proto_identity_v1_identity_proto_rawDescData
+	return file_identity_v1_identity_proto_rawDescData
 }
 
-var file_contracts_proto_identity_v1_identity_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
-var file_contracts_proto_identity_v1_identity_proto_goTypes = []any{
+var file_identity_v1_identity_proto_msgTypes = make([]protoimpl.MessageInfo, 39)
+var file_identity_v1_identity_proto_goTypes = []any{
 	(*SendPhoneLoginCodeRequest)(nil),           // 0: hospital.identity.v1.SendPhoneLoginCodeRequest
 	(*SendPhoneLoginCodeResponse)(nil),          // 1: hospital.identity.v1.SendPhoneLoginCodeResponse
 	(*PhoneLoginRequest)(nil),                   // 2: hospital.identity.v1.PhoneLoginRequest
@@ -3037,7 +3057,7 @@ var file_contracts_proto_identity_v1_identity_proto_goTypes = []any{
 	(*ChangeDoctorDepartmentRequest)(nil),       // 37: hospital.identity.v1.ChangeDoctorDepartmentRequest
 	(*AccountMutationRequest)(nil),              // 38: hospital.identity.v1.AccountMutationRequest
 }
-var file_contracts_proto_identity_v1_identity_proto_depIdxs = []int32{
+var file_identity_v1_identity_proto_depIdxs = []int32{
 	11, // 0: hospital.identity.v1.OrganizationContext.hospital:type_name -> hospital.identity.v1.HospitalSummary
 	12, // 1: hospital.identity.v1.OrganizationContext.campuses:type_name -> hospital.identity.v1.CampusSummary
 	13, // 2: hospital.identity.v1.ListDepartmentsResponse.items:type_name -> hospital.identity.v1.DepartmentSummary
@@ -3102,33 +3122,33 @@ var file_contracts_proto_identity_v1_identity_proto_depIdxs = []int32{
 	0,  // [0:9] is the sub-list for field type_name
 }
 
-func init() { file_contracts_proto_identity_v1_identity_proto_init() }
-func file_contracts_proto_identity_v1_identity_proto_init() {
-	if File_contracts_proto_identity_v1_identity_proto != nil {
+func init() { file_identity_v1_identity_proto_init() }
+func file_identity_v1_identity_proto_init() {
+	if File_identity_v1_identity_proto != nil {
 		return
 	}
-	file_contracts_proto_identity_v1_identity_proto_msgTypes[9].OneofWrappers = []any{}
-	file_contracts_proto_identity_v1_identity_proto_msgTypes[19].OneofWrappers = []any{}
-	file_contracts_proto_identity_v1_identity_proto_msgTypes[26].OneofWrappers = []any{}
-	file_contracts_proto_identity_v1_identity_proto_msgTypes[28].OneofWrappers = []any{}
-	file_contracts_proto_identity_v1_identity_proto_msgTypes[29].OneofWrappers = []any{}
-	file_contracts_proto_identity_v1_identity_proto_msgTypes[35].OneofWrappers = []any{}
-	file_contracts_proto_identity_v1_identity_proto_msgTypes[36].OneofWrappers = []any{}
+	file_identity_v1_identity_proto_msgTypes[9].OneofWrappers = []any{}
+	file_identity_v1_identity_proto_msgTypes[19].OneofWrappers = []any{}
+	file_identity_v1_identity_proto_msgTypes[26].OneofWrappers = []any{}
+	file_identity_v1_identity_proto_msgTypes[28].OneofWrappers = []any{}
+	file_identity_v1_identity_proto_msgTypes[29].OneofWrappers = []any{}
+	file_identity_v1_identity_proto_msgTypes[35].OneofWrappers = []any{}
+	file_identity_v1_identity_proto_msgTypes[36].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_contracts_proto_identity_v1_identity_proto_rawDesc), len(file_contracts_proto_identity_v1_identity_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_identity_v1_identity_proto_rawDesc), len(file_identity_v1_identity_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   39,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_contracts_proto_identity_v1_identity_proto_goTypes,
-		DependencyIndexes: file_contracts_proto_identity_v1_identity_proto_depIdxs,
-		MessageInfos:      file_contracts_proto_identity_v1_identity_proto_msgTypes,
+		GoTypes:           file_identity_v1_identity_proto_goTypes,
+		DependencyIndexes: file_identity_v1_identity_proto_depIdxs,
+		MessageInfos:      file_identity_v1_identity_proto_msgTypes,
 	}.Build()
-	File_contracts_proto_identity_v1_identity_proto = out.File
-	file_contracts_proto_identity_v1_identity_proto_goTypes = nil
-	file_contracts_proto_identity_v1_identity_proto_depIdxs = nil
+	File_identity_v1_identity_proto = out.File
+	file_identity_v1_identity_proto_goTypes = nil
+	file_identity_v1_identity_proto_depIdxs = nil
 }

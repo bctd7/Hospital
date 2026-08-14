@@ -20,6 +20,7 @@ const (
 	bookingActionDeleteByPatient = "delete_by_patient"
 	bookingDateLayout            = "2006-01-02"
 	bookingOptionsTTL            = 20 * time.Second
+	patientWeeklyBookingLimit    = int64(10)
 )
 
 var hospitalLocation = func() *time.Location {
@@ -31,12 +32,14 @@ var hospitalLocation = func() *time.Location {
 }()
 
 type CreateBookingCommand struct {
-	ItemID      string
-	RoomID      string
-	ServiceDate string
-	Session     Session
-	OperationID string
-	RequestID   string
+	ItemID             string
+	RoomID             string
+	ServiceDate        string
+	Session            Session
+	PatientDisplayName string
+	PatientPhoneMasked string
+	OperationID        string
+	RequestID          string
 }
 
 type DeleteBookingCommand struct {
@@ -98,12 +101,14 @@ func (m *Manager) CreateBooking(ctx context.Context, patient authn.Principal, co
 		return Booking{}, err
 	}
 	fingerprint := bookingFingerprint(bookingActionCreate, struct {
-		ItemID      string
-		RoomID      string
-		ServiceDate string
-		Session     Session
-		OperationID string
-	}{command.ItemID, command.RoomID, command.ServiceDate, command.Session, command.OperationID})
+		ItemID             string
+		RoomID             string
+		ServiceDate        string
+		Session            Session
+		PatientDisplayName string
+		PatientPhoneMasked string
+		OperationID        string
+	}{command.ItemID, command.RoomID, command.ServiceDate, command.Session, command.PatientDisplayName, command.PatientPhoneMasked, command.OperationID})
 	bookingID := uuid.NewString()
 	var result Booking
 	err = m.bookings.WithinBookingTransaction(ctx, func(tx BookingTxStore) error {
@@ -119,6 +124,10 @@ func (m *Manager) CreateBooking(ctx context.Context, patient authn.Principal, co
 				return fmt.Errorf("decode create booking result: %w", err)
 			}
 			return nil
+		}
+		weekStart, _ := currentWeek(dateOnly(serviceDate))
+		if err := tx.ConsumePatientWeeklyQuota(ctx, patient.AccountID, weekStart, patientWeeklyBookingLimit, now); err != nil {
+			return err
 		}
 		if err := tx.ClaimPatientSession(ctx, patient.AccountID, serviceDate, command.Session, bookingID); err != nil {
 			return err
@@ -166,8 +175,11 @@ func (m *Manager) CreateBooking(ctx context.Context, patient authn.Principal, co
 		}
 		result = Booking{
 			BookingID: bookingID, PatientAccountID: patient.AccountID,
-			DepartmentID: selection.DepartmentID, ItemID: selection.ItemID, ItemName: selection.ItemName,
+			PatientDisplayName: command.PatientDisplayName, PatientPhoneMasked: command.PatientPhoneMasked,
+			PatientPhoneLast4: command.PatientPhoneMasked[len(command.PatientPhoneMasked)-4:],
+			DepartmentID:      selection.DepartmentID, ItemID: selection.ItemID, ItemName: selection.ItemName,
 			RoomID: selection.RoomID, RoomDisplayName: selection.RoomDisplayName, CampusID: selection.CampusID,
+			Building: selection.Building, FloorNumber: selection.FloorNumber, RoomNumber: selection.RoomNumber,
 			ServiceDate: serviceDate, Session: selection.Session, Status: BookingStatusConfirmed,
 			RoomOpenTime: selection.RoomOpenTime, RoomCloseTime: selection.RoomCloseTime,
 			ItemStartTime: selection.ItemStartTime, ItemEndTime: selection.ItemEndTime,
@@ -210,16 +222,22 @@ func (m *Manager) GetMyBooking(ctx context.Context, patient authn.Principal, boo
 }
 
 // ListMyBookings 分页返回当前患者的预约记录。
-func (m *Manager) ListMyBookings(ctx context.Context, patient authn.Principal, page, pageSize int64) (Page[Booking], error) {
+func (m *Manager) ListMyBookings(ctx context.Context, patient authn.Principal, view BookingListView, page, pageSize int64) (Page[Booking], error) {
 	if err := requirePatient(patient); err != nil {
 		return Page[Booking]{}, err
+	}
+	if view == "" {
+		view = BookingListViewActive
+	}
+	if !view.Valid() {
+		return Page[Booking]{}, fmt.Errorf("%w: view must be active or completed", ErrInvalid)
 	}
 	page, pageSize, offset, err := normalizeBookingPage(page, pageSize)
 	if err != nil {
 		return Page[Booking]{}, err
 	}
 	values, total, err := m.bookings.ListBookings(ctx, BookingListFilter{
-		PatientAccountID: patient.AccountID, Offset: offset, Limit: pageSize,
+		PatientAccountID: patient.AccountID, View: view, Offset: offset, Limit: pageSize,
 	})
 	if err != nil {
 		return Page[Booking]{}, err
@@ -326,8 +344,30 @@ func normalizeCreateBooking(command CreateBookingCommand) (CreateBookingCommand,
 		return CreateBookingCommand{}, time.Time{}, fmt.Errorf("%w: service_date must use YYYY-MM-DD", ErrInvalid)
 	}
 	command.ServiceDate = serviceDate.Format(bookingDateLayout)
+	command.PatientDisplayName = strings.TrimSpace(command.PatientDisplayName)
+	command.PatientPhoneMasked = strings.TrimSpace(command.PatientPhoneMasked)
+	if command.PatientDisplayName == "" || len([]rune(command.PatientDisplayName)) > 128 {
+		return CreateBookingCommand{}, time.Time{}, fmt.Errorf("%w: patient_display_name is required", ErrInvalid)
+	}
+	if !validMaskedPhone(command.PatientPhoneMasked) {
+		return CreateBookingCommand{}, time.Time{}, fmt.Errorf("%w: patient_phone_masked is invalid", ErrInvalid)
+	}
 	command.RequestID = strings.TrimSpace(command.RequestID)
 	return command, serviceDate, nil
+}
+
+func validMaskedPhone(value string) bool {
+	if len(value) != 11 || value[3:7] != "****" {
+		return false
+	}
+	for _, part := range []string{value[:3], value[7:]} {
+		for _, char := range part {
+			if char < '0' || char > '9' {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func normalizeDeleteBooking(command DeleteBookingCommand) (DeleteBookingCommand, error) {

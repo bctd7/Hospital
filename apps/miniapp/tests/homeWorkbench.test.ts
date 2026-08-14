@@ -37,6 +37,13 @@ describe("home workbench", () => {
         url: "/pages/profile/appointments/index",
       },
     });
+    expect(view.serviceGroups[2]?.actions.map((action) => action.id)).toEqual([
+      "reports",
+      "invoice",
+      "inpatient-copy",
+      "imaging",
+    ]);
+    expect(view.serviceGroups[2]?.actions[0]?.title).toBe("检验报告查询");
   });
 
   it("shows examination item management as the staff primary action", () => {
@@ -63,6 +70,20 @@ describe("home workbench", () => {
         url: "/pages/admin/appointment/bookings?department_id=department-1&department_label=%E7%A7%91%E5%AE%A4%E9%A2%84%E7%BA%A6",
       },
     });
+    expect(view.serviceGroups[2]?.actions[0]).toMatchObject({
+      id: "appointment-history",
+      title: "检查记录",
+      target: {
+        type: "navigate",
+        url: "/pages/admin/appointment/bookings?view=completed&department_id=department-1&department_label=%E6%A3%80%E6%9F%A5%E8%AE%B0%E5%BD%95",
+      },
+    });
+    expect(view.serviceGroups[2]?.actions.map((action) => action.id)).toEqual([
+      "appointment-history",
+      "invoice",
+      "inpatient-copy",
+      "imaging",
+    ]);
   });
 
   it("uses the examination management entry for an administrator", () => {
@@ -76,12 +97,18 @@ describe("home workbench", () => {
     expect(view.serviceGroups[0]?.actions[0]).toMatchObject({
       title: "科室预约",
       description: "选择科室查看预约情况",
-      target: { type: "navigate", url: "/pages/admin/appointment/index" },
+      target: { type: "navigate", url: "/pages/admin/appointment/bookings" },
     });
     expect(view.serviceGroups.map((group) => group.title)).toEqual([
       "诊前服务",
       "诊中服务",
       "诊后服务",
+    ]);
+    expect(view.serviceGroups[2]?.actions.map((action) => action.id)).toEqual([
+      "appointment-history",
+      "invoice",
+      "inpatient-copy",
+      "imaging",
     ]);
   });
 });

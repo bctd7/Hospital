@@ -53,6 +53,16 @@ func (s *AppointmentServiceServer) EnableExaminationItem(ctx context.Context, in
 	return l.EnableExaminationItem(in)
 }
 
+func (s *AppointmentServiceServer) GetExaminationItemReportTemplate(ctx context.Context, in *v1_appointmentv1.GetExaminationItemRequest) (*v1_appointmentv1.ExaminationItemReportTemplate, error) {
+	l := logic.NewGetExaminationItemReportTemplateLogic(ctx, s.svcCtx)
+	return l.GetExaminationItemReportTemplate(in)
+}
+
+func (s *AppointmentServiceServer) SaveExaminationItemReportTemplate(ctx context.Context, in *v1_appointmentv1.SaveExaminationItemReportTemplateRequest) (*v1_appointmentv1.ExaminationItemReportTemplate, error) {
+	l := logic.NewSaveExaminationItemReportTemplateLogic(ctx, s.svcCtx)
+	return l.SaveExaminationItemReportTemplate(in)
+}
+
 func (s *AppointmentServiceServer) CreateRoom(ctx context.Context, in *v1_appointmentv1.CreateRoomRequest) (*v1_appointmentv1.Room, error) {
 	l := logic.NewCreateRoomLogic(ctx, s.svcCtx)
 	return l.CreateRoom(in)
@@ -168,12 +178,52 @@ func (s *AppointmentServiceServer) ListBookings(ctx context.Context, in *v1_appo
 	return l.ListBookings(in)
 }
 
-func (s *AppointmentServiceServer) CheckInBooking(ctx context.Context, in *v1_appointmentv1.CheckInBookingRequest) (*v1_appointmentv1.Booking, error) {
-	l := logic.NewCheckInBookingLogic(ctx, s.svcCtx)
-	return l.CheckInBooking(in)
+func (s *AppointmentServiceServer) StartExamination(ctx context.Context, in *v1_appointmentv1.StartExaminationRequest) (*v1_appointmentv1.Booking, error) {
+	l := logic.NewStartExaminationLogic(ctx, s.svcCtx)
+	return l.StartExamination(in)
 }
 
 func (s *AppointmentServiceServer) DeleteBooking(ctx context.Context, in *v1_appointmentv1.DeleteBookingRequest) (*v1_appointmentv1.DeleteBookingResponse, error) {
 	l := logic.NewDeleteBookingLogic(ctx, s.svcCtx)
 	return l.DeleteBooking(in)
+}
+
+func (s *AppointmentServiceServer) SaveExaminationReportDraft(ctx context.Context, in *v1_appointmentv1.SaveExaminationReportDraftRequest) (*v1_appointmentv1.ExaminationReport, error) {
+	l := logic.NewSaveExaminationReportDraftLogic(ctx, s.svcCtx)
+	return l.SaveExaminationReportDraft(in)
+}
+
+func (s *AppointmentServiceServer) CompleteAndPublishExaminationReport(ctx context.Context, in *v1_appointmentv1.CompleteAndPublishExaminationReportRequest) (*v1_appointmentv1.ExaminationReport, error) {
+	l := logic.NewCompleteAndPublishExaminationReportLogic(ctx, s.svcCtx)
+	return l.CompleteAndPublishExaminationReport(in)
+}
+
+func (s *AppointmentServiceServer) CorrectExaminationReport(ctx context.Context, in *v1_appointmentv1.CorrectExaminationReportRequest) (*v1_appointmentv1.ExaminationReport, error) {
+	l := logic.NewCorrectExaminationReportLogic(ctx, s.svcCtx)
+	return l.CorrectExaminationReport(in)
+}
+
+func (s *AppointmentServiceServer) GetExaminationReport(ctx context.Context, in *v1_appointmentv1.GetExaminationReportRequest) (*v1_appointmentv1.ExaminationReport, error) {
+	l := logic.NewGetExaminationReportLogic(ctx, s.svcCtx)
+	return l.GetExaminationReport(in)
+}
+
+func (s *AppointmentServiceServer) ListExaminationReports(ctx context.Context, in *v1_appointmentv1.ListExaminationReportsRequest) (*v1_appointmentv1.ListExaminationReportsResponse, error) {
+	l := logic.NewListExaminationReportsLogic(ctx, s.svcCtx)
+	return l.ListExaminationReports(in)
+}
+
+func (s *AppointmentServiceServer) ListExaminationReportVersions(ctx context.Context, in *v1_appointmentv1.ListExaminationReportVersionsRequest) (*v1_appointmentv1.ListExaminationReportVersionsResponse, error) {
+	l := logic.NewListExaminationReportVersionsLogic(ctx, s.svcCtx)
+	return l.ListExaminationReportVersions(in)
+}
+
+func (s *AppointmentServiceServer) GetMyExaminationReport(ctx context.Context, in *v1_appointmentv1.GetExaminationReportRequest) (*v1_appointmentv1.ExaminationReport, error) {
+	l := logic.NewGetMyExaminationReportLogic(ctx, s.svcCtx)
+	return l.GetMyExaminationReport(in)
+}
+
+func (s *AppointmentServiceServer) ListMyExaminationReports(ctx context.Context, in *v1_appointmentv1.ListMyExaminationReportsRequest) (*v1_appointmentv1.ListExaminationReportsResponse, error) {
+	l := logic.NewListMyExaminationReportsLogic(ctx, s.svcCtx)
+	return l.ListMyExaminationReports(in)
 }

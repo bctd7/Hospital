@@ -19,13 +19,85 @@ import (
 )
 
 const (
-	ActionExaminationItemCreated  = "appointment.project.examination_item.created"
-	ActionExaminationItemUpdated  = "appointment.project.examination_item.updated"
-	ActionExaminationItemDisabled = "appointment.project.examination_item.disabled"
-	ActionExaminationItemEnabled  = "appointment.project.examination_item.enabled"
-	actionItemWindowSet           = "appointment.resource.item_window.set"
-	actionItemWindowDisabled      = "appointment.resource.item_window.disabled"
+	ActionExaminationItemCreated             = "appointment.project.examination_item.created"
+	ActionExaminationItemUpdated             = "appointment.project.examination_item.updated"
+	ActionExaminationItemDisabled            = "appointment.project.examination_item.disabled"
+	ActionExaminationItemEnabled             = "appointment.project.examination_item.enabled"
+	ActionExaminationItemReportTemplateSaved = "appointment.project.examination_item.report_template.saved"
+	actionItemWindowSet                      = "appointment.resource.item_window.set"
+	actionItemWindowDisabled                 = "appointment.resource.item_window.disabled"
 )
+
+// SaveProjectReportTemplate 更新项目级报告默认正文，不改写已有草稿或正式报告。
+func (m *Manager) SaveProjectReportTemplate(ctx context.Context, operator authn.Principal, command staffinput.SaveReportTemplate) (ExaminationItem, error) {
+	if err := requireProjectPermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
+		return ExaminationItem{}, err
+	}
+	itemID, err := staffsupport.NormalizeUUID(command.ItemID, "item_id")
+	if err != nil {
+		return ExaminationItem{}, err
+	}
+	meta, err := staffinput.NormalizeOperation(command.Operation)
+	if err != nil {
+		return ExaminationItem{}, err
+	}
+	template, err := normalizeReportContent(command.Template, false)
+	if err != nil {
+		return ExaminationItem{}, err
+	}
+	if command.ExpectedTemplateVersion < 0 {
+		return ExaminationItem{}, fmt.Errorf("%w: expected_template_version cannot be negative", ErrInvalid)
+	}
+	fingerprint := operationFingerprint(ActionExaminationItemReportTemplateSaved, struct {
+		ItemID                  string
+		Template                ReportContent
+		ExpectedTemplateVersion int64
+	}{itemID, template, command.ExpectedTemplateVersion})
+
+	var result ExaminationItem
+	err = m.projectWrites.WithinProjectTransaction(ctx, func(tx ProjectTxStore) error {
+		operation, exists, findErr := tx.FindOperation(ctx, meta.OperationID)
+		if findErr != nil {
+			return findErr
+		}
+		if exists {
+			if matchErr := matchingOperation(operation, operator.AccountID, itemID, ActionExaminationItemReportTemplateSaved, fingerprint); matchErr != nil {
+				return matchErr
+			}
+			if scopeErr := requireDepartmentScope(operator, operation.Result.OwnerDepartmentID); scopeErr != nil {
+				return scopeErr
+			}
+			result = operation.Result
+			return nil
+		}
+		before, lockErr := tx.GetItemForUpdate(ctx, itemID)
+		if lockErr != nil {
+			return lockErr
+		}
+		if scopeErr := requireDepartmentScope(operator, before.OwnerDepartmentID); scopeErr != nil {
+			return scopeErr
+		}
+		if before.ReportTemplate.Version != command.ExpectedTemplateVersion {
+			return ErrVersionConflict
+		}
+		after := before
+		after.ReportTemplate = ReportTemplate{ReportContent: template, Version: before.ReportTemplate.Version + 1}
+		after.UpdatedAt = time.Now().UTC()
+		if updateErr := tx.UpdateItemReportTemplate(ctx, after, command.ExpectedTemplateVersion); updateErr != nil {
+			return updateErr
+		}
+		if recordErr := tx.RecordChange(ctx, ProjectChange{
+			OperationID: meta.OperationID, OperatorAccountID: operator.AccountID,
+			ItemID: itemID, Action: ActionExaminationItemReportTemplateSaved,
+			RequestFingerprint: fingerprint, Before: &before, After: after, RequestID: meta.RequestID,
+		}); recordErr != nil {
+			return recordErr
+		}
+		result = after
+		return nil
+	})
+	return result, err
+}
 
 // CreateProject 编排项目创建规则、幂等检查、事务写入和审计记录。
 func (m *Manager) CreateProject(ctx context.Context, operator authn.Principal, command staffinput.CreateProject) (ExaminationItem, error) {

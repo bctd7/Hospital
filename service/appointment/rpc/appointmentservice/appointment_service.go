@@ -19,7 +19,8 @@ type (
 	BookingOption                              = v1_appointmentv1.BookingOption
 	ChangeExaminationItemStatusRequest         = v1_appointmentv1.ChangeExaminationItemStatusRequest
 	ChangeResourceStatusRequest                = v1_appointmentv1.ChangeResourceStatusRequest
-	CheckInBookingRequest                      = v1_appointmentv1.CheckInBookingRequest
+	CompleteAndPublishExaminationReportRequest = v1_appointmentv1.CompleteAndPublishExaminationReportRequest
+	CorrectExaminationReportRequest            = v1_appointmentv1.CorrectExaminationReportRequest
 	CreateBookingRequest                       = v1_appointmentv1.CreateBookingRequest
 	CreateExaminationItemRequest               = v1_appointmentv1.CreateExaminationItemRequest
 	CreateRoomRequest                          = v1_appointmentv1.CreateRoomRequest
@@ -27,8 +28,13 @@ type (
 	DeleteBookingResponse                      = v1_appointmentv1.DeleteBookingResponse
 	ExaminationItem                            = v1_appointmentv1.ExaminationItem
 	ExaminationItemInput                       = v1_appointmentv1.ExaminationItemInput
+	ExaminationItemReportTemplate              = v1_appointmentv1.ExaminationItemReportTemplate
+	ExaminationReport                          = v1_appointmentv1.ExaminationReport
+	ExaminationReportContent                   = v1_appointmentv1.ExaminationReportContent
+	ExaminationReportVersion                   = v1_appointmentv1.ExaminationReportVersion
 	GetBookingRequest                          = v1_appointmentv1.GetBookingRequest
 	GetExaminationItemRequest                  = v1_appointmentv1.GetExaminationItemRequest
+	GetExaminationReportRequest                = v1_appointmentv1.GetExaminationReportRequest
 	GetRoomRequest                             = v1_appointmentv1.GetRoomRequest
 	ItemWeeklyWindow                           = v1_appointmentv1.ItemWeeklyWindow
 	ListAvailableRoomsByExaminationItemRequest = v1_appointmentv1.ListAvailableRoomsByExaminationItemRequest
@@ -38,8 +44,13 @@ type (
 	ListBookingsResponse                       = v1_appointmentv1.ListBookingsResponse
 	ListExaminationItemsRequest                = v1_appointmentv1.ListExaminationItemsRequest
 	ListExaminationItemsResponse               = v1_appointmentv1.ListExaminationItemsResponse
+	ListExaminationReportVersionsRequest       = v1_appointmentv1.ListExaminationReportVersionsRequest
+	ListExaminationReportVersionsResponse      = v1_appointmentv1.ListExaminationReportVersionsResponse
+	ListExaminationReportsRequest              = v1_appointmentv1.ListExaminationReportsRequest
+	ListExaminationReportsResponse             = v1_appointmentv1.ListExaminationReportsResponse
 	ListItemWeeklyWindowsResponse              = v1_appointmentv1.ListItemWeeklyWindowsResponse
 	ListMyBookingsRequest                      = v1_appointmentv1.ListMyBookingsRequest
+	ListMyExaminationReportsRequest            = v1_appointmentv1.ListMyExaminationReportsRequest
 	ListRoomExaminationItemsRequest            = v1_appointmentv1.ListRoomExaminationItemsRequest
 	ListRoomExaminationItemsResponse           = v1_appointmentv1.ListRoomExaminationItemsResponse
 	ListRoomWeeklyWindowsResponse              = v1_appointmentv1.ListRoomWeeklyWindowsResponse
@@ -50,8 +61,11 @@ type (
 	Room                                       = v1_appointmentv1.Room
 	RoomExaminationItem                        = v1_appointmentv1.RoomExaminationItem
 	RoomWeeklyWindow                           = v1_appointmentv1.RoomWeeklyWindow
+	SaveExaminationItemReportTemplateRequest   = v1_appointmentv1.SaveExaminationItemReportTemplateRequest
+	SaveExaminationReportDraftRequest          = v1_appointmentv1.SaveExaminationReportDraftRequest
 	SetItemWeeklyWindowRequest                 = v1_appointmentv1.SetItemWeeklyWindowRequest
 	SetRoomWeeklyWindowRequest                 = v1_appointmentv1.SetRoomWeeklyWindowRequest
+	StartExaminationRequest                    = v1_appointmentv1.StartExaminationRequest
 	UpdateExaminationItemRequest               = v1_appointmentv1.UpdateExaminationItemRequest
 	UpdateRoomRequest                          = v1_appointmentv1.UpdateRoomRequest
 
@@ -62,6 +76,8 @@ type (
 		UpdateExaminationItem(ctx context.Context, in *UpdateExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 		DisableExaminationItem(ctx context.Context, in *ChangeExaminationItemStatusRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 		EnableExaminationItem(ctx context.Context, in *ChangeExaminationItemStatusRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
+		GetExaminationItemReportTemplate(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItemReportTemplate, error)
+		SaveExaminationItemReportTemplate(ctx context.Context, in *SaveExaminationItemReportTemplateRequest, opts ...grpc.CallOption) (*ExaminationItemReportTemplate, error)
 		CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*Room, error)
 		GetRoom(ctx context.Context, in *GetRoomRequest, opts ...grpc.CallOption) (*Room, error)
 		ListRooms(ctx context.Context, in *ListRoomsRequest, opts ...grpc.CallOption) (*ListRoomsResponse, error)
@@ -85,8 +101,16 @@ type (
 		DeleteMyBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
 		GetBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 		ListBookings(ctx context.Context, in *ListBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
-		CheckInBooking(ctx context.Context, in *CheckInBookingRequest, opts ...grpc.CallOption) (*Booking, error)
+		StartExamination(ctx context.Context, in *StartExaminationRequest, opts ...grpc.CallOption) (*Booking, error)
 		DeleteBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
+		SaveExaminationReportDraft(ctx context.Context, in *SaveExaminationReportDraftRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
+		CompleteAndPublishExaminationReport(ctx context.Context, in *CompleteAndPublishExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
+		CorrectExaminationReport(ctx context.Context, in *CorrectExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
+		GetExaminationReport(ctx context.Context, in *GetExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
+		ListExaminationReports(ctx context.Context, in *ListExaminationReportsRequest, opts ...grpc.CallOption) (*ListExaminationReportsResponse, error)
+		ListExaminationReportVersions(ctx context.Context, in *ListExaminationReportVersionsRequest, opts ...grpc.CallOption) (*ListExaminationReportVersionsResponse, error)
+		GetMyExaminationReport(ctx context.Context, in *GetExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
+		ListMyExaminationReports(ctx context.Context, in *ListMyExaminationReportsRequest, opts ...grpc.CallOption) (*ListExaminationReportsResponse, error)
 	}
 
 	defaultAppointmentService struct {
@@ -128,6 +152,16 @@ func (m *defaultAppointmentService) DisableExaminationItem(ctx context.Context, 
 func (m *defaultAppointmentService) EnableExaminationItem(ctx context.Context, in *ChangeExaminationItemStatusRequest, opts ...grpc.CallOption) (*ExaminationItem, error) {
 	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.EnableExaminationItem(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) GetExaminationItemReportTemplate(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItemReportTemplate, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.GetExaminationItemReportTemplate(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) SaveExaminationItemReportTemplate(ctx context.Context, in *SaveExaminationItemReportTemplateRequest, opts ...grpc.CallOption) (*ExaminationItemReportTemplate, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.SaveExaminationItemReportTemplate(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*Room, error) {
@@ -245,12 +279,52 @@ func (m *defaultAppointmentService) ListBookings(ctx context.Context, in *ListBo
 	return client.ListBookings(ctx, in, opts...)
 }
 
-func (m *defaultAppointmentService) CheckInBooking(ctx context.Context, in *CheckInBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
+func (m *defaultAppointmentService) StartExamination(ctx context.Context, in *StartExaminationRequest, opts ...grpc.CallOption) (*Booking, error) {
 	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
-	return client.CheckInBooking(ctx, in, opts...)
+	return client.StartExamination(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) DeleteBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error) {
 	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.DeleteBooking(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) SaveExaminationReportDraft(ctx context.Context, in *SaveExaminationReportDraftRequest, opts ...grpc.CallOption) (*ExaminationReport, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.SaveExaminationReportDraft(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) CompleteAndPublishExaminationReport(ctx context.Context, in *CompleteAndPublishExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.CompleteAndPublishExaminationReport(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) CorrectExaminationReport(ctx context.Context, in *CorrectExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.CorrectExaminationReport(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) GetExaminationReport(ctx context.Context, in *GetExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.GetExaminationReport(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) ListExaminationReports(ctx context.Context, in *ListExaminationReportsRequest, opts ...grpc.CallOption) (*ListExaminationReportsResponse, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.ListExaminationReports(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) ListExaminationReportVersions(ctx context.Context, in *ListExaminationReportVersionsRequest, opts ...grpc.CallOption) (*ListExaminationReportVersionsResponse, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.ListExaminationReportVersions(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) GetMyExaminationReport(ctx context.Context, in *GetExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.GetMyExaminationReport(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) ListMyExaminationReports(ctx context.Context, in *ListMyExaminationReportsRequest, opts ...grpc.CallOption) (*ListExaminationReportsResponse, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.ListMyExaminationReports(ctx, in, opts...)
 }
