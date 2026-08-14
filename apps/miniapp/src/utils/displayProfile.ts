@@ -10,6 +10,9 @@ export const DEFAULT_DISPLAY_PROFILE: Readonly<DisplayProfile> = {
 
 let runtimeProfile: DisplayProfile | undefined;
 
+const LOCAL_AVATAR_HOST_PATTERN =
+  /^https?:\/\/(?:localhost|127(?:\.\d{1,3}){3}|\[::1\]|tmp)(?::\d+)?(?:[/?#]|$)/i;
+
 function normalizeProfile(input?: DisplayProfileInput): DisplayProfile {
   const nickname = input?.nickname?.trim().slice(0, 32);
 
@@ -19,6 +22,21 @@ function normalizeProfile(input?: DisplayProfileInput): DisplayProfile {
   };
 }
 
+function persistentProfile(profile: DisplayProfile): DisplayProfile {
+  const avatarUrl = profile.avatarUrl;
+  const isRemoteAvatar = /^https?:\/\//i.test(avatarUrl);
+
+  return {
+    ...profile,
+    // chooseAvatar 返回的是临时文件地址。它只在当前运行期间有效，不能跨会话缓存。
+    avatarUrl: isRemoteAvatar && !LOCAL_AVATAR_HOST_PATTERN.test(avatarUrl) ? avatarUrl : "",
+  };
+}
+
+function persistDisplayProfile(profile: DisplayProfile) {
+  uni.setStorageSync(DISPLAY_PROFILE_STORAGE_KEY, persistentProfile(profile));
+}
+
 export function getDisplayProfile(): DisplayProfile {
   if (runtimeProfile) {
     return { ...runtimeProfile };
@@ -26,7 +44,11 @@ export function getDisplayProfile(): DisplayProfile {
 
   try {
     const storedProfile = uni.getStorageSync(DISPLAY_PROFILE_STORAGE_KEY) as DisplayProfileInput | undefined;
-    runtimeProfile = normalizeProfile(storedProfile);
+    const normalizedProfile = normalizeProfile(storedProfile);
+    runtimeProfile = persistentProfile(normalizedProfile);
+    if (runtimeProfile.avatarUrl !== normalizedProfile.avatarUrl) {
+      persistDisplayProfile(runtimeProfile);
+    }
   } catch {
     runtimeProfile = { ...DEFAULT_DISPLAY_PROFILE };
   }
@@ -38,7 +60,7 @@ export function saveDisplayProfile(input: DisplayProfileInput): DisplayProfile {
   runtimeProfile = normalizeProfile(input);
 
   try {
-    uni.setStorageSync(DISPLAY_PROFILE_STORAGE_KEY, runtimeProfile);
+    persistDisplayProfile(runtimeProfile);
   } catch {
     // 当前运行时仍保留展示资料；本地存储失败不阻塞用户进入主应用。
   }
