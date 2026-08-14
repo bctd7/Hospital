@@ -21,7 +21,17 @@ else
 fi
 
 for attempt in $(seq 1 30); do
-  if curl --fail --silent --show-error http://127.0.0.1:8888/api/v1/health >/dev/null; then
+  running_services="$("${compose[@]}" ps --status running --services)"
+  if curl --fail --silent --show-error http://127.0.0.1:8888/api/v1/health >/dev/null \
+    && grep -qx identity-rpc <<<"${running_services}" \
+    && grep -qx appointment-rpc <<<"${running_services}" \
+    && grep -qx app-api <<<"${running_services}"; then
+    sleep 2
+    running_services="$("${compose[@]}" ps --status running --services)"
+    grep -qx identity-rpc <<<"${running_services}"
+    grep -qx appointment-rpc <<<"${running_services}"
+    grep -qx app-api <<<"${running_services}"
+    curl --fail --silent --show-error http://127.0.0.1:8888/api/v1/health >/dev/null
     "${compose[@]}" ps
     echo "Deployment is healthy."
     exit 0

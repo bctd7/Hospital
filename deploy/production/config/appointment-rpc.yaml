@@ -18,6 +18,12 @@ AuthorizationRedis:
   DB: 0
   VersionPrefix: "identity:authorization-version:"
 
+AppointmentRedis:
+  Addr: ${REDIS_HOST}:${REDIS_PORT}
+  Password: ${REDIS_PASSWORD}
+  DB: 0
+  Prefix: "appointment:"
+
 Token:
   Issuer: hospital-identity
   Audience: hospital-services
