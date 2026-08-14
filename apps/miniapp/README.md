@@ -80,6 +80,32 @@ apps/miniapp/dist/build/mp-weixin
 `.env.production.local` 或当前 Shell 中的 `VITE_*`。构建结束会检查产物；发现局域网 API 地址、
 缺失 CloudBase 环境或没有编译为 AnyService 调用时直接失败。不要绕过该脚本直接执行 `uni build`。
 
+### 终端上传体验版
+
+体验版统一从终端构建并上传，明确指定 `dist/build/mp-weixin`，不要从项目根目录或
+`dist/dev/mp-weixin` 点击上传。发布前关闭正在打开 `dist/build/mp-weixin` 的开发者工具项目；构建会删除并
+重新生成该产物目录，否则开发者工具可能误报“项目文件夹已被删除”。
+
+```powershell
+$miniappRoot = 'C:\Users\27902\GolandProjects\Hospital\apps\miniapp'
+$wechatCli = 'C:\Program Files (x86)\Tencent\微信web开发者工具\cli.bat'
+$releaseVersion = '0.3.1'
+$releaseDescription = '完善检查预约、检查记录与检验报告功能，优化整体使用体验。'
+
+Set-Location $miniappRoot
+npm run test
+npm run type-check
+npm run build:mp-weixin
+
+& $wechatCli upload `
+  --project (Join-Path $miniappRoot 'dist\build\mp-weixin') `
+  --version $releaseVersion `
+  --desc $releaseDescription `
+  --lang zh
+```
+
+终端最后输出 `√ upload` 才表示上传成功。上传后仍需到微信公众平台将对应版本设为体验版。
+
 ## API 地址
 
 开发者工具模拟器可以访问 `127.0.0.1`；真机中的 `127.0.0.1` 指向手机自身，必须配置电脑局域网地址：

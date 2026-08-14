@@ -111,16 +111,29 @@ EXPERIENCE_SEED_ACKNOWLEDGE=fresh-experience-database ./scripts/seed-experience.
 
 ### 3. 上传体验版
 
-后端健康检查和两个管理员登录均成功后，再在开发机执行：
+后端健康检查和两个管理员登录均成功后，再在开发机通过终端完成构建和上传：
 
 ```powershell
-Set-Location C:\Users\27902\GolandProjects\Hospital\apps\miniapp
+$miniappRoot = 'C:\Users\27902\GolandProjects\Hospital\apps\miniapp'
+$wechatCli = 'C:\Program Files (x86)\Tencent\微信web开发者工具\cli.bat'
+$releaseVersion = '0.3.1'
+$releaseDescription = '完善检查预约、检查记录与检验报告功能，优化整体使用体验。'
+
+Set-Location $miniappRoot
 npm run test
 npm run type-check
 npm run build:mp-weixin
+
+& $wechatCli upload `
+  --project (Join-Path $miniappRoot 'dist\build\mp-weixin') `
+  --version $releaseVersion `
+  --desc $releaseDescription `
+  --lang zh
 ```
 
-微信开发者工具导入 `dist/build/mp-weixin`，上传新版本并设置为体验版。不要先上传依赖新接口的小程序。
+不要从 `apps/miniapp` 项目根目录或 `dist/dev/mp-weixin` 上传；两者可能携带本地 `.env.local` 的局域网地址。
+构建前关闭正在打开 `dist/build/mp-weixin` 的开发者工具项目，避免重建产物时出现目录删除提示。终端输出
+`√ upload` 后，再到微信公众平台将该版本设为体验版。不要先上传依赖尚未部署接口的小程序。
 
 ## 一、更换 ECS 服务器
 
@@ -235,13 +248,24 @@ VITE_ANYSERVICE_NAME=hospitalapi
 ### 3. 重新构建并上传
 
 ```powershell
-cd C:\Users\27902\GolandProjects\Hospital\apps\miniapp
+$miniappRoot = 'C:\Users\27902\GolandProjects\Hospital\apps\miniapp'
+$wechatCli = 'C:\Program Files (x86)\Tencent\微信web开发者工具\cli.bat'
+$releaseVersion = '填写新版本号'
+$releaseDescription = '填写面向体验客户的版本说明'
+
+Set-Location $miniappRoot
 npm run type-check
 npm run test
 npm run build:mp-weixin
+
+& $wechatCli upload `
+  --project (Join-Path $miniappRoot 'dist\build\mp-weixin') `
+  --version $releaseVersion `
+  --desc $releaseDescription `
+  --lang zh
 ```
 
-在微信开发者工具上传一个新版本，并到微信公众平台把它设为体验版。
+终端输出 `√ upload` 后，到微信公众平台把新版本设为体验版。
 
 ### 4. 验证
 
@@ -254,16 +278,27 @@ ECS、MySQL、Redis 和 Kafka 没有变化，所以不需要搬数据库或消�
 ### 情况 A：只修改小程序代码
 
 ```powershell
-cd C:\Users\27902\GolandProjects\Hospital\apps\miniapp
+$miniappRoot = 'C:\Users\27902\GolandProjects\Hospital\apps\miniapp'
+$wechatCli = 'C:\Program Files (x86)\Tencent\微信web开发者工具\cli.bat'
+$releaseVersion = '填写新版本号'
+$releaseDescription = '填写面向体验客户的版本说明'
+
+Set-Location $miniappRoot
 npm run type-check
 npm run test
 npm run build:mp-weixin
+
+& $wechatCli upload `
+  --project (Join-Path $miniappRoot 'dist\build\mp-weixin') `
+  --version $releaseVersion `
+  --desc $releaseDescription `
+  --lang zh
 ```
 
 然后：
 
 ```text
-微信开发者工具上传新版本
+确认终端输出 √ upload
 → 微信公众平台版本管理
 → 设为体验版
 ```
