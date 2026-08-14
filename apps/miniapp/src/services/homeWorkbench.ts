@@ -1,5 +1,6 @@
 import type { AppVariant } from "@/types/auth";
 import type {
+  HomeAction,
   HomeWorkbenchAdapter,
   HomeWorkbenchIdentity,
   HomeWorkbenchView,
@@ -139,7 +140,7 @@ function patientHome(): HomeWorkbenchView {
 
 export function buildHomeWorkbench(
   variant: AppVariant,
-  _principal: HomeWorkbenchIdentity | null,
+  principal: HomeWorkbenchIdentity | null,
 ): HomeWorkbenchView {
   const view = { ...patientHome(), variant };
   if (variant === "staff") {
@@ -155,6 +156,30 @@ export function buildHomeWorkbench(
         url: "/pages/admin/appointment/index",
       },
     };
+    const departmentId = principal?.department_id?.trim() ?? "";
+    const departmentBookingAction: HomeAction = {
+      id: "department-appointments",
+      title: "科室预约",
+      description: departmentId ? "查看当前科室预约情况" : "选择科室查看预约情况",
+      symbol: "约",
+      tone: "blue",
+      target: {
+        type: "navigate",
+        url: departmentId
+          ? `/pages/admin/appointment/bookings?department_id=${encodeURIComponent(departmentId)}&department_label=${encodeURIComponent("科室预约")}`
+          : "/pages/admin/appointment/index",
+      },
+    };
+    view.serviceGroups = view.serviceGroups.map((group) =>
+      group.id === "before-visit"
+        ? {
+            ...group,
+            actions: group.actions.map((action) =>
+              action.id === "my-appointments" ? departmentBookingAction : action,
+            ),
+          }
+        : group,
+    );
     view.notice = "检查项目、房间和每周配置已接入真实 Appointment 数据。";
     view.mock = false;
   }
