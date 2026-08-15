@@ -5,6 +5,7 @@ import { computed, ref } from "vue";
 import { appointmentManagementApi } from "@/api/appointment";
 import {
   invalidateRoomAppointment,
+  loadExaminationItems,
   loadRoomExaminationItems,
   loadRoomWeeklyWindows,
 } from "@/services/appointment";
@@ -18,6 +19,7 @@ import type {
 } from "@/types/appointment";
 import {
   canReadAppointmentManagement,
+  formatEstimatedDuration,
   hasPermission,
   messageOf,
   roomWindowTimeValid,
@@ -35,6 +37,7 @@ const building = ref("");
 const floorNumber = ref("");
 const roomNumber = ref("");
 const relations = ref<RoomExaminationItem[]>([]);
+const examinationItems = ref<ExaminationItem[]>([]);
 const windows = ref<RoomWeeklyWindow[]>([]);
 const relationStatus = ref<"active" | "disabled">("active");
 const loading = ref(false);
@@ -53,6 +56,9 @@ const canUpdate = computed(() => hasPermission(sessionState.principal, "appointm
 const isNew = computed(() => !roomId.value);
 const sortedWindows = computed(() => [...windows.value].sort((a, b) =>
   a.weekday - b.weekday || (a.session === "morning" ? -1 : 1),
+));
+const examinationItemById = computed(() => new Map(
+  examinationItems.value.map((item) => [item.itemId, item]),
 ));
 
 onLoad((options) => {
@@ -74,10 +80,11 @@ async function loadDetail(force = false) {
   loading.value = true;
   error.value = "";
   try {
-    const [detail, linked, configured] = await Promise.all([
-      appointmentManagementApi.getRoom(roomId.value),
+    const detail = await appointmentManagementApi.getRoom(roomId.value);
+    const [linked, configured, items] = await Promise.all([
       loadRoomExaminationItems(roomId.value, relationStatus.value, force),
       loadRoomWeeklyWindows(roomId.value, force),
+      loadExaminationItems(detail.departmentId, "active", 1, 100, force),
     ]);
     room.value = detail;
     departmentId.value = detail.departmentId;
@@ -86,6 +93,7 @@ async function loadDetail(force = false) {
     floorNumber.value = String(detail.floorNumber);
     roomNumber.value = detail.roomNumber;
     relations.value = linked.items;
+    examinationItems.value = items.items;
     windows.value = configured;
   } catch (cause) {
     error.value = messageOf(cause, "房间资源加载失败，请重试");
@@ -192,6 +200,12 @@ function chooseItemCandidate(candidates: ExaminationItem[], disabledRelations: R
       }
     },
   });
+}
+
+function relationDuration(value: RoomExaminationItem) {
+  return formatEstimatedDuration(
+    examinationItemById.value.get(value.itemId)?.estimatedDurationMinutes ?? 0,
+  );
 }
 
 function changeRelation(value: RoomExaminationItem) {
@@ -331,7 +345,10 @@ function disableWindow(value: RoomWeeklyWindow) {
         <view class="section__heading"><text>可执行检查项目</text><button v-if="canUpdate" @tap="addItem">＋ 加入</button></view>
         <view v-if="!relations.length" class="inline-empty">尚未加入检查项目</view>
         <view v-for="value in relations" :key="value.relationId" class="relation-row">
-          <text class="relation-row__title">{{ value.itemName }}</text>
+          <view>
+            <text class="relation-row__title">{{ value.itemName }}</text>
+            <text class="relation-row__hint">{{ relationDuration(value) }}</text>
+          </view>
           <button v-if="canUpdate" class="text-danger" @tap="changeRelation(value)">移出</button>
         </view>
       </view>

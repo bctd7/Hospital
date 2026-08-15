@@ -65,10 +65,15 @@ export function loadExaminationItems(
   departmentId: string,
   status: AppointmentStatus,
   page = 1,
+  pageSize = 50,
   force = false,
 ) {
-  const key = `${departmentId}:${status}:${page}`;
-  return itemPages.load(key, () => appointmentManagementApi.listItems(departmentId, status, page), force);
+  const key = `${departmentId}:${status}:${page}:${pageSize}`;
+  return itemPages.load(
+    key,
+    () => appointmentManagementApi.listItems(departmentId, status, page, pageSize),
+    force,
+  );
 }
 
 export function loadAppointmentRooms(

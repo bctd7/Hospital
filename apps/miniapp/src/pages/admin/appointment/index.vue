@@ -4,6 +4,7 @@ import { computed, ref } from "vue";
 
 import {
   loadAppointmentRooms,
+  loadExaminationItems,
   loadRoomExaminationItems,
 } from "@/services/appointment";
 import {
@@ -12,10 +13,11 @@ import {
   loadOrganizationContext,
 } from "@/services/organization";
 import { sessionState } from "@/stores/session";
-import type { AppointmentRoom, RoomExaminationItem } from "@/types/appointment";
+import type { AppointmentRoom, ExaminationItem, RoomExaminationItem } from "@/types/appointment";
 import type { CampusSummary, DepartmentSummary } from "@/types/staffManagement";
 import {
   canReadAppointmentManagement,
+  formatEstimatedDuration,
   hasPermission,
   hasRole,
   messageOf,
@@ -35,6 +37,7 @@ const selectedCampusId = ref("");
 const departments = ref<DepartmentSummary[]>([]);
 const selectedDepartmentId = ref("");
 const rooms = ref<AppointmentRoom[]>([]);
+const examinationItems = ref<ExaminationItem[]>([]);
 const selectedRoomId = ref("");
 const relations = ref<RoomExaminationItem[]>([]);
 const departmentSearch = ref("");
@@ -68,6 +71,9 @@ const selectedDepartment = computed(() =>
 const selectedRoom = computed(() =>
   rooms.value.find((room) => room.roomId === selectedRoomId.value),
 );
+const examinationItemById = computed(() => new Map(
+  examinationItems.value.map((item) => [item.itemId, item]),
+));
 const filteredDepartments = computed(() => {
   const keyword = departmentSearch.value.trim().toLowerCase();
   if (!keyword) return departments.value;
@@ -151,6 +157,7 @@ async function loadRooms(force = false) {
   const generation = ++roomGeneration;
   page.value = 1;
   rooms.value = [];
+  examinationItems.value = [];
   selectedRoomId.value = "";
   relations.value = [];
   roomError.value = "";
@@ -158,9 +165,13 @@ async function loadRooms(force = false) {
   if (!departmentId) return;
   loadingRooms.value = true;
   try {
-    const result = await loadAppointmentRooms(departmentId, 1, force);
+    const [result, itemResult] = await Promise.all([
+      loadAppointmentRooms(departmentId, 1, force),
+      loadExaminationItems(departmentId, "active", 1, 100, force),
+    ]);
     if (generation !== roomGeneration) return;
     rooms.value = result.items;
+    examinationItems.value = itemResult.items;
     totalRooms.value = result.total;
     const nextRoom = rooms.value.find((room) => room.roomId === rememberedRoomId)
       ?? rooms.value[0];
@@ -261,6 +272,12 @@ function roomCampusName(room: AppointmentRoom) {
 
 function floorLabel(floor: number) {
   return floor < 0 ? `B${Math.abs(floor)}层` : `${floor}层`;
+}
+
+function relationDuration(relation: RoomExaminationItem) {
+  return formatEstimatedDuration(
+    examinationItemById.value.get(relation.itemId)?.estimatedDurationMinutes ?? 0,
+  );
 }
 
 function updateSearch(event: Event) {
@@ -441,6 +458,7 @@ function navigate(url: string) {
             >
               <view class="resource-row__copy">
                 <text class="resource-row__name">{{ relation.itemName }}</text>
+                <text class="resource-row__duration">{{ relationDuration(relation) }}</text>
               </view>
               <text class="resource-row__detail">编辑 ›</text>
             </button>
@@ -508,6 +526,7 @@ button::after { display: none; }
 .resource-row--active::before { position: absolute; top: 14rpx; bottom: 14rpx; left: 0; width: 6rpx; content: ""; background: #2188c7; border-radius: 0 5rpx 5rpx 0; }
 .resource-row--active .resource-row__name,.resource-row--active .room-card__number { color: #177dbb; }
 .resource-row__copy { min-width: 0; flex: 1; }
+.resource-row__duration { display: block; margin-top: 10rpx; color: #5e6d82; font-size: 19rpx; line-height: 1.4; }
 .resource-row__detail { flex: 0 0 auto; padding: 0; margin: 0; color: #177dbb; font-size: 18rpx; line-height: 44rpx; background: transparent; }
 .room-card__number { margin-bottom: 12rpx; }
 .room-card__address { display: block; margin-top: 5rpx; color: #5e6d82; font-size: 19rpx; line-height: 1.45; white-space: normal; word-break: break-all; }
