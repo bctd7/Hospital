@@ -9,7 +9,8 @@
 - [组织目录与账号管理](./02-organization-and-account-management.md)；
 - [检查资源与预约](./03-appointment-resources-and-booking.md)；
 - [检查执行与报告](./04-examination-reports.md)；
-- [预约消息](./05-appointment-messages.md)。
+- [预约消息](./05-appointment-messages.md)；
+- [智能导诊与检查导航产品方案](./06-intelligent-guidance-and-navigation.md)。
 
 路径和字段以 `contracts/api/` 为准。页面文档只记录入口、身份差异、交互规则和验收边界，不维护第二份接口
 清单。
@@ -34,3 +35,6 @@
 
 “我的”中的“我的预约”始终是当前账号自己的患者预约，不因工作人员身份变成科室预约；科室预约和检查记录
 位于工作人员首页。
+
+智能导诊与检查导航尚处于产品规划：患者首页主入口用于多项目方案规划，诊前服务的“检查导航”用于预约后路线；
+现有“我的预约”保持不变。工作人员端对应“导诊管理”，用于顺序规则、地点标注和方案试算。
