@@ -124,6 +124,9 @@ SET @item_mri_disabled = '30000000-0000-4000-8000-000000000004';
 SET @item_ultrasound = '30000000-0000-4000-8000-000000000005';
 SET @item_east_ct = '30000000-0000-4000-8000-000000000006';
 SET @item_blood = '30000000-0000-4000-8000-000000000007';
+SET @item_cta = '30000000-0000-4000-8000-000000000008';
+SET @item_thyroid_ultrasound = '30000000-0000-4000-8000-000000000009';
+SET @item_liver_function = '30000000-0000-4000-8000-000000000010';
 
 INSERT INTO appointment_examination_items
     (id, owner_department_id, name, description, estimated_duration_minutes,
@@ -137,7 +140,10 @@ VALUES
 (@item_mri_disabled, @dept_radiology_main, '头颅MRI（暂未开放）', '用于测试停用项目展示。', 45, '', '', '', '', 0, 'disabled', 1, @now, @now),
 (@item_ultrasound, @dept_ultrasound_main, '腹部彩超', '肝胆胰脾肾常规超声检查。', 25, '肝胆胰脾肾超声所见：', '腹部超声检查结论：', '', '', 1, 'active', 1, @now, @now),
 (@item_east_ct, @dept_radiology_east, '胸部CT平扫', '东院区胸部CT平扫。', 20, '双肺及纵隔所见：', '胸部CT检查结论：', '', '', 1, 'active', 1, @now, @now),
-(@item_blood, @dept_laboratory_east, '血常规', '静脉血常规检查。', 10, '白细胞：\n红细胞：\n血小板：', '血常规检查结论：', '', '', 1, 'active', 1, @now, @now);
+(@item_blood, @dept_laboratory_east, '血常规', '静脉血常规检查。', 10, '白细胞：\n红细胞：\n血小板：', '血常规检查结论：', '', '', 1, 'active', 1, @now, @now),
+(@item_cta, @dept_radiology_main, '冠状动脉CTA', '冠状动脉CT血管成像，检查前请遵医嘱完成相关准备。', 45, '冠状动脉起源及走行：\n管腔与斑块情况：', '冠状动脉CTA检查结论：', '请结合临床及相关检查综合评估。', '', 1, 'active', 1, @now, @now),
+(@item_thyroid_ultrasound, @dept_ultrasound_main, '甲状腺彩超', '甲状腺及颈部相关区域超声检查。', 20, '甲状腺大小、形态及回声：\n颈部淋巴结：', '甲状腺超声检查结论：', '', '', 1, 'active', 1, @now, @now),
+(@item_liver_function, @dept_laboratory_east, '肝功能检查', '通过静脉采血检测常用肝功能指标，是否空腹请以医嘱为准。', 15, '主要检测指标：', '肝功能检查结论：', '请结合临床及其他检查结果。', '', 1, 'active', 1, @now, @now);
 
 SET @room_ct201 = '31000000-0000-4000-8000-000000000001';
 SET @room_ct202 = '31000000-0000-4000-8000-000000000002';
@@ -166,7 +172,11 @@ VALUES
 ('32000000-0000-4000-8000-000000000005', @room_us301, @item_ultrasound, 'active', 1, @now, @now),
 ('32000000-0000-4000-8000-000000000006', @room_east_ct105, @item_east_ct, 'active', 1, @now, @now),
 ('32000000-0000-4000-8000-000000000007', @room_lab201, @item_blood, 'active', 1, @now, @now),
-('32000000-0000-4000-8000-000000000008', @room_ct202, @item_mri_disabled, 'disabled', 1, @now, @now);
+('32000000-0000-4000-8000-000000000008', @room_ct202, @item_mri_disabled, 'disabled', 1, @now, @now),
+('32000000-0000-4000-8000-000000000009', @room_ct201, @item_cta, 'active', 1, @now, @now),
+('32000000-0000-4000-8000-000000000010', @room_ct202, @item_cta, 'active', 1, @now, @now),
+('32000000-0000-4000-8000-000000000011', @room_us301, @item_thyroid_ultrasound, 'active', 1, @now, @now),
+('32000000-0000-4000-8000-000000000012', @room_lab201, @item_liver_function, 'active', 1, @now, @now);
 
 INSERT INTO appointment_room_weekly_windows
     (id, room_id, weekday, session, open_time, close_time, active_capacity, status, version, created_at, updated_at)

@@ -132,7 +132,7 @@ SELECT IF(
   AND (SELECT COUNT(*) FROM hospital_identity.identity_organization_units WHERE unit_type = 'department' AND status = 'active') >= 4
   AND (SELECT COUNT(DISTINCT status) FROM hospital_appointment.appointment_bookings) = 5
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_items
-       WHERE estimated_duration_minutes BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes, 5) = 0) = 7
+       WHERE estimated_duration_minutes BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes, 5) = 0) = 10
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings
        WHERE estimated_duration_minutes_snapshot BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes_snapshot, 5) = 0) = 8
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings WHERE status = 'canceled') >= 1
