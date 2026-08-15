@@ -53,6 +53,16 @@ describe("appointment management view rules", () => {
     expect(source).toContain("void loadPage()");
   });
 
+  it("shows no-show patients below patients who have not checked in", () => {
+    const source = readFileSync(
+      new URL("../src/pages/admin/appointment/bookings.vue", import.meta.url),
+      "utf8",
+    );
+    expect(source.indexOf('class="section-title">尚未报到')).toBeLessThan(source.indexOf('class="section-title">未到场'));
+    expect(source).toContain('status: "no_show", view: "completed"');
+    expect(source).toContain("noShowBookings");
+  });
+
   it("validates the two different weekly time models", () => {
     expect(roomWindowTimeValid("08:00", "12:00")).toBe(true);
     expect(roomWindowTimeValid("12:00", "08:00")).toBe(false);
