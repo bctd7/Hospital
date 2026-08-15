@@ -407,11 +407,11 @@ func (s *memoryProjectStore) ListBookingsForUpdate(context.Context, BookingListF
 	return nil, nil
 }
 
-func (s *memoryProjectStore) ClaimPatientSession(context.Context, string, time.Time, Session, string) error {
+func (s *memoryProjectStore) ClaimPatientItemSession(context.Context, string, string, time.Time, Session, string) error {
 	return ErrNotImplemented
 }
 
-func (s *memoryProjectStore) ReleasePatientSession(context.Context, string) error {
+func (s *memoryProjectStore) ReleasePatientItemSession(context.Context, string) error {
 	return ErrNotImplemented
 }
 

@@ -243,11 +243,13 @@ SELECT patient_account_id,
 FROM appointment_bookings
 GROUP BY patient_account_id, DATE_SUB(service_date, INTERVAL WEEKDAY(service_date) DAY);
 
-INSERT INTO appointment_patient_session_claims
-    (patient_account_id, service_date, session, booking_id)
+INSERT INTO appointment_patient_item_session_claims
+    (patient_account_id, item_id, service_date, session, booking_id)
 VALUES
-(@account_patient_1, @today, @current_session, @booking_confirmed_now),
-(@account_patient_2, @tomorrow, 'morning', @booking_confirmed_future);
+(@account_patient_1, @item_urgent_ct, @today, @current_session, @booking_confirmed_now),
+(@account_patient_2, @item_ct, @tomorrow, 'morning', @booking_confirmed_future),
+(@account_patient_4, @item_urgent_ct, @today, @current_session, @booking_in_progress),
+(@account_patient_4, @item_xray, @yesterday, 'morning', @booking_report_overdue);
 
 INSERT INTO appointment_room_date_capacity
     (id, room_id, service_date, session, total_capacity, occupied_capacity,

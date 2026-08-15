@@ -79,7 +79,7 @@ FOR UPDATE SKIP LOCKED`, before.Format("2006-01-02"), before.Format("2006-01-02"
 		if err := txStore.DecreaseOccupiedCapacity(ctx, capacity.CapacityID); err != nil {
 			return rollback(err)
 		}
-		if err := txStore.ReleasePatientSession(ctx, bookingID); err != nil {
+		if err := txStore.ReleasePatientItemSession(ctx, bookingID); err != nil {
 			return rollback(err)
 		}
 		booking.Status = appointmentmanager.BookingStatusNoShow

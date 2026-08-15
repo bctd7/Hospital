@@ -323,17 +323,19 @@ CREATE TABLE appointment_message_reads (
     KEY idx_appointment_message_reads_account_time (account_id, read_at DESC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- A patient may hold only one not-yet-started booking in a concrete date/session.
--- This guard is released when the examination starts, the booking is cancelled, or it becomes no_show.
-CREATE TABLE appointment_patient_session_claims (
+-- A patient may hold only one confirmed or in-progress booking for the same item in a concrete date/session.
+-- The room is deliberately excluded so changing rooms cannot bypass duplicate protection.
+-- The guard is released after completion, cancellation, or no-show.
+CREATE TABLE appointment_patient_item_session_claims (
     patient_account_id CHAR(36)    NOT NULL,
+    item_id            CHAR(36)    NOT NULL,
     service_date       DATE        NOT NULL,
     session            VARCHAR(16) NOT NULL,
     booking_id         CHAR(36)    NOT NULL,
     created_at         DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    PRIMARY KEY (patient_account_id, service_date, session),
-    UNIQUE KEY uk_appointment_patient_session_claims_booking (booking_id),
-    CONSTRAINT chk_appointment_patient_session_claims_session
+    PRIMARY KEY (patient_account_id, item_id, service_date, session),
+    UNIQUE KEY uk_appointment_patient_item_session_claims_booking (booking_id),
+    CONSTRAINT chk_appointment_patient_item_session_claims_session
         CHECK (session IN ('morning', 'afternoon'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 

@@ -167,8 +167,8 @@ async function confirmAppointment() {
     setTimeout(() => void uni.navigateTo({ url: "/pages/profile/appointments/index" }), 500);
   } catch (error) {
     let content = messageOf(error, "请刷新后重试");
-    if (error instanceof ApiError && error.code === "PATIENT_SESSION_OCCUPIED") {
-      content = "同一天的同一上午或下午只能保留一个待检查预约；原预约开始检查、删除或转为未到场后才能再次预约该时段。";
+    if (error instanceof ApiError && error.code === "PATIENT_ITEM_SESSION_OCCUPIED") {
+      content = "同一检查项目在当天同一上午或下午已有待检查或检查中的预约；完成、取消或转为未到场后可以重新预约。";
     } else if (error instanceof ApiError && error.code === "PATIENT_WEEKLY_QUOTA_EXHAUSTED") {
       content = "本周 10 次预约额度已经用完。删除、完成或未到场均不会返还额度，下周将自动获得新的额度。";
     }

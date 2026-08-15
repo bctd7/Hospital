@@ -23,8 +23,8 @@ func bookingRPCError(err error) error {
 		return status.Error(codes.NotFound, "booking or booking resource not found")
 	case errors.Is(err, common.ErrCapacityFull):
 		return status.Error(codes.ResourceExhausted, "booking capacity is full")
-	case errors.Is(err, common.ErrPatientSessionOccupied):
-		return bookingStatusError(codes.FailedPrecondition, "patient already has a pending booking in this date and session", "PATIENT_SESSION_OCCUPIED")
+	case errors.Is(err, common.ErrPatientItemSessionOccupied):
+		return bookingStatusError(codes.FailedPrecondition, "patient already has an active booking for this item in this date and session", "PATIENT_ITEM_SESSION_OCCUPIED")
 	case errors.Is(err, common.ErrPatientWeeklyQuotaFull):
 		return bookingStatusError(codes.ResourceExhausted, "weekly booking quota is exhausted", "PATIENT_WEEKLY_QUOTA_EXHAUSTED")
 	case errors.Is(err, common.ErrExaminationWindowClosed):

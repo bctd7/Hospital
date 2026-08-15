@@ -129,7 +129,7 @@ func (m *Manager) CreateBooking(ctx context.Context, patient authn.Principal, co
 		if err := tx.ConsumePatientWeeklyQuota(ctx, patient.AccountID, weekStart, patientWeeklyBookingLimit, now); err != nil {
 			return err
 		}
-		if err := tx.ClaimPatientSession(ctx, patient.AccountID, serviceDate, command.Session, bookingID); err != nil {
+		if err := tx.ClaimPatientItemSession(ctx, patient.AccountID, command.ItemID, serviceDate, command.Session, bookingID); err != nil {
 			return err
 		}
 
@@ -183,9 +183,9 @@ func (m *Manager) CreateBooking(ctx context.Context, patient authn.Principal, co
 			ServiceDate: serviceDate, Session: selection.Session, Status: BookingStatusConfirmed,
 			RoomOpenTime: selection.RoomOpenTime, RoomCloseTime: selection.RoomCloseTime,
 			ItemStartTime: selection.ItemStartTime, ItemEndTime: selection.ItemEndTime,
-			BookingCutoffTime: selection.BookingCutoffTime,
+			BookingCutoffTime:        selection.BookingCutoffTime,
 			EstimatedDurationMinutes: selection.EstimatedDurationMinutes,
-			Version:           1, CreatedAt: now, UpdatedAt: now,
+			Version:                  1, CreatedAt: now, UpdatedAt: now,
 		}
 		if err := tx.CreateBooking(ctx, result); err != nil {
 			return err
@@ -300,7 +300,7 @@ func (m *Manager) DeleteMyBooking(ctx context.Context, patient authn.Principal, 
 		if err := tx.DecreaseOccupiedCapacity(ctx, capacity.CapacityID); err != nil {
 			return err
 		}
-		if err := tx.ReleasePatientSession(ctx, booking.BookingID); err != nil {
+		if err := tx.ReleasePatientItemSession(ctx, booking.BookingID); err != nil {
 			return err
 		}
 		if err := tx.DeleteBooking(ctx, booking.BookingID); err != nil {

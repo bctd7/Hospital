@@ -12,7 +12,7 @@ type ReportTxStore interface {
 	RecordBookingOperation(ctx context.Context, change BookingOperationChange) error
 	GetBookingForUpdate(ctx context.Context, bookingID string) (Booking, error)
 	StartExamination(ctx context.Context, booking Booking, expectedVersion int64) error
-	ReleasePatientSession(ctx context.Context, bookingID string) error
+	ReleasePatientItemSession(ctx context.Context, bookingID string) error
 	CompleteBooking(ctx context.Context, booking Booking, expectedVersion int64) error
 	FindDateCapacityForUpdate(ctx context.Context, roomID string, serviceDate time.Time, session Session) (DateCapacity, bool, error)
 	DecreaseOccupiedCapacity(ctx context.Context, capacityID string) error

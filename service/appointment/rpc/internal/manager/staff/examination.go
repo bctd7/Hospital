@@ -77,9 +77,6 @@ func (m *Manager) StartExamination(ctx context.Context, operator authn.Principal
 		if err := tx.StartExamination(ctx, booking, command.ExpectedVersion); err != nil {
 			return err
 		}
-		if err := tx.ReleasePatientSession(ctx, booking.BookingID); err != nil {
-			return err
-		}
 		result = booking
 		return tx.RecordBookingOperation(ctx, BookingOperationChange{
 			OperationID: command.OperationID, OperatorAccountID: operator.AccountID,

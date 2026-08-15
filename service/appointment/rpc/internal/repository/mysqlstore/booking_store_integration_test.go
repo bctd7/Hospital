@@ -31,6 +31,9 @@ const (
 	bookingTestRoomWindowTwo = "41000000-0000-0000-0000-000000000013"
 	bookingTestPatientTwo    = "41000000-0000-0000-0000-000000000014"
 	bookingTestStaff         = "41000000-0000-0000-0000-000000000015"
+	bookingTestItemTwo       = "41000000-0000-0000-0000-000000000016"
+	bookingTestRelationThree = "41000000-0000-0000-0000-000000000017"
+	bookingTestItemWindowTwo = "41000000-0000-0000-0000-000000000018"
 )
 
 func TestBookingCapacityAllowsOnlyOneConcurrentWinner(t *testing.T) {
@@ -160,7 +163,7 @@ func TestBookingCapacityAllowsOnlyOneConcurrentWinner(t *testing.T) {
 	}
 }
 
-func TestPatientSessionClaimBlocksMultipleRoomsUntilExaminationStarts(t *testing.T) {
+func TestPatientItemSessionClaimAllowsDifferentItemsAndBlocksSameItemWhileInProgress(t *testing.T) {
 	dataSource := os.Getenv("APPOINTMENT_TEST_MYSQL_DSN")
 	if dataSource == "" {
 		t.Skip("APPOINTMENT_TEST_MYSQL_DSN is not set")
@@ -203,12 +206,19 @@ func TestPatientSessionClaimBlocksMultipleRoomsUntilExaminationStarts(t *testing
 	if err != nil {
 		t.Fatalf("create first booking: %v", err)
 	}
-	secondCommand := patientmanager.CreateBookingCommand{
+	duplicateCommand := patientmanager.CreateBookingCommand{
 		ItemID: bookingTestItem, RoomID: bookingTestRoomTwo, ServiceDate: serviceDate.Format("2006-01-02"),
 		Session: session, PatientDisplayName: "测试患者", PatientPhoneMasked: "134****0001", OperationID: "41000000-0000-0000-0000-000000000022",
 	}
-	if _, err := patientManager.CreateBooking(ctx, patient, secondCommand); !errors.Is(err, appointmentmanager.ErrPatientSessionOccupied) {
-		t.Fatalf("second room booking error=%v, want patient session occupied", err)
+	if _, err := patientManager.CreateBooking(ctx, patient, duplicateCommand); !errors.Is(err, appointmentmanager.ErrPatientItemSessionOccupied) {
+		t.Fatalf("same-item second-room booking error=%v, want patient item session occupied", err)
+	}
+	differentItem, err := patientManager.CreateBooking(ctx, patient, patientmanager.CreateBookingCommand{
+		ItemID: bookingTestItemTwo, RoomID: bookingTestRoomTwo, ServiceDate: serviceDate.Format("2006-01-02"),
+		Session: session, PatientDisplayName: "测试患者", PatientPhoneMasked: "134****0001", OperationID: "41000000-0000-0000-0000-000000000024",
+	})
+	if err != nil {
+		t.Fatalf("different item in same session must be allowed: %v", err)
 	}
 
 	staff := authn.Principal{
@@ -227,13 +237,13 @@ func TestPatientSessionClaimBlocksMultipleRoomsUntilExaminationStarts(t *testing
 	if started.Status != appointmentmanager.BookingStatusInProgress {
 		t.Fatalf("started status=%s", started.Status)
 	}
-	second, err := patientManager.CreateBooking(ctx, patient, secondCommand)
-	if err != nil {
-		t.Fatalf("create after examination starts: %v", err)
+	duplicateCommand.OperationID = "41000000-0000-0000-0000-000000000025"
+	if _, err := patientManager.CreateBooking(ctx, patient, duplicateCommand); !errors.Is(err, appointmentmanager.ErrPatientItemSessionOccupied) {
+		t.Fatalf("same-item booking while examination is in progress error=%v, want patient item session occupied", err)
 	}
 
 	var claims, bookings, occupied int
-	if err := store.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM appointment_patient_session_claims WHERE patient_account_id = ?`, bookingTestPatient).Scan(&claims); err != nil {
+	if err := store.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM appointment_patient_item_session_claims WHERE patient_account_id = ?`, bookingTestPatient).Scan(&claims); err != nil {
 		t.Fatal(err)
 	}
 	if err := store.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM appointment_bookings WHERE patient_account_id = ?`, bookingTestPatient).Scan(&bookings); err != nil {
@@ -242,15 +252,18 @@ func TestPatientSessionClaimBlocksMultipleRoomsUntilExaminationStarts(t *testing
 	if err := store.db.QueryRowContext(ctx, `SELECT COALESCE(SUM(occupied_capacity), 0) FROM appointment_room_date_capacity WHERE room_id IN (?, ?)`, bookingTestRoom, bookingTestRoomTwo).Scan(&occupied); err != nil {
 		t.Fatal(err)
 	}
-	if claims != 1 || bookings != 2 || occupied != 2 {
-		t.Fatalf("claims=%d bookings=%d occupied=%d, want 1, 2, 2", claims, bookings, occupied)
+	if claims != 2 || bookings != 2 || occupied != 2 {
+		t.Fatalf("claims=%d bookings=%d occupied=%d, want 2, 2, 2", claims, bookings, occupied)
 	}
-	var claimedBookingID string
-	if err := store.db.QueryRowContext(ctx, `SELECT booking_id FROM appointment_patient_session_claims WHERE patient_account_id = ?`, bookingTestPatient).Scan(&claimedBookingID); err != nil {
+	var firstClaim, secondClaim string
+	if err := store.db.QueryRowContext(ctx, `SELECT booking_id FROM appointment_patient_item_session_claims WHERE patient_account_id = ? AND item_id = ?`, bookingTestPatient, bookingTestItem).Scan(&firstClaim); err != nil {
 		t.Fatal(err)
 	}
-	if claimedBookingID != second.BookingID {
-		t.Fatalf("claimed booking=%s, want second booking %s", claimedBookingID, second.BookingID)
+	if err := store.db.QueryRowContext(ctx, `SELECT booking_id FROM appointment_patient_item_session_claims WHERE patient_account_id = ? AND item_id = ?`, bookingTestPatient, bookingTestItemTwo).Scan(&secondClaim); err != nil {
+		t.Fatal(err)
+	}
+	if firstClaim != first.BookingID || secondClaim != differentItem.BookingID {
+		t.Fatalf("item claims=%s/%s, want %s/%s", firstClaim, secondClaim, first.BookingID, differentItem.BookingID)
 	}
 }
 
@@ -397,7 +410,7 @@ WHERE id = ?`, booking.BookingID); err != nil {
 	if err := store.db.QueryRowContext(ctx, `SELECT occupied_capacity FROM appointment_room_date_capacity WHERE room_id = ? AND service_date = ? AND session = ?`, bookingTestRoom, serviceDate.Format("2006-01-02"), session).Scan(&occupied); err != nil {
 		t.Fatal(err)
 	}
-	if err := store.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM appointment_patient_session_claims WHERE booking_id = ?`, booking.BookingID).Scan(&claims); err != nil {
+	if err := store.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM appointment_patient_item_session_claims WHERE booking_id = ?`, booking.BookingID).Scan(&claims); err != nil {
 		t.Fatal(err)
 	}
 	if err := store.db.QueryRowContext(ctx, `SELECT used_count FROM appointment_patient_weekly_quota_usage WHERE patient_account_id = ?`, bookingTestPatient).Scan(&quota); err != nil {
@@ -405,6 +418,23 @@ WHERE id = ?`, booking.BookingID); err != nil {
 	}
 	if occupied != 0 || claims != 0 || quota != 1 {
 		t.Fatalf("occupied=%d claims=%d quota=%d, want 0, 0, 1", occupied, claims, quota)
+	}
+	repeated, err := patientManager.CreateBooking(ctx, patient, patientmanager.CreateBookingCommand{
+		ItemID: bookingTestItem, RoomID: bookingTestRoom, ServiceDate: serviceDate.Format("2006-01-02"),
+		Session: session, PatientDisplayName: "测试患者", PatientPhoneMasked: "134****0001",
+		OperationID: "41000000-0000-0000-0004-000000000002",
+	})
+	if err != nil {
+		t.Fatalf("rebook same item after no-show: %v", err)
+	}
+	if repeated.BookingID == booking.BookingID {
+		t.Fatal("rebooking after no-show must create a new booking")
+	}
+	if err := store.db.QueryRowContext(ctx, `SELECT used_count FROM appointment_patient_weekly_quota_usage WHERE patient_account_id = ?`, bookingTestPatient).Scan(&quota); err != nil {
+		t.Fatal(err)
+	}
+	if quota != 2 {
+		t.Fatalf("quota=%d, want 2 because rebooking consumes a new weekly quota", quota)
 	}
 }
 
@@ -491,12 +521,29 @@ func TestExaminationReportPublishAndCorrectionPreserveHistory(t *testing.T) {
 	if len(versions) != 2 || versions[0].Status != appointmentmanager.ReportVersionStatusPublished || versions[1].Status != appointmentmanager.ReportVersionStatusSuperseded || versions[1].Impression != "initial impression" {
 		t.Fatalf("versions=%+v", versions)
 	}
+	var claims int
+	if err := store.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM appointment_patient_item_session_claims WHERE booking_id = ?`, booking.BookingID).Scan(&claims); err != nil {
+		t.Fatal(err)
+	}
+	if claims != 0 {
+		t.Fatalf("completed booking claims=%d, want 0", claims)
+	}
+	repeated, err := patientManager.CreateBooking(ctx, patient, patientmanager.CreateBookingCommand{
+		ItemID: bookingTestItem, RoomID: bookingTestRoom, ServiceDate: serviceDate.Format("2006-01-02"),
+		Session: session, PatientDisplayName: "测试患者", PatientPhoneMasked: "134****0001", OperationID: "41000000-0000-0000-0000-000000000037",
+	})
+	if err != nil {
+		t.Fatalf("rebook same item after completion: %v", err)
+	}
+	if repeated.BookingID == booking.BookingID {
+		t.Fatal("rebooking after completion must create a new booking")
+	}
 	var occupied int
 	if err := store.db.QueryRowContext(ctx, `SELECT occupied_capacity FROM appointment_room_date_capacity WHERE room_id = ? AND service_date = ? AND session = ?`, bookingTestRoom, serviceDate.Format("2006-01-02"), session).Scan(&occupied); err != nil {
 		t.Fatal(err)
 	}
-	if occupied != 0 {
-		t.Fatalf("occupied capacity=%d, want 0 after completion", occupied)
+	if occupied != 1 {
+		t.Fatalf("occupied capacity=%d, want 1 after rebooking completed item", occupied)
 	}
 }
 
@@ -520,13 +567,21 @@ func seedBookingIntegrationData(t *testing.T, store *Store, ctx context.Context,
              report_template_recommendation, report_template_notes, report_template_version,
              status, version, created_at, updated_at)
 			VALUES (?, ?, 'Booking integration item', 'test', 35, '', '', '', '', 0, 'active', 1, ?, ?)`, []any{bookingTestItem, bookingTestDepartment, now, now}},
+		{`INSERT INTO appointment_examination_items
+			(id, owner_department_id, name, description, estimated_duration_minutes,
+             report_template_objective_findings, report_template_impression,
+             report_template_recommendation, report_template_notes, report_template_version,
+             status, version, created_at, updated_at)
+			VALUES (?, ?, 'Second booking integration item', 'test', 20, '', '', '', '', 0, 'active', 1, ?, ?)`, []any{bookingTestItemTwo, bookingTestDepartment, now, now}},
 		{`INSERT INTO appointment_rooms (id, department_id, campus_id, building, floor_number, room_number, version, created_at, updated_at) VALUES (?, ?, ?, 'T', 1, '101', 1, ?, ?)`, []any{bookingTestRoom, bookingTestDepartment, bookingTestCampus, now, now}},
 		{`INSERT INTO appointment_rooms (id, department_id, campus_id, building, floor_number, room_number, version, created_at, updated_at) VALUES (?, ?, ?, 'T', 1, '102', 1, ?, ?)`, []any{bookingTestRoomTwo, bookingTestDepartment, bookingTestCampus, now, now}},
 		{`INSERT INTO appointment_room_examination_items (id, room_id, item_id, status, version, created_at, updated_at) VALUES (?, ?, ?, 'active', 1, ?, ?)`, []any{bookingTestRelation, bookingTestRoom, bookingTestItem, now, now}},
 		{`INSERT INTO appointment_room_examination_items (id, room_id, item_id, status, version, created_at, updated_at) VALUES (?, ?, ?, 'active', 1, ?, ?)`, []any{bookingTestRelationTwo, bookingTestRoomTwo, bookingTestItem, now, now}},
+		{`INSERT INTO appointment_room_examination_items (id, room_id, item_id, status, version, created_at, updated_at) VALUES (?, ?, ?, 'active', 1, ?, ?)`, []any{bookingTestRelationThree, bookingTestRoomTwo, bookingTestItemTwo, now, now}},
 		{`INSERT INTO appointment_room_weekly_windows (id, room_id, weekday, session, open_time, close_time, active_capacity, status, version, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 1, 'active', 1, ?, ?)`, []any{bookingTestRoomWindow, bookingTestRoom, weekday, session, openTime, closeTime, now, now}},
 		{`INSERT INTO appointment_room_weekly_windows (id, room_id, weekday, session, open_time, close_time, active_capacity, status, version, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 1, 'active', 1, ?, ?)`, []any{bookingTestRoomWindowTwo, bookingTestRoomTwo, weekday, session, openTime, closeTime, now, now}},
 		{`INSERT INTO appointment_item_weekly_windows (id, item_id, weekday, session, start_time, booking_cutoff_time, end_time, status, version, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'active', 1, ?, ?)`, []any{bookingTestItemWindow, bookingTestItem, weekday, session, openTime, cutoffTime, closeTime, now, now}},
+		{`INSERT INTO appointment_item_weekly_windows (id, item_id, weekday, session, start_time, booking_cutoff_time, end_time, status, version, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'active', 1, ?, ?)`, []any{bookingTestItemWindowTwo, bookingTestItemTwo, weekday, session, openTime, cutoffTime, closeTime, now, now}},
 	}
 	for _, statement := range statements {
 		if _, err := store.db.ExecContext(ctx, statement.query, statement.args...); err != nil {
@@ -543,15 +598,15 @@ func cleanupBookingIntegrationData(t *testing.T, store *Store, ctx context.Conte
 		`DELETE FROM appointment_examination_reports WHERE item_id = '` + bookingTestItem + `'`,
 		`DELETE FROM appointment_booking_operations WHERE operator_account_id = '` + bookingTestPatient + `'`,
 		`DELETE FROM appointment_booking_operations WHERE operator_account_id IN ('` + bookingTestPatientTwo + `', '` + bookingTestStaff + `')`,
-		`DELETE FROM appointment_patient_session_claims WHERE patient_account_id IN ('` + bookingTestPatient + `', '` + bookingTestPatientTwo + `')`,
+		`DELETE FROM appointment_patient_item_session_claims WHERE patient_account_id IN ('` + bookingTestPatient + `', '` + bookingTestPatientTwo + `')`,
 		`DELETE FROM appointment_patient_weekly_quota_usage WHERE patient_account_id IN ('` + bookingTestPatient + `', '` + bookingTestPatientTwo + `')`,
-		`DELETE FROM appointment_bookings WHERE item_id = '` + bookingTestItem + `'`,
+		`DELETE FROM appointment_bookings WHERE item_id IN ('` + bookingTestItem + `', '` + bookingTestItemTwo + `')`,
 		`DELETE FROM appointment_room_date_capacity WHERE room_id IN ('` + bookingTestRoom + `', '` + bookingTestRoomTwo + `')`,
-		`DELETE FROM appointment_item_weekly_windows WHERE item_id = '` + bookingTestItem + `'`,
+		`DELETE FROM appointment_item_weekly_windows WHERE item_id IN ('` + bookingTestItem + `', '` + bookingTestItemTwo + `')`,
 		`DELETE FROM appointment_room_weekly_windows WHERE room_id IN ('` + bookingTestRoom + `', '` + bookingTestRoomTwo + `')`,
-		`DELETE FROM appointment_room_examination_items WHERE item_id = '` + bookingTestItem + `'`,
+		`DELETE FROM appointment_room_examination_items WHERE item_id IN ('` + bookingTestItem + `', '` + bookingTestItemTwo + `')`,
 		`DELETE FROM appointment_rooms WHERE id IN ('` + bookingTestRoom + `', '` + bookingTestRoomTwo + `')`,
-		`DELETE FROM appointment_examination_items WHERE id = '` + bookingTestItem + `'`,
+		`DELETE FROM appointment_examination_items WHERE id IN ('` + bookingTestItem + `', '` + bookingTestItemTwo + `')`,
 	}
 	for _, statement := range statements {
 		if _, err := store.db.ExecContext(ctx, statement); err != nil {

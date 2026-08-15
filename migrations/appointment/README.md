@@ -13,7 +13,7 @@
 - `appointment_resource_operations`、`appointment_resource_audit`：房间、关系和窗口操作的幂等结果与审计；
 - `appointment_room_date_capacity`：房间在具体日期和上午/下午的容量事实；
 - `appointment_patient_weekly_quota_usage`：患者每自然周已经消耗的预约额度；
-- `appointment_patient_session_claims`：患者在具体日期和上午/下午的唯一待检查占用；
+- `appointment_patient_item_session_claims`：患者对同一项目在具体日期和上午/下午的待检查或检查中唯一占用；
 - `appointment_bookings`：待检查、检查中、已完成、未到场和已取消预约及关键快照；
 - `appointment_booking_operations`：预约写操作幂等结果；
 - `appointment_examination_reports`：一次预约唯一的报告主体和检查资源快照；

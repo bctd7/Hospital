@@ -309,6 +309,9 @@ func (m *Manager) CompleteAndPublishExaminationReport(ctx context.Context, opera
 		if err := tx.CompleteBooking(ctx, booking, command.ExpectedBookingVersion); err != nil {
 			return err
 		}
+		if err := tx.ReleasePatientItemSession(ctx, booking.BookingID); err != nil {
+			return err
+		}
 		return recordReportOperation(ctx, tx, operator, command.OperationID, booking.BookingID, bookingActionCompleteReport, fingerprint, result)
 	})
 	if err == nil {

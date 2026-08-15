@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS appointment_message_reads;
 DROP TABLE IF EXISTS appointment_examination_report_versions;
 DROP TABLE IF EXISTS appointment_examination_reports;
 DROP TABLE IF EXISTS appointment_booking_operations;
-DROP TABLE IF EXISTS appointment_patient_session_claims;
+DROP TABLE IF EXISTS appointment_patient_item_session_claims;
 DROP TABLE IF EXISTS appointment_bookings;
 DROP TABLE IF EXISTS appointment_patient_weekly_quota_usage;
 DROP TABLE IF EXISTS appointment_room_date_capacity;

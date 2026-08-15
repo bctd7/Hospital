@@ -37,15 +37,15 @@ const (
 )
 
 var (
-	ErrForbidden              = common.ErrForbidden
-	ErrNotFound               = common.ErrNotFound
-	ErrInvalid                = common.ErrInvalid
-	ErrConflict               = common.ErrConflict
-	ErrInvalidState           = common.ErrInvalidState
-	ErrCapacityFull           = common.ErrCapacityFull
-	ErrBookingClosed          = common.ErrBookingClosed
-	ErrPatientSessionOccupied = common.ErrPatientSessionOccupied
-	ErrPatientWeeklyQuotaFull = common.ErrPatientWeeklyQuotaFull
+	ErrForbidden                  = common.ErrForbidden
+	ErrNotFound                   = common.ErrNotFound
+	ErrInvalid                    = common.ErrInvalid
+	ErrConflict                   = common.ErrConflict
+	ErrInvalidState               = common.ErrInvalidState
+	ErrCapacityFull               = common.ErrCapacityFull
+	ErrBookingClosed              = common.ErrBookingClosed
+	ErrPatientItemSessionOccupied = common.ErrPatientItemSessionOccupied
+	ErrPatientWeeklyQuotaFull     = common.ErrPatientWeeklyQuotaFull
 )
 
 func loadCached[T any](ctx context.Context, cache Cache, flights *flightGroup, key string, ttl time.Duration, loader func() (T, bool, error)) (T, bool, error) {

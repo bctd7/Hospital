@@ -10,8 +10,8 @@ import (
 	"hospital/service/appointment/rpc/internal/manager/common"
 )
 
-func TestBookingRPCErrorIncludesPatientSessionReason(t *testing.T) {
-	value, ok := status.FromError(bookingRPCError(common.ErrPatientSessionOccupied))
+func TestBookingRPCErrorIncludesPatientItemSessionReason(t *testing.T) {
+	value, ok := status.FromError(bookingRPCError(common.ErrPatientItemSessionOccupied))
 	if !ok {
 		t.Fatal("bookingRPCError did not return a gRPC status")
 	}
@@ -20,11 +20,11 @@ func TestBookingRPCErrorIncludesPatientSessionReason(t *testing.T) {
 	}
 	for _, detail := range value.Details() {
 		info, ok := detail.(*errdetails.ErrorInfo)
-		if ok && info.GetReason() == "PATIENT_SESSION_OCCUPIED" && info.GetDomain() == "hospital.appointment" {
+		if ok && info.GetReason() == "PATIENT_ITEM_SESSION_OCCUPIED" && info.GetDomain() == "hospital.appointment" {
 			return
 		}
 	}
-	t.Fatal("missing PATIENT_SESSION_OCCUPIED ErrorInfo")
+	t.Fatal("missing PATIENT_ITEM_SESSION_OCCUPIED ErrorInfo")
 }
 
 func TestBookingRPCErrorIncludesExaminationWindowReason(t *testing.T) {

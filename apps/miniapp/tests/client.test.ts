@@ -83,8 +83,8 @@ describe("api client", () => {
         options.success({
           statusCode: 409,
           data: {
-            code: "PATIENT_SESSION_OCCUPIED",
-            message: "patient already has a pending booking in this date and session",
+            code: "PATIENT_ITEM_SESSION_OCCUPIED",
+            message: "patient already has an active booking for this item in this date and session",
           },
         });
       }),
@@ -93,7 +93,7 @@ describe("api client", () => {
     await expect(
       request({ path: "/api/v1/patient/appointment/bookings", method: "POST" }),
     ).rejects.toMatchObject({
-      code: "PATIENT_SESSION_OCCUPIED",
+      code: "PATIENT_ITEM_SESSION_OCCUPIED",
       statusCode: 409,
     });
   });
