@@ -15,9 +15,9 @@ contracts/
 
 - HTTP：`contracts/api/app.api`；
 - Identity RPC：`contracts/proto/identity/v1/identity.proto`；
+- Appointment RPC：`contracts/proto/appointment/v1/appointment.proto`；
 - 权限目录：`contracts/authz/permissions.yaml`；
 - 事件信封：`contracts/events/event-envelope.schema.json`；
-- 生成的 HTTP 文档：`docs/api/openapi.json`。
 
 ## 修改规则
 
@@ -27,14 +27,14 @@ contracts/
 4. 新字段优先向后兼容，删除或改变语义需要显式版本策略；
 5. HTTP、RPC 和事件使用独立边界，不复用数据库 Model；
 6. 手机号、验证码、Token 和 Secret 不写入示例；
-7. 契约变更必须同步测试和 Swagger 快照。
+7. 契约变更必须同步生成代码、消费方和测试。
 
 ## 校验
 
 ```powershell
 goctl api validate -api contracts/api/app.api
-goctl api swagger --api contracts/api/app.api --dir docs/api --filename openapi
 go test ./contracts/...
 ```
 
-业务目的、状态机和完成范围写在 `plan/`；本地启动写在对应 README；字段、路径和方法只在本目录维护。
+仓库当前不提交生成式 OpenAPI 快照。业务目的、状态机和完成范围写在 `plan/`；本地启动写在对应 README；
+字段、路径和方法只在本目录维护。

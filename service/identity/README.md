@@ -94,7 +94,7 @@ service/identity/rpc/
 
 ## HTTP 能力
 
-HTTP 接口由 `app-api` 暴露，完整字段见 `contracts/api/` 与 `docs/api/openapi.json`。
+HTTP 接口由 `app-api` 暴露，完整字段见 `contracts/api/identity-*.api`。
 
 | 范围 | 主要路径 |
 |---|---|
@@ -155,7 +155,7 @@ MySQL 集成测试通过 `IDENTITY_TEST_MYSQL_DSN` 显式启用。阶段收尾�
 4. 涉及授权的变化必须递增 `authorization_version`，在同一事务写入授权 Outbox，并由 Consumer 从 Kafka 同步到 Redis；组织变化当前只写审计，不发布事件；
 5. 涉及手机号、验证码或 Token 的新 RPC 必须加入客户端和服务端正文日志屏蔽名单；
 6. 新查询要明确是公共目录、本人查询还是管理员查询，不能共用一个返回对象泄漏字段；
-7. 新接口完成后重新生成 Swagger，并补充数据库集成与 HTTP 全链路测试。
+7. 新接口完成后同步生成代码、消费方，并补充数据库集成与 HTTP 全链路测试。
 
 ## 暂不包含
 

@@ -6,8 +6,8 @@
 
 | 组件 | 镜像 | 主机地址 | 用途 |
 |---|---|---|---|
-| MySQL | `mysql:8.4.11` | `127.0.0.1:3306` | 业务事实库；首期包含独立 `hospital_identity` 数据库和账号 |
-| Redis | `redis:7.4.10-alpine` | `127.0.0.1:6379` | Refresh Session 和授权版本同步状态 |
+| MySQL | `mysql:8.4.11` | `127.0.0.1:3306` | 独立的 Identity 与 Appointment 业务数据库和账号 |
+| Redis | `redis:7.4.10-alpine` | `127.0.0.1:6379` | Refresh Session、授权版本和 Appointment 热点缓存 |
 | Kafka | `apache/kafka:4.2.0` | `127.0.0.1:9092` | 传递 Identity Outbox 授权版本事件 |
 
 Kafka 使用单节点 KRaft combined mode，仅用于本地开发、集成测试和功能验证。容器内客户端使用 `kafka:29092`，运行在 Windows 主机上的 Go 服务使用 `127.0.0.1:9092`。

@@ -18,8 +18,8 @@ manager/
 │  ├─ project_room.go      房间可执行项目关系
 │  ├─ booking.go           管理删除及配置变化对预约的影响
 │  ├─ examination.go       在项目时间内开始检查
-│  ├─ examination.go       检查开始状态与实际执行人员
 │  ├─ report.go            报告草稿、完成发布、正式更正和工作人员读取
+│  ├─ message.go           当前科室消息与逐账号已读
 │  ├─ input/               业务方法输入及输入整体规则
 │  └─ support/             校验、授权、窗口约束、幂等和缓存辅助
 └─ common/                 无角色、无业务动作的基础契约

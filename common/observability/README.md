@@ -9,8 +9,8 @@ Logic 使用稳定的事件名称记录重要业务结果：
 ```go
 projectlog.Info(
 	l.ctx,
-	"planning.plan.created",
-	logx.Field("plan_id", planID),
+	"appointment.booking.created",
+	logx.Field("booking_id", bookingID),
 )
 ```
 
@@ -19,9 +19,9 @@ projectlog.Info(
 ```go
 projectlog.Error(
 	l.ctx,
-	"planning.plan.creation_failed",
+	"appointment.booking.creation_failed",
 	err,
-	logx.Field("plan_id", planID),
+	logx.Field("booking_id", bookingID),
 )
 ```
 

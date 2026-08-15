@@ -1,4 +1,4 @@
-# Identity Repository
+# Identity 持久化适配器
 
 本目录只保存领域 Store 接口的数据库适配实现，不定义账号、组织、授权或会话规则。领域接口仍由
 `account`、`authentication`、`organization`、`session` 和 `messaging/outbox` 等包拥有。

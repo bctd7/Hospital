@@ -7,8 +7,9 @@
   → CloudBase AnyService（hospitalapi）
   → ECS:8888
   → App API
-  → Identity RPC
-  → MySQL / Redis
+  ├→ Identity RPC
+  └→ Appointment RPC
+  → 各自的 MySQL / Redis
   → Outbox → Kafka → Redis 授权版本同步
 ```
 
@@ -34,7 +35,7 @@
   -> identity-migrate 与 appointment-migrate 分别执行压平后的 000001 后退出
   -> identity-bootstrap-admin 创建医院根节点和多个超级管理员后退出
   -> Kafka 启动，kafka-init 创建授权事件 Topic 后退出
-  -> Redis、identity-rpc、app-api 启动
+  -> Redis、identity-rpc、appointment-rpc、app-api 启动
   -> 后端健康检查通过
   -> 构建并上传微信体验版
 ```
@@ -95,7 +96,8 @@ docker compose --env-file .env.production -f docker-compose.yml logs identity-mi
 curl --fail http://127.0.0.1:8888/api/v1/health
 ```
 
-两个管理员随后使用各自手机号接收真实短信验证码登录。登录后由管理员页面创建院区、科室和医生。
+两个管理员随后使用各自手机号接收真实短信验证码登录。需要完整体验数据时执行下方受保护的体验数据脚本；
+不执行脚本时，院区、科室和医生需通过 Identity 管理接口建立。
 
 体验版需要预置完整测试链路时，只能在刚完成迁移和两个管理员初始化、尚无业务数据的数据库上执行：
 
@@ -158,7 +160,7 @@ gzip -t backups/hospital-时间戳.sql.gz
 
 - 安装 Ubuntu 22.04、Docker Engine 和 Compose v2；
 - 安全组开放 SSH `22` 和后端源站 `8888`；
-- 不开放 MySQL `3306`、Redis `6379`、Identity RPC `8080`；
+- 不开放 MySQL `3306`、Redis `6379`、Identity RPC `8080` 和 Appointment RPC `8081`；
 - 把同一版本仓库放到 `/opt/hospital`；
 - 把旧服务器的 `.env.production` 安全复制到新服务器：
 
@@ -175,7 +177,7 @@ cd /opt/hospital/deploy/production
 chmod 600 .env.production
 chmod +x scripts/*.sh
 ./scripts/deploy.sh
-docker compose --env-file .env.production -f docker-compose.yml stop app-api identity-rpc
+docker compose --env-file .env.production -f docker-compose.yml stop app-api identity-rpc appointment-rpc
 ```
 
 把备份上传到新服务器后恢复：
@@ -328,7 +330,7 @@ cd /opt/hospital/deploy/production
 
 ```bash
 curl --fail http://127.0.0.1:8888/api/v1/health
-docker compose --env-file .env.production -f docker-compose.yml logs --tail=100 app-api identity-rpc
+docker compose --env-file .env.production -f docker-compose.yml logs --tail=100 app-api identity-rpc appointment-rpc
 ```
 
 后端接口兼容时，小程序不需要重新上传。
@@ -413,7 +415,7 @@ cd /opt/hospital/deploy/production
 ```bash
 curl --fail http://127.0.0.1:8888/api/v1/health
 docker compose --env-file .env.production -f docker-compose.yml ps
-docker compose --env-file .env.production -f docker-compose.yml logs --tail=100 app-api identity-rpc kafka
+docker compose --env-file .env.production -f docker-compose.yml logs --tail=100 app-api identity-rpc appointment-rpc kafka
 ```
 
 然后在手机体验版验证：启动、短信登录、退出登录和关键页面。

@@ -19,12 +19,7 @@ Payload 包含 `operation_id`、`action` 和 `authorization_version`。生产者
 <domain>.<entity>.<action>.v<major>
 ```
 
-例如：
-
-```text
-identity.authorization.changed.v1
-planning.plan.created.v1
-```
+当前实际事件为 `identity.authorization.changed.v1`。没有生产者、消费者和重放策略的未来事件不提前加入目录。
 
 生产者和消费者必须共同约定：
 

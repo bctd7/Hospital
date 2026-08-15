@@ -10,11 +10,15 @@
 - `appointment_room_examination_items`：房间可执行的检查项目；
 - `appointment_room_weekly_windows`：房间周开放时间和共享容量；
 - `appointment_item_weekly_windows`：项目独立的周预约时间和停止新增时间；
-- `appointment_resource_operations`、`appointment_resource_audit`：房间、关系和窗口操作的幂等结果与审计。
-- `appointment_bookings`：待检查、检查中、已完成和未到场状态；
+- `appointment_resource_operations`、`appointment_resource_audit`：房间、关系和窗口操作的幂等结果与审计；
+- `appointment_room_date_capacity`：房间在具体日期和上午/下午的容量事实；
 - `appointment_patient_weekly_quota_usage`：患者每自然周已经消耗的预约额度；
+- `appointment_patient_session_claims`：患者在具体日期和上午/下午的唯一待检查占用；
+- `appointment_bookings`：待检查、检查中、已完成、未到场和已取消预约及关键快照；
+- `appointment_booking_operations`：预约写操作幂等结果；
 - `appointment_examination_reports`：一次预约唯一的报告主体和检查资源快照；
-- `appointment_examination_report_versions`：可编辑草稿、当前正式版和不可覆盖的历史更正版本。
+- `appointment_examination_report_versions`：可编辑草稿、当前正式版和不可覆盖的历史更正版本；
+- `appointment_message_reads`：每个账号对动态消息键的已读时间，不保存消息正文。
 
 本地执行：
 

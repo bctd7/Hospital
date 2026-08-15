@@ -1,10 +1,10 @@
-# Scripts
+# 开发与运维脚本
 
 本目录保存已经实现、可重复执行且失败时返回非零退出码的开发脚本。
 
 | 脚本 | 用途 |
 |---|---|
-| `start-backend.ps1` | 按 UTF-8 加载 `.env`，构建并启动 Identity RPC 与 App API |
+| `start-backend.ps1` | 按 UTF-8 加载 `.env`，构建并启动 Identity RPC、Appointment RPC 与 App API |
 | `seed-comprehensive-test-data.ps1` | 向已经执行最新版迁移的本地 Identity 与 Appointment 数据库写入综合联调数据 |
 | `db-bootstrap-local.ps1` | 启动本地 MySQL、幂等创建数据库/账号并执行迁移 |
 | `migrate.ps1` | 执行升级、受限回滚、版本查询和显式基线登记 |

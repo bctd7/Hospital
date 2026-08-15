@@ -1,48 +1,34 @@
-# Hospital 规划文档
+# Hospital 规划索引
 
-本目录按交付对象分为前端与后端两条主线。当前文档只描述有效决策；被替代的微信主登录、空白
-初始化阶段和重复页面草案已删除，其 Git 历史仍可追溯。
+本目录只保留当前有效的架构决定、已经完成的业务归档和仍需评审的后续事项。HTTP、gRPC 和事件字段不在
+Plan 中重复维护，分别以 `contracts/api/`、`contracts/proto/` 和 `contracts/events/` 为事实来源。
 
-当前里程碑：Identity 认证、授权、组织、账号与医生管理首期已经完成并归档；Appointment 预约检查服务
-已经按上午/下午大窗口模型收敛为当前唯一待人工评审的模块 Plan。评审通过后再进入契约和最小闭环实现。
+## 当前状态
 
-## 前端
+| 模块 | 状态 | 说明 |
+|---|---|---|
+| Identity | 首期已完成 | 手机号认证、会话、授权版本、组织、账号与医生管理已经形成闭环 |
+| Appointment | 当前范围已完成 | 项目、房间、周窗口、预约、容量、检查、报告和消息已经落地 |
+| 小程序 | 已接入上述真实接口 | 患者端与工作人员端共用登录身份，但使用不同页面与权限范围 |
+| 就诊人、缴费、医保、票据等 | 未规划或仅保留入口 | 不把展示入口误写成后端已实现能力 |
 
-[frontend](./frontend/) 分为：
+Appointment 原先按阶段拆分的 1～5 号实施稿已经合并为
+[Appointment 已实现归档](./backend/modules/implemented/02-appointment-service.md)。旧 Mock 方案、重复接口清单和已经
+完成的阶段待办不再保留；需要追溯时使用 Git 历史。
 
-- `api/`：HTTP 契约、会话、身份、刷新和安全边界；
-- `pages/`：路由、页面结构、交互状态与页面验收标准。
+## 阅读顺序
 
-前端当前采用 uni-app + Vue 3 + TypeScript + Vite，主登录为手机号 PNVS 短信认证。
+- [后端规划](./backend/README.md)：服务边界、交付规则和模块状态；
+- [前端规划](./frontend/README.md)：小程序页面事实、身份版本和剩余边界；
+- [Identity 已实现归档](./backend/modules/implemented/01-identity-service.md)；
+- [Appointment 已实现归档](./backend/modules/implemented/02-appointment-service.md)。
 
-## 后端
+## 文档边界
 
-[backend](./backend/) 分为：
+- README 回答“当前有什么、从哪里读、如何运行”；
+- Plan 回答“为什么这样设计、当前完成到哪里、后续要确认什么”；
+- 契约回答“路径、字段、错误和版本是什么”；
+- Migration 回答“数据库最终结构是什么”。
 
-- `overview/`：技术选型、系统边界、可观测性、业务全景和交付路线；
-- `modules/`：当前 Appointment Plan、持续业务审计约束，以及已实施模块归档。
-
-后端当前采用 Go + go-zero、MySQL、Redis、Kafka；小程序只访问 App API，服务间使用 zRPC，
-异步状态传播使用 Outbox + Kafka。
-
-可执行 HTTP 字段不在 Plan 中重复维护。统一查看 `contracts/api/` 和
-[`docs/api/openapi.json`](../docs/api/openapi.json)。
-
-## 文档维护规则
-
-三类文档必须各司其职：
-
-| 文档 | 回答的问题 | 主要位置 | 不应包含 |
-|---|---|---|---|
-| README | 当前目录有什么、如何运行、从哪里开始读 | 仓库根目录和各稳定模块目录 | 大段未来设想、完整接口字段 |
-| 接口文档 | 如何调用、如何鉴权、字段和错误是什么 | `contracts/`、生成的 `docs/api/openapi.json` | 架构讨论、页面交互草案 |
-| Plan | 为什么这样设计、业务规则、完成边界和下一步 | `plan/` | 可由契约生成的字段清单、启动手册 |
-
-`plan/frontend/api/` 只记录前端消费接口时的状态、缓存和错误处理策略，不是接口事实源；接口发生变化时
-先修改 `contracts/`，再重新生成 OpenAPI，最后按需更新消费方案。
-
-1. 当前方案发生替代时直接更新主文档，不长期并列保存“历史方案”；
-2. 前端页面不复制数据库设计，后端模块不描述像素级界面；
-3. HTTP/RPC 字段以 `contracts/` 为准，文档只说明用途和约束；
-4. 尚未确认的业务写为“待确认”，不得伪装成已实现接口；
-5. 新模块优先补充到既有索引，确有独立生命周期时再新建文档。
+已实现功能发生变化时，同一次提交应更新相应归档和模块 README。被替代的方案直接修改或删除，不长期并列
+保存多个相互冲突的版本。
