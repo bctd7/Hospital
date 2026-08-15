@@ -35,9 +35,7 @@ const phone = ref("");
 const verificationCode = ref("");
 const sendingCode = ref(false);
 const countdown = ref(0);
-const avatarChoosing = ref(false);
 let countdownTimer: ReturnType<typeof setInterval> | null = null;
-let avatarChoosingTimer: ReturnType<typeof setTimeout> | null = null;
 
 onLoad(() => {
   const profile = getDisplayProfile();
@@ -45,22 +43,8 @@ onLoad(() => {
   nickname.value = profile.nickname === "微信用户" ? "" : profile.nickname;
 });
 
-function beginAvatarChoice() {
-  avatarChoosing.value = true;
-  if (avatarChoosingTimer) clearTimeout(avatarChoosingTimer);
-  avatarChoosingTimer = setTimeout(() => {
-    avatarChoosing.value = false;
-    avatarChoosingTimer = null;
-  }, 1200);
-}
-
 function chooseAvatar(event: ChooseAvatarEvent) {
   avatarUrl.value = event.detail.avatarUrl ?? "";
-  avatarChoosing.value = false;
-  if (avatarChoosingTimer) {
-    clearTimeout(avatarChoosingTimer);
-    avatarChoosingTimer = null;
-  }
 }
 
 function updateNickname(event: Event) {
@@ -169,7 +153,6 @@ onUnmounted(() => {
   if (countdownTimer) {
     clearInterval(countdownTimer);
   }
-  if (avatarChoosingTimer) clearTimeout(avatarChoosingTimer);
 });
 </script>
 
@@ -182,9 +165,7 @@ onUnmounted(() => {
       <button
         class="entry-page__avatar-button"
         open-type="chooseAvatar"
-        :disabled="avatarChoosing"
         aria-label="选择微信头像"
-        @tap="beginAvatarChoice"
         @chooseavatar="chooseAvatar"
       >
         <ProfileAvatar :src="avatarUrl" size="large" />

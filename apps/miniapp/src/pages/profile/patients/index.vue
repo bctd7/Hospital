@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onShow, onUnload } from "@dcloudio/uni-app";
+import { onShow } from "@dcloudio/uni-app";
 import { computed, ref } from "vue";
 
 import ProfileAvatar from "@/components/profile/ProfileAvatar.vue";
@@ -32,8 +32,6 @@ const nickname = ref("微信用户");
 const phoneMasked = ref("");
 const editingNickname = ref(false);
 const loggingOut = ref(false);
-const avatarChoosing = ref(false);
-let avatarChoosingTimer: ReturnType<typeof setTimeout> | null = null;
 
 const phoneDisplay = computed(() => {
   if (sessionState.status !== "authenticated") {
@@ -64,27 +62,9 @@ onShow(() => {
   }
 });
 
-onUnload(() => {
-  if (avatarChoosingTimer) clearTimeout(avatarChoosingTimer);
-});
-
-function beginAvatarChoice() {
-  avatarChoosing.value = true;
-  if (avatarChoosingTimer) clearTimeout(avatarChoosingTimer);
-  avatarChoosingTimer = setTimeout(() => {
-    avatarChoosing.value = false;
-    avatarChoosingTimer = null;
-  }, 1200);
-}
-
 function chooseAvatar(event: ChooseAvatarEvent) {
   const nextAvatarUrl = event.detail.avatarUrl?.trim() ?? "";
   avatarUrl.value = nextAvatarUrl;
-  avatarChoosing.value = false;
-  if (avatarChoosingTimer) {
-    clearTimeout(avatarChoosingTimer);
-    avatarChoosingTimer = null;
-  }
   saveDisplayProfile({
     avatarUrl: nextAvatarUrl,
     nickname: nickname.value,
@@ -150,9 +130,7 @@ async function logoutCurrentSession() {
       <button
         class="patients-row patients-row--avatar"
         open-type="chooseAvatar"
-        :disabled="avatarChoosing"
         aria-label="修改本人头像"
-        @tap="beginAvatarChoice"
         @chooseavatar="chooseAvatar"
       >
         <text class="patients-row__label">头像</text>
