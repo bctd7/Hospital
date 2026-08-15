@@ -130,26 +130,36 @@ SET @hospital_local_today = DATE(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')
 SELECT IF(
   (SELECT COUNT(*) FROM hospital_identity.identity_organization_units WHERE unit_type = 'campus' AND status = 'active') >= 2
   AND (SELECT COUNT(*) FROM hospital_identity.identity_organization_units WHERE unit_type = 'department' AND status = 'active') >= 4
+  AND (SELECT COUNT(*) FROM hospital_identity.identity_staff_profiles WHERE staff_status = 'active') >= 4
+  -- 153 管理员以真实超级管理员账号兼任报告患者，因此 account_type 不伪装成 patient。
+  AND (SELECT COUNT(*) FROM hospital_identity.identity_accounts WHERE account_type = 'patient' AND status = 'active') >= 9
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings) = 30
   AND (SELECT COUNT(DISTINCT status) FROM hospital_appointment.appointment_bookings) = 8
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_items
        WHERE estimated_duration_minutes BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes, 5) = 0) = 10
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings
-       WHERE estimated_duration_minutes_snapshot BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes_snapshot, 5) = 0) = 10
+       WHERE estimated_duration_minutes_snapshot BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes_snapshot, 5) = 0) = 30
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings WHERE status = 'canceled') >= 1
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings WHERE status = 'report_pending' AND service_date < @hospital_local_today) >= 1
-  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_check_queues) >= 2
-  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_check_queue_entries) >= 3
-  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_check_queue_events WHERE event_type = 'called') >= 2
+  AND (SELECT COUNT(DISTINCT department_id) FROM hospital_appointment.appointment_bookings WHERE service_date = @hospital_local_today) = 4
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_check_queues) >= 4
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_check_queue_entries) >= 9
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_check_queue_events WHERE event_type = 'called') >= 3
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings
        WHERE id = '40000000-0000-4000-8000-000000000007'
          AND started_at = CONVERT_TZ(TIMESTAMP(DATE_SUB(@hospital_local_today, INTERVAL 1 DAY), '09:15:00'), '+08:00', '+00:00')) = 1
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_report_versions WHERE version_kind = 'correction' AND status = 'published') >= 1
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_reports) >= 8
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_reports WHERE status = 'published') >= 6
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings b
+       LEFT JOIN hospital_appointment.appointment_examination_reports r ON r.booking_id = b.id
+       WHERE b.status = 'report_pending' AND r.id IS NULL) >= 1
   AND (SELECT COUNT(*)
        FROM hospital_identity.identity_account_phones p
        JOIN hospital_identity.identity_account_roles ar ON ar.account_id = p.account_id
        JOIN hospital_identity.identity_roles r ON r.id = ar.role_id AND r.code = 'super_admin'
        JOIN hospital_appointment.appointment_examination_reports report ON report.patient_account_id = p.account_id
-       WHERE p.phone_fingerprint = @phone_patient_1 AND report.status = 'published') >= 1
+       WHERE p.phone_fingerprint = @phone_patient_1 AND report.status = 'published') >= 4
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_message_reads) >= 1,
   'ready', 'incomplete');
 "@
@@ -164,4 +174,6 @@ Write-Output "Local administrators: 13482154556 and 15363658538"
 Write-Output "Radiology doctor: 13800000001"
 Write-Output "Ultrasound doctor: 13800000002"
 Write-Output "Report patient (also a super administrator): 15363658538"
-Write-Output "Other patients: 13900000002 through 13900000004"
+Write-Output "Login-capable patients: 13900000002 through 13900000004"
+Write-Output "Display-only patients: 张伟、刘洋、陈静、孙磊、周婷、吴昊"
+Write-Output "Coverage: 30 bookings, 8 statuses, 4 department queues, 8 reports"
