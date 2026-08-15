@@ -122,8 +122,8 @@ EXPERIENCE_SEED_ACKNOWLEDGE=fresh-experience-database ./scripts/seed-experience.
 ```powershell
 $miniappRoot = 'C:\Users\27902\GolandProjects\Hospital\apps\miniapp'
 $wechatCli = 'C:\Program Files (x86)\Tencent\微信web开发者工具\cli.bat'
-$releaseVersion = '0.3.2'
-$releaseDescription = '增加检查预计时长，完善预约与资源管理展示。'
+$releaseVersion = '0.3.4'
+$releaseDescription = '增加检查报到、候检叫号与未到场展示，完善检查报告流程。'
 
 Set-Location $miniappRoot
 npm run test
