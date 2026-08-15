@@ -44,10 +44,22 @@ const windowSession = ref<AppointmentSession>("morning");
 const startTime = ref("09:00");
 const cutoffTime = ref("11:30");
 const endTime = ref("12:00");
+const durationOptions = Array.from({ length: 96 }, (_, index) => (index + 1) * 5);
+const durationLabels = durationOptions.map((minutes) => {
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+  if (!hours) return `${minutes} 分钟`;
+  if (!remainder) return `${hours} 小时`;
+  return `${hours} 小时 ${remainder} 分钟`;
+});
 
 const canCreate = computed(() => hasPermission(sessionState.principal, "appointment.create"));
 const canUpdate = computed(() => hasPermission(sessionState.principal, "appointment.update"));
 const isNew = computed(() => !itemId.value);
+const durationIndex = computed(() => {
+  const index = durationOptions.indexOf(estimatedDurationMinutes.value);
+  return index >= 0 ? index : durationOptions.indexOf(30);
+});
 const sortedWindows = computed(() => [...windows.value].sort((a, b) =>
   a.weekday - b.weekday || (a.session === "morning" ? -1 : 1),
 ));
@@ -140,6 +152,11 @@ async function saveItem() {
   } finally {
     saving.value = false;
   }
+}
+
+function selectDuration(event: { detail: { value: string | number } }) {
+  const selected = durationOptions[Number(event.detail.value)];
+  if (selected) estimatedDurationMinutes.value = selected;
 }
 
 function changeItemStatus() {
@@ -312,8 +329,18 @@ function disableWindow(value: ItemWeeklyWindow) {
         </view>
         <text class="field-label">项目名称</text>
         <input v-model="name" class="field-input" maxlength="128" placeholder="例如：胸部 CT" />
-        <text class="field-label">预计检查时长（分钟）</text>
-        <input v-model.number="estimatedDurationMinutes" class="field-input" type="number" placeholder="5–480，按 5 分钟递增" />
+        <text class="field-label">预计检查时长</text>
+        <picker
+          mode="selector"
+          :value="durationIndex"
+          :range="durationLabels"
+          @change="selectDuration"
+        >
+          <view class="field-picker">
+            <text>{{ durationLabels[durationIndex] }}</text>
+            <text class="field-picker__arrow">›</text>
+          </view>
+        </picker>
         <text class="field-label">患者可见检查说明</text>
         <textarea v-model="description" class="field-textarea" maxlength="4000" placeholder="说明检查用途、准备事项等" />
         <button class="primary-button" :disabled="saving || (isNew ? !canCreate : !canUpdate)" @tap="saveItem">
@@ -377,5 +404,5 @@ function disableWindow(value: ItemWeeklyWindow) {
 </template>
 
 <style scoped>
-button::after{display:none}.detail-page{min-height:100vh;padding:24rpx;box-sizing:border-box;background:#f2f6fa}.context-card,.section{padding:26rpx;background:#fff;border:1rpx solid #e6ecf2;border-radius:24rpx}.context-card__label,.context-card__value{display:block}.context-card__label{color:#99a3b2;font-size:20rpx}.context-card__value{margin-top:7rpx;color:#344157;font-size:26rpx;font-weight:680}.section{margin-top:20rpx}.section__heading{display:flex;align-items:center;justify-content:space-between;color:#273449;font-size:28rpx;font-weight:700}.section__heading button,.window-row button{width:auto;margin:0;padding:0 16rpx;color:#1684ca;font-size:21rpx;line-height:50rpx;background:#e9f5fc;border-radius:25rpx}.section__hint{display:block;margin-top:12rpx;color:#8d98a8;font-size:20rpx;line-height:1.6}.field-label{display:block;margin-top:22rpx;color:#657287;font-size:21rpx}.field-input,.field-textarea{width:100%;margin-top:10rpx;padding:0 20rpx;box-sizing:border-box;color:#28364a;font-size:24rpx;background:#f6f8fa;border:1rpx solid #e4eaf0;border-radius:16rpx}.field-input{height:72rpx}.field-textarea{height:190rpx;padding-top:18rpx}.report-field{height:150rpx}.template-version{color:#77869a;font-size:20rpx;font-weight:500}.primary-button,.danger-button{width:100%;margin:22rpx 0 0;font-size:24rpx;line-height:72rpx;border-radius:36rpx}.primary-button{color:#fff;background:#168bd7}.danger-button{color:#c94b5e;background:#fbecef}.status{padding:5rpx 11rpx;font-size:18rpx;border-radius:13rpx}.status--active{color:#138766;background:#e1f7ef}.status--disabled{color:#a0616b;background:#f7e8eb}.inline-empty,.state{margin-top:18rpx;padding:48rpx 20rpx;color:#8d98a8;font-size:22rpx;text-align:center;background:#f7f9fb;border-radius:18rpx}.state{display:flex;flex-direction:column;gap:18rpx}.state--error{color:#c44f61}.state button{margin:auto;color:#1684ca;background:#e9f5fc}.window-row{display:flex;align-items:center;justify-content:space-between;gap:18rpx;margin-top:14rpx;padding:18rpx;background:#f7f9fb;border-radius:18rpx}.window-row__title,.window-row__time{display:block}.window-row__title{color:#344157;font-size:23rpx;font-weight:650}.window-row__time{margin-top:6rpx;color:#8390a3;font-size:19rpx}.window-row__actions{display:flex;align-items:center;gap:8rpx}.window-row__actions .text-danger{color:#c94b5e;background:#fbecef}.dialog-mask{position:fixed;inset:0;display:flex;align-items:flex-end;z-index:20;background:rgba(19,29,43,.48)}.dialog{width:100%;padding:30rpx 26rpx calc(30rpx + env(safe-area-inset-bottom));box-sizing:border-box;background:#fff;border-radius:30rpx 30rpx 0 0}.dialog__title{color:#263348;font-size:30rpx;font-weight:720}.picker-row{display:grid;grid-template-columns:1fr 1fr;gap:14rpx;margin-top:22rpx}.picker-row view{padding:0 20rpx;color:#425067;font-size:23rpx;line-height:68rpx;background:#f4f7fa;border-radius:16rpx}.dialog__notice{display:block;margin-top:20rpx;color:#bb7838;font-size:20rpx}.dialog__buttons{display:grid;grid-template-columns:1fr 1fr;gap:16rpx;margin-top:20rpx}.dialog__buttons button{margin:0;line-height:68rpx;border-radius:34rpx}.dialog__buttons .primary-button{margin:0}.primary-button[disabled]{opacity:.55}
+button::after{display:none}.detail-page{min-height:100vh;padding:24rpx;box-sizing:border-box;background:#f2f6fa}.context-card,.section{padding:26rpx;background:#fff;border:1rpx solid #e6ecf2;border-radius:24rpx}.context-card__label,.context-card__value{display:block}.context-card__label{color:#99a3b2;font-size:20rpx}.context-card__value{margin-top:7rpx;color:#344157;font-size:26rpx;font-weight:680}.section{margin-top:20rpx}.section__heading{display:flex;align-items:center;justify-content:space-between;color:#273449;font-size:28rpx;font-weight:700}.section__heading button,.window-row button{width:auto;margin:0;padding:0 16rpx;color:#1684ca;font-size:21rpx;line-height:50rpx;background:#e9f5fc;border-radius:25rpx}.section__hint{display:block;margin-top:12rpx;color:#8d98a8;font-size:20rpx;line-height:1.6}.field-label{display:block;margin-top:22rpx;color:#657287;font-size:21rpx}.field-input,.field-textarea,.field-picker{width:100%;margin-top:10rpx;padding:0 20rpx;box-sizing:border-box;color:#28364a;font-size:24rpx;background:#f6f8fa;border:1rpx solid #e4eaf0;border-radius:16rpx}.field-input,.field-picker{height:72rpx}.field-picker{display:flex;align-items:center;justify-content:space-between}.field-picker__arrow{color:#8491a4;font-size:32rpx}.field-textarea{height:190rpx;padding-top:18rpx}.report-field{height:150rpx}.template-version{color:#77869a;font-size:20rpx;font-weight:500}.primary-button,.danger-button{width:100%;margin:22rpx 0 0;font-size:24rpx;line-height:72rpx;border-radius:36rpx}.primary-button{color:#fff;background:#168bd7}.danger-button{color:#c94b5e;background:#fbecef}.status{padding:5rpx 11rpx;font-size:18rpx;border-radius:13rpx}.status--active{color:#138766;background:#e1f7ef}.status--disabled{color:#a0616b;background:#f7e8eb}.inline-empty,.state{margin-top:18rpx;padding:48rpx 20rpx;color:#8d98a8;font-size:22rpx;text-align:center;background:#f7f9fb;border-radius:18rpx}.state{display:flex;flex-direction:column;gap:18rpx}.state--error{color:#c44f61}.state button{margin:auto;color:#1684ca;background:#e9f5fc}.window-row{display:flex;align-items:center;justify-content:space-between;gap:18rpx;margin-top:14rpx;padding:18rpx;background:#f7f9fb;border-radius:18rpx}.window-row__title,.window-row__time{display:block}.window-row__title{color:#344157;font-size:23rpx;font-weight:650}.window-row__time{margin-top:6rpx;color:#8390a3;font-size:19rpx}.window-row__actions{display:flex;align-items:center;gap:8rpx}.window-row__actions .text-danger{color:#c94b5e;background:#fbecef}.dialog-mask{position:fixed;inset:0;display:flex;align-items:flex-end;z-index:20;background:rgba(19,29,43,.48)}.dialog{width:100%;padding:30rpx 26rpx calc(30rpx + env(safe-area-inset-bottom));box-sizing:border-box;background:#fff;border-radius:30rpx 30rpx 0 0}.dialog__title{color:#263348;font-size:30rpx;font-weight:720}.picker-row{display:grid;grid-template-columns:1fr 1fr;gap:14rpx;margin-top:22rpx}.picker-row view{padding:0 20rpx;color:#425067;font-size:23rpx;line-height:68rpx;background:#f4f7fa;border-radius:16rpx}.dialog__notice{display:block;margin-top:20rpx;color:#bb7838;font-size:20rpx}.dialog__buttons{display:grid;grid-template-columns:1fr 1fr;gap:16rpx;margin-top:20rpx}.dialog__buttons button{margin:0;line-height:68rpx;border-radius:34rpx}.dialog__buttons .primary-button{margin:0}.primary-button[disabled]{opacity:.55}
 </style>
