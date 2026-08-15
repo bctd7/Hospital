@@ -481,7 +481,7 @@ type ListItemWeeklyWindowsAPIResponse struct {
 }
 
 type ListMessagesAPIRequest struct {
-	DepartmentID string `form:"department_id"`
+	DepartmentID string `form:"department_id,optional"`
 	Page         int64  `form:"page,default=1"`
 	PageSize     int64  `form:"page_size,default=20"`
 }

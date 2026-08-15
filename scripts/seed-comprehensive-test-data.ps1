@@ -119,12 +119,16 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $verificationSQL = @"
+SET @hospital_local_today = DATE(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00'));
 SELECT IF(
   (SELECT COUNT(*) FROM hospital_identity.identity_organization_units WHERE unit_type = 'campus' AND status = 'active') >= 2
   AND (SELECT COUNT(*) FROM hospital_identity.identity_organization_units WHERE unit_type = 'department' AND status = 'active') >= 4
   AND (SELECT COUNT(DISTINCT status) FROM hospital_appointment.appointment_bookings) = 5
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings WHERE status = 'canceled') >= 1
-  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings WHERE status = 'in_progress' AND service_date < CURDATE()) >= 1
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings WHERE status = 'in_progress' AND service_date < @hospital_local_today) >= 1
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings
+       WHERE id = '40000000-0000-4000-8000-000000000007'
+         AND started_at = CONVERT_TZ(TIMESTAMP(DATE_SUB(@hospital_local_today, INTERVAL 1 DAY), '09:15:00'), '+08:00', '+00:00')) = 1
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_report_versions WHERE version_kind = 'correction' AND status = 'published') >= 1
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_message_reads) >= 1,
   'ready', 'incomplete');
