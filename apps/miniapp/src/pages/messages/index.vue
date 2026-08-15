@@ -4,6 +4,7 @@ import { computed, ref } from "vue";
 
 import { appointmentMessageApi } from "@/api/appointment";
 import AppPage from "@/components/layout/AppPage.vue";
+import { updateMessageBadge } from "@/services/messageBadge";
 import { loadDepartmentOptions, type DepartmentOption } from "@/services/organization";
 import { sessionState } from "@/stores/session";
 import type { AppointmentMessage } from "@/types/appointment";
@@ -56,7 +57,7 @@ async function initialize() {
         departmentUnreadCounts.value = Object.fromEntries(
           summary.departmentUnreadCounts.map((current) => [current.departmentId, current.unreadCount]),
         );
-        updateBadge(summary.unreadCount);
+        updateMessageBadge(summary.unreadCount);
         return;
       }
     }
@@ -77,7 +78,7 @@ async function loadMessages() {
   departmentUnreadCounts.value = Object.fromEntries(
     value.departmentUnreadCounts.map((current) => [current.departmentId, current.unreadCount]),
   );
-  updateBadge(value.unreadCount);
+  updateMessageBadge(value.unreadCount);
 }
 
 function chooseDepartment() {
@@ -126,7 +127,7 @@ async function openMessage(value: AppointmentMessage) {
           (departmentUnreadCounts.value[departmentId.value] ?? 0) - 1,
         );
       }
-      updateBadge(unreadCount.value);
+      updateMessageBadge(unreadCount.value);
     } catch (error) {
       uni.showToast({ title: messageOf(error, "标记已读失败"), icon: "none" });
       return;
@@ -149,18 +150,6 @@ function appointmentOf(value: AppointmentMessage) {
 
 function formatTime(value: string) {
   return appointmentMessageTime(value);
-}
-
-function updateBadge(count: number) {
-  if (count <= 0) {
-    clearBadge();
-    return;
-  }
-  uni.setTabBarBadge({ index: 2, text: count > 99 ? "99+" : String(count) });
-}
-
-function clearBadge() {
-  uni.removeTabBarBadge({ index: 2, fail: () => undefined });
 }
 
 function messageOf(error: unknown, fallback: string) {

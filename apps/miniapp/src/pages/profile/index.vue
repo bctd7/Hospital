@@ -4,6 +4,7 @@ import { computed, ref } from "vue";
 
 import ActionMenu from "@/components/menu/ActionMenu.vue";
 import ProfileHero from "@/components/profile/ProfileHero.vue";
+import { refreshMessageBadge } from "@/services/messageBadge";
 import {
   availableAppVariants,
   sessionState,
@@ -60,6 +61,7 @@ const menuItems: MenuEntry[] = [
 
 onShow(() => {
   navigationPending.value = false;
+  void refreshMessageBadge();
   const profile = getDisplayProfile();
   avatarUrl.value = profile.avatarUrl;
   nickname.value = profile.nickname;

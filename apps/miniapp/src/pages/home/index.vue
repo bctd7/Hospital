@@ -4,6 +4,7 @@ import { ref } from "vue";
 
 import PatientServiceHome from "@/components/home/PatientServiceHome.vue";
 import { homeWorkbenchAdapter } from "@/services/homeWorkbench";
+import { refreshMessageBadge } from "@/services/messageBadge";
 import { sessionState } from "@/stores/session";
 import type { HomeAction, HomeWorkbenchView } from "@/types/homeWorkbench";
 
@@ -16,6 +17,7 @@ let loadGeneration = 0;
 onShow(() => {
   navigationPending.value = false;
   uni.setNavigationBarTitle({ title: "首页" });
+  void refreshMessageBadge();
   void loadWorkbench();
 });
 

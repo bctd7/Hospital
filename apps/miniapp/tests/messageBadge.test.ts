@@ -37,6 +37,7 @@ describe("message tab badge", () => {
       setTabBarBadge: vi.fn(),
       removeTabBarBadge: vi.fn(),
     });
+    vi.stubGlobal("getCurrentPages", () => [{ route: "pages/home/index" }]);
   });
 
   it("loads the patient unread count", async () => {
@@ -46,7 +47,7 @@ describe("message tab badge", () => {
     await refreshMessageBadge();
 
     expect(mocks.listMine).toHaveBeenCalledWith(1, 1);
-    expect(uni.setTabBarBadge).toHaveBeenCalledWith({ index: 2, text: "4" });
+    expect(uni.setTabBarBadge).toHaveBeenCalledWith(expect.objectContaining({ index: 2, text: "4" }));
   });
 
   it("locks a doctor to the principal department", async () => {
@@ -69,6 +70,17 @@ describe("message tab badge", () => {
     await refreshMessageBadge();
 
     expect(mocks.listDepartment).toHaveBeenCalledWith("", 1, 1);
-    expect(uni.setTabBarBadge).toHaveBeenCalledWith({ index: 2, text: "12" });
+    expect(uni.setTabBarBadge).toHaveBeenCalledWith(expect.objectContaining({ index: 2, text: "12" }));
+  });
+
+  it("does not update the tab badge while a non-tab page is active", async () => {
+    vi.stubGlobal("getCurrentPages", () => [{ route: "pages/admin/appointment/booking-detail" }]);
+    mocks.listMine.mockResolvedValue({ unreadCount: 4 });
+    const { refreshMessageBadge } = await import("@/services/messageBadge");
+
+    await refreshMessageBadge();
+
+    expect(mocks.listMine).toHaveBeenCalledWith(1, 1);
+    expect(uni.setTabBarBadge).not.toHaveBeenCalled();
   });
 });

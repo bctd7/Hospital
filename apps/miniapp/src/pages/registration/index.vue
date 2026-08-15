@@ -5,6 +5,7 @@ import { computed, ref } from "vue";
 import {
   organizationAdminApi,
 } from "@/api/staffManagement";
+import { refreshMessageBadge } from "@/services/messageBadge";
 import DepartmentDoctorPanel from "@/components/staff/DepartmentDoctorPanel.vue";
 import DepartmentEditorDialog from "@/components/staff/DepartmentEditorDialog.vue";
 import DepartmentSidebar from "@/components/staff/DepartmentSidebar.vue";
@@ -86,6 +87,7 @@ const visibleDepartments = computed(() =>
 onShow(() => {
   navigationPending.value = false;
   uni.setNavigationBarTitle({ title: pageTitle.value });
+  void refreshMessageBadge();
   void refreshOrganization(false);
 });
 
