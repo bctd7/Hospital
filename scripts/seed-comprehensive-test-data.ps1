@@ -132,19 +132,19 @@ SELECT IF(
   AND (SELECT COUNT(*) FROM hospital_identity.identity_organization_units WHERE unit_type = 'department' AND status = 'active') >= 4
   AND (SELECT COUNT(*) FROM hospital_identity.identity_staff_profiles WHERE staff_status = 'active') >= 4
   -- 153 管理员以真实超级管理员账号兼任报告患者，因此 account_type 不伪装成 patient。
-  AND (SELECT COUNT(*) FROM hospital_identity.identity_accounts WHERE account_type = 'patient' AND status = 'active') >= 9
-  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings) = 30
+  AND (SELECT COUNT(*) FROM hospital_identity.identity_accounts WHERE account_type = 'patient' AND status = 'active') >= 10
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings) = 31
   AND (SELECT COUNT(DISTINCT status) FROM hospital_appointment.appointment_bookings) = 8
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_items
        WHERE estimated_duration_minutes BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes, 5) = 0) = 10
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings
-       WHERE estimated_duration_minutes_snapshot BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes_snapshot, 5) = 0) = 30
+       WHERE estimated_duration_minutes_snapshot BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes_snapshot, 5) = 0) = 31
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings WHERE status = 'canceled') >= 1
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings WHERE status = 'report_pending' AND service_date < @hospital_local_today) >= 1
   AND (SELECT COUNT(DISTINCT department_id) FROM hospital_appointment.appointment_bookings WHERE service_date = @hospital_local_today) = 4
-  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_check_queues) >= 4
-  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_check_queue_entries) >= 9
-  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_check_queue_events WHERE event_type = 'called') >= 3
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_check_queues) >= 5
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_check_queue_entries) >= 10
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_check_queue_events WHERE event_type = 'called') >= 4
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings
        WHERE id = '40000000-0000-4000-8000-000000000007'
          AND started_at = CONVERT_TZ(TIMESTAMP(DATE_SUB(@hospital_local_today, INTERVAL 1 DAY), '09:15:00'), '+08:00', '+00:00')) = 1
@@ -175,5 +175,5 @@ Write-Output "Radiology doctor: 13800000001"
 Write-Output "Ultrasound doctor: 13800000002"
 Write-Output "Report patient (also a super administrator): 15363658538"
 Write-Output "Login-capable patients: 13900000002 through 13900000004"
-Write-Output "Display-only patients: 张伟、刘洋、陈静、孙磊、周婷、吴昊"
-Write-Output "Coverage: 30 bookings, 8 statuses, 4 department queues, 8 reports"
+Write-Output "Display-only patients: 张伟、刘洋、陈静、孙磊、周婷、吴昊、林悦"
+Write-Output "Coverage: 31 bookings, 8 statuses, 5 room queues, 8 reports"

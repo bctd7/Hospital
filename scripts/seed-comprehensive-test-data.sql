@@ -30,6 +30,7 @@ SET @account_patient_7 = '21000000-0000-4000-8000-000000000007';
 SET @account_patient_8 = '21000000-0000-4000-8000-000000000008';
 SET @account_patient_9 = '21000000-0000-4000-8000-000000000009';
 SET @account_patient_10 = '21000000-0000-4000-8000-000000000010';
+SET @account_patient_11 = '21000000-0000-4000-8000-000000000011';
 
 INSERT INTO identity_organization_units (id, parent_id, unit_type, code, name, status, version) VALUES
 (@campus_main, @hospital, 'campus', 'MAIN', '总院区', 'active', 1),
@@ -52,7 +53,8 @@ INSERT INTO identity_accounts (id, account_type, status, authorization_version, 
 (@account_patient_7, 'patient', 'active', 1, 1),
 (@account_patient_8, 'patient', 'active', 1, 1),
 (@account_patient_9, 'patient', 'active', 1, 1),
-(@account_patient_10, 'patient', 'active', 1, 1);
+(@account_patient_10, 'patient', 'active', 1, 1),
+(@account_patient_11, 'patient', 'active', 1, 1);
 
 INSERT INTO identity_accounts (id, account_type, status, authorization_version, management_version)
 SELECT @account_patient_1, 'patient', 'active', 1, 1
@@ -71,7 +73,8 @@ INSERT INTO identity_account_profiles (account_id, nickname) VALUES
 (@account_patient_7, '陈静'),
 (@account_patient_8, '孙磊'),
 (@account_patient_9, '周婷'),
-(@account_patient_10, '吴昊');
+(@account_patient_10, '吴昊'),
+(@account_patient_11, '林悦');
 
 INSERT IGNORE INTO identity_account_profiles (account_id, nickname)
 VALUES (@account_patient_1, '体验管理员');
@@ -142,6 +145,12 @@ SET @current_end_time = CASE
     WHEN @current_session = 'morning' THEN LEAST(CAST('11:59:59' AS TIME), TIME(DATE_ADD(@local_now, INTERVAL 30 MINUTE)))
     ELSE LEAST(CAST('23:59:59' AS TIME), TIME(DATE_ADD(@local_now, INTERVAL 30 MINUTE)))
 END;
+SET @expired_start_time = CASE
+    WHEN @current_session = 'morning' THEN GREATEST(CAST('00:00:00' AS TIME), TIME(DATE_SUB(@local_now, INTERVAL 20 MINUTE)))
+    ELSE GREATEST(CAST('12:00:00' AS TIME), TIME(DATE_SUB(@local_now, INTERVAL 20 MINUTE)))
+END;
+SET @expired_cutoff_time = TIME(DATE_SUB(@local_now, INTERVAL 5 MINUTE));
+SET @expired_end_time = TIME(DATE_SUB(@local_now, INTERVAL 1 MINUTE));
 SET @current_close_time = CASE WHEN @current_session = 'morning' THEN '11:59:59' ELSE '23:59:59' END;
 SET @current_session_started_at = CASE
     WHEN @current_session = 'morning' THEN TIMESTAMP(@today, '00:00:00')
@@ -265,6 +274,7 @@ SET @booking_lab_report_pending = '40000000-0000-4000-8000-000000000027';
 SET @booking_east_completed = '40000000-0000-4000-8000-000000000028';
 SET @booking_lab_canceled = '40000000-0000-4000-8000-000000000029';
 SET @booking_ct_completed_other = '40000000-0000-4000-8000-000000000030';
+SET @booking_called_after_end = '40000000-0000-4000-8000-000000000031';
 
 INSERT INTO appointment_bookings
     (id, patient_account_id, patient_display_name_snapshot, patient_phone_masked_snapshot,
@@ -315,7 +325,8 @@ VALUES
 (@booking_lab_report_pending, @account_patient_6, '刘洋', '139****0106', '0106', @dept_laboratory_east, @item_liver_function, @room_lab201, @yesterday, 'morning', 'report_pending', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', 15, CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), @account_doctor_4, '孙医生', CONVERT_TZ(TIMESTAMP(@yesterday, '09:25:00'), '+08:00', '+00:00'), @account_doctor_4, '孙医生', NULL, NULL, NULL, 3, CONVERT_TZ(TIMESTAMP(@two_days_ago, '14:00:00'), '+08:00', '+00:00'), @now),
 (@booking_east_completed, @account_patient_7, '陈静', '139****0107', '0107', @dept_radiology_east, @item_east_ct, @room_east_ct105, @two_days_ago, 'afternoon', 'completed', '12:00:00', '18:00:00', '14:00:00', '17:00:00', '16:30:00', 20, CONVERT_TZ(TIMESTAMP(@two_days_ago, '14:15:00'), '+08:00', '+00:00'), @account_doctor_3, '刘医生', CONVERT_TZ(TIMESTAMP(@two_days_ago, '14:35:00'), '+08:00', '+00:00'), @account_doctor_3, '刘医生', CONVERT_TZ(TIMESTAMP(@two_days_ago, '15:00:00'), '+08:00', '+00:00'), @account_doctor_3, '刘医生', 4, CONVERT_TZ(TIMESTAMP(@three_days_ago, '15:00:00'), '+08:00', '+00:00'), @now),
 (@booking_lab_canceled, @account_patient_8, '孙磊', '139****0108', '0108', @dept_laboratory_east, @item_liver_function, @room_lab201, @tomorrow, 'afternoon', 'canceled', '12:00:00', '18:00:00', '14:00:00', '17:00:00', '16:30:00', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, DATE_SUB(@now, INTERVAL 6 HOUR), DATE_SUB(@now, INTERVAL 4 HOUR)),
-(@booking_ct_completed_other, @account_patient_9, '周婷', '139****0109', '0109', @dept_radiology_main, @item_ct, @room_ct201, @yesterday, 'afternoon', 'completed', '12:00:00', '18:00:00', '14:00:00', '17:00:00', '16:30:00', 20, CONVERT_TZ(TIMESTAMP(@yesterday, '14:20:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@yesterday, '14:40:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@yesterday, '15:10:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', 4, CONVERT_TZ(TIMESTAMP(@two_days_ago, '17:00:00'), '+08:00', '+00:00'), @now);
+(@booking_ct_completed_other, @account_patient_9, '周婷', '139****0109', '0109', @dept_radiology_main, @item_ct, @room_ct201, @yesterday, 'afternoon', 'completed', '12:00:00', '18:00:00', '14:00:00', '17:00:00', '16:30:00', 20, CONVERT_TZ(TIMESTAMP(@yesterday, '14:20:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@yesterday, '14:40:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@yesterday, '15:10:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', 4, CONVERT_TZ(TIMESTAMP(@two_days_ago, '17:00:00'), '+08:00', '+00:00'), @now),
+(@booking_called_after_end, @account_patient_11, '林悦', '139****0111', '0111', @dept_radiology_main, @item_xray, @room_dr101, @today, @current_session, 'queued', @current_open_time, @current_close_time, @expired_start_time, @expired_end_time, @expired_cutoff_time, 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 4, DATE_SUB(@now, INTERVAL 30 MINUTE), @now);
 
 INSERT INTO appointment_check_queues
     (id, room_id, service_date, session, next_ticket_number, call_sequence, current_called_booking_id, version, created_at, updated_at)
@@ -323,7 +334,8 @@ VALUES
 ('43000000-0000-4000-8000-000000000001', @room_ct201, @today, @current_session, 5, 1, NULL, 4, DATE_SUB(@now, INTERVAL 70 MINUTE), @now),
 ('43000000-0000-4000-8000-000000000002', @room_ct202, @today, @current_session, 3, 1, @booking_called, 3, DATE_SUB(@now, INTERVAL 60 MINUTE), @now),
 ('43000000-0000-4000-8000-000000000003', @room_us301, @today, @current_session, 3, 1, NULL, 3, DATE_SUB(@now, INTERVAL 50 MINUTE), @now),
-('43000000-0000-4000-8000-000000000004', @room_east_ct105, @today, @current_session, 2, 0, NULL, 2, DATE_SUB(@now, INTERVAL 45 MINUTE), @now);
+('43000000-0000-4000-8000-000000000004', @room_east_ct105, @today, @current_session, 2, 0, NULL, 2, DATE_SUB(@now, INTERVAL 45 MINUTE), @now),
+('43000000-0000-4000-8000-000000000005', @room_dr101, @today, @current_session, 2, 1, NULL, 4, DATE_SUB(@now, INTERVAL 25 MINUTE), @now);
 
 INSERT INTO appointment_check_queue_entries
     (booking_id, queue_id, ticket_number, eligible_after_call_sequence, call_attempts, checked_in_at, called_at, call_deadline, updated_at)
@@ -336,7 +348,8 @@ VALUES
 (@booking_queue_ct202, '43000000-0000-4000-8000-000000000002', 2, 0, 0, DATE_SUB(@now, INTERVAL 30 MINUTE), NULL, NULL, @now),
 (@booking_us_in_progress, '43000000-0000-4000-8000-000000000003', 1, 0, 1, DATE_SUB(@now, INTERVAL 40 MINUTE), DATE_SUB(@now, INTERVAL 16 MINUTE), NULL, @now),
 (@booking_us_queued, '43000000-0000-4000-8000-000000000003', 2, 0, 0, DATE_SUB(@now, INTERVAL 25 MINUTE), NULL, NULL, @now),
-(@booking_east_queued, '43000000-0000-4000-8000-000000000004', 1, 0, 0, DATE_SUB(@now, INTERVAL 20 MINUTE), NULL, NULL, @now);
+(@booking_east_queued, '43000000-0000-4000-8000-000000000004', 1, 0, 0, DATE_SUB(@now, INTERVAL 20 MINUTE), NULL, NULL, @now),
+(@booking_called_after_end, '43000000-0000-4000-8000-000000000005', 1, 1, 1, DATE_SUB(@now, INTERVAL 15 MINUTE), NULL, NULL, @now);
 
 INSERT INTO appointment_check_queue_events
     (id, queue_id, booking_id, event_type, call_sequence, occurred_at)
@@ -354,7 +367,10 @@ VALUES
 ('44000000-0000-4000-8000-000000000011', '43000000-0000-4000-8000-000000000003', @booking_us_in_progress, 'called', 1, DATE_SUB(@now, INTERVAL 16 MINUTE)),
 ('44000000-0000-4000-8000-000000000012', '43000000-0000-4000-8000-000000000003', @booking_us_in_progress, 'started', 1, DATE_SUB(@now, INTERVAL 15 MINUTE)),
 ('44000000-0000-4000-8000-000000000013', '43000000-0000-4000-8000-000000000003', @booking_us_queued, 'checked_in', 0, DATE_SUB(@now, INTERVAL 25 MINUTE)),
-('44000000-0000-4000-8000-000000000014', '43000000-0000-4000-8000-000000000004', @booking_east_queued, 'checked_in', 0, DATE_SUB(@now, INTERVAL 20 MINUTE));
+('44000000-0000-4000-8000-000000000014', '43000000-0000-4000-8000-000000000004', @booking_east_queued, 'checked_in', 0, DATE_SUB(@now, INTERVAL 20 MINUTE)),
+('44000000-0000-4000-8000-000000000015', '43000000-0000-4000-8000-000000000005', @booking_called_after_end, 'checked_in', 0, DATE_SUB(@now, INTERVAL 15 MINUTE)),
+('44000000-0000-4000-8000-000000000016', '43000000-0000-4000-8000-000000000005', @booking_called_after_end, 'called', 1, DATE_SUB(@now, INTERVAL 10 MINUTE)),
+('44000000-0000-4000-8000-000000000017', '43000000-0000-4000-8000-000000000005', @booking_called_after_end, 'deferred', 1, DATE_SUB(@now, INTERVAL 9 MINUTE));
 
 INSERT INTO appointment_booking_operations
     (operation_id, operator_account_id, booking_id, action, request_fingerprint, result_data, created_at)
@@ -391,7 +407,8 @@ VALUES
 (@account_patient_7, @item_east_ct, @today, @current_session, @booking_east_confirmed),
 (@account_patient_8, @item_blood, @today, @current_session, @booking_lab_confirmed),
 (@account_patient_1, @item_east_ct, @tomorrow, 'morning', @booking_admin_east_future),
-(@account_patient_1, @item_blood, @tomorrow, 'afternoon', @booking_admin_lab_future);
+(@account_patient_1, @item_blood, @tomorrow, 'afternoon', @booking_admin_lab_future),
+(@account_patient_11, @item_xray, @today, @current_session, @booking_called_after_end);
 
 INSERT INTO appointment_room_date_capacity
     (id, room_id, service_date, session, total_capacity, occupied_capacity,
@@ -471,6 +488,13 @@ SELECT '41000000-0000-4000-8000-000000000011', @room_lab201, @tomorrow, 'afterno
        rw.id, rw.version, 1, @now, @now
 FROM appointment_room_weekly_windows rw
 WHERE rw.room_id = @room_lab201 AND rw.weekday = WEEKDAY(@tomorrow) + 1 AND rw.session = 'afternoon';
+INSERT INTO appointment_room_date_capacity
+    (id, room_id, service_date, session, total_capacity, occupied_capacity,
+     room_window_id, room_window_version, version, created_at, updated_at)
+SELECT '41000000-0000-4000-8000-000000000012', @room_dr101, @today, @current_session, 4, 1,
+       rw.id, rw.version, 1, @now, @now
+FROM appointment_room_weekly_windows rw
+WHERE rw.room_id = @room_dr101 AND rw.weekday = WEEKDAY(@today) + 1 AND rw.session = @current_session;
 
 SET @report_draft = '50000000-0000-4000-8000-000000000001';
 SET @report_published = '50000000-0000-4000-8000-000000000002';
