@@ -114,7 +114,11 @@ async function startExamination(value: PatientBooking) {
 async function endExamination(value: PatientBooking) {
   if (value.status !== "in_progress" || pendingId.value) return;
   pendingId.value = value.bookingId;
-  try { await staffBookingApi.endExamination(value); uni.showToast({ title: "检查已结束", icon: "success" }); await loadAfterMutation(); }
+  try {
+    const endedBooking = await staffBookingApi.endExamination(value);
+    uni.showToast({ title: "检查已结束，请填写报告", icon: "success" });
+    openBooking(endedBooking);
+  }
   catch (error) { showOperationError("结束检查失败", error); }
   finally { pendingId.value = ""; }
 }

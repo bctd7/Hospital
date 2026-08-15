@@ -33,6 +33,15 @@ describe("appointment management view rules", () => {
     }
   });
 
+  it("opens report editing immediately after ending an examination from the room queue", () => {
+    const source = readFileSync(
+      new URL("../src/pages/admin/appointment/bookings.vue", import.meta.url),
+      "utf8",
+    );
+    expect(source).toContain("检查已结束，请填写报告");
+    expect(source).toContain("openBooking(endedBooking)");
+  });
+
   it("validates the two different weekly time models", () => {
     expect(roomWindowTimeValid("08:00", "12:00")).toBe(true);
     expect(roomWindowTimeValid("12:00", "08:00")).toBe(false);
