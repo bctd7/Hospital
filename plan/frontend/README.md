@@ -24,6 +24,7 @@
 - [工作人员检查项目与预约资源管理](./pages/06-admin-appointment-resource-management.md)
 - [患者检查项目展示与预约占位](./pages/07-patient-examination-item-browser.md)
 - [检查执行与报告页面](./pages/08-examination-reports.md)
+- [预约消息页面](./pages/09-appointment-messages.md)
 
 ## 当前基线
 
@@ -42,6 +43,7 @@
 - Appointment 管理端检查项目、房间、项目关系和独立周配置，以及患者端本周预约均已接入真实 API；
 - 患者端项目浏览和预约与管理端分开实现，不再使用 Appointment Mock；
 - 检查执行与报告后端主链路已经完成，前端页面待报告模板、患者搜索和可读名称契约评审后实施。
+- 第三栏“消息”已确认患者和工作人员的预约提醒范围及工作人员科室上下文，具体视觉效果待后续讨论。
 
 新增前端需求时，接口契约先进入 `contracts/`；`plan/frontend/api/` 只补客户端消费策略，页面交互进入
 `pages/`。不再创建混合接口字段、后端实现和页面截图的超长文档。
