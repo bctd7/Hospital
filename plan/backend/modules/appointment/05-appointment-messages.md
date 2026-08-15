@@ -41,19 +41,100 @@
 - 管理员从未选择过科室时，第一次进入消息页必须先选择，不自动选择列表中的第一个科室；
 - 管理员选择科室时按“院区 / 科室”识别范围，业务查询使用稳定 `department_id`。
 
-## 5. 尚未确认
+## 5. 预约取消与消息来源
+
+取消预约不再物理删除 `appointment_bookings`，而是把 `status` 更新为 `canceled`。取消仍然释放房间容量和患者时段，
+且不归还患者当周预约额度；取消后的预约不进入患者未完成预约列表。现有 `appointment_booking_operations` 继续记录
+取消操作者、原因和幂等结果。
+
+消息不建立独立事实表，按稳定规则从现有数据动态生成：
+
+- `appointment_bookings`：预约成功、到院提醒、取消、未到场和报告待完成；
+- `appointment_examination_reports`：报告发布；
+- `appointment_examination_report_versions`：报告更正；
+- `appointment_booking_operations`：取消操作信息。
+
+每条动态消息生成稳定 `message_key`，例如：
+
+```text
+booking:{booking_id}:patient:created
+booking:{booking_id}:patient:arrival-60m
+booking:{booking_id}:patient:arrival-30m
+booking:{booking_id}:department:created
+booking:{booking_id}:department:canceled
+booking:{booking_id}:department:no-show
+booking:{booking_id}:department:report-due
+booking:{booking_id}:department:report-overdue
+report:{report_id}:patient:published
+report-version:{version_id}:patient:corrected
+```
+
+到院和报告待完成提醒根据预约时间、`started_at`、`completed_at` 和最终状态判断在对应时点是否成立；已经开始检查、
+已经取消或已经未到场的预约不产生后续到院提醒，已经完成的预约不产生后续报告待完成提醒。
+
+## 6. 已读状态
+
+只新增一张个人阅读状态表，不新增 `appointment_messages`：
+
+```text
+appointment_message_reads
+├── account_id
+├── message_key
+└── read_at
+```
+
+`(account_id, message_key)` 为联合主键。同一条科室消息由不同工作人员分别记录已读状态；读取其他账号的消息不会
+改变当前账号的未读数量。写入已读前必须验证动态消息真实存在并属于当前患者或当前工作人员可访问的科室。
+
+## 7. 接口
+
+患者端：
+
+```text
+GET /api/v1/appointment/messages?page=&page_size=
+PUT /api/v1/appointment/messages/read
+```
+
+工作人员端：
+
+```text
+GET /api/v1/admin/appointment/messages?department_id=&page=&page_size=
+PUT /api/v1/admin/appointment/messages/read
+```
+
+已读请求只提交 `message_key`。列表项复用现有预约摘要，并增加消息自身字段：
+
+```text
+message_key
+message_type
+occurred_at
+read_at
+booking
+report_id
+report_version_id
+report_version_no
+```
+
+`booking` 使用现有预约响应结构；报告消息只返回跳转和版本标识，不在消息列表返回报告正文。列表响应保留分页字段，
+同时返回当前账号的 `unread_count`；工作人员响应另外返回按 `department_id` 汇总的科室未读数量，支持管理员科室
+选择和底部消息角标。
+
+## 8. 尚未确认
 
 以下内容不在本 Plan 中预设，实施前继续讨论：
 
 - 消息页面的具体视觉样式；
 - 消息卡片的具体排版和动效；
-- 消息持久化结构、接口字段和推送渠道。
+- 微信订阅消息等站外推送渠道。
 
-## 6. 验收标准
+## 9. 验收标准
 
 - 患者只收到本人预约对应的四类消息；
 - 提前 1 小时和提前 30 分钟提醒均以最晚到院时间为基准，并在生成时重新检查预约状态；
 - 工作人员只收到已确认的三类科室消息；
 - 已经完成并发布报告的检查不再产生报告未完成提醒；
 - 医生不能切换科室，管理员必须在明确的当前科室范围内查看消息；
+- 取消预约保留为 `canceled`，释放容量但不归还当周预约额度；
+- 消息从现有预约和报告数据动态生成，只新增个人阅读状态表；
+- 同一科室消息的已读状态按工作人员账号分别记录；
 - 不新增未经确认的消息类型、医生资源关系或页面功能。
