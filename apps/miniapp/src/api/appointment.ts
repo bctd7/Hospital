@@ -151,12 +151,22 @@ interface BookingResponse {
   started_at?: string;
   started_by?: string;
   started_by_display_name?: string;
+  examination_ended_at?: string;
+  examination_ended_by?: string;
+  examination_ended_by_display_name?: string;
   completed_at?: string;
   completed_by?: string;
   completed_by_display_name?: string;
   report_id?: string;
   report_status?: ExaminationReportStatus;
   report_version?: number;
+  queue_number?: number;
+  current_called_queue_number?: number;
+  people_ahead?: number;
+  checked_in_at?: string;
+  called_at?: string;
+  call_deadline?: string;
+  call_attempts?: number;
 }
 
 interface MessageResponse {
@@ -412,12 +422,22 @@ const booking = (value: BookingResponse): PatientBooking => ({
   startedAt: value.started_at,
   startedBy: value.started_by,
   startedByDisplayName: value.started_by_display_name,
+  examinationEndedAt: value.examination_ended_at,
+  examinationEndedBy: value.examination_ended_by,
+  examinationEndedByDisplayName: value.examination_ended_by_display_name,
   completedAt: value.completed_at,
   completedBy: value.completed_by,
   completedByDisplayName: value.completed_by_display_name,
   reportId: value.report_id,
   reportStatus: value.report_status,
   reportVersion: value.report_version,
+  queueNumber: value.queue_number ?? 0,
+  currentCalledQueueNumber: value.current_called_queue_number ?? 0,
+  peopleAhead: value.people_ahead ?? 0,
+  checkedInAt: value.checked_in_at,
+  calledAt: value.called_at,
+  callDeadline: value.call_deadline,
+  callAttempts: value.call_attempts ?? 0,
 });
 
 const appointmentMessage = (value: MessageResponse): AppointmentMessage => ({
@@ -730,6 +750,15 @@ export const patientAppointmentApi: PatientAppointmentApi = {
     }));
   },
 
+  async checkIn(value) {
+    return booking(await mutation<BookingResponse>(
+      `booking:check-in:${value.bookingId}:${value.version}`,
+      `/api/v1/appointment/bookings/${encodeURIComponent(value.bookingId)}/check-in`,
+      "POST",
+      { expected_version: value.version },
+    ));
+  },
+
   async deleteMyBooking(bookingId, reason = "") {
     await request<{ booking_id: string; deleted: boolean }>({
       path: `/api/v1/appointment/bookings/${encodeURIComponent(bookingId)}`,
@@ -762,6 +791,8 @@ export const staffBookingApi: StaffBookingApi = {
         department_id: departmentId,
         patient_keyword: filters.patientKeyword,
         status: filters.status,
+        service_date: filters.serviceDate,
+        room_id: filters.roomId,
         view: filters.view ?? "active",
         page: currentPage,
         page_size: pageSize,
@@ -797,6 +828,24 @@ export const staffBookingApi: StaffBookingApi = {
       `/api/v1/admin/appointment/bookings/${encodeURIComponent(value.bookingId)}/start-examination`,
       "POST",
       { expected_version: value.version },
+    ));
+  },
+
+  async endExamination(value) {
+    return booking(await mutation<BookingResponse>(
+      `booking:end:${value.bookingId}:${value.version}`,
+      `/api/v1/admin/appointment/bookings/${encodeURIComponent(value.bookingId)}/end-examination`,
+      "POST",
+      { expected_version: value.version },
+    ));
+  },
+
+  async callNext(departmentId, roomId, serviceDate) {
+    return booking(await mutation<BookingResponse>(
+      `booking:call-next:${roomId}:${serviceDate}`,
+      `/api/v1/admin/appointment/rooms/${encodeURIComponent(roomId)}/call-next`,
+      "POST",
+      { department_id: departmentId, service_date: serviceDate },
     ));
   },
 

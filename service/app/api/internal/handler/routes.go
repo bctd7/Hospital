@@ -41,6 +41,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: appointmentbookings.DeleteBookingHandler(serverCtx),
 				},
 				{
+					Method:  http.MethodPost,
+					Path:    "/admin/appointment/bookings/:bookingId/end-examination",
+					Handler: appointmentbookings.EndExaminationHandler(serverCtx),
+				},
+				{
 					Method:  http.MethodGet,
 					Path:    "/admin/appointment/bookings/:bookingId/report",
 					Handler: appointmentbookings.GetExaminationReportHandler(serverCtx),
@@ -87,6 +92,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					Method:  http.MethodPost,
+					Path:    "/admin/appointment/rooms/:roomId/call-next",
+					Handler: appointmentbookings.CallNextBookingHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
 					Path:    "/appointment/bookings",
 					Handler: appointmentbookings.CreateBookingHandler(serverCtx),
 				},
@@ -104,6 +114,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodDelete,
 					Path:    "/appointment/bookings/:bookingId",
 					Handler: appointmentbookings.DeleteMyBookingHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/appointment/bookings/:bookingId/check-in",
+					Handler: appointmentbookings.CheckInBookingHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodGet,

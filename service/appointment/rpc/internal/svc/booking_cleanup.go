@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	bookingCleanupInterval = 5 * time.Minute
+	bookingCleanupInterval = 5 * time.Second
 	bookingCleanupBatch    = 100
 )
 
@@ -51,7 +51,7 @@ func (s *ServiceContext) cleanupExpiredBookings(ctx context.Context) {
 				_ = s.bookingCache.BumpDepartment(ctx, departmentID)
 			}
 		}
-		if result.MarkedNoShow < bookingCleanupBatch {
+		if result.Processed < bookingCleanupBatch {
 			return
 		}
 	}

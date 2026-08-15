@@ -90,6 +90,45 @@ ORDER BY v.published_at DESC, v.id DESC`, patientAccountID)
 	return values, nil
 }
 
+func (s *Store) ListPatientMessageQueueFacts(ctx context.Context, patientAccountID string) ([]appointmentmanager.MessageQueueFact, error) {
+	bookings, err := s.ListMessageBookings(ctx, patientAccountID, "")
+	if err != nil {
+		return nil, err
+	}
+	byID := make(map[string]appointmentmanager.Booking, len(bookings))
+	for _, booking := range bookings {
+		byID[booking.BookingID] = booking
+	}
+	rows, err := s.db.QueryContext(ctx, `
+SELECT e.id, e.event_type, e.call_sequence, e.occurred_at, e.booking_id
+FROM appointment_check_queue_events e
+JOIN appointment_bookings b ON b.id = e.booking_id
+WHERE b.patient_account_id = ? AND e.event_type IN ('called', 'deferred')
+ORDER BY e.occurred_at DESC, e.id DESC`, patientAccountID)
+	if err != nil {
+		return nil, fmt.Errorf("list patient queue message facts: %w", err)
+	}
+	defer rows.Close()
+	values := make([]appointmentmanager.MessageQueueFact, 0)
+	for rows.Next() {
+		var value appointmentmanager.MessageQueueFact
+		var bookingID string
+		if err := rows.Scan(&value.EventID, &value.EventType, &value.CallSequence, &value.OccurredAt, &bookingID); err != nil {
+			return nil, fmt.Errorf("scan patient queue message fact: %w", err)
+		}
+		booking, ok := byID[bookingID]
+		if !ok {
+			continue
+		}
+		value.Booking = booking
+		values = append(values, value)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate patient queue message facts: %w", err)
+	}
+	return values, nil
+}
+
 func scanMessageReportBooking(scanner bookingScanner, fact *appointmentmanager.MessageReportFact, publishedAt *sql.NullTime) (appointmentmanager.Booking, error) {
 	var value appointmentmanager.Booking
 	var startedAt, completedAt sql.NullTime

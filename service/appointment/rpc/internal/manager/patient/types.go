@@ -10,6 +10,7 @@ import (
 type (
 	Cache                  = common.Cache
 	BookingTxStore         = common.BookingTxStore
+	QueueTxStore           = common.QueueTxStore
 	Booking                = common.Booking
 	BookingOption          = common.BookingOption
 	BookingSelection       = common.BookingSelection
@@ -29,6 +30,7 @@ type (
 const (
 	StatusActive             = common.StatusActive
 	BookingStatusConfirmed   = common.BookingStatusConfirmed
+	BookingStatusQueued      = common.BookingStatusQueued
 	BookingStatusNoShow      = common.BookingStatusNoShow
 	BookingStatusCanceled    = common.BookingStatusCanceled
 	BookingListViewActive    = common.BookingListViewActive

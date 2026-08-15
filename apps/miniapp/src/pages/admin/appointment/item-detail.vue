@@ -52,6 +52,7 @@ const durationLabels = durationOptions.map((minutes) => {
   if (!remainder) return `${hours} 小时`;
   return `${hours} 小时 ${remainder} 分钟`;
 });
+const timeOptions = computed(() => sessionTimeOptions(windowSession.value));
 
 const canCreate = computed(() => hasPermission(sessionState.principal, "appointment.create"));
 const canUpdate = computed(() => hasPermission(sessionState.principal, "appointment.update"));
@@ -219,6 +220,19 @@ function selectSession(event: { detail: { value: string | number } }) {
   windowSession.value = Number(event.detail.value) === 0 ? "morning" : "afternoon";
   applySessionTimeDefaults();
 }
+
+function sessionTimeOptions(session: AppointmentSession) {
+  const start = session === "morning" ? 0 : 12 * 60;
+  const end = session === "morning" ? 12 * 60 : 23 * 60 + 55;
+  return Array.from({ length: Math.floor((end - start) / 5) + 1 }, (_, index) => {
+    const minutes = start + index * 5;
+    return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+  });
+}
+function timeIndex(value: string) { const index = timeOptions.value.indexOf(value.slice(0, 5)); return index < 0 ? 0 : index; }
+function selectStartTime(event: { detail: { value: string | number } }) { startTime.value = timeOptions.value[Number(event.detail.value)] ?? startTime.value; }
+function selectCutoffTime(event: { detail: { value: string | number } }) { cutoffTime.value = timeOptions.value[Number(event.detail.value)] ?? cutoffTime.value; }
+function selectEndTime(event: { detail: { value: string | number } }) { endTime.value = timeOptions.value[Number(event.detail.value)] ?? endTime.value; }
 
 function applySessionTimeDefaults() {
   if (windowSession.value === "morning") {
@@ -394,9 +408,9 @@ function disableWindow(value: ItemWeeklyWindow) {
           <picker :value="windowWeekday - 1" :range="WEEKDAY_LABELS" @change="selectWeekday"><view>{{ WEEKDAY_LABELS[windowWeekday - 1] }} ›</view></picker>
           <picker :value="windowSession === 'morning' ? 0 : 1" :range="['上午', '下午']" @change="selectSession"><view>{{ SESSION_LABELS[windowSession] }} ›</view></picker>
         </view>
-        <text class="field-label">预约开始（HH:MM）</text><input v-model="startTime" class="field-input" placeholder="09:00" />
-        <text class="field-label">停止新增（HH:MM）</text><input v-model="cutoffTime" class="field-input" placeholder="11:30" />
-        <text class="field-label">预约结束（HH:MM）</text><input v-model="endTime" class="field-input" placeholder="12:00" />
+        <text class="field-label">预约开始</text><picker :value="timeIndex(startTime)" :range="timeOptions" @change="selectStartTime"><view class="field-picker">{{ startTime }}<text class="field-picker__arrow">›</text></view></picker>
+        <text class="field-label">停止新增与停止报到</text><picker :value="timeIndex(cutoffTime)" :range="timeOptions" @change="selectCutoffTime"><view class="field-picker">{{ cutoffTime }}<text class="field-picker__arrow">›</text></view></picker>
+        <text class="field-label">预约结束</text><picker :value="timeIndex(endTime)" :range="timeOptions" @change="selectEndTime"><view class="field-picker">{{ endTime }}<text class="field-picker__arrow">›</text></view></picker>
         <view class="dialog__buttons"><button @tap="editorVisible = false">取消</button><button class="primary-button" :disabled="saving" @tap="saveWindow">保存</button></view>
       </view>
     </view>

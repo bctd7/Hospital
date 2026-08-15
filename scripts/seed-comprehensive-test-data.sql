@@ -211,23 +211,51 @@ SET @booking_completed = '40000000-0000-4000-8000-000000000005';
 SET @booking_corrected = '40000000-0000-4000-8000-000000000006';
 SET @booking_report_overdue = '40000000-0000-4000-8000-000000000007';
 SET @booking_canceled = '40000000-0000-4000-8000-000000000008';
+SET @booking_queued = '40000000-0000-4000-8000-000000000009';
+SET @booking_called = '40000000-0000-4000-8000-000000000010';
 
 INSERT INTO appointment_bookings
     (id, patient_account_id, patient_display_name_snapshot, patient_phone_masked_snapshot,
      patient_phone_last4_snapshot, department_id, item_id, room_id, service_date, session, status,
      room_open_time_snapshot, room_close_time_snapshot, item_start_time_snapshot,
      item_end_time_snapshot, item_cutoff_time_snapshot, estimated_duration_minutes_snapshot, started_at, started_by, started_by_display_name_snapshot,
+     examination_ended_at, examination_ended_by, examination_ended_by_display_name_snapshot,
      completed_at, completed_by, completed_by_display_name_snapshot,
      version, created_at, updated_at)
 VALUES
-(@booking_confirmed_now, @account_patient_1, '体验管理员', @phone_patient_1_masked, @phone_patient_1_last4, @dept_radiology_main, @item_urgent_ct, @room_ct201, @today, @current_session, 'confirmed', @current_open_time, @current_close_time, @current_start_time, @current_end_time, @current_cutoff_time, 30, NULL, NULL, NULL, NULL, NULL, NULL, 1, DATE_SUB(@now, INTERVAL 2 HOUR), @now),
-(@booking_confirmed_future, @account_patient_2, '李敏', '139****0002', '0002', @dept_radiology_main, @item_ct, @room_ct202, @tomorrow, 'morning', 'confirmed', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', 20, NULL, NULL, NULL, NULL, NULL, NULL, 1, DATE_SUB(@now, INTERVAL 1 HOUR), @now),
-(@booking_no_show, @account_patient_3, '王芳', '139****0003', '0003', @dept_radiology_main, @item_ct, @room_ct201, @yesterday, 'morning', 'no_show', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', 20, NULL, NULL, NULL, NULL, NULL, NULL, 2, DATE_SUB(@now, INTERVAL 1 DAY), @now),
-(@booking_in_progress, @account_patient_4, '赵强', '139****0004', '0004', @dept_radiology_main, @item_urgent_ct, @room_ct201, @today, @current_session, 'in_progress', @current_open_time, @current_close_time, @current_start_time, @current_end_time, @current_cutoff_time, 30, IF(TIMESTAMPDIFF(SECOND, @current_session_started_at_utc, DATE_SUB(@now, INTERVAL 20 MINUTE)) > 0, DATE_SUB(@now, INTERVAL 20 MINUTE), CAST(@current_session_started_at_utc AS DATETIME)), @account_doctor_1, '陈医生', NULL, NULL, NULL, 2, DATE_SUB(@now, INTERVAL 4 HOUR), @now),
-(@booking_completed, @account_patient_1, '体验管理员', @phone_patient_1_masked, @phone_patient_1_last4, @dept_ultrasound_main, @item_ultrasound, @room_us301, @yesterday, 'morning', 'completed', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', 25, CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), @account_doctor_2, '周医生', CONVERT_TZ(TIMESTAMP(@yesterday, '09:50:00'), '+08:00', '+00:00'), @account_doctor_2, '周医生', 3, CONVERT_TZ(TIMESTAMP(@two_days_ago, '15:00:00'), '+08:00', '+00:00'), @now),
-(@booking_corrected, @account_patient_1, '体验管理员', @phone_patient_1_masked, @phone_patient_1_last4, @dept_radiology_main, @item_xray, @room_dr101, @two_days_ago, 'morning', 'completed', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', 15, CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:20:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@two_days_ago, '10:10:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', 3, CONVERT_TZ(TIMESTAMP(@three_days_ago, '15:00:00'), '+08:00', '+00:00'), @now),
-(@booking_report_overdue, @account_patient_4, '赵强', '139****0004', '0004', @dept_radiology_main, @item_xray, @room_dr101, @yesterday, 'morning', 'in_progress', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', 15, CONVERT_TZ(TIMESTAMP(@yesterday, '09:15:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', NULL, NULL, NULL, 2, CONVERT_TZ(TIMESTAMP(@two_days_ago, '16:00:00'), '+08:00', '+00:00'), @now),
-(@booking_canceled, @account_patient_2, '李敏', '139****0002', '0002', @dept_radiology_main, @item_ct, @room_ct202, @tomorrow, 'afternoon', 'canceled', '12:00:00', '18:00:00', '14:00:00', '17:00:00', '16:30:00', 20, NULL, NULL, NULL, NULL, NULL, NULL, 2, DATE_SUB(@now, INTERVAL 3 HOUR), DATE_SUB(@now, INTERVAL 2 HOUR));
+(@booking_confirmed_now, @account_patient_1, '体验管理员', @phone_patient_1_masked, @phone_patient_1_last4, @dept_radiology_main, @item_urgent_ct, @room_ct201, @today, @current_session, 'confirmed', @current_open_time, @current_close_time, @current_start_time, @current_end_time, @current_cutoff_time, 30, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, DATE_SUB(@now, INTERVAL 2 HOUR), @now),
+(@booking_confirmed_future, @account_patient_2, '李敏', '139****0002', '0002', @dept_radiology_main, @item_ct, @room_ct202, @tomorrow, 'morning', 'confirmed', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', 20, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, DATE_SUB(@now, INTERVAL 1 HOUR), @now),
+(@booking_no_show, @account_patient_3, '王芳', '139****0003', '0003', @dept_radiology_main, @item_ct, @room_ct201, @yesterday, 'morning', 'no_show', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', 20, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, DATE_SUB(@now, INTERVAL 1 DAY), @now),
+(@booking_in_progress, @account_patient_4, '赵强', '139****0004', '0004', @dept_radiology_main, @item_urgent_ct, @room_ct201, @today, @current_session, 'in_progress', @current_open_time, @current_close_time, @current_start_time, @current_end_time, @current_cutoff_time, 30, IF(TIMESTAMPDIFF(SECOND, @current_session_started_at_utc, DATE_SUB(@now, INTERVAL 20 MINUTE)) > 0, DATE_SUB(@now, INTERVAL 20 MINUTE), CAST(@current_session_started_at_utc AS DATETIME)), @account_doctor_1, '陈医生', NULL, NULL, NULL, NULL, NULL, NULL, 3, DATE_SUB(@now, INTERVAL 4 HOUR), @now),
+(@booking_completed, @account_patient_1, '体验管理员', @phone_patient_1_masked, @phone_patient_1_last4, @dept_ultrasound_main, @item_ultrasound, @room_us301, @yesterday, 'morning', 'completed', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', 25, CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), @account_doctor_2, '周医生', CONVERT_TZ(TIMESTAMP(@yesterday, '09:40:00'), '+08:00', '+00:00'), @account_doctor_2, '周医生', CONVERT_TZ(TIMESTAMP(@yesterday, '09:50:00'), '+08:00', '+00:00'), @account_doctor_2, '周医生', 4, CONVERT_TZ(TIMESTAMP(@two_days_ago, '15:00:00'), '+08:00', '+00:00'), @now),
+(@booking_corrected, @account_patient_1, '体验管理员', @phone_patient_1_masked, @phone_patient_1_last4, @dept_radiology_main, @item_xray, @room_dr101, @two_days_ago, 'morning', 'completed', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', 15, CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:20:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:50:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@two_days_ago, '10:10:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', 4, CONVERT_TZ(TIMESTAMP(@three_days_ago, '15:00:00'), '+08:00', '+00:00'), @now),
+(@booking_report_overdue, @account_patient_4, '赵强', '139****0004', '0004', @dept_radiology_main, @item_xray, @room_dr101, @yesterday, 'morning', 'report_pending', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', 15, CONVERT_TZ(TIMESTAMP(@yesterday, '09:15:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@yesterday, '10:00:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', NULL, NULL, NULL, 3, CONVERT_TZ(TIMESTAMP(@two_days_ago, '16:00:00'), '+08:00', '+00:00'), @now),
+(@booking_canceled, @account_patient_2, '李敏', '139****0002', '0002', @dept_radiology_main, @item_ct, @room_ct202, @tomorrow, 'afternoon', 'canceled', '12:00:00', '18:00:00', '14:00:00', '17:00:00', '16:30:00', 20, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, DATE_SUB(@now, INTERVAL 3 HOUR), DATE_SUB(@now, INTERVAL 2 HOUR)),
+(@booking_queued, @account_patient_2, '李敏', '139****0002', '0002', @dept_radiology_main, @item_urgent_ct, @room_ct201, @today, @current_session, 'queued', @current_open_time, @current_close_time, @current_start_time, @current_end_time, @current_cutoff_time, 30, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, DATE_SUB(@now, INTERVAL 90 MINUTE), @now),
+(@booking_called, @account_patient_3, '王芳', '139****0003', '0003', @dept_radiology_main, @item_ct, @room_ct202, @today, @current_session, 'called', @current_open_time, @current_close_time, @current_start_time, @current_end_time, @current_cutoff_time, 20, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 3, DATE_SUB(@now, INTERVAL 80 MINUTE), @now);
+
+INSERT INTO appointment_check_queues
+    (id, room_id, service_date, session, next_ticket_number, call_sequence, current_called_booking_id, version, created_at, updated_at)
+VALUES
+('43000000-0000-4000-8000-000000000001', @room_ct201, @today, @current_session, 3, 1, NULL, 4, DATE_SUB(@now, INTERVAL 70 MINUTE), @now),
+('43000000-0000-4000-8000-000000000002', @room_ct202, @today, @current_session, 2, 1, @booking_called, 3, DATE_SUB(@now, INTERVAL 60 MINUTE), @now);
+
+INSERT INTO appointment_check_queue_entries
+    (booking_id, queue_id, ticket_number, eligible_after_call_sequence, call_attempts, checked_in_at, called_at, call_deadline, updated_at)
+VALUES
+(@booking_in_progress, '43000000-0000-4000-8000-000000000001', 1, 0, 1, DATE_SUB(@now, INTERVAL 65 MINUTE), DATE_SUB(@now, INTERVAL 21 MINUTE), NULL, @now),
+(@booking_queued, '43000000-0000-4000-8000-000000000001', 2, 0, 0, DATE_SUB(@now, INTERVAL 55 MINUTE), NULL, NULL, @now),
+(@booking_called, '43000000-0000-4000-8000-000000000002', 1, 0, 1, DATE_SUB(@now, INTERVAL 50 MINUTE), @now, DATE_ADD(@now, INTERVAL 1 MINUTE), @now);
+
+INSERT INTO appointment_check_queue_events
+    (id, queue_id, booking_id, event_type, call_sequence, occurred_at)
+VALUES
+('44000000-0000-4000-8000-000000000001', '43000000-0000-4000-8000-000000000001', @booking_in_progress, 'checked_in', 0, DATE_SUB(@now, INTERVAL 65 MINUTE)),
+('44000000-0000-4000-8000-000000000002', '43000000-0000-4000-8000-000000000001', @booking_in_progress, 'called', 1, DATE_SUB(@now, INTERVAL 21 MINUTE)),
+('44000000-0000-4000-8000-000000000003', '43000000-0000-4000-8000-000000000001', @booking_in_progress, 'started', 1, DATE_SUB(@now, INTERVAL 20 MINUTE)),
+('44000000-0000-4000-8000-000000000004', '43000000-0000-4000-8000-000000000001', @booking_queued, 'checked_in', 0, DATE_SUB(@now, INTERVAL 55 MINUTE)),
+('44000000-0000-4000-8000-000000000005', '43000000-0000-4000-8000-000000000002', @booking_called, 'checked_in', 0, DATE_SUB(@now, INTERVAL 50 MINUTE)),
+('44000000-0000-4000-8000-000000000006', '43000000-0000-4000-8000-000000000002', @booking_called, 'called', 1, @now);
 
 INSERT INTO appointment_booking_operations
     (operation_id, operator_account_id, booking_id, action, request_fingerprint, result_data, created_at)
@@ -248,13 +276,14 @@ INSERT INTO appointment_patient_item_session_claims
 VALUES
 (@account_patient_1, @item_urgent_ct, @today, @current_session, @booking_confirmed_now),
 (@account_patient_2, @item_ct, @tomorrow, 'morning', @booking_confirmed_future),
-(@account_patient_4, @item_urgent_ct, @today, @current_session, @booking_in_progress),
-(@account_patient_4, @item_xray, @yesterday, 'morning', @booking_report_overdue);
+(@account_patient_2, @item_urgent_ct, @today, @current_session, @booking_queued),
+(@account_patient_3, @item_ct, @today, @current_session, @booking_called),
+(@account_patient_4, @item_urgent_ct, @today, @current_session, @booking_in_progress);
 
 INSERT INTO appointment_room_date_capacity
     (id, room_id, service_date, session, total_capacity, occupied_capacity,
      room_window_id, room_window_version, version, created_at, updated_at)
-SELECT '41000000-0000-4000-8000-000000000001', @room_ct201, @today, @current_session, 6, 2,
+SELECT '41000000-0000-4000-8000-000000000001', @room_ct201, @today, @current_session, 6, 3,
        rw.id, rw.version, 1, @now, @now
 FROM appointment_room_weekly_windows rw
 WHERE rw.room_id = @room_ct201 AND rw.weekday = WEEKDAY(@today) + 1 AND rw.session = @current_session;
@@ -265,6 +294,13 @@ SELECT '41000000-0000-4000-8000-000000000002', @room_ct202, @tomorrow, 'morning'
        rw.id, rw.version, 1, @now, @now
 FROM appointment_room_weekly_windows rw
 WHERE rw.room_id = @room_ct202 AND rw.weekday = WEEKDAY(@tomorrow) + 1 AND rw.session = 'morning';
+INSERT INTO appointment_room_date_capacity
+    (id, room_id, service_date, session, total_capacity, occupied_capacity,
+     room_window_id, room_window_version, version, created_at, updated_at)
+SELECT '41000000-0000-4000-8000-000000000006', @room_ct202, @today, @current_session, 6, 1,
+       rw.id, rw.version, 1, @now, @now
+FROM appointment_room_weekly_windows rw
+WHERE rw.room_id = @room_ct202 AND rw.weekday = WEEKDAY(@today) + 1 AND rw.session = @current_session;
 INSERT INTO appointment_room_date_capacity
     (id, room_id, service_date, session, total_capacity, occupied_capacity,
      room_window_id, room_window_version, version, created_at, updated_at)
@@ -282,7 +318,7 @@ WHERE rw.room_id = @room_dr101 AND rw.weekday = WEEKDAY(@two_days_ago) + 1 AND r
 INSERT INTO appointment_room_date_capacity
     (id, room_id, service_date, session, total_capacity, occupied_capacity,
      room_window_id, room_window_version, version, created_at, updated_at)
-SELECT '41000000-0000-4000-8000-000000000005', @room_dr101, @yesterday, 'morning', 4, 1,
+SELECT '41000000-0000-4000-8000-000000000005', @room_dr101, @yesterday, 'morning', 4, 0,
        rw.id, rw.version, 1, @now, @now
 FROM appointment_room_weekly_windows rw
 WHERE rw.room_id = @room_dr101 AND rw.weekday = WEEKDAY(@yesterday) + 1 AND rw.session = 'morning';
@@ -304,8 +340,8 @@ INSERT INTO appointment_examination_reports
      version, created_at, updated_at)
 VALUES
 (@report_draft, @booking_in_progress, @account_patient_4, '赵强', '139****0004', @dept_radiology_main, '放射科', @item_urgent_ct, '当日急诊CT', @room_ct201, @campus_main, '总院区', '影像楼', 2, 'CT201', 'draft', @account_doctor_1, '陈医生', IF(TIMESTAMPDIFF(SECOND, @current_session_started_at_utc, DATE_SUB(@now, INTERVAL 20 MINUTE)) > 0, DATE_SUB(@now, INTERVAL 20 MINUTE), CAST(@current_session_started_at_utc AS DATETIME)), NULL, NULL, 1, IF(TIMESTAMPDIFF(SECOND, @current_session_started_at_utc, DATE_SUB(@now, INTERVAL 20 MINUTE)) > 0, DATE_SUB(@now, INTERVAL 20 MINUTE), CAST(@current_session_started_at_utc AS DATETIME)), @now),
-(@report_published, @booking_completed, @account_patient_1, '体验管理员', @phone_patient_1_masked, @dept_ultrasound_main, '超声科', @item_ultrasound, '腹部彩超', @room_us301, @campus_main, '总院区', '门诊楼', 3, 'US301', 'published', @account_doctor_2, '周医生', CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@yesterday, '09:50:00'), '+08:00', '+00:00'), NULL, 1, CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), @now),
-(@report_corrected, @booking_corrected, @account_patient_1, '体验管理员', @phone_patient_1_masked, @dept_radiology_main, '放射科', @item_xray, '胸部X线正侧位', @room_dr101, @campus_main, '总院区', '影像楼', 1, 'DR101', 'published', @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:20:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@two_days_ago, '10:10:00'), '+08:00', '+00:00'), NULL, 2, CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:20:00'), '+08:00', '+00:00'), @now);
+(@report_published, @booking_completed, @account_patient_1, '体验管理员', @phone_patient_1_masked, @dept_ultrasound_main, '超声科', @item_ultrasound, '腹部彩超', @room_us301, @campus_main, '总院区', '门诊楼', 3, 'US301', 'published', @account_doctor_2, '周医生', CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@yesterday, '09:40:00'), '+08:00', '+00:00'), NULL, 1, CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), @now),
+(@report_corrected, @booking_corrected, @account_patient_1, '体验管理员', @phone_patient_1_masked, @dept_radiology_main, '放射科', @item_xray, '胸部X线正侧位', @room_dr101, @campus_main, '总院区', '影像楼', 1, 'DR101', 'published', @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:20:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:50:00'), '+08:00', '+00:00'), NULL, 2, CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:20:00'), '+08:00', '+00:00'), @now);
 
 INSERT INTO appointment_examination_report_versions
     (id, report_id, version_no, version_kind, status, objective_findings, impression,

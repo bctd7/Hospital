@@ -130,13 +130,16 @@ SET @hospital_local_today = DATE(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')
 SELECT IF(
   (SELECT COUNT(*) FROM hospital_identity.identity_organization_units WHERE unit_type = 'campus' AND status = 'active') >= 2
   AND (SELECT COUNT(*) FROM hospital_identity.identity_organization_units WHERE unit_type = 'department' AND status = 'active') >= 4
-  AND (SELECT COUNT(DISTINCT status) FROM hospital_appointment.appointment_bookings) = 5
+  AND (SELECT COUNT(DISTINCT status) FROM hospital_appointment.appointment_bookings) = 8
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_items
        WHERE estimated_duration_minutes BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes, 5) = 0) = 10
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings
-       WHERE estimated_duration_minutes_snapshot BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes_snapshot, 5) = 0) = 8
+       WHERE estimated_duration_minutes_snapshot BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes_snapshot, 5) = 0) = 10
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings WHERE status = 'canceled') >= 1
-  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings WHERE status = 'in_progress' AND service_date < @hospital_local_today) >= 1
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings WHERE status = 'report_pending' AND service_date < @hospital_local_today) >= 1
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_check_queues) >= 2
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_check_queue_entries) >= 3
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_check_queue_events WHERE event_type = 'called') >= 2
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings
        WHERE id = '40000000-0000-4000-8000-000000000007'
          AND started_at = CONVERT_TZ(TIMESTAMP(DATE_SUB(@hospital_local_today, INTERVAL 1 DAY), '09:15:00'), '+08:00', '+00:00')) = 1

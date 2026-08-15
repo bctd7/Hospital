@@ -27,9 +27,15 @@ func bookingRPCError(err error) error {
 		return bookingStatusError(codes.FailedPrecondition, "patient already has an active booking for this item in this date and session", "PATIENT_ITEM_SESSION_OCCUPIED")
 	case errors.Is(err, common.ErrPatientWeeklyQuotaFull):
 		return bookingStatusError(codes.ResourceExhausted, "weekly booking quota is exhausted", "PATIENT_WEEKLY_QUOTA_EXHAUSTED")
-	case errors.Is(err, common.ErrExaminationWindowClosed):
-		return bookingStatusError(codes.FailedPrecondition, "examination can only start during the booked examination window", "EXAMINATION_WINDOW_CLOSED")
-	case errors.Is(err, common.ErrBookingClosed), errors.Is(err, common.ErrInvalidState):
+	case errors.Is(err, common.ErrQueueEmpty):
+		return bookingStatusError(codes.FailedPrecondition, "room has no callable queued patient", "QUEUE_EMPTY")
+	case errors.Is(err, common.ErrRoomQueueBusy):
+		return bookingStatusError(codes.FailedPrecondition, "room already has a called or in-progress patient", "ROOM_QUEUE_BUSY")
+	case errors.Is(err, common.ErrCallExpired):
+		return bookingStatusError(codes.FailedPrecondition, "current call has expired", "CALL_EXPIRED")
+	case errors.Is(err, common.ErrBookingClosed):
+		return bookingStatusError(codes.FailedPrecondition, "booking or check-in window is closed", "BOOKING_WINDOW_CLOSED")
+	case errors.Is(err, common.ErrInvalidState):
 		return status.Error(codes.FailedPrecondition, "booking state does not allow the operation")
 	case errors.Is(err, common.ErrConflict), errors.Is(err, common.ErrVersionConflict):
 		return status.Error(codes.Aborted, "booking data conflict")
@@ -62,7 +68,9 @@ func bookingResponse(value common.Booking) *appointmentv1.Booking {
 		ItemStartTime: value.ItemStartTime, ItemEndTime: value.ItemEndTime,
 		BookingCutoffTime: value.BookingCutoffTime, Version: value.Version,
 		EstimatedDurationMinutes: value.EstimatedDurationMinutes,
-		CreatedAt:                value.CreatedAt.UTC().Format(timeLayout), UpdatedAt: value.UpdatedAt.UTC().Format(timeLayout),
+		QueueNumber:              value.QueueNumber, CurrentCalledQueueNumber: value.CurrentCalledQueueNumber,
+		PeopleAhead: value.PeopleAhead, CallAttempts: value.CallAttempts,
+		CreatedAt: value.CreatedAt.UTC().Format(timeLayout), UpdatedAt: value.UpdatedAt.UTC().Format(timeLayout),
 		StartedBy: value.StartedBy, CompletedBy: value.CompletedBy,
 		StartedByDisplayName: value.StartedByDisplayName, CompletedByDisplayName: value.CompletedByDisplayName,
 		ReportId: value.ReportID, ReportStatus: string(value.ReportStatus), ReportVersion: value.ReportVersion,
@@ -72,6 +80,20 @@ func bookingResponse(value common.Booking) *appointmentv1.Booking {
 	}
 	if value.CompletedAt != nil {
 		response.CompletedAt = value.CompletedAt.UTC().Format(timeLayout)
+	}
+	if value.ExaminationEndedAt != nil {
+		response.ExaminationEndedAt = value.ExaminationEndedAt.UTC().Format(timeLayout)
+	}
+	response.ExaminationEndedBy = value.ExaminationEndedBy
+	response.ExaminationEndedByDisplayName = value.ExaminationEndedByDisplayName
+	if value.CheckedInAt != nil {
+		response.CheckedInAt = value.CheckedInAt.UTC().Format(timeLayout)
+	}
+	if value.CalledAt != nil {
+		response.CalledAt = value.CalledAt.UTC().Format(timeLayout)
+	}
+	if value.CallDeadline != nil {
+		response.CallDeadline = value.CallDeadline.UTC().Format(timeLayout)
 	}
 	return response
 }

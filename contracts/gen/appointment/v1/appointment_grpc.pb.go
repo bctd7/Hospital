@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v7.34.1
-// source: contracts/proto/appointment/v1/appointment.proto
+// source: appointment/v1/appointment.proto
 
 package appointmentv1
 
@@ -45,6 +45,7 @@ const (
 	AppointmentService_ListItemWeeklyWindows_FullMethodName               = "/hospital.appointment.v1.AppointmentService/ListItemWeeklyWindows"
 	AppointmentService_ListBookingOptions_FullMethodName                  = "/hospital.appointment.v1.AppointmentService/ListBookingOptions"
 	AppointmentService_CreateBooking_FullMethodName                       = "/hospital.appointment.v1.AppointmentService/CreateBooking"
+	AppointmentService_CheckInBooking_FullMethodName                      = "/hospital.appointment.v1.AppointmentService/CheckInBooking"
 	AppointmentService_GetMyBooking_FullMethodName                        = "/hospital.appointment.v1.AppointmentService/GetMyBooking"
 	AppointmentService_ListMyBookings_FullMethodName                      = "/hospital.appointment.v1.AppointmentService/ListMyBookings"
 	AppointmentService_DeleteMyBooking_FullMethodName                     = "/hospital.appointment.v1.AppointmentService/DeleteMyBooking"
@@ -53,6 +54,8 @@ const (
 	AppointmentService_GetBooking_FullMethodName                          = "/hospital.appointment.v1.AppointmentService/GetBooking"
 	AppointmentService_ListBookings_FullMethodName                        = "/hospital.appointment.v1.AppointmentService/ListBookings"
 	AppointmentService_StartExamination_FullMethodName                    = "/hospital.appointment.v1.AppointmentService/StartExamination"
+	AppointmentService_CallNextBooking_FullMethodName                     = "/hospital.appointment.v1.AppointmentService/CallNextBooking"
+	AppointmentService_EndExamination_FullMethodName                      = "/hospital.appointment.v1.AppointmentService/EndExamination"
 	AppointmentService_DeleteBooking_FullMethodName                       = "/hospital.appointment.v1.AppointmentService/DeleteBooking"
 	AppointmentService_ListMessages_FullMethodName                        = "/hospital.appointment.v1.AppointmentService/ListMessages"
 	AppointmentService_MarkMessageRead_FullMethodName                     = "/hospital.appointment.v1.AppointmentService/MarkMessageRead"
@@ -96,6 +99,7 @@ type AppointmentServiceClient interface {
 	ListItemWeeklyWindows(ctx context.Context, in *ListWeeklyWindowsRequest, opts ...grpc.CallOption) (*ListItemWeeklyWindowsResponse, error)
 	ListBookingOptions(ctx context.Context, in *ListBookingOptionsRequest, opts ...grpc.CallOption) (*ListBookingOptionsResponse, error)
 	CreateBooking(ctx context.Context, in *CreateBookingRequest, opts ...grpc.CallOption) (*Booking, error)
+	CheckInBooking(ctx context.Context, in *CheckInBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 	GetMyBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 	ListMyBookings(ctx context.Context, in *ListMyBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
 	DeleteMyBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
@@ -104,6 +108,8 @@ type AppointmentServiceClient interface {
 	GetBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 	ListBookings(ctx context.Context, in *ListBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
 	StartExamination(ctx context.Context, in *StartExaminationRequest, opts ...grpc.CallOption) (*Booking, error)
+	CallNextBooking(ctx context.Context, in *CallNextBookingRequest, opts ...grpc.CallOption) (*Booking, error)
+	EndExamination(ctx context.Context, in *EndExaminationRequest, opts ...grpc.CallOption) (*Booking, error)
 	DeleteBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
 	ListMessages(ctx context.Context, in *ListMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error)
 	MarkMessageRead(ctx context.Context, in *MarkMessageReadRequest, opts ...grpc.CallOption) (*Message, error)
@@ -385,6 +391,16 @@ func (c *appointmentServiceClient) CreateBooking(ctx context.Context, in *Create
 	return out, nil
 }
 
+func (c *appointmentServiceClient) CheckInBooking(ctx context.Context, in *CheckInBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Booking)
+	err := c.cc.Invoke(ctx, AppointmentService_CheckInBooking_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *appointmentServiceClient) GetMyBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Booking)
@@ -459,6 +475,26 @@ func (c *appointmentServiceClient) StartExamination(ctx context.Context, in *Sta
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Booking)
 	err := c.cc.Invoke(ctx, AppointmentService_StartExamination_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) CallNextBooking(ctx context.Context, in *CallNextBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Booking)
+	err := c.cc.Invoke(ctx, AppointmentService_CallNextBooking_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) EndExamination(ctx context.Context, in *EndExaminationRequest, opts ...grpc.CallOption) (*Booking, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Booking)
+	err := c.cc.Invoke(ctx, AppointmentService_EndExamination_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -605,6 +641,7 @@ type AppointmentServiceServer interface {
 	ListItemWeeklyWindows(context.Context, *ListWeeklyWindowsRequest) (*ListItemWeeklyWindowsResponse, error)
 	ListBookingOptions(context.Context, *ListBookingOptionsRequest) (*ListBookingOptionsResponse, error)
 	CreateBooking(context.Context, *CreateBookingRequest) (*Booking, error)
+	CheckInBooking(context.Context, *CheckInBookingRequest) (*Booking, error)
 	GetMyBooking(context.Context, *GetBookingRequest) (*Booking, error)
 	ListMyBookings(context.Context, *ListMyBookingsRequest) (*ListBookingsResponse, error)
 	DeleteMyBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error)
@@ -613,6 +650,8 @@ type AppointmentServiceServer interface {
 	GetBooking(context.Context, *GetBookingRequest) (*Booking, error)
 	ListBookings(context.Context, *ListBookingsRequest) (*ListBookingsResponse, error)
 	StartExamination(context.Context, *StartExaminationRequest) (*Booking, error)
+	CallNextBooking(context.Context, *CallNextBookingRequest) (*Booking, error)
+	EndExamination(context.Context, *EndExaminationRequest) (*Booking, error)
 	DeleteBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error)
 	ListMessages(context.Context, *ListMessagesRequest) (*ListMessagesResponse, error)
 	MarkMessageRead(context.Context, *MarkMessageReadRequest) (*Message, error)
@@ -712,6 +751,9 @@ func (UnimplementedAppointmentServiceServer) ListBookingOptions(context.Context,
 func (UnimplementedAppointmentServiceServer) CreateBooking(context.Context, *CreateBookingRequest) (*Booking, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateBooking not implemented")
 }
+func (UnimplementedAppointmentServiceServer) CheckInBooking(context.Context, *CheckInBookingRequest) (*Booking, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckInBooking not implemented")
+}
 func (UnimplementedAppointmentServiceServer) GetMyBooking(context.Context, *GetBookingRequest) (*Booking, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMyBooking not implemented")
 }
@@ -735,6 +777,12 @@ func (UnimplementedAppointmentServiceServer) ListBookings(context.Context, *List
 }
 func (UnimplementedAppointmentServiceServer) StartExamination(context.Context, *StartExaminationRequest) (*Booking, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StartExamination not implemented")
+}
+func (UnimplementedAppointmentServiceServer) CallNextBooking(context.Context, *CallNextBookingRequest) (*Booking, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CallNextBooking not implemented")
+}
+func (UnimplementedAppointmentServiceServer) EndExamination(context.Context, *EndExaminationRequest) (*Booking, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EndExamination not implemented")
 }
 func (UnimplementedAppointmentServiceServer) DeleteBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteBooking not implemented")
@@ -1258,6 +1306,24 @@ func _AppointmentService_CreateBooking_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AppointmentService_CheckInBooking_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckInBookingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).CheckInBooking(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_CheckInBooking_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).CheckInBooking(ctx, req.(*CheckInBookingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _AppointmentService_GetMyBooking_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetBookingRequest)
 	if err := dec(in); err != nil {
@@ -1398,6 +1464,42 @@ func _AppointmentService_StartExamination_Handler(srv interface{}, ctx context.C
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppointmentServiceServer).StartExamination(ctx, req.(*StartExaminationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_CallNextBooking_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CallNextBookingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).CallNextBooking(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_CallNextBooking_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).CallNextBooking(ctx, req.(*CallNextBookingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_EndExamination_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EndExaminationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).EndExamination(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_EndExamination_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).EndExamination(ctx, req.(*EndExaminationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1712,6 +1814,10 @@ var AppointmentService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AppointmentService_CreateBooking_Handler,
 		},
 		{
+			MethodName: "CheckInBooking",
+			Handler:    _AppointmentService_CheckInBooking_Handler,
+		},
+		{
 			MethodName: "GetMyBooking",
 			Handler:    _AppointmentService_GetMyBooking_Handler,
 		},
@@ -1742,6 +1848,14 @@ var AppointmentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "StartExamination",
 			Handler:    _AppointmentService_StartExamination_Handler,
+		},
+		{
+			MethodName: "CallNextBooking",
+			Handler:    _AppointmentService_CallNextBooking_Handler,
+		},
+		{
+			MethodName: "EndExamination",
+			Handler:    _AppointmentService_EndExamination_Handler,
 		},
 		{
 			MethodName: "DeleteBooking",
@@ -1789,5 +1903,5 @@ var AppointmentService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "contracts/proto/appointment/v1/appointment.proto",
+	Metadata: "appointment/v1/appointment.proto",
 }

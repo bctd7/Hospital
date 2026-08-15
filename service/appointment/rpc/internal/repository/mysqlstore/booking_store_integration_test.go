@@ -226,10 +226,18 @@ func TestPatientItemSessionClaimAllowsDifferentItemsAndBlocksSameItemWhileInProg
 		Roles: []string{authn.RoleDepartmentDoctor}, DepartmentID: bookingTestDepartment,
 		Permissions: []string{contractauthz.PermissionAppointmentUpdate},
 	}
+	first, err = patientManager.CheckIn(ctx, patient, patientmanager.CheckInCommand{BookingID: first.BookingID, ExpectedVersion: first.Version, OperationID: "41000000-0000-0000-0000-000000000023"})
+	if err != nil {
+		t.Fatalf("check in first booking: %v", err)
+	}
+	first, err = staffManager.CallNext(ctx, staff, staffinput.CallNext{DepartmentID: bookingTestDepartment, RoomID: bookingTestRoom, ServiceDate: serviceDate.Format("2006-01-02"), OperationID: "41000000-0000-0000-0000-000000000026"})
+	if err != nil {
+		t.Fatalf("call first booking: %v", err)
+	}
 	started, err := staffManager.StartExamination(ctx, staff, staffinput.StartExamination{
 		BookingID: first.BookingID, ExpectedVersion: first.Version,
 		ActorDisplayName: "测试医生",
-		Operation:        staffinput.Operation{OperationID: "41000000-0000-0000-0000-000000000023"},
+		Operation:        staffinput.Operation{OperationID: "41000000-0000-0000-0000-000000000027"},
 	})
 	if err != nil {
 		t.Fatalf("start first examination: %v", err)
@@ -438,6 +446,73 @@ WHERE id = ?`, booking.BookingID); err != nil {
 	}
 }
 
+func TestCalledBookingTimeoutDefersAndCanBeRecalledWhenQueueHasNoOneElse(t *testing.T) {
+	dataSource := os.Getenv("APPOINTMENT_TEST_MYSQL_DSN")
+	if dataSource == "" {
+		t.Skip("APPOINTMENT_TEST_MYSQL_DSN is not set")
+	}
+	location, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now().In(location)
+	if now.Minute() >= 58 && (now.Hour() == 11 || now.Hour() == 23) {
+		t.Skip("not enough time remains in the examination window")
+	}
+	serviceDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, location)
+	weekday := (int(serviceDate.Weekday())+6)%7 + 1
+	session, openTime, cutoffTime, closeTime := bookingIntegrationWindow(now)
+	store, err := New(dataSource)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer store.Close()
+	ctx := context.Background()
+	cleanupBookingIntegrationData(t, store, ctx)
+	defer cleanupBookingIntegrationData(t, store, ctx)
+	seedBookingIntegrationData(t, store, ctx, weekday, session, openTime, cutoffTime, closeTime)
+	patientManager, _ := patientmanager.NewManager(store, store, store, store, nil)
+	staffManager, _ := staffmanager.NewManager(store, store, store, store, store, nil)
+	patient := authn.Principal{AccountID: bookingTestPatient, AccountType: authn.AccountTypePatient, Status: authn.AccountStatusActive}
+	staff := authn.Principal{AccountID: bookingTestStaff, AccountType: authn.AccountTypeStaff, Status: authn.AccountStatusActive, Roles: []string{authn.RoleDepartmentDoctor}, DepartmentID: bookingTestDepartment, Permissions: []string{contractauthz.PermissionAppointmentUpdate}}
+	booking, err := patientManager.CreateBooking(ctx, patient, patientmanager.CreateBookingCommand{ItemID: bookingTestItem, RoomID: bookingTestRoom, ServiceDate: serviceDate.Format("2006-01-02"), Session: session, PatientDisplayName: "测试患者", PatientPhoneMasked: "134****0001", OperationID: "41000000-0000-0000-0005-000000000001"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	booking, err = patientManager.CheckIn(ctx, patient, patientmanager.CheckInCommand{BookingID: booking.BookingID, ExpectedVersion: booking.Version, OperationID: "41000000-0000-0000-0005-000000000002"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	booking, err = staffManager.CallNext(ctx, staff, staffinput.CallNext{DepartmentID: bookingTestDepartment, RoomID: bookingTestRoom, ServiceDate: serviceDate.Format("2006-01-02"), OperationID: "41000000-0000-0000-0005-000000000003"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.db.ExecContext(ctx, `UPDATE appointment_check_queue_entries SET call_deadline = ? WHERE booking_id = ?`, time.Now().UTC().Add(-time.Second), booking.BookingID); err != nil {
+		t.Fatal(err)
+	}
+	cleanup, err := store.CleanupExpiredBookings(ctx, now, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cleanup.Deferred != 1 || cleanup.MarkedNoShow != 0 {
+		t.Fatalf("cleanup=%+v, want one deferred", cleanup)
+	}
+	deferred, err := store.GetBooking(ctx, booking.BookingID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if deferred.Status != appointmentmanager.BookingStatusQueued {
+		t.Fatalf("status=%s, want queued", deferred.Status)
+	}
+	recalled, err := staffManager.CallNext(ctx, staff, staffinput.CallNext{DepartmentID: bookingTestDepartment, RoomID: bookingTestRoom, ServiceDate: serviceDate.Format("2006-01-02"), OperationID: "41000000-0000-0000-0005-000000000004"})
+	if err != nil {
+		t.Fatalf("recall only queued patient: %v", err)
+	}
+	if recalled.Status != appointmentmanager.BookingStatusCalled || recalled.CallAttempts != 2 {
+		t.Fatalf("recalled=%+v", recalled)
+	}
+}
+
 func TestExaminationReportPublishAndCorrectionPreserveHistory(t *testing.T) {
 	dataSource := os.Getenv("APPOINTMENT_TEST_MYSQL_DSN")
 	if dataSource == "" {
@@ -482,18 +557,30 @@ func TestExaminationReportPublishAndCorrectionPreserveHistory(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create booking: %v", err)
 	}
-	booking, err = staffManager.StartExamination(ctx, staff, staffinput.StartExamination{BookingID: booking.BookingID, ExpectedVersion: booking.Version, ActorDisplayName: "测试医生", Operation: staffinput.Operation{OperationID: "41000000-0000-0000-0000-000000000033"}})
+	booking, err = patientManager.CheckIn(ctx, patient, patientmanager.CheckInCommand{BookingID: booking.BookingID, ExpectedVersion: booking.Version, OperationID: "41000000-0000-0000-0000-000000000032"})
+	if err != nil {
+		t.Fatalf("check in booking: %v", err)
+	}
+	booking, err = staffManager.CallNext(ctx, staff, staffinput.CallNext{DepartmentID: bookingTestDepartment, RoomID: bookingTestRoom, ServiceDate: serviceDate.Format("2006-01-02"), OperationID: "41000000-0000-0000-0000-000000000033"})
+	if err != nil {
+		t.Fatalf("call booking: %v", err)
+	}
+	booking, err = staffManager.StartExamination(ctx, staff, staffinput.StartExamination{BookingID: booking.BookingID, ExpectedVersion: booking.Version, ActorDisplayName: "测试医生", Operation: staffinput.Operation{OperationID: "41000000-0000-0000-0000-000000000034"}})
 	if err != nil {
 		t.Fatalf("start examination: %v", err)
 	}
-	draft, err := staffManager.SaveExaminationReportDraft(ctx, staff, staffinput.SaveReportDraft{BookingID: booking.BookingID, Content: appointmentmanager.ReportContent{ObjectiveFindings: "draft finding"}, ExpectedReportVersion: 0, ActorDisplayName: "测试医生", Operation: staffinput.Operation{OperationID: "41000000-0000-0000-0000-000000000034"}})
+	draft, err := staffManager.SaveExaminationReportDraft(ctx, staff, staffinput.SaveReportDraft{BookingID: booking.BookingID, Content: appointmentmanager.ReportContent{ObjectiveFindings: "draft finding"}, ExpectedReportVersion: 0, ActorDisplayName: "测试医生", Operation: staffinput.Operation{OperationID: "41000000-0000-0000-0000-000000000035"}})
 	if err != nil {
 		t.Fatalf("save report draft: %v", err)
 	}
 	if _, err := patientManager.GetMyExaminationReport(ctx, patient, booking.BookingID); !errors.Is(err, appointmentmanager.ErrNotFound) {
 		t.Fatalf("patient draft read error=%v, want not found", err)
 	}
-	report, err := staffManager.CompleteAndPublishExaminationReport(ctx, staff, staffinput.CompleteAndPublishReport{BookingID: booking.BookingID, Content: appointmentmanager.ReportContent{ObjectiveFindings: "published finding", Impression: "initial impression"}, ExpectedBookingVersion: booking.Version, ExpectedReportVersion: draft.Version, ActorDisplayName: "测试医生", DepartmentName: "测试科室", CampusName: "测试院区", Operation: staffinput.Operation{OperationID: "41000000-0000-0000-0000-000000000035"}})
+	booking, err = staffManager.EndExamination(ctx, staff, staffinput.EndExamination{BookingID: booking.BookingID, ExpectedVersion: booking.Version, ActorDisplayName: "测试医生", Operation: staffinput.Operation{OperationID: "41000000-0000-0000-0000-000000000036"}})
+	if err != nil {
+		t.Fatalf("end examination: %v", err)
+	}
+	report, err := staffManager.CompleteAndPublishExaminationReport(ctx, staff, staffinput.CompleteAndPublishReport{BookingID: booking.BookingID, Content: appointmentmanager.ReportContent{ObjectiveFindings: "published finding", Impression: "initial impression"}, ExpectedBookingVersion: booking.Version, ExpectedReportVersion: draft.Version, ActorDisplayName: "测试医生", DepartmentName: "测试科室", CampusName: "测试院区", Operation: staffinput.Operation{OperationID: "41000000-0000-0000-0000-000000000037"}})
 	if err != nil {
 		t.Fatalf("complete and publish: %v", err)
 	}
@@ -507,7 +594,7 @@ func TestExaminationReportPublishAndCorrectionPreserveHistory(t *testing.T) {
 	if patientReport.CurrentVersion.Impression != "initial impression" {
 		t.Fatalf("initial impression=%q", patientReport.CurrentVersion.Impression)
 	}
-	corrected, err := staffManager.CorrectExaminationReport(ctx, staff, staffinput.CorrectReport{ReportID: report.ReportID, Content: appointmentmanager.ReportContent{ObjectiveFindings: "corrected finding", Impression: "corrected impression"}, CorrectionReason: "修正录入错误", ExpectedReportVersion: report.Version, ActorDisplayName: "测试医生", Operation: staffinput.Operation{OperationID: "41000000-0000-0000-0000-000000000036"}})
+	corrected, err := staffManager.CorrectExaminationReport(ctx, staff, staffinput.CorrectReport{ReportID: report.ReportID, Content: appointmentmanager.ReportContent{ObjectiveFindings: "corrected finding", Impression: "corrected impression"}, CorrectionReason: "修正录入错误", ExpectedReportVersion: report.Version, ActorDisplayName: "测试医生", Operation: staffinput.Operation{OperationID: "41000000-0000-0000-0000-000000000038"}})
 	if err != nil {
 		t.Fatalf("correct report: %v", err)
 	}
@@ -530,7 +617,7 @@ func TestExaminationReportPublishAndCorrectionPreserveHistory(t *testing.T) {
 	}
 	repeated, err := patientManager.CreateBooking(ctx, patient, patientmanager.CreateBookingCommand{
 		ItemID: bookingTestItem, RoomID: bookingTestRoom, ServiceDate: serviceDate.Format("2006-01-02"),
-		Session: session, PatientDisplayName: "测试患者", PatientPhoneMasked: "134****0001", OperationID: "41000000-0000-0000-0000-000000000037",
+		Session: session, PatientDisplayName: "测试患者", PatientPhoneMasked: "134****0001", OperationID: "41000000-0000-0000-0000-000000000039",
 	})
 	if err != nil {
 		t.Fatalf("rebook same item after completion: %v", err)
@@ -598,6 +685,9 @@ func cleanupBookingIntegrationData(t *testing.T, store *Store, ctx context.Conte
 		`DELETE FROM appointment_examination_reports WHERE item_id = '` + bookingTestItem + `'`,
 		`DELETE FROM appointment_booking_operations WHERE operator_account_id = '` + bookingTestPatient + `'`,
 		`DELETE FROM appointment_booking_operations WHERE operator_account_id IN ('` + bookingTestPatientTwo + `', '` + bookingTestStaff + `')`,
+		`DELETE FROM appointment_check_queue_events WHERE booking_id IN (SELECT id FROM appointment_bookings WHERE item_id IN ('` + bookingTestItem + `', '` + bookingTestItemTwo + `'))`,
+		`DELETE FROM appointment_check_queue_entries WHERE booking_id IN (SELECT id FROM appointment_bookings WHERE item_id IN ('` + bookingTestItem + `', '` + bookingTestItemTwo + `'))`,
+		`DELETE FROM appointment_check_queues WHERE room_id IN ('` + bookingTestRoom + `', '` + bookingTestRoomTwo + `')`,
 		`DELETE FROM appointment_patient_item_session_claims WHERE patient_account_id IN ('` + bookingTestPatient + `', '` + bookingTestPatientTwo + `')`,
 		`DELETE FROM appointment_patient_weekly_quota_usage WHERE patient_account_id IN ('` + bookingTestPatient + `', '` + bookingTestPatientTwo + `')`,
 		`DELETE FROM appointment_bookings WHERE item_id IN ('` + bookingTestItem + `', '` + bookingTestItemTwo + `')`,

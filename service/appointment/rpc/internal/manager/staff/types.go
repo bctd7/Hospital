@@ -8,6 +8,7 @@ type (
 	ProjectChange          = common.ProjectChange
 	ProjectListFilter      = common.ProjectListFilter
 	BookingTxStore         = common.BookingTxStore
+	QueueTxStore           = common.QueueTxStore
 	Booking                = common.Booking
 	BookingListFilter      = common.BookingListFilter
 	BookingOperation       = common.BookingOperation
@@ -45,7 +46,10 @@ const (
 	SessionMorning               = common.SessionMorning
 	SessionAfternoon             = common.SessionAfternoon
 	BookingStatusConfirmed       = common.BookingStatusConfirmed
+	BookingStatusQueued          = common.BookingStatusQueued
+	BookingStatusCalled          = common.BookingStatusCalled
 	BookingStatusInProgress      = common.BookingStatusInProgress
+	BookingStatusReportPending   = common.BookingStatusReportPending
 	BookingStatusCompleted       = common.BookingStatusCompleted
 	BookingStatusNoShow          = common.BookingStatusNoShow
 	BookingStatusCanceled        = common.BookingStatusCanceled
@@ -60,14 +64,16 @@ const (
 )
 
 var (
-	ErrInvalid                 = common.ErrInvalid
-	ErrForbidden               = common.ErrForbidden
-	ErrNotFound                = common.ErrNotFound
-	ErrConflict                = common.ErrConflict
-	ErrVersionConflict         = common.ErrVersionConflict
-	ErrInvalidState            = common.ErrInvalidState
-	ErrExaminationWindowClosed = common.ErrExaminationWindowClosed
-	ErrWindowConflict          = common.ErrWindowConflict
-	ErrNotImplemented          = common.ErrNotImplemented
-	FormatRoomDisplayName      = common.FormatRoomDisplayName
+	ErrInvalid            = common.ErrInvalid
+	ErrForbidden          = common.ErrForbidden
+	ErrNotFound           = common.ErrNotFound
+	ErrConflict           = common.ErrConflict
+	ErrVersionConflict    = common.ErrVersionConflict
+	ErrInvalidState       = common.ErrInvalidState
+	ErrQueueEmpty         = common.ErrQueueEmpty
+	ErrRoomQueueBusy      = common.ErrRoomQueueBusy
+	ErrCallExpired        = common.ErrCallExpired
+	ErrWindowConflict     = common.ErrWindowConflict
+	ErrNotImplemented     = common.ErrNotImplemented
+	FormatRoomDisplayName = common.FormatRoomDisplayName
 )

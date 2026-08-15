@@ -27,23 +27,6 @@ func TestBookingRPCErrorIncludesPatientItemSessionReason(t *testing.T) {
 	t.Fatal("missing PATIENT_ITEM_SESSION_OCCUPIED ErrorInfo")
 }
 
-func TestBookingRPCErrorIncludesExaminationWindowReason(t *testing.T) {
-	value, ok := status.FromError(bookingRPCError(common.ErrExaminationWindowClosed))
-	if !ok {
-		t.Fatal("bookingRPCError did not return a gRPC status")
-	}
-	if value.Code() != codes.FailedPrecondition {
-		t.Fatalf("code = %v, want %v", value.Code(), codes.FailedPrecondition)
-	}
-	for _, detail := range value.Details() {
-		info, ok := detail.(*errdetails.ErrorInfo)
-		if ok && info.GetReason() == "EXAMINATION_WINDOW_CLOSED" && info.GetDomain() == "hospital.appointment" {
-			return
-		}
-	}
-	t.Fatal("missing EXAMINATION_WINDOW_CLOSED ErrorInfo")
-}
-
 func TestBookingRPCErrorIncludesWeeklyQuotaReason(t *testing.T) {
 	value, ok := status.FromError(bookingRPCError(common.ErrPatientWeeklyQuotaFull))
 	if !ok {

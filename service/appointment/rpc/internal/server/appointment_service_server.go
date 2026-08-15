@@ -193,6 +193,21 @@ func (s *AppointmentServiceServer) StartExamination(ctx context.Context, in *v1_
 	return l.StartExamination(in)
 }
 
+func (s *AppointmentServiceServer) CheckInBooking(ctx context.Context, in *v1_appointmentv1.CheckInBookingRequest) (*v1_appointmentv1.Booking, error) {
+	l := logic.NewCheckInBookingLogic(ctx, s.svcCtx)
+	return l.CheckInBooking(in)
+}
+
+func (s *AppointmentServiceServer) CallNextBooking(ctx context.Context, in *v1_appointmentv1.CallNextBookingRequest) (*v1_appointmentv1.Booking, error) {
+	l := logic.NewCallNextBookingLogic(ctx, s.svcCtx)
+	return l.CallNextBooking(in)
+}
+
+func (s *AppointmentServiceServer) EndExamination(ctx context.Context, in *v1_appointmentv1.EndExaminationRequest) (*v1_appointmentv1.Booking, error) {
+	l := logic.NewEndExaminationLogic(ctx, s.svcCtx)
+	return l.EndExamination(in)
+}
+
 func (s *AppointmentServiceServer) DeleteBooking(ctx context.Context, in *v1_appointmentv1.DeleteBookingRequest) (*v1_appointmentv1.DeleteBookingResponse, error) {
 	l := logic.NewDeleteBookingLogic(ctx, s.svcCtx)
 	return l.DeleteBooking(in)

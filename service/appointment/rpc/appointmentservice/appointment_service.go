@@ -19,6 +19,8 @@ type (
 	BookingOption                              = v1_appointmentv1.BookingOption
 	ChangeExaminationItemStatusRequest         = v1_appointmentv1.ChangeExaminationItemStatusRequest
 	ChangeResourceStatusRequest                = v1_appointmentv1.ChangeResourceStatusRequest
+	CheckInBookingRequest                      = v1_appointmentv1.CheckInBookingRequest
+	CallNextBookingRequest                     = v1_appointmentv1.CallNextBookingRequest
 	CompleteAndPublishExaminationReportRequest = v1_appointmentv1.CompleteAndPublishExaminationReportRequest
 	CorrectExaminationReportRequest            = v1_appointmentv1.CorrectExaminationReportRequest
 	CreateBookingRequest                       = v1_appointmentv1.CreateBookingRequest
@@ -26,6 +28,7 @@ type (
 	CreateRoomRequest                          = v1_appointmentv1.CreateRoomRequest
 	DeleteBookingRequest                       = v1_appointmentv1.DeleteBookingRequest
 	DeleteBookingResponse                      = v1_appointmentv1.DeleteBookingResponse
+	EndExaminationRequest                      = v1_appointmentv1.EndExaminationRequest
 	DepartmentUnreadCount                      = v1_appointmentv1.DepartmentUnreadCount
 	ExaminationItem                            = v1_appointmentv1.ExaminationItem
 	ExaminationItemInput                       = v1_appointmentv1.ExaminationItemInput
@@ -102,6 +105,7 @@ type (
 		ListItemWeeklyWindows(ctx context.Context, in *ListWeeklyWindowsRequest, opts ...grpc.CallOption) (*ListItemWeeklyWindowsResponse, error)
 		ListBookingOptions(ctx context.Context, in *ListBookingOptionsRequest, opts ...grpc.CallOption) (*ListBookingOptionsResponse, error)
 		CreateBooking(ctx context.Context, in *CreateBookingRequest, opts ...grpc.CallOption) (*Booking, error)
+		CheckInBooking(ctx context.Context, in *CheckInBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 		GetMyBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 		ListMyBookings(ctx context.Context, in *ListMyBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
 		DeleteMyBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
@@ -110,6 +114,8 @@ type (
 		GetBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 		ListBookings(ctx context.Context, in *ListBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
 		StartExamination(ctx context.Context, in *StartExaminationRequest, opts ...grpc.CallOption) (*Booking, error)
+		CallNextBooking(ctx context.Context, in *CallNextBookingRequest, opts ...grpc.CallOption) (*Booking, error)
+		EndExamination(ctx context.Context, in *EndExaminationRequest, opts ...grpc.CallOption) (*Booking, error)
 		DeleteBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
 		ListMessages(ctx context.Context, in *ListMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error)
 		MarkMessageRead(ctx context.Context, in *MarkMessageReadRequest, opts ...grpc.CallOption) (*Message, error)
@@ -264,6 +270,11 @@ func (m *defaultAppointmentService) CreateBooking(ctx context.Context, in *Creat
 	return client.CreateBooking(ctx, in, opts...)
 }
 
+func (m *defaultAppointmentService) CheckInBooking(ctx context.Context, in *CheckInBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.CheckInBooking(ctx, in, opts...)
+}
+
 func (m *defaultAppointmentService) GetMyBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
 	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.GetMyBooking(ctx, in, opts...)
@@ -302,6 +313,16 @@ func (m *defaultAppointmentService) ListBookings(ctx context.Context, in *ListBo
 func (m *defaultAppointmentService) StartExamination(ctx context.Context, in *StartExaminationRequest, opts ...grpc.CallOption) (*Booking, error) {
 	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.StartExamination(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) CallNextBooking(ctx context.Context, in *CallNextBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.CallNextBooking(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) EndExamination(ctx context.Context, in *EndExaminationRequest, opts ...grpc.CallOption) (*Booking, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.EndExamination(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) DeleteBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error) {

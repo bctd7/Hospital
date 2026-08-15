@@ -1,6 +1,6 @@
 export type AppointmentStatus = "active" | "disabled";
 export type AppointmentSession = "morning" | "afternoon";
-export type PatientBookingStatus = "confirmed" | "in_progress" | "completed" | "no_show" | "canceled";
+export type PatientBookingStatus = "confirmed" | "queued" | "called" | "in_progress" | "report_pending" | "completed" | "no_show" | "canceled";
 export type AppointmentListView = "active" | "completed";
 export type ExaminationReportStatus = "draft" | "published";
 export type ExaminationReportVersionKind = "original" | "correction";
@@ -197,12 +197,22 @@ export interface PatientBooking {
   startedAt?: string;
   startedBy?: string;
   startedByDisplayName?: string;
+  examinationEndedAt?: string;
+  examinationEndedBy?: string;
+  examinationEndedByDisplayName?: string;
   completedAt?: string;
   completedBy?: string;
   completedByDisplayName?: string;
   reportId?: string;
   reportStatus?: ExaminationReportStatus;
   reportVersion?: number;
+  queueNumber: number;
+  currentCalledQueueNumber: number;
+  peopleAhead: number;
+  checkedInAt?: string;
+  calledAt?: string;
+  callDeadline?: string;
+  callAttempts: number;
 }
 
 export type AppointmentMessageType =
@@ -211,6 +221,8 @@ export type AppointmentMessageType =
   | "arrival_30m"
   | "booking_canceled"
   | "booking_no_show"
+  | "booking_called"
+  | "booking_deferred"
   | "report_due"
   | "report_overdue"
   | "report_published"
@@ -300,6 +312,7 @@ export interface PatientAppointmentApi {
   createBooking(itemId: string, roomId: string, serviceDate: string, session: AppointmentSession): Promise<PatientBooking>;
   listMyBookings(page?: number, pageSize?: number, view?: AppointmentListView): Promise<AppointmentPage<PatientBooking>>;
   getMyBooking(bookingId: string): Promise<PatientBooking>;
+  checkIn(booking: PatientBooking): Promise<PatientBooking>;
   deleteMyBooking(bookingId: string, reason?: string): Promise<void>;
   listMyReports(page?: number, pageSize?: number): Promise<AppointmentPage<ExaminationReport>>;
   getMyReport(bookingId: string): Promise<ExaminationReport>;
@@ -308,6 +321,8 @@ export interface PatientAppointmentApi {
 export interface StaffBookingFilters {
   patientKeyword?: string;
   status?: PatientBookingStatus;
+  serviceDate?: string;
+  roomId?: string;
   view?: AppointmentListView;
 }
 
@@ -320,6 +335,8 @@ export interface StaffBookingApi {
   listReports(departmentId: string, filters?: StaffReportFilters, page?: number, pageSize?: number): Promise<AppointmentPage<ExaminationReport>>;
   getBooking(bookingId: string): Promise<PatientBooking>;
   startExamination(booking: PatientBooking): Promise<PatientBooking>;
+  endExamination(booking: PatientBooking): Promise<PatientBooking>;
+  callNext(departmentId: string, roomId: string, serviceDate: string): Promise<PatientBooking>;
   getReport(bookingId: string): Promise<ExaminationReport>;
   saveReportDraft(bookingId: string, content: ExaminationReportContent, expectedReportVersion: number): Promise<ExaminationReport>;
   completeAndPublishReport(booking: PatientBooking, content: ExaminationReportContent, expectedReportVersion: number): Promise<ExaminationReport>;

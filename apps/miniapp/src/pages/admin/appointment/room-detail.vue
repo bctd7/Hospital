@@ -50,6 +50,7 @@ const windowSession = ref<AppointmentSession>("morning");
 const openTime = ref("08:00");
 const closeTime = ref("12:00");
 const activeCapacity = ref("20");
+const timeOptions = computed(() => sessionTimeOptions(windowSession.value));
 
 const canCreate = computed(() => hasPermission(sessionState.principal, "appointment.create"));
 const canUpdate = computed(() => hasPermission(sessionState.principal, "appointment.update"));
@@ -256,6 +257,17 @@ function selectSession(event: { detail: { value: string | number } }) {
   openTime.value = windowSession.value === "morning" ? "09:00" : "13:00";
   closeTime.value = windowSession.value === "morning" ? "12:00" : "18:00";
 }
+function sessionTimeOptions(session: AppointmentSession) {
+  const start = session === "morning" ? 0 : 12 * 60;
+  const end = session === "morning" ? 12 * 60 : 23 * 60 + 55;
+  return Array.from({ length: Math.floor((end - start) / 5) + 1 }, (_, index) => {
+    const minutes = start + index * 5;
+    return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+  });
+}
+function timeIndex(value: string) { const index = timeOptions.value.indexOf(value.slice(0, 5)); return index < 0 ? 0 : index; }
+function selectOpenTime(event: { detail: { value: string | number } }) { openTime.value = timeOptions.value[Number(event.detail.value)] ?? openTime.value; }
+function selectCloseTime(event: { detail: { value: string | number } }) { closeTime.value = timeOptions.value[Number(event.detail.value)] ?? closeTime.value; }
 
 async function saveWindow() {
   if (!room.value || saving.value) return;
@@ -367,8 +379,8 @@ function disableWindow(value: RoomWeeklyWindow) {
       <view class="dialog">
         <text class="dialog__title">{{ editingWindow ? '编辑房间窗口' : '新增房间窗口' }}</text>
         <view class="picker-row"><picker :value="windowWeekday - 1" :range="WEEKDAY_LABELS" @change="selectWeekday"><view>{{ WEEKDAY_LABELS[windowWeekday - 1] }} ›</view></picker><picker :value="windowSession === 'morning' ? 0 : 1" :range="['上午', '下午']" @change="selectSession"><view>{{ SESSION_LABELS[windowSession] }} ›</view></picker></view>
-        <text class="field-label">开放开始（HH:MM）</text><input v-model="openTime" class="field-input" placeholder="08:00" />
-        <text class="field-label">开放结束（HH:MM）</text><input v-model="closeTime" class="field-input" placeholder="12:00" />
+        <text class="field-label">开放开始</text><picker :value="timeIndex(openTime)" :range="timeOptions" @change="selectOpenTime"><view class="field-input time-picker">{{ openTime }}<text>›</text></view></picker>
+        <text class="field-label">开放结束</text><picker :value="timeIndex(closeTime)" :range="timeOptions" @change="selectCloseTime"><view class="field-input time-picker">{{ closeTime }}<text>›</text></view></picker>
         <text class="field-label">共享活动容量</text><input v-model="activeCapacity" class="field-input" type="number" placeholder="20" />
         <view class="dialog__buttons"><button @tap="editorVisible = false">取消</button><button class="primary-button" :disabled="saving" @tap="saveWindow">保存</button></view>
       </view>
@@ -377,6 +389,6 @@ function disableWindow(value: RoomWeeklyWindow) {
 </template>
 
 <style scoped>
-.readonly-field{width:100%;height:72rpx;margin-top:10rpx;padding:0 20rpx;box-sizing:border-box;color:#536177;font-size:24rpx;line-height:72rpx;background:#eef2f6;border:1rpx solid #e1e7ed;border-radius:16rpx}
+.readonly-field{width:100%;height:72rpx;margin-top:10rpx;padding:0 20rpx;box-sizing:border-box;color:#536177;font-size:24rpx;line-height:72rpx;background:#eef2f6;border:1rpx solid #e1e7ed;border-radius:16rpx}.time-picker{display:flex;align-items:center;justify-content:space-between;line-height:72rpx}
 button::after{display:none}.detail-page{min-height:100vh;padding:24rpx;box-sizing:border-box;background:#f2f6fa}.context-card,.section{padding:26rpx;background:#fff;border:1rpx solid #e6ecf2;border-radius:24rpx}.context-card__label,.context-card__value{display:block}.context-card__label{color:#99a3b2;font-size:20rpx}.context-card__value{margin-top:7rpx;color:#344157;font-size:26rpx;font-weight:680}.section{margin-top:20rpx}.section__heading{display:flex;align-items:center;justify-content:space-between;color:#273449;font-size:28rpx;font-weight:700}.section__heading button,.relation-row button,.window-row button,.sub-toolbar button{width:auto;margin:0;padding:0 16rpx;color:#1684ca;font-size:20rpx;line-height:50rpx;background:#e9f5fc;border-radius:25rpx}.section__hint{display:block;margin-top:12rpx;color:#8d98a8;font-size:20rpx;line-height:1.6}.field-label{display:block;margin-top:22rpx;color:#657287;font-size:21rpx}.field-input{width:100%;height:72rpx;margin-top:10rpx;padding:0 20rpx;box-sizing:border-box;color:#28364a;font-size:24rpx;background:#f6f8fa;border:1rpx solid #e4eaf0;border-radius:16rpx}.primary-button,.danger-button{width:100%;margin:22rpx 0 0;font-size:24rpx;line-height:72rpx;border-radius:36rpx}.primary-button{color:#fff;background:linear-gradient(135deg,#168bd7,#1db4b2)}.danger-button{color:#c94b5e;background:#fbecef}.status{padding:5rpx 11rpx;font-size:18rpx;border-radius:13rpx}.status--active{color:#138766;background:#e1f7ef}.status--disabled{color:#a0616b;background:#f7e8eb}.sub-toolbar{display:flex;align-items:center;justify-content:space-between;margin-top:14rpx;color:#8d98a8;font-size:19rpx}.inline-empty,.state{margin-top:18rpx;padding:48rpx 20rpx;color:#8d98a8;font-size:22rpx;text-align:center;background:#f7f9fb;border-radius:18rpx}.state{display:flex;flex-direction:column;gap:18rpx}.state--error{color:#c44f61}.state button{margin:auto;color:#1684ca;background:#e9f5fc}.relation-row,.window-row{display:flex;align-items:center;justify-content:space-between;gap:18rpx;margin-top:14rpx;padding:18rpx;background:#f7f9fb;border-radius:18rpx}.relation-row__title,.relation-row__hint,.window-row__title,.window-row__time{display:block}.relation-row__title,.window-row__title{color:#344157;font-size:23rpx;font-weight:650}.relation-row__hint,.window-row__time{margin-top:6rpx;color:#8390a3;font-size:19rpx}.text-danger,.relation-row button.text-danger,.window-row__actions button.text-danger{color:#c94b5e;background:#fbecef}.window-row__actions{display:flex;align-items:center;gap:8rpx}.dialog-mask{position:fixed;inset:0;display:flex;align-items:flex-end;z-index:20;background:rgba(19,29,43,.48)}.dialog{width:100%;padding:30rpx 26rpx calc(30rpx + env(safe-area-inset-bottom));box-sizing:border-box;background:#fff;border-radius:30rpx 30rpx 0 0}.dialog__title{color:#263348;font-size:30rpx;font-weight:720}.picker-row{display:grid;grid-template-columns:1fr 1fr;gap:14rpx;margin-top:22rpx}.picker-row view{padding:0 20rpx;color:#425067;font-size:23rpx;line-height:68rpx;background:#f4f7fa;border-radius:16rpx}.dialog__notice{display:block;margin-top:20rpx;color:#bb7838;font-size:20rpx}.dialog__buttons{display:grid;grid-template-columns:1fr 1fr;gap:16rpx;margin-top:20rpx}.dialog__buttons button{margin:0;line-height:68rpx;border-radius:34rpx}.dialog__buttons .primary-button{margin:0}.primary-button[disabled]{opacity:.55}
 </style>

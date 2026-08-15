@@ -16,6 +16,8 @@ const (
 	MessageTypeArrival30       MessageType = "arrival_30m"
 	MessageTypeBookingCanceled MessageType = "booking_canceled"
 	MessageTypeBookingNoShow   MessageType = "booking_no_show"
+	MessageTypeBookingCalled   MessageType = "booking_called"
+	MessageTypeBookingDeferred MessageType = "booking_deferred"
 	MessageTypeReportDue       MessageType = "report_due"
 	MessageTypeReportOverdue   MessageType = "report_overdue"
 	MessageTypeReportPublished MessageType = "report_published"
@@ -30,6 +32,15 @@ type MessageReportFact struct {
 	VersionKind ReportVersionKind
 	Booking     Booking
 	PublishedAt time.Time
+}
+
+// MessageQueueFact 保存叫号事件的不可变事实，避免患者稍后读取时丢失曾经发生的提醒。
+type MessageQueueFact struct {
+	EventID      string
+	EventType    QueueEventType
+	CallSequence int64
+	OccurredAt   time.Time
+	Booking      Booking
 }
 
 // Message 是由预约和报告事实动态形成的只读消息。
@@ -62,14 +73,20 @@ type MessagePage struct {
 type MessageStore interface {
 	ListMessageBookings(ctx context.Context, patientAccountID, departmentID string) ([]Booking, error)
 	ListPatientMessageReportFacts(ctx context.Context, patientAccountID string) ([]MessageReportFact, error)
+	ListPatientMessageQueueFacts(ctx context.Context, patientAccountID string) ([]MessageQueueFact, error)
 	ListMessageReads(ctx context.Context, accountID string, messageKeys []string) (map[string]time.Time, error)
 	MarkMessageRead(ctx context.Context, accountID, messageKey string, readAt time.Time) error
 }
 
-func PatientMessages(bookings []Booking, reports []MessageReportFact, now time.Time) []Message {
+func PatientMessages(bookings []Booking, reports []MessageReportFact, now time.Time, queueFacts ...[]MessageQueueFact) []Message {
 	values := make([]Message, 0, len(bookings)*3+len(reports))
 	for _, booking := range bookings {
 		values = append(values, Message{MessageKey: "booking:" + booking.BookingID + ":patient:created", MessageType: MessageTypeBookingCreated, OccurredAt: booking.CreatedAt, Booking: booking})
+		if booking.Status == BookingStatusNoShow {
+			if at, err := noShowOccurredAt(booking); err == nil {
+				values = append(values, Message{MessageKey: "booking:" + booking.BookingID + ":patient:no-show", MessageType: MessageTypeBookingNoShow, OccurredAt: at, Booking: booking})
+			}
+		}
 		cutoff, err := messageDateTime(booking.ServiceDate, booking.BookingCutoffTime)
 		if err != nil {
 			continue
@@ -99,6 +116,21 @@ func PatientMessages(bookings []Booking, reports []MessageReportFact, now time.T
 			ReportID: fact.ReportID, ReportVersionID: fact.VersionID, ReportVersionNo: fact.VersionNo,
 		})
 	}
+	if len(queueFacts) > 0 {
+		for _, fact := range queueFacts[0] {
+			messageType := MessageTypeBookingCalled
+			if fact.EventType == QueueEventDeferred {
+				messageType = MessageTypeBookingDeferred
+			}
+			if fact.EventType != QueueEventCalled && fact.EventType != QueueEventDeferred {
+				continue
+			}
+			values = append(values, Message{
+				MessageKey: "queue-event:" + fact.EventID + ":patient", MessageType: messageType,
+				OccurredAt: fact.OccurredAt, Booking: fact.Booking,
+			})
+		}
+	}
 	sortMessages(values)
 	return values
 }
@@ -110,9 +142,10 @@ func DepartmentMessages(bookings []Booking, now time.Time) []Message {
 		if booking.Status == BookingStatusCanceled {
 			values = append(values, Message{MessageKey: "booking:" + booking.BookingID + ":department:canceled", MessageType: MessageTypeBookingCanceled, OccurredAt: booking.UpdatedAt, Booking: booking})
 		}
-		cutoff, cutoffErr := messageDateTime(booking.ServiceDate, booking.BookingCutoffTime)
-		if booking.Status == BookingStatusNoShow && cutoffErr == nil {
-			values = append(values, Message{MessageKey: "booking:" + booking.BookingID + ":department:no-show", MessageType: MessageTypeBookingNoShow, OccurredAt: cutoff, Booking: booking})
+		if booking.Status == BookingStatusNoShow {
+			if at, err := noShowOccurredAt(booking); err == nil {
+				values = append(values, Message{MessageKey: "booking:" + booking.BookingID + ":department:no-show", MessageType: MessageTypeBookingNoShow, OccurredAt: at, Booking: booking})
+			}
 		}
 		end, err := messageDateTime(booking.ServiceDate, booking.ItemEndTime)
 		if err != nil || booking.StartedAt == nil {
@@ -131,6 +164,12 @@ func DepartmentMessages(bookings []Booking, now time.Time) []Message {
 	}
 	sortMessages(values)
 	return values
+}
+
+func noShowOccurredAt(booking Booking) (time.Time, error) {
+	clock := booking.BookingCutoffTime
+	if booking.CallAttempts > 0 { clock = booking.ItemEndTime }
+	return messageDateTime(booking.ServiceDate, clock)
 }
 
 func ApplyMessageReads(values []Message, reads map[string]time.Time) int64 {

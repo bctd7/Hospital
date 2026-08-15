@@ -35,6 +35,7 @@ service AppointmentService {
 
   rpc ListBookingOptions(ListBookingOptionsRequest) returns (ListBookingOptionsResponse);
   rpc CreateBooking(CreateBookingRequest) returns (Booking);
+  rpc CheckInBooking(CheckInBookingRequest) returns (Booking);
   rpc GetMyBooking(GetBookingRequest) returns (Booking);
   rpc ListMyBookings(ListMyBookingsRequest) returns (ListBookingsResponse);
   rpc DeleteMyBooking(DeleteBookingRequest) returns (DeleteBookingResponse);
@@ -43,6 +44,8 @@ service AppointmentService {
   rpc GetBooking(GetBookingRequest) returns (Booking);
   rpc ListBookings(ListBookingsRequest) returns (ListBookingsResponse);
   rpc StartExamination(StartExaminationRequest) returns (Booking);
+  rpc CallNextBooking(CallNextBookingRequest) returns (Booking);
+  rpc EndExamination(EndExaminationRequest) returns (Booking);
   rpc DeleteBooking(DeleteBookingRequest) returns (DeleteBookingResponse);
   rpc ListMessages(ListMessagesRequest) returns (ListMessagesResponse);
   rpc MarkMessageRead(MarkMessageReadRequest) returns (Message);
@@ -377,6 +380,29 @@ message StartExaminationRequest {
   string actor_display_name = 5;
 }
 
+message CheckInBookingRequest {
+  string booking_id = 1;
+  int64 expected_version = 2;
+  string operation_id = 3;
+  string request_id = 4;
+}
+
+message CallNextBookingRequest {
+  string department_id = 1;
+  string room_id = 2;
+  string service_date = 3;
+  string operation_id = 4;
+  string request_id = 5;
+}
+
+message EndExaminationRequest {
+  string booking_id = 1;
+  int64 expected_version = 2;
+  string operation_id = 3;
+  string request_id = 4;
+  string actor_display_name = 5;
+}
+
 message Booking {
   string booking_id = 1;
   string patient_account_id = 2;
@@ -412,6 +438,16 @@ message Booking {
   string report_status = 34;
   int64 report_version = 35;
   int32 estimated_duration_minutes = 36;
+  string examination_ended_at = 37;
+  string examination_ended_by = 38;
+  string examination_ended_by_display_name = 39;
+  int64 queue_number = 40;
+  int64 current_called_queue_number = 41;
+  int64 people_ahead = 42;
+  string checked_in_at = 43;
+  string called_at = 44;
+  string call_deadline = 45;
+  int64 call_attempts = 46;
 }
 
 message ListBookingsResponse {

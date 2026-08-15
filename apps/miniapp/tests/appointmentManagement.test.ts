@@ -3,7 +3,6 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
-  examinationWindowRelation,
   formatEstimatedDuration,
   canReadAppointmentManagement,
   itemWindowTimeValid,
@@ -23,23 +22,14 @@ describe("appointment management view rules", () => {
     expect(canReadAppointmentManagement({ roles: ["department_doctor"], permissions: [] })).toBe(false);
   });
 
-  it("only allows examination start inside the booked project window", () => {
-    expect(examinationWindowRelation("2026-08-15", "09:00", "12:00", new Date(2026, 7, 15, 8, 59, 59))).toBe("before");
-    expect(examinationWindowRelation("2026-08-15", "09:00", "12:00", new Date(2026, 7, 15, 9, 0, 0))).toBe("open");
-    expect(examinationWindowRelation("2026-08-15", "09:00:00", "12:00:00", new Date(2026, 7, 15, 11, 59, 59))).toBe("open");
-    expect(examinationWindowRelation("2026-08-15", "09:00", "12:00", new Date(2026, 7, 15, 12, 0, 0))).toBe("after");
-    expect(examinationWindowRelation("2026-02-30", "09:00", "12:00", new Date(2026, 2, 2, 10, 0, 0))).toBe("invalid");
-  });
-
-  it("explains why examination cannot start outside the project window", () => {
+  it("only exposes examination start after staff has called the patient", () => {
     for (const page of ["bookings.vue", "booking-detail.vue"]) {
       const source = readFileSync(
         new URL(`../src/pages/admin/appointment/${page}`, import.meta.url),
         "utf8",
       );
-      expect(source).toContain("暂不能开始检查");
-      expect(source).toContain("examinationWindowDescription");
-      expect(source).toContain("内开始检查");
+      expect(source).toContain("status === \"called\"");
+      expect(source).toContain("开始检查");
     }
   });
 

@@ -265,6 +265,9 @@ CREATE TABLE appointment_bookings (
     started_at                   DATETIME(3)      NULL,
     started_by                   CHAR(36)         NULL,
     started_by_display_name_snapshot VARCHAR(128) NULL,
+    examination_ended_at           DATETIME(3)      NULL,
+    examination_ended_by           CHAR(36)         NULL,
+    examination_ended_by_display_name_snapshot VARCHAR(128) NULL,
     completed_at                 DATETIME(3)      NULL,
     completed_by                 CHAR(36)         NULL,
     completed_by_display_name_snapshot VARCHAR(128) NULL,
@@ -291,7 +294,7 @@ CREATE TABLE appointment_bookings (
     CONSTRAINT chk_appointment_bookings_session
         CHECK (session IN ('morning', 'afternoon')),
     CONSTRAINT chk_appointment_bookings_status
-        CHECK (status IN ('confirmed', 'in_progress', 'completed', 'no_show', 'canceled')),
+        CHECK (status IN ('confirmed', 'queued', 'called', 'in_progress', 'report_pending', 'completed', 'no_show', 'canceled')),
     CONSTRAINT chk_appointment_bookings_room_time
         CHECK (room_open_time_snapshot < room_close_time_snapshot),
     CONSTRAINT chk_appointment_bookings_item_time
@@ -304,14 +307,71 @@ CREATE TABLE appointment_bookings (
     CONSTRAINT chk_appointment_bookings_duration
         CHECK (estimated_duration_minutes_snapshot BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes_snapshot, 5) = 0),
     CONSTRAINT chk_appointment_bookings_lifecycle CHECK (
-        (status IN ('confirmed', 'no_show', 'canceled') AND started_at IS NULL AND started_by IS NULL
-            AND completed_at IS NULL AND completed_by IS NULL)
+        (status IN ('confirmed', 'queued', 'called', 'no_show', 'canceled') AND started_at IS NULL AND started_by IS NULL
+            AND examination_ended_at IS NULL AND examination_ended_by IS NULL AND completed_at IS NULL AND completed_by IS NULL)
         OR (status = 'in_progress' AND started_at IS NOT NULL AND started_by IS NOT NULL
+            AND examination_ended_at IS NULL AND examination_ended_by IS NULL AND completed_at IS NULL AND completed_by IS NULL)
+        OR (status = 'report_pending' AND started_at IS NOT NULL AND started_by IS NOT NULL
+            AND examination_ended_at IS NOT NULL AND examination_ended_by IS NOT NULL
             AND completed_at IS NULL AND completed_by IS NULL)
         OR (status = 'completed' AND started_at IS NOT NULL AND started_by IS NOT NULL
+            AND examination_ended_at IS NOT NULL AND examination_ended_by IS NOT NULL
             AND completed_at IS NOT NULL AND completed_by IS NOT NULL)
     ),
     CONSTRAINT chk_appointment_bookings_version CHECK (version > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE appointment_check_queues (
+    id                        CHAR(36)        NOT NULL,
+    room_id                   CHAR(36)        NOT NULL,
+    service_date              DATE            NOT NULL,
+    session                   VARCHAR(16)     NOT NULL,
+    next_ticket_number        BIGINT UNSIGNED NOT NULL DEFAULT 1,
+    call_sequence             BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    current_called_booking_id CHAR(36)        NULL,
+    version                   BIGINT UNSIGNED NOT NULL DEFAULT 1,
+    created_at                DATETIME(3)     NOT NULL,
+    updated_at                DATETIME(3)     NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_appointment_check_queues_scope (room_id, service_date, session),
+    KEY idx_appointment_check_queues_current (current_called_booking_id),
+    CONSTRAINT fk_appointment_check_queues_room FOREIGN KEY (room_id) REFERENCES appointment_rooms (id),
+    CONSTRAINT chk_appointment_check_queues_session CHECK (session IN ('morning', 'afternoon')),
+    CONSTRAINT chk_appointment_check_queues_numbers CHECK (next_ticket_number > 0 AND version > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE appointment_check_queue_entries (
+    booking_id                   CHAR(36)        NOT NULL,
+    queue_id                     CHAR(36)        NOT NULL,
+    ticket_number                BIGINT UNSIGNED NOT NULL,
+    eligible_after_call_sequence BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    call_attempts                BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    checked_in_at                DATETIME(3)     NOT NULL,
+    called_at                    DATETIME(3)     NULL,
+    call_deadline                DATETIME(3)     NULL,
+    updated_at                   DATETIME(3)     NOT NULL,
+    PRIMARY KEY (booking_id),
+    UNIQUE KEY uk_appointment_check_queue_entries_ticket (queue_id, ticket_number),
+    KEY idx_appointment_check_queue_entries_next (queue_id, eligible_after_call_sequence, ticket_number),
+    KEY idx_appointment_check_queue_entries_deadline (call_deadline, booking_id),
+    CONSTRAINT fk_appointment_check_queue_entries_booking FOREIGN KEY (booking_id) REFERENCES appointment_bookings (id),
+    CONSTRAINT fk_appointment_check_queue_entries_queue FOREIGN KEY (queue_id) REFERENCES appointment_check_queues (id),
+    CONSTRAINT chk_appointment_check_queue_entries_ticket CHECK (ticket_number > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE appointment_check_queue_events (
+    id            CHAR(36)        NOT NULL,
+    queue_id      CHAR(36)        NOT NULL,
+    booking_id    CHAR(36)        NOT NULL,
+    event_type    VARCHAR(24)     NOT NULL,
+    call_sequence BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    occurred_at   DATETIME(3)     NOT NULL,
+    PRIMARY KEY (id),
+    KEY idx_appointment_check_queue_events_booking (booking_id, occurred_at, id),
+    KEY idx_appointment_check_queue_events_queue (queue_id, occurred_at, id),
+    CONSTRAINT fk_appointment_check_queue_events_queue FOREIGN KEY (queue_id) REFERENCES appointment_check_queues (id),
+    CONSTRAINT fk_appointment_check_queue_events_booking FOREIGN KEY (booking_id) REFERENCES appointment_bookings (id),
+    CONSTRAINT chk_appointment_check_queue_events_type CHECK (event_type IN ('checked_in', 'called', 'deferred', 'started', 'ended'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- 消息正文由预约与报告事实动态生成；这里只保存每个账号独立的已读游标。
@@ -352,7 +412,7 @@ CREATE TABLE appointment_booking_operations (
     KEY idx_appointment_booking_operations_operator (operator_account_id, created_at),
     CONSTRAINT chk_appointment_booking_operations_action CHECK (
         action IN ('create', 'delete_by_patient', 'delete_by_staff', 'delete_by_configuration',
-                   'mark_no_show', 'start_examination',
+                   'mark_no_show', 'check_in', 'call_next', 'start_examination', 'end_examination',
                    'save_report_draft', 'complete_and_publish_report', 'correct_report')
     )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

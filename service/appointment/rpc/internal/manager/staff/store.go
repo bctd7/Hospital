@@ -31,6 +31,7 @@ type BookingStore interface {
 	GetBooking(ctx context.Context, bookingID string) (Booking, error)
 	ListBookings(ctx context.Context, filter BookingListFilter) ([]Booking, int64, error)
 	WithinBookingTransaction(ctx context.Context, fn func(BookingTxStore) error) error
+	WithinQueueTransaction(ctx context.Context, fn func(QueueTxStore) error) error
 }
 
 // ReportStore 是工作人员执行检查、维护报告草稿、发布和更正所需的入口。

@@ -5,7 +5,7 @@ import { computed, ref } from "vue";
 import { appointmentManagementApi, staffBookingApi } from "@/api/appointment";
 import { sessionState } from "@/stores/session";
 import type { ExaminationReport, ExaminationReportContent, PatientBooking, PatientBookingStatus } from "@/types/appointment";
-import { examinationWindowRelation, formatEstimatedDuration, hasPermission } from "@/utils/appointmentManagement";
+import { formatEstimatedDuration, hasPermission } from "@/utils/appointmentManagement";
 
 const bookingId = ref("");
 const booking = ref<PatientBooking>();
@@ -22,13 +22,11 @@ const notes = ref("");
 
 const canPublish = computed(() => hasPermission(sessionState.principal, "report.publish"));
 const canCorrect = computed(() => hasPermission(sessionState.principal, "report.correct"));
-const editable = computed(() => booking.value?.status === "in_progress" || correctionMode.value);
-const showBottomActions = computed(() => booking.value?.status === "confirmed"
+const editable = computed(() => booking.value?.status === "in_progress" || booking.value?.status === "report_pending" || correctionMode.value);
+const showBottomActions = computed(() => booking.value?.status === "called"
   || booking.value?.status === "in_progress"
+  || booking.value?.status === "report_pending"
   || (booking.value?.status === "completed" && canCorrect.value));
-const examinationWindowState = computed(() => booking.value
-  ? examinationWindowRelation(booking.value.serviceDate, booking.value.itemStartTime, booking.value.itemEndTime)
-  : "invalid");
 
 onLoad((query) => {
   bookingId.value = decode(String(query?.booking_id ?? ""));
@@ -47,11 +45,11 @@ async function loadDetail() {
     booking.value = await staffBookingApi.getBooking(bookingId.value);
     report.value = undefined;
     clearContent();
-    if (booking.value.status === "in_progress" || booking.value.status === "completed") {
+    if (["in_progress", "report_pending", "completed"].includes(booking.value.status)) {
       if (booking.value.reportId) {
         report.value = await staffBookingApi.getReport(booking.value.bookingId);
         fillContent(report.value.currentVersion);
-      } else if (booking.value.status === "in_progress") {
+      } else if (booking.value.status === "in_progress" || booking.value.status === "report_pending") {
         const template = await appointmentManagementApi.getItemReportTemplate(booking.value.itemId);
         fillContent(template);
       } else {
@@ -66,15 +64,7 @@ async function loadDetail() {
 }
 
 async function startExamination() {
-  if (!booking.value || booking.value.status !== "confirmed" || saving.value) return;
-  if (examinationWindowState.value !== "open") {
-    uni.showModal({
-      title: "暂不能开始检查",
-      content: examinationWindowDescription(booking.value),
-      showCancel: false,
-    });
-    return;
-  }
+  if (!booking.value || booking.value.status !== "called" || saving.value) return;
   await runMutation("检查已开始", async () => {
     booking.value = await staffBookingApi.startExamination(booking.value!);
     const template = await appointmentManagementApi.getItemReportTemplate(booking.value.itemId);
@@ -82,8 +72,15 @@ async function startExamination() {
   });
 }
 
-async function saveDraft() {
+async function endExamination() {
   if (!booking.value || booking.value.status !== "in_progress" || saving.value) return;
+  await runMutation("检查已结束", async () => {
+    booking.value = await staffBookingApi.endExamination(booking.value!);
+  });
+}
+
+async function saveDraft() {
+  if (!booking.value || !["in_progress", "report_pending"].includes(booking.value.status) || saving.value) return;
   if (!hasAnyContent()) {
     uni.showToast({ title: "请至少填写一项报告内容", icon: "none" });
     return;
@@ -95,14 +92,14 @@ async function saveDraft() {
 }
 
 function requestPublish() {
-  if (!booking.value || booking.value.status !== "in_progress" || !canPublish.value) return;
+  if (!booking.value || booking.value.status !== "report_pending" || !canPublish.value) return;
   if (!objectiveFindings.value.trim() || !impression.value.trim()) {
     uni.showToast({ title: "发布前必须填写客观所见和检查结论", icon: "none" });
     return;
   }
   uni.showModal({
-    title: "完成检查并发布报告",
-    content: "发布后将完成本次检查并释放容量。原版不可覆盖，后续只能通过更正生成新版本。",
+    title: "发布检查报告",
+    content: "检查已结束。发布后患者可以查看正式报告；原版不可覆盖，后续只能通过更正生成新版本。",
     confirmText: "确认发布",
     success: ({ confirm }) => { if (confirm) void publish(); },
   });
@@ -168,8 +165,7 @@ function clearContent() { fillContent({ objectiveFindings: "", impression: "", r
 function decode(value: string) { try { return decodeURIComponent(value); } catch { return ""; } }
 function messageOf(error: unknown, fallback: string) { return error instanceof Error && error.message.trim() ? error.message : fallback; }
 function sessionLabel(value: string) { return value === "morning" ? "上午" : "下午"; }
-function statusLabel(value: PatientBookingStatus) { return ({ confirmed: "待检查", in_progress: "检查中", completed: "已完成", no_show: "未到场", canceled: "已取消" } as const)[value]; }
-function examinationWindowDescription(value: PatientBooking) { return `只能在 ${value.serviceDate} ${clockLabel(value.itemStartTime)}–${clockLabel(value.itemEndTime)} 内开始检查。`; }
+function statusLabel(value: PatientBookingStatus) { return ({ confirmed: "待报到", queued: "排队中", called: "正在叫号", in_progress: "检查中", report_pending: "报告待完成", completed: "已完成", no_show: "未到场", canceled: "已取消" } as const)[value]; }
 function clockLabel(value: string) { return value.slice(0, 5); }
 </script>
 
@@ -189,11 +185,12 @@ function clockLabel(value: string) { return value.slice(0, 5); }
         <text>{{ booking.departmentName || '当前科室' }} · {{ booking.roomDisplayName }}</text>
         <text>{{ booking.campusName ? `${booking.campusName} · ` : '' }}{{ booking.building }} · {{ booking.floorNumber }}层 · {{ booking.roomNumber }}室</text>
         <text class="duration">{{ formatEstimatedDuration(booking.estimatedDurationMinutes) }}</text>
-        <text v-if="booking.status === 'confirmed' && examinationWindowState !== 'open'" class="arrival-notice">只能在 {{ booking.serviceDate }} {{ clockLabel(booking.itemStartTime) }}–{{ clockLabel(booking.itemEndTime) }} 内开始检查</text>
+        <text v-if="booking.status === 'queued'" class="arrival-notice">候检号 {{ booking.queueNumber }}，前方 {{ booking.peopleAhead }} 人。</text>
+        <text v-if="booking.status === 'called'" class="arrival-notice">正在叫 {{ booking.queueNumber }} 号，请确认患者已到达房间后开始检查。</text>
         <text v-if="booking.status === 'no_show'" class="arrival-notice">项目结束时仍未开始检查，系统已记录为未到场。</text>
       </view>
 
-      <view v-if="booking.status === 'in_progress' || booking.status === 'completed'" class="card report-card">
+      <view v-if="booking.status === 'in_progress' || booking.status === 'report_pending' || booking.status === 'completed'" class="card report-card">
         <view class="card-heading">
           <text>{{ correctionMode ? '填写更正版' : '检查报告' }}</text>
           <button v-if="report" @tap="openHistory">版本记录</button>
@@ -214,10 +211,14 @@ function clockLabel(value: string) { return value.slice(0, 5); }
       </view>
 
       <view v-if="showBottomActions" class="bottom-actions">
-        <button v-if="booking.status === 'confirmed'" :disabled="saving" class="primary" @tap="startExamination">{{ examinationWindowState === 'open' ? '开始检查' : '查看可开始时间' }}</button>
+        <button v-if="booking.status === 'called'" :disabled="saving" class="primary" @tap="startExamination">确认到场并开始检查</button>
         <template v-else-if="booking.status === 'in_progress'">
           <button :disabled="saving" class="secondary" @tap="saveDraft">保存草稿</button>
-          <button v-if="canPublish" :disabled="saving" class="primary" @tap="requestPublish">完成并发布</button>
+          <button :disabled="saving" class="primary" @tap="endExamination">结束检查</button>
+        </template>
+        <template v-else-if="booking.status === 'report_pending'">
+          <button :disabled="saving" class="secondary" @tap="saveDraft">保存草稿</button>
+          <button v-if="canPublish" :disabled="saving" class="primary" @tap="requestPublish">发布报告</button>
         </template>
         <template v-else-if="booking.status === 'completed' && canCorrect">
           <button v-if="!correctionMode" :disabled="saving" class="primary" @tap="beginCorrection">发起更正</button>

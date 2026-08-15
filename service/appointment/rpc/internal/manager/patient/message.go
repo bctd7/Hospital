@@ -26,7 +26,11 @@ func (m *Manager) ListMyMessages(ctx context.Context, patient authn.Principal, p
 	if err != nil {
 		return common.MessagePage{}, err
 	}
-	values := common.PatientMessages(bookings, reports, time.Now())
+	queueFacts, err := m.messages.ListPatientMessageQueueFacts(ctx, patient.AccountID)
+	if err != nil {
+		return common.MessagePage{}, err
+	}
+	values := common.PatientMessages(bookings, reports, time.Now(), queueFacts)
 	reads, err := m.messages.ListMessageReads(ctx, patient.AccountID, messageKeys(values))
 	if err != nil {
 		return common.MessagePage{}, err
@@ -51,7 +55,11 @@ func (m *Manager) MarkMyMessageRead(ctx context.Context, patient authn.Principal
 	if err != nil {
 		return common.Message{}, err
 	}
-	for _, message := range common.PatientMessages(bookings, reports, time.Now()) {
+	queueFacts, err := m.messages.ListPatientMessageQueueFacts(ctx, patient.AccountID)
+	if err != nil {
+		return common.Message{}, err
+	}
+	for _, message := range common.PatientMessages(bookings, reports, time.Now(), queueFacts) {
 		if message.MessageKey != messageKey {
 			continue
 		}

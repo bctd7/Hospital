@@ -349,10 +349,21 @@ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 
 func (s *bookingTxStore) StartExamination(ctx context.Context, value appointmentmanager.Booking, expectedVersion int64) error {
 	result, err := s.tx.ExecContext(ctx, `
+UPDATE appointment_check_queues q
+JOIN appointment_check_queue_entries e ON e.queue_id = q.id
+SET q.current_called_booking_id = NULL, q.version = q.version + 1, q.updated_at = ?
+WHERE e.booking_id = ? AND q.current_called_booking_id = ?`, value.UpdatedAt, value.BookingID, value.BookingID)
+	if err != nil {
+		return fmt.Errorf("release current called booking: %w", err)
+	}
+	if affected, _ := result.RowsAffected(); affected != 1 {
+		return appointmentmanager.ErrInvalidState
+	}
+	result, err = s.tx.ExecContext(ctx, `
 UPDATE appointment_bookings
 SET status = 'in_progress', started_at = ?, started_by = ?, started_by_display_name_snapshot = ?,
     version = version + 1, updated_at = ?
-WHERE id = ? AND status = 'confirmed' AND version = ?`,
+WHERE id = ? AND status = 'called' AND version = ?`,
 		value.StartedAt, value.StartedBy, value.StartedByDisplayName, value.UpdatedAt, value.BookingID, expectedVersion,
 	)
 	if err != nil {
@@ -368,11 +379,27 @@ WHERE id = ? AND status = 'confirmed' AND version = ?`,
 	return nil
 }
 
+func (s *bookingTxStore) EndExamination(ctx context.Context, value appointmentmanager.Booking, expectedVersion int64) error {
+	result, err := s.tx.ExecContext(ctx, `
+UPDATE appointment_bookings
+SET status = 'report_pending', examination_ended_at = ?, examination_ended_by = ?,
+    examination_ended_by_display_name_snapshot = ?, version = version + 1, updated_at = ?
+WHERE id = ? AND status = 'in_progress' AND version = ?`, value.ExaminationEndedAt, value.ExaminationEndedBy,
+		value.ExaminationEndedByDisplayName, value.UpdatedAt, value.BookingID, expectedVersion)
+	if err != nil {
+		return fmt.Errorf("end examination: %w", err)
+	}
+	if affected, _ := result.RowsAffected(); affected != 1 {
+		return appointmentmanager.ErrVersionConflict
+	}
+	return nil
+}
+
 func (s *bookingTxStore) MarkBookingNoShow(ctx context.Context, value appointmentmanager.Booking, expectedVersion int64) error {
 	result, err := s.tx.ExecContext(ctx, `
 UPDATE appointment_bookings
 SET status = 'no_show', version = version + 1, updated_at = ?
-WHERE id = ? AND status = 'confirmed' AND version = ?`,
+WHERE id = ? AND status IN ('confirmed', 'called') AND version = ?`,
 		value.UpdatedAt, value.BookingID, expectedVersion,
 	)
 	if err != nil {
@@ -393,7 +420,7 @@ func (s *bookingTxStore) CompleteBooking(ctx context.Context, value appointmentm
 UPDATE appointment_bookings
 SET status = 'completed', completed_at = ?, completed_by = ?, completed_by_display_name_snapshot = ?,
     version = version + 1, updated_at = ?
-WHERE id = ? AND status = 'in_progress' AND version = ?`,
+WHERE id = ? AND status = 'report_pending' AND version = ?`,
 		value.CompletedAt, value.CompletedBy, value.CompletedByDisplayName, value.UpdatedAt, value.BookingID, expectedVersion,
 	)
 	if err != nil {

@@ -9,6 +9,13 @@ type StartExamination struct {
 	Operation
 }
 
+type EndExamination struct {
+	BookingID        string
+	ExpectedVersion  int64
+	ActorDisplayName string
+	Operation
+}
+
 type SaveReportDraft struct {
 	BookingID             string
 	Content               common.ReportContent

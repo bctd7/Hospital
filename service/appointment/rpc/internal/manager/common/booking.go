@@ -8,11 +8,14 @@ type BookingStatus string
 type BookingListView string
 
 const (
-	BookingStatusConfirmed  BookingStatus = "confirmed"
-	BookingStatusInProgress BookingStatus = "in_progress"
-	BookingStatusCompleted  BookingStatus = "completed"
-	BookingStatusNoShow     BookingStatus = "no_show"
-	BookingStatusCanceled   BookingStatus = "canceled"
+	BookingStatusConfirmed     BookingStatus = "confirmed"
+	BookingStatusQueued        BookingStatus = "queued"
+	BookingStatusCalled        BookingStatus = "called"
+	BookingStatusInProgress    BookingStatus = "in_progress"
+	BookingStatusReportPending BookingStatus = "report_pending"
+	BookingStatusCompleted     BookingStatus = "completed"
+	BookingStatusNoShow        BookingStatus = "no_show"
+	BookingStatusCanceled      BookingStatus = "canceled"
 )
 
 const (
@@ -25,46 +28,57 @@ func (v BookingListView) Valid() bool {
 }
 
 func (s BookingStatus) Valid() bool {
-	return s == BookingStatusConfirmed || s == BookingStatusInProgress ||
+	return s == BookingStatusConfirmed || s == BookingStatusQueued || s == BookingStatusCalled || s == BookingStatusInProgress ||
+		s == BookingStatusReportPending ||
 		s == BookingStatusCompleted || s == BookingStatusNoShow || s == BookingStatusCanceled
 }
 
 type Booking struct {
-	BookingID                string        `json:"booking_id"`
-	PatientAccountID         string        `json:"patient_account_id"`
-	PatientDisplayName       string        `json:"patient_display_name"`
-	PatientPhoneMasked       string        `json:"patient_phone_masked"`
-	PatientPhoneLast4        string        `json:"-"`
-	DepartmentID             string        `json:"department_id"`
-	ItemID                   string        `json:"item_id"`
-	ItemName                 string        `json:"item_name"`
-	RoomID                   string        `json:"room_id"`
-	RoomDisplayName          string        `json:"room_display_name"`
-	CampusID                 string        `json:"campus_id"`
-	Building                 string        `json:"building"`
-	FloorNumber              int32         `json:"floor_number"`
-	RoomNumber               string        `json:"room_number"`
-	ServiceDate              time.Time     `json:"service_date"`
-	Session                  Session       `json:"session"`
-	Status                   BookingStatus `json:"status"`
-	RoomOpenTime             string        `json:"room_open_time"`
-	RoomCloseTime            string        `json:"room_close_time"`
-	ItemStartTime            string        `json:"item_start_time"`
-	ItemEndTime              string        `json:"item_end_time"`
-	BookingCutoffTime        string        `json:"booking_cutoff_time"`
-	EstimatedDurationMinutes int32         `json:"estimated_duration_minutes"`
-	StartedAt                *time.Time    `json:"started_at,omitempty"`
-	StartedBy                string        `json:"started_by,omitempty"`
-	StartedByDisplayName     string        `json:"started_by_display_name,omitempty"`
-	CompletedAt              *time.Time    `json:"completed_at,omitempty"`
-	CompletedBy              string        `json:"completed_by,omitempty"`
-	CompletedByDisplayName   string        `json:"completed_by_display_name,omitempty"`
-	ReportID                 string        `json:"report_id,omitempty"`
-	ReportStatus             ReportStatus  `json:"report_status,omitempty"`
-	ReportVersion            int64         `json:"report_version,omitempty"`
-	Version                  int64         `json:"version"`
-	CreatedAt                time.Time     `json:"created_at"`
-	UpdatedAt                time.Time     `json:"updated_at"`
+	BookingID                     string        `json:"booking_id"`
+	PatientAccountID              string        `json:"patient_account_id"`
+	PatientDisplayName            string        `json:"patient_display_name"`
+	PatientPhoneMasked            string        `json:"patient_phone_masked"`
+	PatientPhoneLast4             string        `json:"-"`
+	DepartmentID                  string        `json:"department_id"`
+	ItemID                        string        `json:"item_id"`
+	ItemName                      string        `json:"item_name"`
+	RoomID                        string        `json:"room_id"`
+	RoomDisplayName               string        `json:"room_display_name"`
+	CampusID                      string        `json:"campus_id"`
+	Building                      string        `json:"building"`
+	FloorNumber                   int32         `json:"floor_number"`
+	RoomNumber                    string        `json:"room_number"`
+	ServiceDate                   time.Time     `json:"service_date"`
+	Session                       Session       `json:"session"`
+	Status                        BookingStatus `json:"status"`
+	RoomOpenTime                  string        `json:"room_open_time"`
+	RoomCloseTime                 string        `json:"room_close_time"`
+	ItemStartTime                 string        `json:"item_start_time"`
+	ItemEndTime                   string        `json:"item_end_time"`
+	BookingCutoffTime             string        `json:"booking_cutoff_time"`
+	EstimatedDurationMinutes      int32         `json:"estimated_duration_minutes"`
+	StartedAt                     *time.Time    `json:"started_at,omitempty"`
+	StartedBy                     string        `json:"started_by,omitempty"`
+	StartedByDisplayName          string        `json:"started_by_display_name,omitempty"`
+	ExaminationEndedAt            *time.Time    `json:"examination_ended_at,omitempty"`
+	ExaminationEndedBy            string        `json:"examination_ended_by,omitempty"`
+	ExaminationEndedByDisplayName string        `json:"examination_ended_by_display_name,omitempty"`
+	CompletedAt                   *time.Time    `json:"completed_at,omitempty"`
+	CompletedBy                   string        `json:"completed_by,omitempty"`
+	CompletedByDisplayName        string        `json:"completed_by_display_name,omitempty"`
+	ReportID                      string        `json:"report_id,omitempty"`
+	ReportStatus                  ReportStatus  `json:"report_status,omitempty"`
+	ReportVersion                 int64         `json:"report_version,omitempty"`
+	QueueNumber                   int64         `json:"queue_number,omitempty"`
+	CurrentCalledQueueNumber      int64         `json:"current_called_queue_number,omitempty"`
+	PeopleAhead                   int64         `json:"people_ahead,omitempty"`
+	CheckedInAt                   *time.Time    `json:"checked_in_at,omitempty"`
+	CalledAt                      *time.Time    `json:"called_at,omitempty"`
+	CallDeadline                  *time.Time    `json:"call_deadline,omitempty"`
+	CallAttempts                  int64         `json:"call_attempts,omitempty"`
+	Version                       int64         `json:"version"`
+	CreatedAt                     time.Time     `json:"created_at"`
+	UpdatedAt                     time.Time     `json:"updated_at"`
 }
 
 type BookingOption struct {

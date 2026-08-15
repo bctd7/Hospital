@@ -26,11 +26,30 @@ SELECT b.id, b.patient_account_id, b.patient_display_name_snapshot,
        TIME_FORMAT(b.item_cutoff_time_snapshot, '%H:%i:%s'),
        b.estimated_duration_minutes_snapshot,
        b.started_at, COALESCE(b.started_by, ''), COALESCE(b.started_by_display_name_snapshot, ''),
+       b.examination_ended_at, COALESCE(b.examination_ended_by, ''), COALESCE(b.examination_ended_by_display_name_snapshot, ''),
        b.completed_at, COALESCE(b.completed_by, ''), COALESCE(b.completed_by_display_name_snapshot, ''),
+       COALESCE(qe.ticket_number, 0), COALESCE(current_qe.ticket_number, 0),
+       qe.checked_in_at, qe.called_at, qe.call_deadline, COALESCE(qe.call_attempts, 0),
+       CASE WHEN qe.booking_id IS NULL THEN 0 ELSE (
+         SELECT COUNT(*)
+         FROM appointment_check_queue_entries ahead
+         JOIN appointment_bookings ahead_booking ON ahead_booking.id = ahead.booking_id AND ahead_booking.status = 'queued'
+         WHERE ahead.queue_id = qe.queue_id AND ahead.booking_id <> b.id
+           AND (
+             (ahead.eligible_after_call_sequence <= q.call_sequence AND qe.eligible_after_call_sequence > q.call_sequence)
+             OR (ahead.eligible_after_call_sequence <= q.call_sequence AND qe.eligible_after_call_sequence <= q.call_sequence AND ahead.ticket_number < qe.ticket_number)
+             OR (ahead.eligible_after_call_sequence > q.call_sequence AND qe.eligible_after_call_sequence > q.call_sequence
+                 AND (ahead.eligible_after_call_sequence < qe.eligible_after_call_sequence
+                      OR (ahead.eligible_after_call_sequence = qe.eligible_after_call_sequence AND ahead.ticket_number < qe.ticket_number)))
+           )
+       ) END,
        b.version, b.created_at, b.updated_at
 FROM appointment_bookings b
 JOIN appointment_examination_items i ON i.id = b.item_id
-JOIN appointment_rooms r ON r.id = b.room_id`
+JOIN appointment_rooms r ON r.id = b.room_id
+LEFT JOIN appointment_check_queue_entries qe ON qe.booking_id = b.id
+LEFT JOIN appointment_check_queues q ON q.id = qe.queue_id
+LEFT JOIN appointment_check_queue_entries current_qe ON current_qe.booking_id = q.current_called_booking_id`
 
 func (s *Store) ListBookingOptions(ctx context.Context, itemID string, fromDate, throughDate time.Time) ([]appointmentmanager.BookingOption, error) {
 	rows, err := s.db.QueryContext(ctx, `
@@ -72,7 +91,7 @@ WHERE i.id = ?
   AND rw.open_time <= iw.start_time
   AND iw.end_time <= rw.close_time
 ORDER BY d.service_date, iw.session, r.building, r.floor_number, r.room_number, r.id`,
-		fromDate, throughDate, itemID,
+		fromDate.Format("2006-01-02"), throughDate.Format("2006-01-02"), itemID,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("list booking options: %w", err)
@@ -157,9 +176,9 @@ func (s *Store) ListBookings(ctx context.Context, filter appointmentmanager.Book
 	}
 	switch filter.View {
 	case appointmentmanager.BookingListViewActive:
-		conditions = append(conditions, "b.status IN ('confirmed', 'in_progress')")
+		conditions = append(conditions, "b.status IN ('confirmed', 'queued', 'called', 'in_progress')")
 	case appointmentmanager.BookingListViewCompleted:
-		conditions = append(conditions, "b.status IN ('completed', 'no_show')")
+		conditions = append(conditions, "b.status IN ('report_pending', 'completed', 'no_show')")
 	}
 	where := ""
 	if len(conditions) > 0 {
@@ -211,11 +230,32 @@ func (s *Store) WithinBookingTransaction(ctx context.Context, fn func(appointmen
 	return nil
 }
 
+func (s *Store) WithinQueueTransaction(ctx context.Context, fn func(appointmentmanager.QueueTxStore) error) error {
+	if fn == nil {
+		return errors.New("queue transaction callback is required")
+	}
+	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
+	if err != nil {
+		return fmt.Errorf("begin queue transaction: %w", err)
+	}
+	if err := fn(&bookingTxStore{tx: tx}); err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil && !errors.Is(rollbackErr, sql.ErrTxDone) {
+			return errors.Join(err, fmt.Errorf("rollback queue transaction: %w", rollbackErr))
+		}
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit queue transaction: %w", err)
+	}
+	return nil
+}
+
 type bookingScanner interface{ Scan(dest ...any) error }
 
 func scanBooking(scanner bookingScanner) (appointmentmanager.Booking, error) {
 	var value appointmentmanager.Booking
-	var startedAt, completedAt sql.NullTime
+	var startedAt, examinationEndedAt, completedAt sql.NullTime
+	var checkedInAt, calledAt, callDeadline sql.NullTime
 	var building, roomNumber string
 	var floorNumber int32
 	err := scanner.Scan(
@@ -228,7 +268,10 @@ func scanBooking(scanner bookingScanner) (appointmentmanager.Booking, error) {
 		&value.ItemStartTime, &value.ItemEndTime, &value.BookingCutoffTime,
 		&value.EstimatedDurationMinutes,
 		&startedAt, &value.StartedBy, &value.StartedByDisplayName,
+		&examinationEndedAt, &value.ExaminationEndedBy, &value.ExaminationEndedByDisplayName,
 		&completedAt, &value.CompletedBy, &value.CompletedByDisplayName,
+		&value.QueueNumber, &value.CurrentCalledQueueNumber,
+		&checkedInAt, &calledAt, &callDeadline, &value.CallAttempts, &value.PeopleAhead,
 		&value.Version, &value.CreatedAt, &value.UpdatedAt,
 	)
 	if err != nil {
@@ -241,6 +284,18 @@ func scanBooking(scanner bookingScanner) (appointmentmanager.Booking, error) {
 	}
 	if completedAt.Valid {
 		value.CompletedAt = &completedAt.Time
+	}
+	if examinationEndedAt.Valid {
+		value.ExaminationEndedAt = &examinationEndedAt.Time
+	}
+	if checkedInAt.Valid {
+		value.CheckedInAt = &checkedInAt.Time
+	}
+	if calledAt.Valid {
+		value.CalledAt = &calledAt.Time
+	}
+	if callDeadline.Valid {
+		value.CallDeadline = &callDeadline.Time
 	}
 	return value, nil
 }

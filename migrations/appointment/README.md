@@ -14,7 +14,10 @@
 - `appointment_room_date_capacity`：房间在具体日期和上午/下午的容量事实；
 - `appointment_patient_weekly_quota_usage`：患者每自然周已经消耗的预约额度；
 - `appointment_patient_item_session_claims`：患者对同一项目在具体日期和上午/下午的待检查或检查中唯一占用；
-- `appointment_bookings`：待检查、检查中、已完成、未到场和已取消预约及关键快照；
+- `appointment_bookings`：待报到、排队、叫号、检查中、报告待完成、已完成、未到场和已取消预约及关键快照；
+- `appointment_check_queues`：房间在具体日期和上午/下午的候检号与叫号轮次；
+- `appointment_check_queue_entries`：预约的候检号、报到时间、叫号次数和顺延资格；
+- `appointment_check_queue_events`：报到、叫号、顺延、开始和结束检查的追加事实；
 - `appointment_booking_operations`：预约写操作幂等结果；
 - `appointment_examination_reports`：一次预约唯一的报告主体和检查资源快照；
 - `appointment_examination_report_versions`：可编辑草稿、当前正式版和不可覆盖的历史更正版本；

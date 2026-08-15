@@ -2,66 +2,52 @@
 import { onLoad, onShow } from "@dcloudio/uni-app";
 import { computed, ref } from "vue";
 
-import { staffBookingApi } from "@/api/appointment";
-import {
-  loadDepartmentOptions,
-  type DepartmentOption,
-} from "@/services/organization";
-import type { AppointmentListView, PatientBooking, PatientBookingStatus } from "@/types/appointment";
-import { examinationWindowRelation, formatEstimatedDuration } from "@/utils/appointmentManagement";
+import { appointmentManagementApi, staffBookingApi } from "@/api/appointment";
+import { ApiError } from "@/api/client";
+import { loadDepartmentOptions, type DepartmentOption } from "@/services/organization";
+import type { AppointmentListView, AppointmentRoom, PatientBooking, PatientBookingStatus } from "@/types/appointment";
 import { currentStaffDepartmentId, rememberStaffDepartmentId } from "@/utils/staffDepartmentContext";
 
 const departmentId = ref("");
 const departmentLabel = ref("科室预约");
-const patientKeyword = ref("");
-const status = ref<PatientBookingStatus | "">("");
-const bookings = ref<PatientBooking[]>([]);
-const loading = ref(false);
-const errorMessage = ref("");
-const pendingId = ref("");
 const departmentLocked = ref(false);
 const departmentOptions = ref<DepartmentOption[]>([]);
-const loadingDepartments = ref(false);
+const rooms = ref<AppointmentRoom[]>([]);
+const selectedRoomId = ref("");
+const serviceDate = ref(today());
+const patientKeyword = ref("");
+const bookings = ref<PatientBooking[]>([]);
+const loading = ref(false);
+const pendingId = ref("");
+const errorMessage = ref("");
 const view = ref<AppointmentListView>("active");
+
 const isCompletedView = computed(() => view.value === "completed");
+const isToday = computed(() => serviceDate.value === today());
 const canSwitchDepartment = computed(() => !departmentLocked.value && departmentOptions.value.length > 1);
-const statusOptions: Array<{ label: string; value: PatientBookingStatus | "" }> = [
-  { label: "全部状态", value: "" },
-  { label: "待检查", value: "confirmed" },
-  { label: "检查中", value: "in_progress" },
-];
+const currentExamination = computed(() => bookings.value.find((value) => value.status === "in_progress"));
+const currentCalled = computed(() => bookings.value.find((value) => value.status === "called"));
+const currentBooking = computed(() => currentExamination.value ?? currentCalled.value);
+const queuedBookings = computed(() => bookings.value.filter((value) => value.status === "queued").sort((a, b) => a.queueNumber - b.queueNumber));
+const confirmedBookings = computed(() => bookings.value.filter((value) => value.status === "confirmed"));
 
 onLoad((query) => {
   view.value = query?.view === "completed" ? "completed" : "active";
   const queryDepartmentId = decode(query?.department_id);
   departmentId.value = queryDepartmentId || currentStaffDepartmentId();
   departmentLocked.value = Boolean(queryDepartmentId);
-  departmentLabel.value = decode(query?.department_label) || "科室预约";
-  uni.setNavigationBarTitle({ title: departmentLabel.value });
+  departmentLabel.value = decode(query?.department_label) || (isCompletedView.value ? "检查记录" : "科室预约");
+  uni.setNavigationBarTitle({ title: isCompletedView.value ? "检查记录" : "科室预约" });
   if (!departmentLocked.value) void prepareDepartmentSelection();
 });
-onShow(() => void loadBookings());
+onShow(() => void loadPage());
 
 async function prepareDepartmentSelection() {
-  if (loadingDepartments.value) return;
-  loadingDepartments.value = true;
-  errorMessage.value = "";
   try {
     departmentOptions.value = await loadDepartmentOptions();
-    const selected = departmentOptions.value.find(
-      (option) => option.department.departmentId === departmentId.value,
-    );
-    if (!selected) {
-      errorMessage.value = "暂无可查看的科室";
-      return;
-    }
-    selectDepartment(selected);
-    await loadBookings();
-  } catch (error) {
-    errorMessage.value = messageOf(error, "科室列表加载失败");
-  } finally {
-    loadingDepartments.value = false;
-  }
+    const selected = departmentOptions.value.find((value) => value.department.departmentId === departmentId.value);
+    if (selected) selectDepartment(selected);
+  } catch (error) { errorMessage.value = messageOf(error, "科室列表加载失败"); }
 }
 
 function selectDepartment(option: DepartmentOption) {
@@ -73,147 +59,112 @@ function selectDepartment(option: DepartmentOption) {
 function switchDepartment() {
   if (!canSwitchDepartment.value || loading.value) return;
   uni.showActionSheet({
-    title: "选择要查看的科室",
-    itemList: departmentOptions.value.map((option) => option.label),
+    title: "选择科室",
+    itemList: departmentOptions.value.map((value) => value.label),
     success: ({ tapIndex }) => {
       const selected = departmentOptions.value[tapIndex];
-      if (!selected || selected.department.departmentId === departmentId.value) return;
+      if (!selected) return;
       selectDepartment(selected);
-      patientKeyword.value = "";
-      status.value = "";
-      bookings.value = [];
-      void loadBookings();
+      rooms.value = [];
+      selectedRoomId.value = "";
+      void loadPage();
     },
   });
 }
 
-async function loadBookings() {
+async function loadPage() {
   if (!departmentId.value || loading.value) return;
   loading.value = true;
   errorMessage.value = "";
   try {
+    if (!isCompletedView.value && !rooms.value.length) {
+      rooms.value = (await appointmentManagementApi.listRooms(departmentId.value, 1, 100)).items;
+      selectedRoomId.value ||= rooms.value[0]?.roomId ?? "";
+    }
     bookings.value = (await staffBookingApi.listBookings(departmentId.value, {
       patientKeyword: patientKeyword.value.trim() || undefined,
-      status: status.value || undefined,
       view: view.value,
+      serviceDate: isCompletedView.value ? undefined : serviceDate.value,
+      roomId: isCompletedView.value ? undefined : selectedRoomId.value || undefined,
     })).items;
-  } catch (error) {
-    errorMessage.value = messageOf(error, "科室预约加载失败");
-  } finally {
-    loading.value = false;
-  }
+  } catch (error) { errorMessage.value = messageOf(error, "科室预约加载失败"); }
+  finally { loading.value = false; }
 }
 
-function selectStatus(event: { detail: { value: string | number } }) {
-  status.value = statusOptions[Number(event.detail.value)]?.value ?? "";
-  void loadBookings();
-}
+function selectRoom(roomId: string) { if (selectedRoomId.value !== roomId) { selectedRoomId.value = roomId; void loadPage(); } }
+function selectDate(event: { detail: { value: string } }) { serviceDate.value = event.detail.value; void loadPage(); }
+function openBooking(value: PatientBooking) { uni.navigateTo({ url: `/pages/admin/appointment/booking-detail?booking_id=${encodeURIComponent(value.bookingId)}` }); }
 
-function openBooking(value: PatientBooking) {
-  uni.navigateTo({ url: `/pages/admin/appointment/booking-detail?booking_id=${encodeURIComponent(value.bookingId)}` });
+async function callNext() {
+  if (!isToday.value || !selectedRoomId.value || currentBooking.value || pendingId.value) return;
+  pendingId.value = "call-next";
+  try { await staffBookingApi.callNext(departmentId.value, selectedRoomId.value, serviceDate.value); uni.showToast({ title: "已叫下一位", icon: "success" }); await loadAfterMutation(); }
+  catch (error) { showOperationError("叫号失败", error); }
+  finally { pendingId.value = ""; }
 }
 
 async function startExamination(value: PatientBooking) {
-  if (pendingId.value || value.status !== "confirmed") return;
-  if (examinationWindowRelation(value.serviceDate, value.itemStartTime, value.itemEndTime) !== "open") {
-    uni.showModal({
-      title: "暂不能开始检查",
-      content: examinationWindowDescription(value),
-      showCancel: false,
-    });
-    return;
-  }
+  if (value.status !== "called" || pendingId.value) return;
   pendingId.value = value.bookingId;
-  try {
-    const updated = await staffBookingApi.startExamination(value);
-    bookings.value = bookings.value.map((booking) => booking.bookingId === updated.bookingId ? updated : booking);
-    uni.showToast({ title: "已开始检查", icon: "success" });
-  } catch (error) {
-    uni.showModal({ title: "开始检查失败", content: messageOf(error, "请刷新后重试"), showCancel: false });
-  } finally {
-    pendingId.value = "";
-  }
+  try { await staffBookingApi.startExamination(value); uni.showToast({ title: "已开始检查", icon: "success" }); await loadAfterMutation(); }
+  catch (error) { showOperationError("开始检查失败", error); }
+  finally { pendingId.value = ""; }
 }
 
-function requestDelete(value: PatientBooking) {
-  if (pendingId.value) return;
-  uni.showModal({
-    title: "删除预约",
-    content: `确认删除“${value.itemName}”预约？`,
-    success: (result) => { if (result.confirm) void deleteBooking(value); },
-  });
-}
-
-async function deleteBooking(value: PatientBooking) {
+async function endExamination(value: PatientBooking) {
+  if (value.status !== "in_progress" || pendingId.value) return;
   pendingId.value = value.bookingId;
-  try {
-    await staffBookingApi.deleteBooking(value.bookingId);
-    bookings.value = bookings.value.filter((booking) => booking.bookingId !== value.bookingId);
-    uni.showToast({ title: "已删除", icon: "success" });
-  } catch (error) {
-    uni.showModal({ title: "删除失败", content: messageOf(error, "请稍后重试"), showCancel: false });
-  } finally {
-    pendingId.value = "";
-  }
+  try { await staffBookingApi.endExamination(value); uni.showToast({ title: "检查已结束", icon: "success" }); await loadAfterMutation(); }
+  catch (error) { showOperationError("结束检查失败", error); }
+  finally { pendingId.value = ""; }
 }
 
+async function loadAfterMutation() { loading.value = false; await loadPage(); }
+function showOperationError(title: string, error: unknown) { uni.showModal({ title, content: messageOf(error, "请刷新后重试"), showCancel: false }); }
+function today() { return new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10); }
 function decode(value?: string) { try { return value ? decodeURIComponent(value) : ""; } catch { return ""; } }
-function messageOf(error: unknown, fallback: string) { return error instanceof Error && error.message.trim() ? error.message : fallback; }
-function sessionLabel(value: string) { return value === "morning" ? "上午" : "下午"; }
-function statusLabel(value: PatientBookingStatus) {
-  return ({ confirmed: "待检查", in_progress: "检查中", completed: "已完成", no_show: "未到场", canceled: "已取消" } as const)[value];
+function messageOf(error: unknown, fallback: string) {
+  if (error instanceof ApiError) {
+    const messages: Record<string, string> = { QUEUE_EMPTY: "当前房间暂无可以叫号的已报到患者", ROOM_QUEUE_BUSY: "请先处理当前叫号或正在检查的患者", CALL_EXPIRED: "本次叫号已经超时，患者已返回候检队列" };
+    if (messages[error.code]) return messages[error.code];
+  }
+  return error instanceof Error && error.message.trim() ? error.message : fallback;
 }
-function examinationActionLabel(value: PatientBooking) {
-  const relation = examinationWindowRelation(value.serviceDate, value.itemStartTime, value.itemEndTime);
-  if (relation === "open") return "开始检查";
-  if (relation === "after") return "已超过检查时间";
-  if (relation === "before") return `${clockLabel(value.itemStartTime)} 后可开始`;
-  return "暂不可开始";
-}
-function examinationWindowDescription(value: PatientBooking) { return `只能在 ${value.serviceDate} ${clockLabel(value.itemStartTime)}–${clockLabel(value.itemEndTime)} 内开始检查。`; }
-function clockLabel(value: string) { return value.slice(0, 5); }
-function roomAddress(value: PatientBooking) { return `${value.campusName ? `${value.campusName} · ` : ""}${value.building} · ${value.floorNumber}层 · ${value.roomNumber}室`; }
+function statusLabel(value: PatientBookingStatus) { return ({ confirmed: "待报到", queued: "排队中", called: "正在叫号", in_progress: "检查中", report_pending: "报告待完成", completed: "已完成", no_show: "未到场", canceled: "已取消" } as const)[value]; }
+function roomAddress(value: AppointmentRoom) { return `${value.building} · ${value.floorNumber}层 · ${value.roomNumber}室`; }
+function bookingAddress(value: PatientBooking) { return `${value.building} · ${value.floorNumber}层 · ${value.roomNumber}室`; }
 </script>
 
 <template>
-  <view class="staff-bookings">
+  <view class="page">
     <view class="summary">
-      <view><text class="summary__title">{{ departmentLabel }}</text><text class="summary__minor">{{ isCompletedView ? "查看并搜索本科室已完成和未到场记录" : "按患者姓名或手机号后四位查找本科室待检查和检查中预约" }}</text></view>
-      <view class="summary__actions">
-        <button v-if="canSwitchDepartment" @tap="switchDepartment">切换科室</button>
-        <button @tap="loadBookings">刷新</button>
-      </view>
+      <view><text class="summary__title">{{ departmentLabel }}</text><text class="summary__minor">{{ isCompletedView ? '查询本科室诊后检查记录' : '按房间处理今日检查队列' }}</text></view>
+      <view class="summary__actions"><button v-if="canSwitchDepartment" @tap="switchDepartment">切换科室</button><button @tap="loadPage">刷新</button></view>
     </view>
-    <view class="filters">
-      <input v-model="patientKeyword" confirm-type="search" placeholder="患者姓名 / 手机号后四位" @confirm="loadBookings" />
-      <picker v-if="!isCompletedView" :range="statusOptions" range-key="label" @change="selectStatus"><view class="filter-status">{{ statusOptions.find((item) => item.value === status)?.label }} ›</view></picker>
-      <button @tap="loadBookings">搜索</button>
-    </view>
+    <view v-if="isCompletedView" class="search"><input v-model="patientKeyword" confirm-type="search" placeholder="患者姓名 / 手机号后四位" @confirm="loadPage" /><button @tap="loadPage">搜索</button></view>
+    <template v-else>
+      <view class="date-bar"><text>检查日期</text><picker mode="date" :value="serviceDate" @change="selectDate"><view class="date-value">{{ serviceDate }} ›</view></picker><text v-if="!isToday" class="readonly">历史日期只读</text></view>
+      <scroll-view scroll-x class="rooms"><view class="room-row"><view v-for="room in rooms" :key="room.roomId" class="room-chip" :class="{ 'room-chip--active': selectedRoomId === room.roomId }" @tap="selectRoom(room.roomId)"><text>{{ roomAddress(room) }}</text></view></view></scroll-view>
+    </template>
     <view v-if="loading" class="state">正在加载…</view>
-    <view v-else-if="errorMessage" class="state state--error" @tap="loadBookings">{{ errorMessage }}</view>
-    <view v-else-if="!bookings.length" class="state">{{ isCompletedView ? "暂无符合条件的诊后记录" : "暂无符合条件的待检查或检查中预约" }}</view>
-    <view v-else class="booking-list">
-      <view v-for="booking in bookings" :key="booking.bookingId" class="booking-card" @tap="openBooking(booking)">
-        <view class="booking-card__heading">
-          <view><text class="patient">{{ booking.patientDisplayName }}</text><text class="phone">{{ booking.patientPhoneMasked }}</text></view>
-          <text class="status" :class="`status--${booking.status}`">{{ statusLabel(booking.status) }}</text>
-        </view>
-        <text class="booking-card__project">{{ booking.itemName }}</text>
-        <text class="booking-card__line">{{ booking.serviceDate }} · {{ sessionLabel(booking.session) }} · {{ booking.itemStartTime }}–{{ booking.itemEndTime }}</text>
-        <text class="booking-card__line">{{ roomAddress(booking) }}</text>
-        <text class="booking-card__line booking-card__duration">{{ formatEstimatedDuration(booking.estimatedDurationMinutes) }}</text>
-        <view class="actions" @tap.stop>
-          <button v-if="booking.status === 'confirmed'" :disabled="pendingId === booking.bookingId" @tap="startExamination(booking)">{{ examinationActionLabel(booking) }}</button>
-          <button v-if="booking.status === 'confirmed'" class="danger" :disabled="pendingId === booking.bookingId" @tap="requestDelete(booking)">删除</button>
-          <button class="detail" @tap="openBooking(booking)">查看详情</button>
-        </view>
-      </view>
+    <view v-else-if="errorMessage" class="state state--error" @tap="loadPage">{{ errorMessage }}</view>
+    <view v-else-if="isCompletedView" class="record-list">
+      <view v-if="!bookings.length" class="state">暂无符合条件的检查记录</view>
+      <view v-for="booking in bookings" :key="booking.bookingId" class="record" @tap="openBooking(booking)"><view class="card-heading"><text class="patient">{{ booking.patientDisplayName }}</text><text class="status">{{ statusLabel(booking.status) }}</text></view><text class="project">{{ booking.itemName }}</text><text class="line">{{ booking.serviceDate }} · {{ booking.itemStartTime.slice(0,5) }}–{{ booking.itemEndTime.slice(0,5) }}</text><text class="line">{{ bookingAddress(booking) }}</text></view>
     </view>
+    <template v-else-if="selectedRoomId">
+      <view class="current-panel" :class="{ 'current-panel--called': currentCalled && !currentExamination }">
+        <text class="section-label">{{ currentExamination ? '当前检查' : currentCalled ? '当前叫号' : '房间状态' }}</text>
+        <template v-if="currentBooking"><view class="card-heading"><text class="current-name">{{ currentBooking.patientDisplayName }}</text><text class="current-number">{{ currentBooking.queueNumber }} 号</text></view><text class="project">{{ currentBooking.itemName }} · {{ currentBooking.patientPhoneMasked }}</text><button v-if="isToday && currentCalled" class="primary" :disabled="Boolean(pendingId)" @tap="startExamination(currentCalled)">确认患者到场并开始检查</button><button v-if="isToday && currentExamination" class="primary" :disabled="Boolean(pendingId)" @tap="endExamination(currentExamination)">结束本次检查</button></template>
+        <text v-else class="idle">当前没有正在叫号或检查的患者</text>
+      </view>
+      <view class="queue-section"><view class="section-heading"><view><text class="section-title">候检队列</text><text class="section-count">{{ queuedBookings.length }} 人</text></view><button v-if="isToday" class="call-button" :disabled="Boolean(currentBooking) || !queuedBookings.length || Boolean(pendingId)" @tap="callNext">叫下一位</button></view><view v-if="!queuedBookings.length" class="empty">暂无已报到患者</view><view v-for="booking in queuedBookings" :key="booking.bookingId" class="queue-row" @tap="openBooking(booking)"><text class="ticket">{{ booking.queueNumber }}</text><view class="queue-person"><text>{{ booking.patientDisplayName }}</text><text>{{ booking.itemName }} · {{ booking.patientPhoneMasked }}</text></view><text class="attempts">{{ booking.callAttempts ? `已叫 ${booking.callAttempts} 次` : '等待叫号' }}</text></view></view>
+      <view class="queue-section"><view class="section-heading"><view><text class="section-title">尚未报到</text><text class="section-count">{{ confirmedBookings.length }} 人</text></view></view><view v-if="!confirmedBookings.length" class="empty">暂无待报到患者</view><view v-for="booking in confirmedBookings" :key="booking.bookingId" class="waiting-row" @tap="openBooking(booking)"><view><text class="patient">{{ booking.patientDisplayName }}</text><text class="line">{{ booking.itemName }} · {{ booking.itemStartTime.slice(0,5) }}–{{ booking.itemEndTime.slice(0,5) }}</text></view><text class="status">待报到</text></view></view>
+    </template>
+    <view v-else-if="!loading" class="state">当前科室尚未配置房间</view>
   </view>
 </template>
 
 <style scoped>
-button::after{display:none}.staff-bookings{min-height:100vh;padding:22rpx 22rpx calc(28rpx + env(safe-area-inset-bottom));box-sizing:border-box;background:#f3f5f8}.summary,.filters,.booking-card,.state{padding:24rpx;background:#fff;border:1rpx solid #e1e6ed;border-radius:18rpx}.summary{display:flex;align-items:center;justify-content:space-between}.summary__title,.summary__minor,.booking-card__project,.booking-card__line{display:block}.summary__title{color:#263348;font-size:27rpx;font-weight:700}.summary__minor{margin-top:7rpx;color:#8995a5;font-size:18rpx}.summary button,.filters button,.actions button{width:auto;margin:0;padding:0 22rpx;color:#fff;font-size:20rpx;line-height:58rpx;background:#2188c7;border-radius:29rpx}.filters{display:grid;grid-template-columns:1fr auto auto;gap:12rpx;margin-top:16rpx;padding:14rpx}.filters input,.filter-status{height:62rpx;padding:0 18rpx;color:#344157;font-size:21rpx;line-height:62rpx;background:#f3f6f9;border-radius:14rpx}.filter-status{min-width:120rpx}.state{margin-top:20rpx;color:#8490a0;font-size:22rpx;text-align:center}.state--error{color:#be4e5d}.booking-card{margin-top:18rpx}.booking-card__heading{display:flex;align-items:center;justify-content:space-between}.patient{color:#263348;font-size:27rpx;font-weight:700}.phone{margin-left:14rpx;color:#7f8b9c;font-size:20rpx}.status{padding:5rpx 12rpx;color:#277bc0;font-size:18rpx;background:#edf6fb;border-radius:14rpx}.status--in_progress{color:#147cb1;background:#e6f5fc}.status--completed{color:#287b5e;background:#eaf7f1}.status--no_show{color:#8a5b35;background:#f8efe6}.booking-card__project{margin-top:18rpx;color:#344157;font-size:24rpx;font-weight:650}.booking-card__line{margin-top:10rpx;color:#758195;font-size:21rpx}.actions{display:flex;justify-content:flex-end;gap:12rpx;margin-top:22rpx}.actions .danger{color:#c84f5d;background:#fff0f1}.actions .detail{color:#247bb4;background:#edf6fb}
-.summary__actions{display:flex;gap:10rpx;margin-left:14rpx;flex-shrink:0}
-.booking-card__duration{color:#2188c7}
+button::after{display:none}.page{min-height:100vh;padding:22rpx 22rpx calc(32rpx + env(safe-area-inset-bottom));box-sizing:border-box;background:#f3f5f8;color:#263348}.summary,.search,.date-bar,.current-panel,.queue-section,.record,.state{background:#fff;border:1rpx solid #e1e6ed;border-radius:18rpx}.summary{display:flex;align-items:center;justify-content:space-between;padding:24rpx}.summary__title,.summary__minor,.project,.line,.section-label,.idle{display:block}.summary__title{font-size:28rpx;font-weight:700}.summary__minor{margin-top:7rpx;color:#8995a5;font-size:19rpx}.summary__actions{display:flex;gap:10rpx}.summary button,.search button{width:auto;margin:0;padding:0 20rpx;color:#247eb7;font-size:20rpx;line-height:56rpx;background:#edf6fb;border-radius:28rpx}.search{display:grid;grid-template-columns:1fr auto;gap:12rpx;margin-top:16rpx;padding:14rpx}.search input{height:60rpx;padding:0 18rpx;font-size:21rpx;background:#f3f6f9;border-radius:14rpx}.date-bar{display:flex;align-items:center;gap:18rpx;margin-top:16rpx;padding:20rpx 24rpx;font-size:21rpx}.date-value{color:#2188c7;font-weight:650}.readonly{margin-left:auto;color:#9aa5b3;font-size:18rpx}.rooms{margin:16rpx 0;white-space:nowrap}.room-row{display:inline-flex;gap:12rpx}.room-chip{padding:18rpx 22rpx;color:#68778a;font-size:20rpx;background:#fff;border:1rpx solid #dfe6ee;border-radius:16rpx}.room-chip--active{color:#fff;background:#2188c7;border-color:#2188c7}.state{margin-top:18rpx;padding:30rpx;color:#8490a0;font-size:22rpx;text-align:center}.state--error{color:#bd4d5c}.current-panel{padding:26rpx;border-left:7rpx solid #22a276}.current-panel--called{border-left-color:#2188c7;background:#f7fcff}.section-label{color:#8190a3;font-size:19rpx}.card-heading,.section-heading,.waiting-row{display:flex;align-items:center;justify-content:space-between}.current-name{margin-top:12rpx;font-size:34rpx;font-weight:750}.current-number{color:#2188c7;font-size:28rpx;font-weight:750}.project{margin-top:13rpx;color:#627188;font-size:22rpx}.idle{margin-top:16rpx;color:#8995a5;font-size:22rpx}.primary,.call-button{margin:24rpx 0 0;padding:0;color:#fff;font-size:22rpx;line-height:68rpx;background:#2188c7;border-radius:34rpx}.queue-section{margin-top:18rpx;padding:24rpx}.section-title{font-size:26rpx;font-weight:700}.section-count{margin-left:10rpx;color:#8090a3;font-size:20rpx}.call-button{width:auto;margin:0;padding:0 22rpx;line-height:58rpx}.call-button[disabled]{color:#9aa6b4;background:#edf1f5}.empty{padding:34rpx 0 18rpx;color:#9aa5b3;font-size:21rpx;text-align:center}.queue-row,.waiting-row{margin-top:16rpx;padding:18rpx;background:#f7f9fb;border-radius:14rpx}.queue-row{display:flex;align-items:center;gap:16rpx}.ticket{display:flex;align-items:center;justify-content:center;width:58rpx;height:58rpx;color:#fff;font-size:24rpx;font-weight:700;background:#2188c7;border-radius:50%}.queue-person{flex:1}.queue-person text{display:block;font-size:23rpx}.queue-person text+text{margin-top:6rpx;color:#8190a3;font-size:18rpx}.attempts,.status{color:#247eb7;font-size:18rpx}.patient{font-size:25rpx;font-weight:700}.line{margin-top:8rpx;color:#7d8999;font-size:20rpx}.record{margin-top:16rpx;padding:24rpx}.record .project{color:#344157;font-weight:650}
 </style>

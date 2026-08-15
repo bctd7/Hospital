@@ -23,3 +23,11 @@ type DeleteBooking struct {
 	Reason      string
 	RequestID   string
 }
+
+type CallNext struct {
+	DepartmentID string
+	RoomID       string
+	ServiceDate  string
+	OperationID  string
+	RequestID    string
+}

@@ -134,7 +134,7 @@ func (m *Manager) SaveExaminationReportDraft(ctx context.Context, operator authn
 		if err := staffsupport.RequireDepartmentScope(operator, booking.DepartmentID); err != nil {
 			return err
 		}
-		if booking.Status != BookingStatusInProgress {
+		if booking.Status != BookingStatusInProgress && booking.Status != BookingStatusReportPending {
 			return ErrInvalidState
 		}
 		now := time.Now().In(bookingHospitalLocation)
@@ -177,7 +177,7 @@ func (m *Manager) SaveExaminationReportDraft(ctx context.Context, operator authn
 	return result, err
 }
 
-// CompleteAndPublishExaminationReport 原子完成检查、释放房间容量并发布首版报告。
+// CompleteAndPublishExaminationReport 发布已经结束检查的首版报告，不再重复释放预约资源。
 func (m *Manager) CompleteAndPublishExaminationReport(ctx context.Context, operator authn.Principal, command staffinput.CompleteAndPublishReport) (ExaminationReport, error) {
 	if err := staffsupport.RequirePermission(operator, contractauthz.PermissionAppointmentUpdate); err != nil {
 		return ExaminationReport{}, err
@@ -236,7 +236,7 @@ func (m *Manager) CompleteAndPublishExaminationReport(ctx context.Context, opera
 		if err := staffsupport.RequireDepartmentScope(operator, booking.DepartmentID); err != nil {
 			return err
 		}
-		if booking.Status != BookingStatusInProgress || booking.StartedAt == nil || booking.StartedBy == "" {
+		if booking.Status != BookingStatusReportPending || booking.StartedAt == nil || booking.StartedBy == "" || booking.ExaminationEndedAt == nil {
 			return ErrInvalidState
 		}
 		if booking.Version != command.ExpectedBookingVersion {
@@ -280,7 +280,7 @@ func (m *Manager) CompleteAndPublishExaminationReport(ctx context.Context, opera
 			report.DepartmentName = command.DepartmentName
 			report.CampusName = command.CampusName
 			report.ExaminationStartedAt = booking.StartedAt
-			report.ExaminationCompletedAt = &now
+			report.ExaminationCompletedAt = booking.ExaminationEndedAt
 			report.CurrentVersionID = version.VersionID
 			report.Version++
 			report.UpdatedAt = now
@@ -290,16 +290,6 @@ func (m *Manager) CompleteAndPublishExaminationReport(ctx context.Context, opera
 			report.CurrentVersion = &version
 			result = report
 		}
-		capacity, found, capacityErr := tx.FindDateCapacityForUpdate(ctx, booking.RoomID, booking.ServiceDate, booking.Session)
-		if capacityErr != nil {
-			return capacityErr
-		}
-		if !found {
-			return fmt.Errorf("%w: booking capacity not found", ErrInvalidState)
-		}
-		if err := tx.DecreaseOccupiedCapacity(ctx, capacity.CapacityID); err != nil {
-			return err
-		}
 		booking.Status = BookingStatusCompleted
 		booking.CompletedAt = &now
 		booking.CompletedBy = operator.AccountID
@@ -307,9 +297,6 @@ func (m *Manager) CompleteAndPublishExaminationReport(ctx context.Context, opera
 		booking.UpdatedAt = now
 		booking.Version++
 		if err := tx.CompleteBooking(ctx, booking, command.ExpectedBookingVersion); err != nil {
-			return err
-		}
-		if err := tx.ReleasePatientItemSession(ctx, booking.BookingID); err != nil {
 			return err
 		}
 		return recordReportOperation(ctx, tx, operator, command.OperationID, booking.BookingID, bookingActionCompleteReport, fingerprint, result)
@@ -430,7 +417,7 @@ func newPublishedReport(booking Booking, author, authorDisplayName, departmentNa
 	report.DepartmentName = departmentName
 	report.CampusName = campusName
 	report.ExaminationStartedAt = booking.StartedAt
-	report.ExaminationCompletedAt = &now
+	report.ExaminationCompletedAt = booking.ExaminationEndedAt
 	version := ReportVersion{VersionID: uuid.NewString(), ReportID: report.ReportID, VersionNo: 1, VersionKind: ReportVersionKindInitial, Status: ReportVersionStatusPublished, ReportContent: content, AuthoredBy: author, AuthoredByDisplayName: authorDisplayName, PublishedBy: author, PublishedByDisplayName: authorDisplayName, PublishedAt: &now, CreatedAt: now, UpdatedAt: now}
 	report.CurrentVersionID = version.VersionID
 	return report, version
