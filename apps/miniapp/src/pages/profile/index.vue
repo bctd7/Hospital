@@ -50,13 +50,6 @@ const menuItems: MenuEntry[] = [
     tone: "gray",
     route: "/pages/profile/settings/index",
   },
-  {
-    id: "message-management",
-    title: "消息管理",
-    symbol: "讯",
-    tone: "cyan",
-    route: "/pages/profile/message-management/index",
-  },
 ];
 
 onShow(() => {

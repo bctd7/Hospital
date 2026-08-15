@@ -41,8 +41,9 @@ describe("home workbench", () => {
       "reports",
       "invoice",
       "inpatient-copy",
-      "imaging",
     ]);
+    expect(view.serviceGroups[0]?.actions.map((action) => action.id)).not.toContain("insurance-profile");
+    expect(view.serviceGroups[1]?.title).toBe("诊中服务（待规划）");
     expect(view.serviceGroups[2]?.actions[0]?.title).toBe("检验报告查询");
   });
 
@@ -82,7 +83,6 @@ describe("home workbench", () => {
       "appointment-history",
       "invoice",
       "inpatient-copy",
-      "imaging",
     ]);
   });
 
@@ -101,14 +101,13 @@ describe("home workbench", () => {
     });
     expect(view.serviceGroups.map((group) => group.title)).toEqual([
       "诊前服务",
-      "诊中服务",
+      "诊中服务（待规划）",
       "诊后服务",
     ]);
     expect(view.serviceGroups[2]?.actions.map((action) => action.id)).toEqual([
       "appointment-history",
       "invoice",
       "inpatient-copy",
-      "imaging",
     ]);
   });
 });

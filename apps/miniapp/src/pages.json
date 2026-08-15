@@ -79,12 +79,6 @@
       "style": {
         "navigationBarTitleText": "设置"
       }
-    },
-    {
-      "path": "pages/profile/message-management/index",
-      "style": {
-        "navigationBarTitleText": "消息管理"
-      }
     }
   ],
   "subPackages": [

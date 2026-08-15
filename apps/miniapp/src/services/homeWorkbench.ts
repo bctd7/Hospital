@@ -53,20 +53,11 @@ function patientHome(): HomeWorkbenchView {
             tone: "violet",
             target: { type: "navigate", url: "/pages/profile/patients/index" },
           },
-          {
-            id: "insurance-profile",
-            title: "医保在线建档",
-            description: "在线维护医保信息",
-            symbol: "档",
-            tone: "cyan",
-            badge: "建设中",
-            target: { type: "unavailable", message: "医保在线建档功能正在建设中" },
-          },
         ],
       },
       {
         id: "during-visit",
-        title: "诊中服务",
+        title: "诊中服务（待规划）",
         actions: [
           {
             id: "payment",
@@ -117,15 +108,6 @@ function patientHome(): HomeWorkbenchView {
             tone: "green",
             badge: "建设中",
             target: { type: "unavailable", message: "住院病案复印功能正在建设中" },
-          },
-          {
-            id: "imaging",
-            title: "影像查询",
-            description: "查看医学影像资料",
-            symbol: "影",
-            tone: "blue",
-            badge: "建设中",
-            target: { type: "unavailable", message: "影像查询功能正在建设中" },
           },
         ],
       },
