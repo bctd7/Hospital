@@ -12,7 +12,13 @@ SET @dept_laboratory_east = '12000000-0000-4000-8000-000000000004';
 
 SET @account_doctor_1 = '20000000-0000-4000-8000-000000000002';
 SET @account_doctor_2 = '20000000-0000-4000-8000-000000000003';
-SET @account_patient_1 = '21000000-0000-4000-8000-000000000001';
+-- 15363658538 同时是体验环境超级管理员和报告测试患者。
+-- 不能在这里另造同手机号患者，否则登录账号与报告所属账号会是两个不同 UUID。
+SET @account_patient_1_fallback = '21000000-0000-4000-8000-000000000001';
+SET @account_patient_1 = COALESCE(
+    (SELECT account_id FROM identity_account_phones WHERE phone_fingerprint = @phone_patient_1 LIMIT 1),
+    @account_patient_1_fallback
+);
 SET @account_patient_2 = '21000000-0000-4000-8000-000000000002';
 SET @account_patient_3 = '21000000-0000-4000-8000-000000000003';
 SET @account_patient_4 = '21000000-0000-4000-8000-000000000004';
@@ -28,18 +34,23 @@ INSERT INTO identity_organization_units (id, parent_id, unit_type, code, name, s
 INSERT INTO identity_accounts (id, account_type, status, authorization_version, management_version) VALUES
 (@account_doctor_1, 'staff', 'active', 1, 1),
 (@account_doctor_2, 'staff', 'active', 1, 1),
-(@account_patient_1, 'patient', 'active', 1, 1),
 (@account_patient_2, 'patient', 'active', 1, 1),
 (@account_patient_3, 'patient', 'active', 1, 1),
 (@account_patient_4, 'patient', 'active', 1, 1);
 
+INSERT INTO identity_accounts (id, account_type, status, authorization_version, management_version)
+SELECT @account_patient_1, 'patient', 'active', 1, 1
+WHERE NOT EXISTS (SELECT 1 FROM identity_accounts WHERE id = @account_patient_1);
+
 INSERT INTO identity_account_profiles (account_id, nickname) VALUES
 (@account_doctor_1, '陈医生'),
 (@account_doctor_2, '周医生'),
-(@account_patient_1, '张明'),
 (@account_patient_2, '李敏'),
 (@account_patient_3, '王芳'),
 (@account_patient_4, '赵强');
+
+INSERT IGNORE INTO identity_account_profiles (account_id, nickname)
+VALUES (@account_patient_1, '体验管理员');
 
 INSERT IGNORE INTO identity_account_profiles (account_id, nickname)
 SELECT ar.account_id, '体验管理员'
@@ -52,10 +63,16 @@ INSERT INTO identity_account_phones
 VALUES
 (@account_doctor_1, @phone_doctor_1, '138****0001', 'verified', 'admin', NOW(3)),
 (@account_doctor_2, @phone_doctor_2, '138****0002', 'verified', 'admin', NOW(3)),
-(@account_patient_1, @phone_patient_1, '153****8538', 'verified', 'sms', NOW(3)),
 (@account_patient_2, @phone_patient_2, '139****0002', 'verified', 'sms', NOW(3)),
 (@account_patient_3, @phone_patient_3, '139****0003', 'verified', 'sms', NOW(3)),
 (@account_patient_4, @phone_patient_4, '139****0004', 'verified', 'sms', NOW(3));
+
+INSERT INTO identity_account_phones
+    (account_id, phone_fingerprint, phone_masked, verification_status, verification_source, verified_at)
+SELECT @account_patient_1, @phone_patient_1, '153****8538', 'verified', 'sms', NOW(3)
+WHERE NOT EXISTS (
+    SELECT 1 FROM identity_account_phones WHERE phone_fingerprint = @phone_patient_1
+);
 
 INSERT INTO identity_staff_profiles
     (account_id, department_id, staff_no, display_name, description, staff_status)
@@ -193,12 +210,12 @@ INSERT INTO appointment_bookings
      completed_at, completed_by, completed_by_display_name_snapshot,
      version, created_at, updated_at)
 VALUES
-(@booking_confirmed_now, @account_patient_1, '张明', '153****8538', '8538', @dept_radiology_main, @item_urgent_ct, @room_ct201, @today, @current_session, 'confirmed', @current_open_time, @current_close_time, @current_start_time, @current_end_time, @current_cutoff_time, NULL, NULL, NULL, NULL, NULL, NULL, 1, DATE_SUB(@now, INTERVAL 2 HOUR), @now),
+(@booking_confirmed_now, @account_patient_1, '体验管理员', '153****8538', '8538', @dept_radiology_main, @item_urgent_ct, @room_ct201, @today, @current_session, 'confirmed', @current_open_time, @current_close_time, @current_start_time, @current_end_time, @current_cutoff_time, NULL, NULL, NULL, NULL, NULL, NULL, 1, DATE_SUB(@now, INTERVAL 2 HOUR), @now),
 (@booking_confirmed_future, @account_patient_2, '李敏', '139****0002', '0002', @dept_radiology_main, @item_ct, @room_ct202, @tomorrow, 'morning', 'confirmed', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', NULL, NULL, NULL, NULL, NULL, NULL, 1, DATE_SUB(@now, INTERVAL 1 HOUR), @now),
 (@booking_no_show, @account_patient_3, '王芳', '139****0003', '0003', @dept_radiology_main, @item_ct, @room_ct201, @yesterday, 'morning', 'no_show', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', NULL, NULL, NULL, NULL, NULL, NULL, 2, DATE_SUB(@now, INTERVAL 1 DAY), @now),
 (@booking_in_progress, @account_patient_4, '赵强', '139****0004', '0004', @dept_radiology_main, @item_urgent_ct, @room_ct201, @today, @current_session, 'in_progress', @current_open_time, @current_close_time, @current_start_time, @current_end_time, @current_cutoff_time, IF(TIMESTAMPDIFF(SECOND, @current_session_started_at_utc, DATE_SUB(@now, INTERVAL 20 MINUTE)) > 0, DATE_SUB(@now, INTERVAL 20 MINUTE), CAST(@current_session_started_at_utc AS DATETIME)), @account_doctor_1, '陈医生', NULL, NULL, NULL, 2, DATE_SUB(@now, INTERVAL 4 HOUR), @now),
-(@booking_completed, @account_patient_1, '张明', '153****8538', '8538', @dept_ultrasound_main, @item_ultrasound, @room_us301, @yesterday, 'morning', 'completed', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), @account_doctor_2, '周医生', CONVERT_TZ(TIMESTAMP(@yesterday, '09:50:00'), '+08:00', '+00:00'), @account_doctor_2, '周医生', 3, CONVERT_TZ(TIMESTAMP(@two_days_ago, '15:00:00'), '+08:00', '+00:00'), @now),
-(@booking_corrected, @account_patient_1, '张明', '153****8538', '8538', @dept_radiology_main, @item_xray, @room_dr101, @two_days_ago, 'morning', 'completed', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:20:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@two_days_ago, '10:10:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', 3, CONVERT_TZ(TIMESTAMP(@three_days_ago, '15:00:00'), '+08:00', '+00:00'), @now),
+(@booking_completed, @account_patient_1, '体验管理员', '153****8538', '8538', @dept_ultrasound_main, @item_ultrasound, @room_us301, @yesterday, 'morning', 'completed', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), @account_doctor_2, '周医生', CONVERT_TZ(TIMESTAMP(@yesterday, '09:50:00'), '+08:00', '+00:00'), @account_doctor_2, '周医生', 3, CONVERT_TZ(TIMESTAMP(@two_days_ago, '15:00:00'), '+08:00', '+00:00'), @now),
+(@booking_corrected, @account_patient_1, '体验管理员', '153****8538', '8538', @dept_radiology_main, @item_xray, @room_dr101, @two_days_ago, 'morning', 'completed', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:20:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@two_days_ago, '10:10:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', 3, CONVERT_TZ(TIMESTAMP(@three_days_ago, '15:00:00'), '+08:00', '+00:00'), @now),
 (@booking_report_overdue, @account_patient_4, '赵强', '139****0004', '0004', @dept_radiology_main, @item_xray, @room_dr101, @yesterday, 'morning', 'in_progress', '08:00:00', '12:00:00', '09:00:00', '12:00:00', '11:30:00', CONVERT_TZ(TIMESTAMP(@yesterday, '09:15:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', NULL, NULL, NULL, 2, CONVERT_TZ(TIMESTAMP(@two_days_ago, '16:00:00'), '+08:00', '+00:00'), @now),
 (@booking_canceled, @account_patient_2, '李敏', '139****0002', '0002', @dept_radiology_main, @item_ct, @room_ct202, @tomorrow, 'afternoon', 'canceled', '12:00:00', '18:00:00', '14:00:00', '17:00:00', '16:30:00', NULL, NULL, NULL, NULL, NULL, NULL, 2, DATE_SUB(@now, INTERVAL 3 HOUR), DATE_SUB(@now, INTERVAL 2 HOUR));
 
@@ -275,8 +292,8 @@ INSERT INTO appointment_examination_reports
      version, created_at, updated_at)
 VALUES
 (@report_draft, @booking_in_progress, @account_patient_4, '赵强', '139****0004', @dept_radiology_main, '放射科', @item_urgent_ct, '当日急诊CT', @room_ct201, @campus_main, '总院区', '影像楼', 2, 'CT201', 'draft', @account_doctor_1, '陈医生', IF(TIMESTAMPDIFF(SECOND, @current_session_started_at_utc, DATE_SUB(@now, INTERVAL 20 MINUTE)) > 0, DATE_SUB(@now, INTERVAL 20 MINUTE), CAST(@current_session_started_at_utc AS DATETIME)), NULL, NULL, 1, IF(TIMESTAMPDIFF(SECOND, @current_session_started_at_utc, DATE_SUB(@now, INTERVAL 20 MINUTE)) > 0, DATE_SUB(@now, INTERVAL 20 MINUTE), CAST(@current_session_started_at_utc AS DATETIME)), @now),
-(@report_published, @booking_completed, @account_patient_1, '张明', '153****8538', @dept_ultrasound_main, '超声科', @item_ultrasound, '腹部彩超', @room_us301, @campus_main, '总院区', '门诊楼', 3, 'US301', 'published', @account_doctor_2, '周医生', CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@yesterday, '09:50:00'), '+08:00', '+00:00'), NULL, 1, CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), @now),
-(@report_corrected, @booking_corrected, @account_patient_1, '张明', '153****8538', @dept_radiology_main, '放射科', @item_xray, '胸部X线正侧位', @room_dr101, @campus_main, '总院区', '影像楼', 1, 'DR101', 'published', @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:20:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@two_days_ago, '10:10:00'), '+08:00', '+00:00'), NULL, 2, CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:20:00'), '+08:00', '+00:00'), @now);
+(@report_published, @booking_completed, @account_patient_1, '体验管理员', '153****8538', @dept_ultrasound_main, '超声科', @item_ultrasound, '腹部彩超', @room_us301, @campus_main, '总院区', '门诊楼', 3, 'US301', 'published', @account_doctor_2, '周医生', CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@yesterday, '09:50:00'), '+08:00', '+00:00'), NULL, 1, CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), @now),
+(@report_corrected, @booking_corrected, @account_patient_1, '体验管理员', '153****8538', @dept_radiology_main, '放射科', @item_xray, '胸部X线正侧位', @room_dr101, @campus_main, '总院区', '影像楼', 1, 'DR101', 'published', @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:20:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@two_days_ago, '10:10:00'), '+08:00', '+00:00'), NULL, 2, CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:20:00'), '+08:00', '+00:00'), @now);
 
 INSERT INTO appointment_examination_report_versions
     (id, report_id, version_no, version_kind, status, objective_findings, impression,

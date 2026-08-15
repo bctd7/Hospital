@@ -18,16 +18,6 @@ test -f .env.production || { echo "Missing ${deploy_dir}/.env.production" >&2; e
 test -f "${seed_file}" || { echo "Missing ${seed_file}" >&2; exit 1; }
 
 compose=(docker compose --env-file .env.production -f docker-compose.yml)
-"${compose[@]}" exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --protocol=socket -uroot -N -e "
-SELECT IF(
-  (SELECT COUNT(*) FROM hospital_identity.identity_organization_units WHERE unit_type = '\''hospital'\'') = 1
-  AND (SELECT COUNT(*) FROM hospital_identity.identity_organization_units WHERE unit_type <> '\''hospital'\'') = 0
-  AND (SELECT COUNT(*) FROM hospital_identity.identity_account_roles ar JOIN hospital_identity.identity_roles r ON r.id = ar.role_id WHERE r.code = '\''super_admin'\'') = 2
-  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_items) = 0,
-  '\''ready'\'', '\''refuse'\'');"' | grep -qx ready || {
-    echo "Experience seed refused: expected one hospital, two bootstrap administrators, and no business data." >&2
-    exit 1
-  }
 
 fingerprint() {
   local normalized_phone="$1"
@@ -43,6 +33,22 @@ phone_patient_1="$(fingerprint +8615363658538)"
 phone_patient_2="$(fingerprint +8613900000002)"
 phone_patient_3="$(fingerprint +8613900000003)"
 phone_patient_4="$(fingerprint +8613900000004)"
+
+"${compose[@]}" exec -T mysql sh -c "MYSQL_PWD=\"\$MYSQL_ROOT_PASSWORD\" mysql --protocol=socket -uroot -N -e \"
+SELECT IF(
+  (SELECT COUNT(*) FROM hospital_identity.identity_organization_units WHERE unit_type = 'hospital') = 1
+  AND (SELECT COUNT(*) FROM hospital_identity.identity_organization_units WHERE unit_type <> 'hospital') = 0
+  AND (SELECT COUNT(*) FROM hospital_identity.identity_account_roles ar JOIN hospital_identity.identity_roles r ON r.id = ar.role_id WHERE r.code = 'super_admin') = 2
+  AND (SELECT COUNT(*)
+       FROM hospital_identity.identity_account_phones p
+       JOIN hospital_identity.identity_account_roles ar ON ar.account_id = p.account_id
+       JOIN hospital_identity.identity_roles r ON r.id = ar.role_id AND r.code = 'super_admin'
+       WHERE p.phone_fingerprint = UNHEX('${phone_patient_1}')) = 1
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_items) = 0,
+  'ready', 'refuse');\"" | grep -qx ready || {
+    echo "Experience seed refused: expected a fresh database, two bootstrap administrators, and 15363658538 bound to one administrator." >&2
+    exit 1
+  }
 
 {
   printf "SET @phone_doctor_1 = UNHEX('%s');\n" "${phone_doctor_1}"
@@ -63,4 +69,15 @@ SELECT CONCAT('\''bookings='\'', COUNT(*)) FROM hospital_appointment.appointment
 SELECT CONCAT('\''booking_statuses='\'', GROUP_CONCAT(status, '\''='\'', total ORDER BY status SEPARATOR '\'','\'')) FROM (SELECT status, COUNT(*) total FROM hospital_appointment.appointment_bookings GROUP BY status) statuses;
 SELECT CONCAT('\''reports='\'', COUNT(*)) FROM hospital_appointment.appointment_examination_reports;"'
 
-echo "Experience test data loaded. Bootstrap administrator phone numbers were preserved from .env.production."
+"${compose[@]}" exec -T mysql sh -c "MYSQL_PWD=\"\$MYSQL_ROOT_PASSWORD\" mysql --protocol=socket -uroot -N -e \"
+SELECT IF(COUNT(*) >= 1, 'report_admin_binding=ready', 'report_admin_binding=missing')
+FROM hospital_identity.identity_account_phones p
+JOIN hospital_identity.identity_account_roles ar ON ar.account_id = p.account_id
+JOIN hospital_identity.identity_roles r ON r.id = ar.role_id AND r.code = 'super_admin'
+JOIN hospital_appointment.appointment_examination_reports report ON report.patient_account_id = p.account_id
+WHERE p.phone_fingerprint = UNHEX('${phone_patient_1}') AND report.status = 'published';\"" | grep -qx report_admin_binding=ready || {
+  echo "Experience seed verification failed: the 153 administrator has no published report." >&2
+  exit 1
+}
+
+echo "Experience test data loaded. The 153 administrator is also bound to completed examinations and published reports."

@@ -81,7 +81,7 @@ $previousAdminPhones = [Environment]::GetEnvironmentVariable("IDENTITY_BOOTSTRAP
 try {
     [Environment]::SetEnvironmentVariable("IDENTITY_BOOTSTRAP_HOSPITAL_CODE", "RH-HOSPITAL", "Process")
     [Environment]::SetEnvironmentVariable("IDENTITY_BOOTSTRAP_HOSPITAL_NAME", "仁和医院", "Process")
-    [Environment]::SetEnvironmentVariable("IDENTITY_BOOTSTRAP_ADMIN_PHONES", "13482154556", "Process")
+    [Environment]::SetEnvironmentVariable("IDENTITY_BOOTSTRAP_ADMIN_PHONES", "13482154556,15363658538", "Process")
     Push-Location $repositoryRoot
     try {
         & go run ./tools/identity-bootstrap-admin
@@ -99,11 +99,13 @@ finally {
     [Environment]::SetEnvironmentVariable("IDENTITY_BOOTSTRAP_ADMIN_PHONES", $previousAdminPhones, "Process")
 }
 
+$fingerprints = @{}
 $variables = foreach ($entry in $phones.GetEnumerator()) {
     $hmac = [Security.Cryptography.HMACSHA256]::new($lookupKey)
     try {
         $digest = $hmac.ComputeHash([Text.Encoding]::UTF8.GetBytes($entry.Value))
         $hex = [Convert]::ToHexString($digest)
+        $fingerprints[$entry.Key] = $hex
         "SET @$($entry.Key) = UNHEX('$hex');"
     }
     finally {
@@ -119,6 +121,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $verificationSQL = @"
+SET @phone_patient_1 = UNHEX('$($fingerprints.phone_patient_1)');
 SET @hospital_local_today = DATE(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00'));
 SELECT IF(
   (SELECT COUNT(*) FROM hospital_identity.identity_organization_units WHERE unit_type = 'campus' AND status = 'active') >= 2
@@ -130,6 +133,12 @@ SELECT IF(
        WHERE id = '40000000-0000-4000-8000-000000000007'
          AND started_at = CONVERT_TZ(TIMESTAMP(DATE_SUB(@hospital_local_today, INTERVAL 1 DAY), '09:15:00'), '+08:00', '+00:00')) = 1
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_report_versions WHERE version_kind = 'correction' AND status = 'published') >= 1
+  AND (SELECT COUNT(*)
+       FROM hospital_identity.identity_account_phones p
+       JOIN hospital_identity.identity_account_roles ar ON ar.account_id = p.account_id
+       JOIN hospital_identity.identity_roles r ON r.id = ar.role_id AND r.code = 'super_admin'
+       JOIN hospital_appointment.appointment_examination_reports report ON report.patient_account_id = p.account_id
+       WHERE p.phone_fingerprint = @phone_patient_1 AND report.status = 'published') >= 1
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_message_reads) >= 1,
   'ready', 'incomplete');
 "@
@@ -140,8 +149,8 @@ if ($LASTEXITCODE -ne 0 -or ($verification | Select-Object -Last 1).Trim() -ne "
 
 Write-Output "Comprehensive local test data loaded."
 Write-Output "Reset mode: $Reset"
-Write-Output "Local administrator: 13482154556"
+Write-Output "Local administrators: 13482154556 and 15363658538"
 Write-Output "Radiology doctor: 13800000001"
 Write-Output "Ultrasound doctor: 13800000002"
-Write-Output "Report patient: 15363658538"
+Write-Output "Report patient (also a super administrator): 15363658538"
 Write-Output "Other patients: 13900000002 through 13900000004"
