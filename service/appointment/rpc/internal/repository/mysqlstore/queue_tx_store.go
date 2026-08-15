@@ -147,8 +147,12 @@ func (s *bookingTxStore) FindNextQueueBookingForUpdate(ctx context.Context, queu
 
 func (s *bookingTxStore) findQueueCandidate(ctx context.Context, queueID string, callSequence int64, now time.Time, requireEligible bool) (string, bool, error) {
 	condition := ""
+	// 正常叫号遵循原始候检号；所有患者都处于顺延期时，兜底选择最早恢复
+	// 叫号资格的人，避免小号患者反复超时后持续挤占后续患者的机会。
+	orderBy := "e.eligible_after_call_sequence, e.ticket_number, e.booking_id"
 	if requireEligible {
 		condition = " AND e.eligible_after_call_sequence <= ?"
+		orderBy = "e.ticket_number, e.booking_id"
 	}
 	// 预约日期和窗口时间是医院本地墙上时间；显式传字符串，避免 DSN 的 UTC loc
 	// 把东八区 time.Time 换算到前一天，尤其会破坏周日当天的叫号判断。
@@ -163,7 +167,7 @@ FROM appointment_check_queue_entries e
 JOIN appointment_bookings b ON b.id = e.booking_id
 WHERE e.queue_id = ? AND b.status = 'queued'
   AND TIMESTAMP(b.service_date, b.item_start_time_snapshot) <= ?`+condition+`
-ORDER BY e.ticket_number, e.booking_id
+ORDER BY `+orderBy+`
 LIMIT 1 FOR UPDATE`, args...).Scan(&bookingID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return "", false, nil

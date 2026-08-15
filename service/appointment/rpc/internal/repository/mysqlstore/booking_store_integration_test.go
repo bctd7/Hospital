@@ -513,6 +513,102 @@ func TestCalledBookingTimeoutDefersAndCanBeRecalledWhenQueueHasNoOneElse(t *test
 	}
 }
 
+func TestDeferredQueueFallbackDoesNotStarveLaterTickets(t *testing.T) {
+	dataSource := os.Getenv("APPOINTMENT_TEST_MYSQL_DSN")
+	if dataSource == "" {
+		t.Skip("APPOINTMENT_TEST_MYSQL_DSN is not set")
+	}
+	location, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now().In(location)
+	if now.Minute() >= 58 && (now.Hour() == 11 || now.Hour() == 23) {
+		t.Skip("not enough time remains in the examination window")
+	}
+	serviceDate := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, location)
+	weekday := (int(serviceDate.Weekday())+6)%7 + 1
+	session, openTime, cutoffTime, closeTime := bookingIntegrationWindow(now)
+	store, err := New(dataSource)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer store.Close()
+	ctx := context.Background()
+	cleanupBookingIntegrationData(t, store, ctx)
+	defer cleanupBookingIntegrationData(t, store, ctx)
+	seedBookingIntegrationData(t, store, ctx, weekday, session, openTime, cutoffTime, closeTime)
+	if _, err := store.db.ExecContext(ctx, `UPDATE appointment_room_weekly_windows SET active_capacity = 2 WHERE id = ?`, bookingTestRoomWindow); err != nil {
+		t.Fatal(err)
+	}
+
+	patientManager, _ := patientmanager.NewManager(store, store, store, store, nil)
+	staffManager, _ := staffmanager.NewManager(store, store, store, store, store, nil)
+	firstPatient := authn.Principal{AccountID: bookingTestPatient, AccountType: authn.AccountTypePatient, Status: authn.AccountStatusActive}
+	secondPatient := authn.Principal{AccountID: bookingTestPatientTwo, AccountType: authn.AccountTypePatient, Status: authn.AccountStatusActive}
+	staff := authn.Principal{AccountID: bookingTestStaff, AccountType: authn.AccountTypeStaff, Status: authn.AccountStatusActive, Roles: []string{authn.RoleDepartmentDoctor}, DepartmentID: bookingTestDepartment, Permissions: []string{contractauthz.PermissionAppointmentUpdate}}
+
+	first, err := patientManager.CreateBooking(ctx, firstPatient, patientmanager.CreateBookingCommand{ItemID: bookingTestItem, RoomID: bookingTestRoom, ServiceDate: serviceDate.Format("2006-01-02"), Session: session, PatientDisplayName: "测试患者甲", PatientPhoneMasked: "134****0001", OperationID: "41000000-0000-0000-0006-000000000001"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := patientManager.CreateBooking(ctx, secondPatient, patientmanager.CreateBookingCommand{ItemID: bookingTestItem, RoomID: bookingTestRoom, ServiceDate: serviceDate.Format("2006-01-02"), Session: session, PatientDisplayName: "测试患者乙", PatientPhoneMasked: "134****0002", OperationID: "41000000-0000-0000-0006-000000000002"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	first, err = patientManager.CheckIn(ctx, firstPatient, patientmanager.CheckInCommand{BookingID: first.BookingID, ExpectedVersion: first.Version, OperationID: "41000000-0000-0000-0006-000000000003"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err = patientManager.CheckIn(ctx, secondPatient, patientmanager.CheckInCommand{BookingID: second.BookingID, ExpectedVersion: second.Version, OperationID: "41000000-0000-0000-0006-000000000004"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expireCalledBooking := func(bookingID string) {
+		t.Helper()
+		if _, err := store.db.ExecContext(ctx, `UPDATE appointment_check_queue_entries SET call_deadline = ? WHERE booking_id = ?`, time.Now().UTC().Add(-time.Second), bookingID); err != nil {
+			t.Fatal(err)
+		}
+		result, err := store.CleanupExpiredBookings(ctx, time.Now().In(location), 10)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if result.Deferred != 1 || result.MarkedNoShow != 0 {
+			t.Fatalf("cleanup=%+v, want one deferred", result)
+		}
+	}
+	callNext := func(operationID string) appointmentmanager.Booking {
+		t.Helper()
+		called, err := staffManager.CallNext(ctx, staff, staffinput.CallNext{DepartmentID: bookingTestDepartment, RoomID: bookingTestRoom, ServiceDate: serviceDate.Format("2006-01-02"), OperationID: operationID})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return called
+	}
+
+	called := callNext("41000000-0000-0000-0006-000000000005")
+	if called.BookingID != first.BookingID {
+		t.Fatalf("first called booking=%s, want %s", called.BookingID, first.BookingID)
+	}
+	expireCalledBooking(called.BookingID)
+	called = callNext("41000000-0000-0000-0006-000000000006")
+	if called.BookingID != second.BookingID {
+		t.Fatalf("second called booking=%s, want %s", called.BookingID, second.BookingID)
+	}
+	expireCalledBooking(called.BookingID)
+
+	called = callNext("41000000-0000-0000-0006-000000000007")
+	if called.BookingID != first.BookingID {
+		t.Fatalf("first fallback booking=%s, want %s", called.BookingID, first.BookingID)
+	}
+	expireCalledBooking(called.BookingID)
+	called = callNext("41000000-0000-0000-0006-000000000008")
+	if called.BookingID != second.BookingID {
+		t.Fatalf("second fallback booking=%s, want %s; later ticket was starved", called.BookingID, second.BookingID)
+	}
+}
+
 func TestExaminationReportPublishAndCorrectionPreserveHistory(t *testing.T) {
 	dataSource := os.Getenv("APPOINTMENT_TEST_MYSQL_DSN")
 	if dataSource == "" {
