@@ -72,6 +72,7 @@ func booking(value *appointmentv1.Booking) *types.BookingResponse {
 		StartedByDisplayName: value.StartedByDisplayName,
 		CompletedAt:          value.CompletedAt, CompletedBy: value.CompletedBy,
 		CompletedByDisplayName: value.CompletedByDisplayName,
+		ReportID:               value.ReportId, ReportStatus: value.ReportStatus, ReportVersion: value.ReportVersion,
 	}
 }
 

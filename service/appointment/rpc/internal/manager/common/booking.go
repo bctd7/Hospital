@@ -58,6 +58,9 @@ type Booking struct {
 	CompletedAt            *time.Time    `json:"completed_at,omitempty"`
 	CompletedBy            string        `json:"completed_by,omitempty"`
 	CompletedByDisplayName string        `json:"completed_by_display_name,omitempty"`
+	ReportID               string        `json:"report_id,omitempty"`
+	ReportStatus           ReportStatus  `json:"report_status,omitempty"`
+	ReportVersion          int64         `json:"report_version,omitempty"`
 	Version                int64         `json:"version"`
 	CreatedAt              time.Time     `json:"created_at"`
 	UpdatedAt              time.Time     `json:"updated_at"`

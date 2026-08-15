@@ -64,6 +64,7 @@ func bookingResponse(value common.Booking) *appointmentv1.Booking {
 		CreatedAt: value.CreatedAt.UTC().Format(timeLayout), UpdatedAt: value.UpdatedAt.UTC().Format(timeLayout),
 		StartedBy: value.StartedBy, CompletedBy: value.CompletedBy,
 		StartedByDisplayName: value.StartedByDisplayName, CompletedByDisplayName: value.CompletedByDisplayName,
+		ReportId: value.ReportID, ReportStatus: string(value.ReportStatus), ReportVersion: value.ReportVersion,
 	}
 	if value.StartedAt != nil {
 		response.StartedAt = value.StartedAt.UTC().Format(timeLayout)

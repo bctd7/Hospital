@@ -140,7 +140,10 @@
                       "completed_by_display_name",
                       "building",
                       "floor_number",
-                      "room_number"
+                      "room_number",
+                      "report_id",
+                      "report_status",
+                      "report_version"
                     ],
                     "properties": {
                       "booking_cutoff_time": {
@@ -199,6 +202,15 @@
                       },
                       "patient_phone_masked": {
                         "type": "string"
+                      },
+                      "report_id": {
+                        "type": "string"
+                      },
+                      "report_status": {
+                        "type": "string"
+                      },
+                      "report_version": {
+                        "type": "integer"
                       },
                       "room_close_time": {
                         "type": "string"
@@ -342,6 +354,15 @@
                 },
                 "patient_phone_masked": {
                   "type": "string"
+                },
+                "report_id": {
+                  "type": "string"
+                },
+                "report_status": {
+                  "type": "string"
+                },
+                "report_version": {
+                  "type": "integer"
                 },
                 "room_close_time": {
                   "type": "string"
@@ -1167,6 +1188,15 @@
                 },
                 "patient_phone_masked": {
                   "type": "string"
+                },
+                "report_id": {
+                  "type": "string"
+                },
+                "report_status": {
+                  "type": "string"
+                },
+                "report_version": {
+                  "type": "integer"
                 },
                 "room_close_time": {
                   "type": "string"
@@ -2171,7 +2201,7 @@
             "type": "string",
             "name": "department_id",
             "in": "query",
-            "required": true
+            "allowEmptyValue": true
           },
           {
             "type": "integer",
@@ -2263,7 +2293,10 @@
                           "completed_by_display_name",
                           "building",
                           "floor_number",
-                          "room_number"
+                          "room_number",
+                          "report_id",
+                          "report_status",
+                          "report_version"
                         ],
                         "properties": {
                           "booking_cutoff_time": {
@@ -2322,6 +2355,15 @@
                           },
                           "patient_phone_masked": {
                             "type": "string"
+                          },
+                          "report_id": {
+                            "type": "string"
+                          },
+                          "report_status": {
+                            "type": "string"
+                          },
+                          "report_version": {
+                            "type": "integer"
                           },
                           "room_close_time": {
                             "type": "string"
@@ -2488,7 +2530,10 @@
                     "completed_by_display_name",
                     "building",
                     "floor_number",
-                    "room_number"
+                    "room_number",
+                    "report_id",
+                    "report_status",
+                    "report_version"
                   ],
                   "properties": {
                     "booking_cutoff_time": {
@@ -2547,6 +2592,15 @@
                     },
                     "patient_phone_masked": {
                       "type": "string"
+                    },
+                    "report_id": {
+                      "type": "string"
+                    },
+                    "report_status": {
+                      "type": "string"
+                    },
+                    "report_version": {
+                      "type": "integer"
                     },
                     "room_close_time": {
                       "type": "string"
@@ -6032,7 +6086,10 @@
                       "completed_by_display_name",
                       "building",
                       "floor_number",
-                      "room_number"
+                      "room_number",
+                      "report_id",
+                      "report_status",
+                      "report_version"
                     ],
                     "properties": {
                       "booking_cutoff_time": {
@@ -6091,6 +6148,15 @@
                       },
                       "patient_phone_masked": {
                         "type": "string"
+                      },
+                      "report_id": {
+                        "type": "string"
+                      },
+                      "report_status": {
+                        "type": "string"
+                      },
+                      "report_version": {
+                        "type": "integer"
                       },
                       "room_close_time": {
                         "type": "string"
@@ -6262,6 +6328,15 @@
                 "patient_phone_masked": {
                   "type": "string"
                 },
+                "report_id": {
+                  "type": "string"
+                },
+                "report_status": {
+                  "type": "string"
+                },
+                "report_version": {
+                  "type": "integer"
+                },
                 "room_close_time": {
                   "type": "string"
                 },
@@ -6392,6 +6467,15 @@
                 },
                 "patient_phone_masked": {
                   "type": "string"
+                },
+                "report_id": {
+                  "type": "string"
+                },
+                "report_status": {
+                  "type": "string"
+                },
+                "report_version": {
+                  "type": "integer"
                 },
                 "room_close_time": {
                   "type": "string"
@@ -7112,7 +7196,10 @@
                           "completed_by_display_name",
                           "building",
                           "floor_number",
-                          "room_number"
+                          "room_number",
+                          "report_id",
+                          "report_status",
+                          "report_version"
                         ],
                         "properties": {
                           "booking_cutoff_time": {
@@ -7171,6 +7258,15 @@
                           },
                           "patient_phone_masked": {
                             "type": "string"
+                          },
+                          "report_id": {
+                            "type": "string"
+                          },
+                          "report_status": {
+                            "type": "string"
+                          },
+                          "report_version": {
+                            "type": "integer"
                           },
                           "room_close_time": {
                             "type": "string"
@@ -7331,7 +7427,10 @@
                     "completed_by_display_name",
                     "building",
                     "floor_number",
-                    "room_number"
+                    "room_number",
+                    "report_id",
+                    "report_status",
+                    "report_version"
                   ],
                   "properties": {
                     "booking_cutoff_time": {
@@ -7390,6 +7489,15 @@
                     },
                     "patient_phone_masked": {
                       "type": "string"
+                    },
+                    "report_id": {
+                      "type": "string"
+                    },
+                    "report_status": {
+                      "type": "string"
+                    },
+                    "report_version": {
+                      "type": "integer"
                     },
                     "room_close_time": {
                       "type": "string"
@@ -8333,7 +8441,7 @@
       "in": "header"
     }
   },
-  "x-date": "2026-08-15 13:04:17",
+  "x-date": "2026-08-15 15:57:53",
   "x-description": "This is a goctl generated swagger file.",
   "x-github": "https://github.com/zeromicro/go-zero",
   "x-go-zero-doc": "https://go-zero.dev/",

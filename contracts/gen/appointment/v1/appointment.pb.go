@@ -3016,6 +3016,9 @@ type Booking struct {
 	PatientPhoneMasked     string                 `protobuf:"bytes,30,opt,name=patient_phone_masked,json=patientPhoneMasked,proto3" json:"patient_phone_masked,omitempty"`
 	StartedByDisplayName   string                 `protobuf:"bytes,31,opt,name=started_by_display_name,json=startedByDisplayName,proto3" json:"started_by_display_name,omitempty"`
 	CompletedByDisplayName string                 `protobuf:"bytes,32,opt,name=completed_by_display_name,json=completedByDisplayName,proto3" json:"completed_by_display_name,omitempty"`
+	ReportId               string                 `protobuf:"bytes,33,opt,name=report_id,json=reportId,proto3" json:"report_id,omitempty"`
+	ReportStatus           string                 `protobuf:"bytes,34,opt,name=report_status,json=reportStatus,proto3" json:"report_status,omitempty"`
+	ReportVersion          int64                  `protobuf:"varint,35,opt,name=report_version,json=reportVersion,proto3" json:"report_version,omitempty"`
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
 }
@@ -3258,6 +3261,27 @@ func (x *Booking) GetCompletedByDisplayName() string {
 		return x.CompletedByDisplayName
 	}
 	return ""
+}
+
+func (x *Booking) GetReportId() string {
+	if x != nil {
+		return x.ReportId
+	}
+	return ""
+}
+
+func (x *Booking) GetReportStatus() string {
+	if x != nil {
+		return x.ReportStatus
+	}
+	return ""
+}
+
+func (x *Booking) GetReportVersion() int64 {
+	if x != nil {
+		return x.ReportVersion
+	}
+	return 0
 }
 
 type ListBookingsResponse struct {
@@ -5401,7 +5425,7 @@ const file_contracts_proto_appointment_v1_appointment_proto_rawDesc = "" +
 	"\foperation_id\x18\x03 \x01(\tR\voperationId\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x04 \x01(\tR\trequestId\x12,\n" +
-	"\x12actor_display_name\x18\x05 \x01(\tR\x10actorDisplayName\"\xc4\b\n" +
+	"\x12actor_display_name\x18\x05 \x01(\tR\x10actorDisplayName\"\xad\t\n" +
 	"\aBooking\x12\x1d\n" +
 	"\n" +
 	"booking_id\x18\x01 \x01(\tR\tbookingId\x12,\n" +
@@ -5439,7 +5463,10 @@ const file_contracts_proto_appointment_v1_appointment_proto_rawDesc = "" +
 	"\x14patient_display_name\x18\x1d \x01(\tR\x12patientDisplayName\x120\n" +
 	"\x14patient_phone_masked\x18\x1e \x01(\tR\x12patientPhoneMasked\x125\n" +
 	"\x17started_by_display_name\x18\x1f \x01(\tR\x14startedByDisplayName\x129\n" +
-	"\x19completed_by_display_name\x18  \x01(\tR\x16completedByDisplayName\"\x9b\x01\n" +
+	"\x19completed_by_display_name\x18  \x01(\tR\x16completedByDisplayName\x12\x1b\n" +
+	"\treport_id\x18! \x01(\tR\breportId\x12#\n" +
+	"\rreport_status\x18\" \x01(\tR\freportStatus\x12%\n" +
+	"\x0ereport_version\x18# \x01(\x03R\rreportVersion\"\x9b\x01\n" +
 	"\x14ListBookingsResponse\x12<\n" +
 	"\bbookings\x18\x01 \x03(\v2 .hospital.appointment.v1.BookingR\bbookings\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x03R\x04page\x12\x1b\n" +

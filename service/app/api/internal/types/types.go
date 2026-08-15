@@ -159,6 +159,9 @@ type BookingResponse struct {
 	Building               string `json:"building"`
 	FloorNumber            int32  `json:"floor_number"`
 	RoomNumber             string `json:"room_number"`
+	ReportID               string `json:"report_id,omitempty"`
+	ReportStatus           string `json:"report_status,omitempty"`
+	ReportVersion          int64  `json:"report_version,omitempty"`
 }
 
 type CampusSummaryResponse struct {

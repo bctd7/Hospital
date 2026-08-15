@@ -2,7 +2,6 @@
 import { onLoad } from "@dcloudio/uni-app";
 import { computed, ref } from "vue";
 
-import { ApiError } from "@/api/client";
 import { appointmentManagementApi, staffBookingApi } from "@/api/appointment";
 import { sessionState } from "@/stores/session";
 import type { ExaminationReport, ExaminationReportContent, PatientBooking, PatientBookingStatus } from "@/types/appointment";
@@ -49,13 +48,14 @@ async function loadDetail() {
     report.value = undefined;
     clearContent();
     if (booking.value.status === "in_progress" || booking.value.status === "completed") {
-      try {
+      if (booking.value.reportId) {
         report.value = await staffBookingApi.getReport(booking.value.bookingId);
         fillContent(report.value.currentVersion);
-      } catch (error) {
-        if (!(error instanceof ApiError) || error.statusCode !== 404 || booking.value.status === "completed") throw error;
+      } else if (booking.value.status === "in_progress") {
         const template = await appointmentManagementApi.getItemReportTemplate(booking.value.itemId);
         fillContent(template);
+      } else {
+        throw new Error("该已完成预约缺少检查报告，请联系管理员检查数据");
       }
     }
   } catch (error) {

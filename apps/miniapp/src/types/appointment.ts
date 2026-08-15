@@ -197,6 +197,9 @@ export interface PatientBooking {
   completedAt?: string;
   completedBy?: string;
   completedByDisplayName?: string;
+  reportId?: string;
+  reportStatus?: ExaminationReportStatus;
+  reportVersion?: number;
 }
 
 export type AppointmentMessageType =

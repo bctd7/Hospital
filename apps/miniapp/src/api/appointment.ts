@@ -151,6 +151,9 @@ interface BookingResponse {
   completed_at?: string;
   completed_by?: string;
   completed_by_display_name?: string;
+  report_id?: string;
+  report_status?: ExaminationReportStatus;
+  report_version?: number;
 }
 
 interface MessageResponse {
@@ -406,6 +409,9 @@ const booking = (value: BookingResponse): PatientBooking => ({
   completedAt: value.completed_at,
   completedBy: value.completed_by,
   completedByDisplayName: value.completed_by_display_name,
+  reportId: value.report_id,
+  reportStatus: value.report_status,
+  reportVersion: value.report_version,
 });
 
 const appointmentMessage = (value: MessageResponse): AppointmentMessage => ({

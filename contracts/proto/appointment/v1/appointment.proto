@@ -404,6 +404,9 @@ message Booking {
   string patient_phone_masked = 30;
   string started_by_display_name = 31;
   string completed_by_display_name = 32;
+  string report_id = 33;
+  string report_status = 34;
+  int64 report_version = 35;
 }
 
 message ListBookingsResponse {

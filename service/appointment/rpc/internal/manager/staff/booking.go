@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -44,6 +45,18 @@ func (m *Manager) GetBooking(ctx context.Context, operator authn.Principal, book
 	}
 	if err := staffsupport.RequireDepartmentScope(operator, value.DepartmentID); err != nil {
 		return Booking{}, err
+	}
+	if value.Status != BookingStatusInProgress && value.Status != BookingStatusCompleted {
+		return value, nil
+	}
+	report, err := m.reports.GetReportByBooking(ctx, bookingID, false)
+	if err != nil && !errors.Is(err, ErrNotFound) {
+		return Booking{}, err
+	}
+	if err == nil {
+		value.ReportID = report.ReportID
+		value.ReportStatus = report.Status
+		value.ReportVersion = report.Version
 	}
 	return value, nil
 }
