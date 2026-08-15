@@ -180,7 +180,7 @@ func (s *bookingTxStore) LockBookingSelection(ctx context.Context, itemID, roomI
 	var building, roomNumber string
 	var floorNumber int32
 	err := s.tx.QueryRowContext(ctx, `
-SELECT i.id, i.owner_department_id, i.name,
+SELECT i.id, i.owner_department_id, i.name, i.estimated_duration_minutes,
        r.id, r.campus_id, r.building, r.floor_number, r.room_number,
        iw.session, rw.id, rw.version,
        TIME_FORMAT(rw.open_time, '%H:%i:%s'), TIME_FORMAT(rw.close_time, '%H:%i:%s'), rw.active_capacity,
@@ -206,7 +206,7 @@ WHERE i.id = ?
   AND rw.open_time <= iw.start_time
   AND iw.end_time <= rw.close_time
 FOR UPDATE`, roomID, serviceDate.Format("2006-01-02"), session, itemID).Scan(
-		&value.ItemID, &value.DepartmentID, &value.ItemName,
+		&value.ItemID, &value.DepartmentID, &value.ItemName, &value.EstimatedDurationMinutes,
 		&value.RoomID, &value.CampusID, &building, &floorNumber, &roomNumber,
 		&value.Session, &value.RoomWindowID, &value.RoomWindowVersion,
 		&value.RoomOpenTime, &value.RoomCloseTime, &value.ActiveCapacity,
@@ -335,13 +335,14 @@ INSERT INTO appointment_bookings
      patient_phone_last4_snapshot, department_id, item_id, room_id, service_date, session, status,
      room_open_time_snapshot, room_close_time_snapshot, item_start_time_snapshot,
      item_end_time_snapshot, item_cutoff_time_snapshot,
-     version, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     estimated_duration_minutes_snapshot, version, created_at, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		value.BookingID, value.PatientAccountID, value.PatientDisplayName, value.PatientPhoneMasked,
 		value.PatientPhoneLast4, value.DepartmentID, value.ItemID, value.RoomID,
 		value.ServiceDate.Format("2006-01-02"), value.Session, value.Status,
 		value.RoomOpenTime, value.RoomCloseTime, value.ItemStartTime,
-		value.ItemEndTime, value.BookingCutoffTime, value.Version, value.CreatedAt, value.UpdatedAt,
+		value.ItemEndTime, value.BookingCutoffTime, value.EstimatedDurationMinutes,
+		value.Version, value.CreatedAt, value.UpdatedAt,
 	)
 	return mapWriteError(err, "create booking")
 }

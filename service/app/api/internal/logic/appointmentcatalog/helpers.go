@@ -10,14 +10,15 @@ func examinationItemResponse(item *appointmentv1.ExaminationItem) *types.Examina
 		return nil
 	}
 	return &types.ExaminationItemResponse{
-		ItemID:            item.GetItemId(),
-		OwnerDepartmentID: item.GetOwnerDepartmentId(),
-		Name:              item.GetName(),
-		Description:       item.GetDescription(),
-		Status:            item.GetStatus(),
-		Version:           item.GetVersion(),
-		CreatedAt:         item.GetCreatedAt(),
-		UpdatedAt:         item.GetUpdatedAt(),
+		ItemID:                   item.GetItemId(),
+		OwnerDepartmentID:        item.GetOwnerDepartmentId(),
+		Name:                     item.GetName(),
+		Description:              item.GetDescription(),
+		EstimatedDurationMinutes: item.GetEstimatedDurationMinutes(),
+		Status:                   item.GetStatus(),
+		Version:                  item.GetVersion(),
+		CreatedAt:                item.GetCreatedAt(),
+		UpdatedAt:                item.GetUpdatedAt(),
 	}
 }
 

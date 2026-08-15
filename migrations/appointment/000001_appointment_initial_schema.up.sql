@@ -3,6 +3,7 @@ CREATE TABLE appointment_examination_items (
     owner_department_id CHAR(36)      NOT NULL,
     name                VARCHAR(128)  NOT NULL,
     description         TEXT          NOT NULL,
+    estimated_duration_minutes SMALLINT UNSIGNED NOT NULL,
     report_template_objective_findings TEXT NOT NULL,
     report_template_impression          TEXT NOT NULL,
     report_template_recommendation      TEXT NOT NULL,
@@ -21,6 +22,8 @@ CREATE TABLE appointment_examination_items (
         CHECK (status IN ('active', 'disabled')),
     CONSTRAINT chk_appointment_examination_items_version
         CHECK (version > 0),
+    CONSTRAINT chk_appointment_examination_items_duration
+        CHECK (estimated_duration_minutes BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes, 5) = 0),
     CONSTRAINT chk_appointment_examination_items_report_template_version
         CHECK (report_template_version >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -258,6 +261,7 @@ CREATE TABLE appointment_bookings (
     item_start_time_snapshot     TIME            NOT NULL,
     item_end_time_snapshot       TIME            NOT NULL,
     item_cutoff_time_snapshot    TIME            NOT NULL,
+    estimated_duration_minutes_snapshot SMALLINT UNSIGNED NOT NULL,
     started_at                   DATETIME(3)      NULL,
     started_by                   CHAR(36)         NULL,
     started_by_display_name_snapshot VARCHAR(128) NULL,
@@ -297,6 +301,8 @@ CREATE TABLE appointment_bookings (
             AND room_open_time_snapshot <= item_start_time_snapshot
             AND item_end_time_snapshot <= room_close_time_snapshot
         ),
+    CONSTRAINT chk_appointment_bookings_duration
+        CHECK (estimated_duration_minutes_snapshot BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes_snapshot, 5) = 0),
     CONSTRAINT chk_appointment_bookings_lifecycle CHECK (
         (status IN ('confirmed', 'no_show', 'canceled') AND started_at IS NULL AND started_by IS NULL
             AND completed_at IS NULL AND completed_by IS NULL)

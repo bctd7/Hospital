@@ -112,10 +112,11 @@ func (m *Manager) CreateProject(ctx context.Context, operator authn.Principal, c
 		return ExaminationItem{}, err
 	}
 	fingerprint := operationFingerprint(ActionExaminationItemCreated, struct {
-		OwnerDepartmentID string
-		Name              string
-		Description       string
-	}{command.OwnerDepartmentID, command.Name, command.Description})
+		OwnerDepartmentID        string
+		Name                     string
+		Description              string
+		EstimatedDurationMinutes int32
+	}{command.OwnerDepartmentID, command.Name, command.Description, command.EstimatedDurationMinutes})
 
 	var result ExaminationItem
 	err = m.projectWrites.WithinProjectTransaction(ctx, func(tx ProjectTxStore) error {
@@ -136,14 +137,15 @@ func (m *Manager) CreateProject(ctx context.Context, operator authn.Principal, c
 
 		now := time.Now().UTC()
 		result = ExaminationItem{
-			ItemID:            uuid.NewString(),
-			OwnerDepartmentID: command.OwnerDepartmentID,
-			Name:              command.Name,
-			Description:       command.Description,
-			Status:            StatusActive,
-			Version:           1,
-			CreatedAt:         now,
-			UpdatedAt:         now,
+			ItemID:                   uuid.NewString(),
+			OwnerDepartmentID:        command.OwnerDepartmentID,
+			Name:                     command.Name,
+			Description:              command.Description,
+			EstimatedDurationMinutes: command.EstimatedDurationMinutes,
+			Status:                   StatusActive,
+			Version:                  1,
+			CreatedAt:                now,
+			UpdatedAt:                now,
 		}
 		if err := tx.CreateItem(ctx, result); err != nil {
 			return err
@@ -174,11 +176,12 @@ func (m *Manager) UpdateProject(ctx context.Context, operator authn.Principal, c
 		return ExaminationItem{}, err
 	}
 	fingerprint := operationFingerprint(ActionExaminationItemUpdated, struct {
-		ItemID          string
-		Name            *string
-		Description     *string
-		ExpectedVersion int64
-	}{command.ItemID, command.Name, command.Description, command.ExpectedVersion})
+		ItemID                   string
+		Name                     *string
+		Description              *string
+		EstimatedDurationMinutes *int32
+		ExpectedVersion          int64
+	}{command.ItemID, command.Name, command.Description, command.EstimatedDurationMinutes, command.ExpectedVersion})
 
 	var result ExaminationItem
 	err = m.projectWrites.WithinProjectTransaction(ctx, func(tx ProjectTxStore) error {
@@ -217,6 +220,9 @@ func (m *Manager) UpdateProject(ctx context.Context, operator authn.Principal, c
 		}
 		if command.Description != nil {
 			after.Description = *command.Description
+		}
+		if command.EstimatedDurationMinutes != nil {
+			after.EstimatedDurationMinutes = *command.EstimatedDurationMinutes
 		}
 		after.Version = before.Version + 1
 		after.UpdatedAt = time.Now().UTC()

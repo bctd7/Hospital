@@ -57,15 +57,16 @@ func (s *projectTxStore) GetItemForUpdate(ctx context.Context, itemID string) (a
 func (s *projectTxStore) CreateItem(ctx context.Context, item appointmentmanager.ExaminationItem) error {
 	_, err := s.tx.ExecContext(ctx, `
 INSERT INTO appointment_examination_items
-    (id, owner_department_id, name, description,
+    (id, owner_department_id, name, description, estimated_duration_minutes,
      report_template_objective_findings, report_template_impression,
      report_template_recommendation, report_template_notes, report_template_version,
      status, version, created_at, updated_at)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		item.ItemID,
 		item.OwnerDepartmentID,
 		item.Name,
 		item.Description,
+		item.EstimatedDurationMinutes,
 		item.ReportTemplate.ObjectiveFindings,
 		item.ReportTemplate.Impression,
 		item.ReportTemplate.Recommendation,
@@ -121,11 +122,13 @@ func (s *projectTxStore) UpdateItem(ctx context.Context, item appointmentmanager
 UPDATE appointment_examination_items
 SET name = ?,
     description = ?,
+    estimated_duration_minutes = ?,
     version = version + 1,
     updated_at = ?
 WHERE id = ? AND version = ?`,
 		item.Name,
 		item.Description,
+		item.EstimatedDurationMinutes,
 		item.UpdatedAt,
 		item.ItemID,
 		expectedVersion,
@@ -239,28 +242,30 @@ SELECT EXISTS(
 }
 
 type examinationItemAuditState struct {
-	ItemID                string                    `json:"item_id"`
-	OwnerDepartmentID     string                    `json:"owner_department_id"`
-	Name                  string                    `json:"name"`
-	Status                appointmentmanager.Status `json:"status"`
-	Version               int64                     `json:"version"`
-	DescriptionChanged    bool                      `json:"description_changed"`
-	ReportTemplateVersion int64                     `json:"report_template_version"`
-	CreatedAt             time.Time                 `json:"created_at"`
-	UpdatedAt             time.Time                 `json:"updated_at"`
+	ItemID                   string                    `json:"item_id"`
+	OwnerDepartmentID        string                    `json:"owner_department_id"`
+	Name                     string                    `json:"name"`
+	Status                   appointmentmanager.Status `json:"status"`
+	Version                  int64                     `json:"version"`
+	DescriptionChanged       bool                      `json:"description_changed"`
+	EstimatedDurationMinutes int32                     `json:"estimated_duration_minutes"`
+	ReportTemplateVersion    int64                     `json:"report_template_version"`
+	CreatedAt                time.Time                 `json:"created_at"`
+	UpdatedAt                time.Time                 `json:"updated_at"`
 }
 
 func newAuditState(item appointmentmanager.ExaminationItem, descriptionChanged bool) examinationItemAuditState {
 	return examinationItemAuditState{
-		ItemID:                item.ItemID,
-		OwnerDepartmentID:     item.OwnerDepartmentID,
-		Name:                  item.Name,
-		Status:                item.Status,
-		Version:               item.Version,
-		DescriptionChanged:    descriptionChanged,
-		ReportTemplateVersion: item.ReportTemplate.Version,
-		CreatedAt:             item.CreatedAt,
-		UpdatedAt:             item.UpdatedAt,
+		ItemID:                   item.ItemID,
+		OwnerDepartmentID:        item.OwnerDepartmentID,
+		Name:                     item.Name,
+		Status:                   item.Status,
+		Version:                  item.Version,
+		DescriptionChanged:       descriptionChanged,
+		EstimatedDurationMinutes: item.EstimatedDurationMinutes,
+		ReportTemplateVersion:    item.ReportTemplate.Version,
+		CreatedAt:                item.CreatedAt,
+		UpdatedAt:                item.UpdatedAt,
 	}
 }
 

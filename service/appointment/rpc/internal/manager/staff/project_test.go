@@ -54,17 +54,18 @@ func TestCreatePersistsActiveItemAndAudit(t *testing.T) {
 	}
 
 	created, err := manager.CreateProject(context.Background(), projectOperator(), staffinput.CreateProject{
-		OwnerDepartmentID: " " + validationDepartmentID + " ",
-		Name:              " 腹部 CT ",
-		Description:       " 检查前禁食。\n可少量饮水。 ",
-		OperationID:       validationOperationID,
-		RequestID:         " request-create ",
+		OwnerDepartmentID:        " " + validationDepartmentID + " ",
+		Name:                     " 腹部 CT ",
+		Description:              " 检查前禁食。\n可少量饮水。 ",
+		EstimatedDurationMinutes: 30,
+		OperationID:              validationOperationID,
+		RequestID:                " request-create ",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 	if created.ItemID == "" || created.OwnerDepartmentID != validationDepartmentID ||
-		created.Name != "腹部 CT" || created.Description != "检查前禁食。\n可少量饮水。" ||
+		created.Name != "腹部 CT" || created.Description != "检查前禁食。\n可少量饮水。" || created.EstimatedDurationMinutes != 30 ||
 		created.Status != StatusActive || created.Version != 1 ||
 		created.CreatedAt.IsZero() || !created.CreatedAt.Equal(created.UpdatedAt) {
 		t.Fatalf("unexpected created item: %#v", created)
@@ -143,14 +144,15 @@ func TestProjectCRUDLifecycle(t *testing.T) {
 	}
 	name := "Updated examination item"
 	description := "Updated preparation description"
+	duration := int32(45)
 	updated, err := manager.UpdateProject(ctx, operator, staffinput.UpdateProject{
-		ItemID: created.ItemID, Name: &name, Description: &description,
+		ItemID: created.ItemID, Name: &name, Description: &description, EstimatedDurationMinutes: &duration,
 		ExpectedVersion: 1, OperationID: "00000000-0000-0000-0000-000000000021",
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if updated.Name != name || updated.Description != description || updated.Version != 2 {
+	if updated.Name != name || updated.Description != description || updated.EstimatedDurationMinutes != duration || updated.Version != 2 {
 		t.Fatalf("unexpected updated item: %#v", updated)
 	}
 
@@ -247,11 +249,12 @@ func TestProjectReportTemplateUsesIndependentVersionAndIdempotency(t *testing.T)
 
 func validCreateCommand() staffinput.CreateProject {
 	return staffinput.CreateProject{
-		OwnerDepartmentID: validationDepartmentID,
-		Name:              "腹部 CT",
-		Description:       "检查前禁食",
-		OperationID:       validationOperationID,
-		RequestID:         "request-create",
+		OwnerDepartmentID:        validationDepartmentID,
+		Name:                     "腹部 CT",
+		Description:              "检查前禁食",
+		EstimatedDurationMinutes: 30,
+		OperationID:              validationOperationID,
+		RequestID:                "request-create",
 	}
 }
 

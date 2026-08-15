@@ -35,7 +35,8 @@ func (l *UpdateExaminationItemLogic) UpdateExaminationItem(req *types.UpdateExam
 	}
 	item, err := l.svcCtx.Appointment.UpdateExaminationItem(ctx, &appointmentv1.UpdateExaminationItemRequest{
 		ItemId: req.ItemID, Name: req.Name, Description: req.Description,
-		ExpectedVersion: req.ExpectedVersion, OperationId: req.OperationID,
+		EstimatedDurationMinutes: req.EstimatedDurationMinutes,
+		ExpectedVersion:          req.ExpectedVersion, OperationId: req.OperationID,
 		RequestId: logging.RequestIDFromContext(l.ctx),
 	})
 	if err != nil {

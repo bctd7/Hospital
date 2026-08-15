@@ -44,7 +44,8 @@ func (l *ListBookingOptionsLogic) ListBookingOptions(in *appointmentv1.ListBooki
 			Session: string(value.Session), RoomOpenTime: value.RoomOpenTime, RoomCloseTime: value.RoomCloseTime,
 			ItemStartTime: value.ItemStartTime, ItemEndTime: value.ItemEndTime,
 			BookingCutoffTime: value.BookingCutoffTime, TotalCapacity: value.TotalCapacity,
-			RemainingCapacity: value.RemainingCapacity,
+			RemainingCapacity:        value.RemainingCapacity,
+			EstimatedDurationMinutes: value.EstimatedDurationMinutes,
 		})
 	}
 	return response, nil

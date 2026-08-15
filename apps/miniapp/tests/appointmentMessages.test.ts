@@ -38,6 +38,7 @@ function message(overrides: Partial<AppointmentMessage> = {}): AppointmentMessag
       itemStartTime: "09:00:00",
       itemEndTime: "12:00:00",
       bookingCutoffTime: "11:30:00",
+      estimatedDurationMinutes: 20,
       version: 1,
       createdAt: "2026-08-15T07:30:00Z",
       updatedAt: "2026-08-15T07:30:00Z",
@@ -55,7 +56,7 @@ describe("appointment message presentation", () => {
     expect(appointmentMessageDetail(value, true)).toContain("张明（153****8538）");
     expect(appointmentMessageDetail(value, false)).toBe("胸部CT平扫 · 放射科");
     expect(appointmentMessageSchedule(value)).toBe(
-      "2026-08-16 09:00–12:00 · 总院区 · 影像楼 · 2层 · CT201室",
+      "2026-08-16 09:00–12:00 · 预计用时约 20 分钟 · 总院区 · 影像楼 · 2层 · CT201室",
     );
   });
 

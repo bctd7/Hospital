@@ -46,7 +46,8 @@ func (l *ListBookingOptionsLogic) ListBookingOptions(req *types.BookingOptionsPa
 			RoomOpenTime: option.RoomOpenTime, RoomCloseTime: option.RoomCloseTime,
 			ItemStartTime: option.ItemStartTime, ItemEndTime: option.ItemEndTime,
 			BookingCutoffTime: option.BookingCutoffTime, TotalCapacity: option.TotalCapacity,
-			RemainingCapacity: option.RemainingCapacity,
+			RemainingCapacity:        option.RemainingCapacity,
+			EstimatedDurationMinutes: option.EstimatedDurationMinutes,
 		})
 	}
 	return response, nil

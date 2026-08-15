@@ -35,9 +35,10 @@ func (l *CreateExaminationItemLogic) CreateExaminationItem(req *types.CreateExam
 	}
 	item, err := l.svcCtx.Appointment.CreateExaminationItem(ctx, &appointmentv1.CreateExaminationItemRequest{
 		ExaminationItem: &appointmentv1.ExaminationItemInput{
-			OwnerDepartmentId: req.OwnerDepartmentID,
-			Name:              req.Name,
-			Description:       req.Description,
+			OwnerDepartmentId:        req.OwnerDepartmentID,
+			Name:                     req.Name,
+			Description:              req.Description,
+			EstimatedDurationMinutes: req.EstimatedDurationMinutes,
 		},
 		OperationId: req.OperationID,
 		RequestId:   logging.RequestIDFromContext(l.ctx),

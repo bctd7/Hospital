@@ -36,6 +36,7 @@ interface ItemResponse {
   owner_department_id: string;
   name: string;
   description: string;
+  estimated_duration_minutes: number;
   status: AppointmentStatus;
   version: number;
   created_at: string;
@@ -116,6 +117,7 @@ interface BookingOptionResponse {
   booking_cutoff_time: string;
   total_capacity: number;
   remaining_capacity: number;
+  estimated_duration_minutes: number;
 }
 
 interface BookingResponse {
@@ -142,6 +144,7 @@ interface BookingResponse {
   item_start_time: string;
   item_end_time: string;
   booking_cutoff_time: string;
+  estimated_duration_minutes: number;
   version: number;
   created_at: string;
   updated_at: string;
@@ -237,6 +240,7 @@ const item = (value: ItemResponse): ExaminationItem => ({
   ownerDepartmentId: value.owner_department_id,
   name: value.name,
   description: value.description,
+  estimatedDurationMinutes: value.estimated_duration_minutes,
   status: value.status,
   version: value.version,
   createdAt: value.created_at,
@@ -374,6 +378,7 @@ const bookingOption = (value: BookingOptionResponse): BookingOption => ({
   bookingCutoffTime: value.booking_cutoff_time,
   totalCapacity: value.total_capacity,
   remainingCapacity: value.remaining_capacity,
+  estimatedDurationMinutes: value.estimated_duration_minutes,
 });
 
 const booking = (value: BookingResponse): PatientBooking => ({
@@ -400,6 +405,7 @@ const booking = (value: BookingResponse): PatientBooking => ({
   itemStartTime: value.item_start_time,
   itemEndTime: value.item_end_time,
   bookingCutoffTime: value.booking_cutoff_time,
+  estimatedDurationMinutes: value.estimated_duration_minutes,
   version: value.version,
   createdAt: value.created_at,
   updatedAt: value.updated_at,
@@ -523,17 +529,17 @@ export const appointmentManagementApi: AppointmentManagementApi = {
     return item(await request<ItemResponse>({ path: `/api/v1/admin/appointment/examination-items/${encodeURIComponent(itemId)}`, authenticated: true }));
   },
 
-  async createItem(departmentId, name, description) {
-    const key = `item:create:${departmentId}:${name}:${description}`;
+  async createItem(departmentId, name, description, estimatedDurationMinutes) {
+    const key = `item:create:${departmentId}:${name}:${description}:${estimatedDurationMinutes}`;
     return item(await mutation<ItemResponse>(key, "/api/v1/admin/appointment/examination-items", "POST", {
-      owner_department_id: departmentId, name, description,
+      owner_department_id: departmentId, name, description, estimated_duration_minutes: estimatedDurationMinutes,
     }));
   },
 
-  async updateItem(value, name, description) {
-    const key = `item:update:${value.itemId}:${value.version}:${name}:${description}`;
+  async updateItem(value, name, description, estimatedDurationMinutes) {
+    const key = `item:update:${value.itemId}:${value.version}:${name}:${description}:${estimatedDurationMinutes}`;
     return item(await mutation<ItemResponse>(key, `/api/v1/admin/appointment/examination-items/${encodeURIComponent(value.itemId)}`, "PUT", {
-      name, description, expected_version: value.version,
+      name, description, estimated_duration_minutes: estimatedDurationMinutes, expected_version: value.version,
     }));
   },
 

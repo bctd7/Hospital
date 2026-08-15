@@ -15,11 +15,12 @@ const (
 
 func TestNormalizeCreateProject(t *testing.T) {
 	value, err := NormalizeCreateProject(CreateProject{
-		OwnerDepartmentID: "  " + validationDepartmentID + "  ",
-		Name:              "  腹部 CT  ",
-		Description:       "  检查前禁食。\r\n可少量饮水。  ",
-		OperationID:       validationOperationID,
-		RequestID:         " request-1 ",
+		OwnerDepartmentID:        "  " + validationDepartmentID + "  ",
+		Name:                     "  腹部 CT  ",
+		Description:              "  检查前禁食。\r\n可少量饮水。  ",
+		EstimatedDurationMinutes: 30,
+		OperationID:              validationOperationID,
+		RequestID:                " request-1 ",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -27,6 +28,20 @@ func TestNormalizeCreateProject(t *testing.T) {
 	if value.OwnerDepartmentID != validationDepartmentID || value.Name != "腹部 CT" ||
 		value.Description != "检查前禁食。\r\n可少量饮水。" || value.RequestID != "request-1" {
 		t.Fatalf("unexpected normalized input: %#v", value)
+	}
+}
+
+func TestNormalizeEstimatedDuration(t *testing.T) {
+	for _, value := range []int32{0, 4, 31, 485} {
+		_, err := NormalizeCreateProject(CreateProject{
+			OwnerDepartmentID: validationDepartmentID,
+			Name:              "腹部 CT", Description: "检查前禁食",
+			EstimatedDurationMinutes: value,
+			OperationID:              validationOperationID,
+		})
+		if !errors.Is(err, common.ErrInvalid) {
+			t.Fatalf("duration %d: error = %v, want ErrInvalid", value, err)
+		}
 	}
 }
 

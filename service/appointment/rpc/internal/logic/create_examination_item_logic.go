@@ -38,11 +38,12 @@ func (l *CreateExaminationItemLogic) CreateExaminationItem(in *appointmentv1.Cre
 		return nil, projectRPCError(common.ErrInvalid)
 	}
 	item, err := l.svcCtx.StaffManager.CreateProject(l.ctx, principal, staffinput.CreateProject{
-		OwnerDepartmentID: itemInput.OwnerDepartmentId,
-		Name:              itemInput.Name,
-		Description:       itemInput.Description,
-		OperationID:       in.OperationId,
-		RequestID:         in.RequestId,
+		OwnerDepartmentID:        itemInput.OwnerDepartmentId,
+		Name:                     itemInput.Name,
+		Description:              itemInput.Description,
+		EstimatedDurationMinutes: itemInput.EstimatedDurationMinutes,
+		OperationID:              in.OperationId,
+		RequestID:                in.RequestId,
 	})
 	if err != nil {
 		return nil, projectRPCError(err)

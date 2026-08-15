@@ -24,6 +24,7 @@ SELECT b.id, b.patient_account_id, b.patient_display_name_snapshot,
        TIME_FORMAT(b.item_start_time_snapshot, '%H:%i:%s'),
        TIME_FORMAT(b.item_end_time_snapshot, '%H:%i:%s'),
        TIME_FORMAT(b.item_cutoff_time_snapshot, '%H:%i:%s'),
+       b.estimated_duration_minutes_snapshot,
        b.started_at, COALESCE(b.started_by, ''), COALESCE(b.started_by_display_name_snapshot, ''),
        b.completed_at, COALESCE(b.completed_by, ''), COALESCE(b.completed_by_display_name_snapshot, ''),
        b.version, b.created_at, b.updated_at
@@ -40,7 +41,7 @@ WITH RECURSIVE booking_dates(service_date) AS (
     FROM booking_dates
     WHERE service_date < DATE(?)
 )
-SELECT i.id, i.owner_department_id,
+SELECT i.id, i.owner_department_id, i.estimated_duration_minutes,
        r.id, r.campus_id, r.building, r.floor_number, r.room_number,
        d.service_date, iw.session,
        TIME_FORMAT(rw.open_time, '%H:%i:%s'), TIME_FORMAT(rw.close_time, '%H:%i:%s'),
@@ -82,7 +83,7 @@ ORDER BY d.service_date, iw.session, r.building, r.floor_number, r.room_number, 
 	for rows.Next() {
 		var value appointmentmanager.BookingOption
 		if err := rows.Scan(
-			&value.ItemID, &value.DepartmentID,
+			&value.ItemID, &value.DepartmentID, &value.EstimatedDurationMinutes,
 			&value.RoomID, &value.CampusID, &value.Building, &value.FloorNumber, &value.RoomNumber,
 			&value.ServiceDate, &value.Session,
 			&value.RoomOpenTime, &value.RoomCloseTime,
@@ -225,6 +226,7 @@ func scanBooking(scanner bookingScanner) (appointmentmanager.Booking, error) {
 		&value.ServiceDate, &value.Session, &value.Status,
 		&value.RoomOpenTime, &value.RoomCloseTime,
 		&value.ItemStartTime, &value.ItemEndTime, &value.BookingCutoffTime,
+		&value.EstimatedDurationMinutes,
 		&startedAt, &value.StartedBy, &value.StartedByDisplayName,
 		&completedAt, &value.CompletedBy, &value.CompletedByDisplayName,
 		&value.Version, &value.CreatedAt, &value.UpdatedAt,

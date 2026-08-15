@@ -34,12 +34,13 @@ func (l *UpdateExaminationItemLogic) UpdateExaminationItem(in *appointmentv1.Upd
 		return nil, projectRPCError(common.ErrInvalid)
 	}
 	item, err := l.svcCtx.StaffManager.UpdateProject(l.ctx, principal, staffinput.UpdateProject{
-		ItemID:          in.ItemId,
-		Name:            in.Name,
-		Description:     in.Description,
-		ExpectedVersion: in.ExpectedVersion,
-		OperationID:     in.OperationId,
-		RequestID:       in.RequestId,
+		ItemID:                   in.ItemId,
+		Name:                     in.Name,
+		Description:              in.Description,
+		EstimatedDurationMinutes: in.EstimatedDurationMinutes,
+		ExpectedVersion:          in.ExpectedVersion,
+		OperationID:              in.OperationId,
+		RequestID:                in.RequestId,
 	})
 	if err != nil {
 		return nil, projectRPCError(err)

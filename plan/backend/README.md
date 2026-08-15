@@ -11,7 +11,6 @@
 - [Identity 已实现归档](./modules/implemented/01-identity-service.md)；
 - [Appointment 已实现归档](./modules/implemented/02-appointment-service.md)；
 - [Appointment 组织只读副本提案](./modules/proposals/01-appointment-organization-read-model.md)。
-- [Appointment 检查项目预计时长补充](./modules/proposals/02-appointment-examination-duration.md)。
 
 ## 固定分层
 

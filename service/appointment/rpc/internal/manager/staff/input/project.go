@@ -9,22 +9,24 @@ import (
 
 // CreateProject 是创建检查项目时允许提交的字段。
 type CreateProject struct {
-	OwnerDepartmentID string
-	Name              string
-	Description       string
-	OperationID       string
-	RequestID         string
+	OwnerDepartmentID        string
+	Name                     string
+	Description              string
+	EstimatedDurationMinutes int32
+	OperationID              string
+	RequestID                string
 }
 
 // UpdateProject 是修改检查项目基本信息时允许提交的字段。
 // 指针字段用于区分“没有提交”和“提交为空值”。
 type UpdateProject struct {
-	ItemID          string
-	Name            *string
-	Description     *string
-	ExpectedVersion int64
-	OperationID     string
-	RequestID       string
+	ItemID                   string
+	Name                     *string
+	Description              *string
+	EstimatedDurationMinutes *int32
+	ExpectedVersion          int64
+	OperationID              string
+	RequestID                string
 }
 
 // ChangeProjectStatus 是启用或停用检查项目时允许提交的字段。
@@ -63,6 +65,9 @@ func NormalizeCreateProject(value CreateProject) (CreateProject, error) {
 	if err != nil {
 		return CreateProject{}, err
 	}
+	if err = validateEstimatedDuration(value.EstimatedDurationMinutes); err != nil {
+		return CreateProject{}, err
+	}
 	value.OperationID, value.RequestID, err = staffsupport.NormalizeOperation(value.OperationID, value.RequestID)
 	if err != nil {
 		return CreateProject{}, err
@@ -80,8 +85,8 @@ func NormalizeUpdateProject(value UpdateProject) (UpdateProject, error) {
 	if value.ExpectedVersion <= 0 {
 		return UpdateProject{}, fmt.Errorf("%w: expected_version must be positive", common.ErrInvalid)
 	}
-	if value.Name == nil && value.Description == nil {
-		return UpdateProject{}, fmt.Errorf("%w: name or description is required", common.ErrInvalid)
+	if value.Name == nil && value.Description == nil && value.EstimatedDurationMinutes == nil {
+		return UpdateProject{}, fmt.Errorf("%w: name, description or estimated_duration_minutes is required", common.ErrInvalid)
 	}
 	if value.Name != nil {
 		name, normalizeErr := staffsupport.NormalizeProjectName(*value.Name)
@@ -97,11 +102,23 @@ func NormalizeUpdateProject(value UpdateProject) (UpdateProject, error) {
 		}
 		value.Description = &description
 	}
+	if value.EstimatedDurationMinutes != nil {
+		if durationErr := validateEstimatedDuration(*value.EstimatedDurationMinutes); durationErr != nil {
+			return UpdateProject{}, durationErr
+		}
+	}
 	value.OperationID, value.RequestID, err = staffsupport.NormalizeOperation(value.OperationID, value.RequestID)
 	if err != nil {
 		return UpdateProject{}, err
 	}
 	return value, nil
+}
+
+func validateEstimatedDuration(value int32) error {
+	if value < 5 || value > 480 || value%5 != 0 {
+		return fmt.Errorf("%w: estimated_duration_minutes must be between 5 and 480 and a multiple of 5", common.ErrInvalid)
+	}
+	return nil
 }
 
 // NormalizeChangeProjectStatus 校验项目状态变更输入。

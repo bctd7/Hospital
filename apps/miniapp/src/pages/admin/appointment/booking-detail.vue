@@ -5,7 +5,7 @@ import { computed, ref } from "vue";
 import { appointmentManagementApi, staffBookingApi } from "@/api/appointment";
 import { sessionState } from "@/stores/session";
 import type { ExaminationReport, ExaminationReportContent, PatientBooking, PatientBookingStatus } from "@/types/appointment";
-import { examinationWindowRelation, hasPermission } from "@/utils/appointmentManagement";
+import { examinationWindowRelation, formatEstimatedDuration, hasPermission } from "@/utils/appointmentManagement";
 
 const bookingId = ref("");
 const booking = ref<PatientBooking>();
@@ -188,6 +188,7 @@ function clockLabel(value: string) { return value.slice(0, 5); }
         <text>{{ booking.serviceDate }} · {{ sessionLabel(booking.session) }} · {{ booking.itemStartTime }}–{{ booking.itemEndTime }}</text>
         <text>{{ booking.departmentName || '当前科室' }} · {{ booking.roomDisplayName }}</text>
         <text>{{ booking.campusName ? `${booking.campusName} · ` : '' }}{{ booking.building }} · {{ booking.floorNumber }}层 · {{ booking.roomNumber }}室</text>
+        <text class="duration">{{ formatEstimatedDuration(booking.estimatedDurationMinutes) }}</text>
         <text v-if="booking.status === 'confirmed' && examinationWindowState !== 'open'" class="arrival-notice">只能在 {{ booking.serviceDate }} {{ clockLabel(booking.itemStartTime) }}–{{ clockLabel(booking.itemEndTime) }} 内开始检查</text>
         <text v-if="booking.status === 'no_show'" class="arrival-notice">项目结束时仍未开始检查，系统已记录为未到场。</text>
       </view>
@@ -229,4 +230,5 @@ function clockLabel(value: string) { return value.slice(0, 5); }
 
 <style scoped>
 button::after{display:none}.detail-page{min-height:100vh;padding:22rpx 22rpx 170rpx;box-sizing:border-box;background:#f3f6f9}.card,.state{margin-bottom:18rpx;padding:24rpx;background:#fff;border:1rpx solid #e2e8ee;border-radius:20rpx}.patient-card,.card-heading{display:flex;align-items:center;justify-content:space-between}.patient-name{color:#263348;font-size:30rpx;font-weight:720}.phone{margin-left:14rpx;color:#7d899a;font-size:21rpx}.status{padding:6rpx 13rpx;color:#247bb4;font-size:19rpx;background:#eaf4fb;border-radius:15rpx}.status--in_progress{color:#147cb1;background:#e6f5fc}.status--completed{color:#287b5e;background:#eaf7f1}.status--no_show{color:#8a5b35;background:#f8efe6}.info-card text{display:block;margin-top:10rpx;color:#718095;font-size:22rpx}.info-card .project-name{margin-top:0;color:#2f3d52;font-size:27rpx;font-weight:680}.card-heading{color:#2c3a4e;font-size:27rpx;font-weight:700}.card-heading button{width:auto;margin:0;padding:0 18rpx;color:#187fbd;font-size:20rpx;line-height:50rpx;background:#eaf5fb;border-radius:25rpx}.report-meta{display:block;margin-top:10rpx;color:#728197;font-size:20rpx}.field-label{display:block;margin-top:22rpx;color:#5f6e82;font-size:21rpx}.field{width:100%;height:180rpx;margin-top:9rpx;padding:18rpx;box-sizing:border-box;color:#2c394d;font-size:23rpx;background:#f5f7f9;border:1rpx solid #e3e8ed;border-radius:15rpx}.field.short{height:130rpx}.field[disabled]{color:#47566a;background:#f8f9fa}.snapshot{margin-top:22rpx;padding:18rpx;background:#f3f7fa;border-radius:15rpx}.snapshot text{display:block;margin-top:7rpx;color:#718095;font-size:20rpx}.snapshot text:first-child{margin-top:0}.state{color:#8490a0;font-size:22rpx;text-align:center}.state--error{color:#be4e5d}.bottom-actions{position:fixed;right:0;bottom:0;left:0;z-index:10;display:flex;gap:16rpx;padding:18rpx 22rpx calc(18rpx + env(safe-area-inset-bottom));background:#fff;border-top:1rpx solid #e2e8ee}.bottom-actions button{flex:1;margin:0;font-size:24rpx;line-height:76rpx;border-radius:38rpx}.bottom-actions .primary{color:#fff;background:#1688ce}.bottom-actions .secondary{color:#217daf;background:#eaf5fb}.bottom-actions button[disabled]{opacity:.55}
+.info-card .duration{color:#1688ce;font-weight:600}
 </style>

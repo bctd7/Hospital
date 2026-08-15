@@ -48,14 +48,15 @@ func projectRPCError(err error) error {
 
 func examinationItemResponse(item common.ExaminationItem) *appointmentv1.ExaminationItem {
 	return &appointmentv1.ExaminationItem{
-		ItemId:            item.ItemID,
-		OwnerDepartmentId: item.OwnerDepartmentID,
-		Name:              item.Name,
-		Description:       item.Description,
-		Status:            string(item.Status),
-		Version:           item.Version,
-		CreatedAt:         item.CreatedAt.UTC().Format(timeLayout),
-		UpdatedAt:         item.UpdatedAt.UTC().Format(timeLayout),
+		ItemId:                   item.ItemID,
+		OwnerDepartmentId:        item.OwnerDepartmentID,
+		Name:                     item.Name,
+		Description:              item.Description,
+		EstimatedDurationMinutes: item.EstimatedDurationMinutes,
+		Status:                   string(item.Status),
+		Version:                  item.Version,
+		CreatedAt:                item.CreatedAt.UTC().Format(timeLayout),
+		UpdatedAt:                item.UpdatedAt.UTC().Format(timeLayout),
 	}
 }
 

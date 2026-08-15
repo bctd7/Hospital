@@ -31,6 +31,7 @@ const itemId = ref("");
 const item = ref<ExaminationItem>();
 const name = ref("");
 const description = ref("");
+const estimatedDurationMinutes = ref(30);
 const windows = ref<ItemWeeklyWindow[]>([]);
 const reportTemplate = ref<ExaminationItemReportTemplate>();
 const loading = ref(false);
@@ -78,6 +79,7 @@ async function loadDetail(force = false) {
     departmentId.value = detail.ownerDepartmentId;
     name.value = detail.name;
     description.value = detail.description;
+    estimatedDurationMinutes.value = detail.estimatedDurationMinutes;
     windows.value = configured;
     reportTemplate.value = configuredTemplate;
   } catch (cause) {
@@ -112,16 +114,21 @@ async function saveItem() {
     uni.showToast({ title: "请输入检查项目名称", icon: "none" });
     return;
   }
+  if (!Number.isInteger(estimatedDurationMinutes.value) || estimatedDurationMinutes.value < 5 || estimatedDurationMinutes.value > 480 || estimatedDurationMinutes.value % 5 !== 0) {
+    uni.showToast({ title: "预计时长须为 5–480 分钟且为 5 的倍数", icon: "none" });
+    return;
+  }
   if (!departmentId.value || saving.value) return;
   saving.value = true;
   try {
     const saved = item.value
-      ? await appointmentManagementApi.updateItem(item.value, normalizedName, description.value.trim())
-      : await appointmentManagementApi.createItem(departmentId.value, normalizedName, description.value.trim());
+      ? await appointmentManagementApi.updateItem(item.value, normalizedName, description.value.trim(), estimatedDurationMinutes.value)
+      : await appointmentManagementApi.createItem(departmentId.value, normalizedName, description.value.trim(), estimatedDurationMinutes.value);
     item.value = saved;
     itemId.value = saved.itemId;
     name.value = saved.name;
     description.value = saved.description;
+    estimatedDurationMinutes.value = saved.estimatedDurationMinutes;
     if (!reportTemplate.value) {
       reportTemplate.value = await appointmentManagementApi.getItemReportTemplate(saved.itemId);
     }
@@ -305,6 +312,8 @@ function disableWindow(value: ItemWeeklyWindow) {
         </view>
         <text class="field-label">项目名称</text>
         <input v-model="name" class="field-input" maxlength="128" placeholder="例如：胸部 CT" />
+        <text class="field-label">预计检查时长（分钟）</text>
+        <input v-model.number="estimatedDurationMinutes" class="field-input" type="number" placeholder="5–480，按 5 分钟递增" />
         <text class="field-label">患者可见检查说明</text>
         <textarea v-model="description" class="field-textarea" maxlength="4000" placeholder="说明检查用途、准备事项等" />
         <button class="primary-button" :disabled="saving || (isNew ? !canCreate : !canUpdate)" @tap="saveItem">

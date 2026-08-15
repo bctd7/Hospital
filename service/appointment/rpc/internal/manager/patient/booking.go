@@ -184,6 +184,7 @@ func (m *Manager) CreateBooking(ctx context.Context, patient authn.Principal, co
 			RoomOpenTime: selection.RoomOpenTime, RoomCloseTime: selection.RoomCloseTime,
 			ItemStartTime: selection.ItemStartTime, ItemEndTime: selection.ItemEndTime,
 			BookingCutoffTime: selection.BookingCutoffTime,
+			EstimatedDurationMinutes: selection.EstimatedDurationMinutes,
 			Version:           1, CreatedAt: now, UpdatedAt: now,
 		}
 		if err := tx.CreateBooking(ctx, result); err != nil {

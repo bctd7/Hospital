@@ -11,6 +11,15 @@ export const SESSION_LABELS: Record<AppointmentSession, string> = {
   afternoon: "下午",
 };
 
+export function formatEstimatedDuration(minutes: number): string {
+  if (!Number.isInteger(minutes) || minutes <= 0) return "预计用时待确认";
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+  if (!hours) return `预计用时约 ${minutes} 分钟`;
+  if (!remainder) return `预计用时约 ${hours} 小时`;
+  return `预计用时约 ${hours} 小时 ${remainder} 分钟`;
+}
+
 export function hasRole(principal: AppointmentPrincipal | null, role: string): boolean {
   return principal?.roles.includes(role) ?? false;
 }

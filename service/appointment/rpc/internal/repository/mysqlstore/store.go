@@ -46,7 +46,7 @@ func (s *Store) Close() error {
 }
 
 const examinationItemSelect = `
-SELECT id, owner_department_id, name, description,
+SELECT id, owner_department_id, name, description, estimated_duration_minutes,
        report_template_objective_findings, report_template_impression,
        report_template_recommendation, report_template_notes, report_template_version,
        status, version, created_at, updated_at
@@ -145,6 +145,7 @@ func scanExaminationItem(scanner examinationItemScanner) (appointmentmanager.Exa
 		&item.OwnerDepartmentID,
 		&item.Name,
 		&item.Description,
+		&item.EstimatedDurationMinutes,
 		&item.ReportTemplate.ObjectiveFindings,
 		&item.ReportTemplate.Impression,
 		&item.ReportTemplate.Recommendation,

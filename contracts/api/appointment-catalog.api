@@ -6,6 +6,7 @@ type (
 		OwnerDepartmentID string `json:"owner_department_id"`
 		Name              string `json:"name"`
 		Description       string `json:"description"`
+		EstimatedDurationMinutes int32 `json:"estimated_duration_minutes"`
 		Status            string `json:"status"`
 		Version           int64  `json:"version"`
 		CreatedAt         string `json:"created_at"`
@@ -16,6 +17,7 @@ type (
 		OwnerDepartmentID string `json:"owner_department_id"`
 		Name              string `json:"name"`
 		Description       string `json:"description"`
+		EstimatedDurationMinutes int32 `json:"estimated_duration_minutes"`
 		OperationID       string `json:"operation_id"`
 	}
 
@@ -41,6 +43,7 @@ type (
 		ItemID          string  `path:"itemId"`
 		Name            *string `json:"name,optional"`
 		Description     *string `json:"description,optional"`
+		EstimatedDurationMinutes *int32 `json:"estimated_duration_minutes,optional"`
 		ExpectedVersion int64   `json:"expected_version"`
 		OperationID     string  `json:"operation_id"`
 	}

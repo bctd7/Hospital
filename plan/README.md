@@ -8,7 +8,7 @@ Plan 中重复维护，分别以 `contracts/api/`、`contracts/proto/` 和 `cont
 | 模块 | 状态 | 说明 |
 |---|---|---|
 | Identity | 首期已完成 | 手机号认证、会话、授权版本、组织、账号与医生管理已经形成闭环 |
-| Appointment | 主体已完成，待补预计时长 | 现有预约闭环已落地；智能导诊前需为项目和预约补充预计检查时长 |
+| Appointment | 当前范围已完成 | 检查资源、预约、预计时长快照、状态机、报告与消息均已形成闭环 |
 | 小程序 | 已接入上述真实接口 | 患者端与工作人员端共用登录身份，但使用不同页面与权限范围 |
 | 就诊人、缴费、医保、票据等 | 未规划或仅保留入口 | 不把展示入口误写成后端已实现能力 |
 
@@ -23,7 +23,6 @@ Appointment 原先按阶段拆分的 1～5 号实施稿已经合并为
 - [Identity 已实现归档](./backend/modules/implemented/01-identity-service.md)；
 - [Appointment 已实现归档](./backend/modules/implemented/02-appointment-service.md)；
 - [智能导诊与检查导航产品方案](./frontend/06-intelligent-guidance-and-navigation.md)；
-- [Appointment 检查项目预计时长补充](./backend/modules/proposals/02-appointment-examination-duration.md)。
 
 ## 文档边界
 

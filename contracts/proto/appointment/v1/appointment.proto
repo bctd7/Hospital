@@ -64,6 +64,7 @@ message ExaminationItemInput {
   string owner_department_id = 1;
   string name = 2;
   string description = 3;
+  int32 estimated_duration_minutes = 4;
 }
 
 message CreateExaminationItemRequest {
@@ -100,6 +101,7 @@ message UpdateExaminationItemRequest {
   int64 expected_version = 4;
   string operation_id = 5;
   string request_id = 6;
+  optional int32 estimated_duration_minutes = 7;
 }
 
 message ChangeExaminationItemStatusRequest {
@@ -118,6 +120,7 @@ message ExaminationItem {
   int64 version = 6;
   string created_at = 7;
   string updated_at = 8;
+  int32 estimated_duration_minutes = 9;
 }
 
 message ExaminationItemReportTemplate {
@@ -308,6 +311,7 @@ message BookingOption {
   string booking_cutoff_time = 14;
   int64 total_capacity = 15;
   int64 remaining_capacity = 16;
+  int32 estimated_duration_minutes = 17;
 }
 
 message ListBookingOptionsResponse {
@@ -407,6 +411,7 @@ message Booking {
   string report_id = 33;
   string report_status = 34;
   int64 report_version = 35;
+  int32 estimated_duration_minutes = 36;
 }
 
 message ListBookingsResponse {

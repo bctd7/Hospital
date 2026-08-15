@@ -10,6 +10,7 @@ export interface ExaminationItem {
   ownerDepartmentId: string;
   name: string;
   description: string;
+  estimatedDurationMinutes: number;
   status: AppointmentStatus;
   version: number;
   createdAt: string;
@@ -123,8 +124,8 @@ export interface SaveItemWindowInput {
 export interface AppointmentManagementApi {
   listItems(departmentId: string, status: AppointmentStatus, page?: number, pageSize?: number): Promise<AppointmentPage<ExaminationItem>>;
   getItem(itemId: string): Promise<ExaminationItem>;
-  createItem(departmentId: string, name: string, description: string): Promise<ExaminationItem>;
-  updateItem(item: ExaminationItem, name: string, description: string): Promise<ExaminationItem>;
+  createItem(departmentId: string, name: string, description: string, estimatedDurationMinutes: number): Promise<ExaminationItem>;
+  updateItem(item: ExaminationItem, name: string, description: string, estimatedDurationMinutes: number): Promise<ExaminationItem>;
   setItemEnabled(item: ExaminationItem, enabled: boolean): Promise<ExaminationItem>;
   getItemReportTemplate(itemId: string): Promise<ExaminationItemReportTemplate>;
   saveItemReportTemplate(template: ExaminationItemReportTemplate): Promise<ExaminationItemReportTemplate>;
@@ -162,6 +163,7 @@ export interface BookingOption {
   bookingCutoffTime: string;
   totalCapacity: number;
   remainingCapacity: number;
+  estimatedDurationMinutes: number;
 }
 
 export interface PatientBooking {
@@ -188,6 +190,7 @@ export interface PatientBooking {
   itemStartTime: string;
   itemEndTime: string;
   bookingCutoffTime: string;
+  estimatedDurationMinutes: number;
   version: number;
   createdAt: string;
   updatedAt: string;

@@ -59,11 +59,12 @@ func TestMySQLProjectLifecycle(t *testing.T) {
 		},
 	}
 	command := staffinput.CreateProject{
-		OwnerDepartmentID: projectIntegrationDepartment,
-		Name:              "Integration Examination Item",
-		Description:       "Integration preparation description",
-		OperationID:       projectIntegrationCreateOperation,
-		RequestID:         "project-integration-create",
+		OwnerDepartmentID:        projectIntegrationDepartment,
+		Name:                     "Integration Examination Item",
+		Description:              "Integration preparation description",
+		EstimatedDurationMinutes: 30,
+		OperationID:              projectIntegrationCreateOperation,
+		RequestID:                "project-integration-create",
 	}
 
 	created, err := manager.CreateProject(ctx, operator, command)

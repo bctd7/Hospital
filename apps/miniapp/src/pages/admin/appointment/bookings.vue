@@ -8,7 +8,7 @@ import {
   type DepartmentOption,
 } from "@/services/organization";
 import type { AppointmentListView, PatientBooking, PatientBookingStatus } from "@/types/appointment";
-import { examinationWindowRelation } from "@/utils/appointmentManagement";
+import { examinationWindowRelation, formatEstimatedDuration } from "@/utils/appointmentManagement";
 import { currentStaffDepartmentId, rememberStaffDepartmentId } from "@/utils/staffDepartmentContext";
 
 const departmentId = ref("");
@@ -201,6 +201,7 @@ function roomAddress(value: PatientBooking) { return `${value.campusName ? `${va
         <text class="booking-card__project">{{ booking.itemName }}</text>
         <text class="booking-card__line">{{ booking.serviceDate }} · {{ sessionLabel(booking.session) }} · {{ booking.itemStartTime }}–{{ booking.itemEndTime }}</text>
         <text class="booking-card__line">{{ roomAddress(booking) }}</text>
+        <text class="booking-card__line booking-card__duration">{{ formatEstimatedDuration(booking.estimatedDurationMinutes) }}</text>
         <view class="actions" @tap.stop>
           <button v-if="booking.status === 'confirmed'" :disabled="pendingId === booking.bookingId" @tap="startExamination(booking)">{{ examinationActionLabel(booking) }}</button>
           <button v-if="booking.status === 'confirmed'" class="danger" :disabled="pendingId === booking.bookingId" @tap="requestDelete(booking)">删除</button>
@@ -214,4 +215,5 @@ function roomAddress(value: PatientBooking) { return `${value.campusName ? `${va
 <style scoped>
 button::after{display:none}.staff-bookings{min-height:100vh;padding:22rpx 22rpx calc(28rpx + env(safe-area-inset-bottom));box-sizing:border-box;background:#f3f5f8}.summary,.filters,.booking-card,.state{padding:24rpx;background:#fff;border:1rpx solid #e1e6ed;border-radius:18rpx}.summary{display:flex;align-items:center;justify-content:space-between}.summary__title,.summary__minor,.booking-card__project,.booking-card__line{display:block}.summary__title{color:#263348;font-size:27rpx;font-weight:700}.summary__minor{margin-top:7rpx;color:#8995a5;font-size:18rpx}.summary button,.filters button,.actions button{width:auto;margin:0;padding:0 22rpx;color:#fff;font-size:20rpx;line-height:58rpx;background:#2188c7;border-radius:29rpx}.filters{display:grid;grid-template-columns:1fr auto auto;gap:12rpx;margin-top:16rpx;padding:14rpx}.filters input,.filter-status{height:62rpx;padding:0 18rpx;color:#344157;font-size:21rpx;line-height:62rpx;background:#f3f6f9;border-radius:14rpx}.filter-status{min-width:120rpx}.state{margin-top:20rpx;color:#8490a0;font-size:22rpx;text-align:center}.state--error{color:#be4e5d}.booking-card{margin-top:18rpx}.booking-card__heading{display:flex;align-items:center;justify-content:space-between}.patient{color:#263348;font-size:27rpx;font-weight:700}.phone{margin-left:14rpx;color:#7f8b9c;font-size:20rpx}.status{padding:5rpx 12rpx;color:#277bc0;font-size:18rpx;background:#edf6fb;border-radius:14rpx}.status--in_progress{color:#147cb1;background:#e6f5fc}.status--completed{color:#287b5e;background:#eaf7f1}.status--no_show{color:#8a5b35;background:#f8efe6}.booking-card__project{margin-top:18rpx;color:#344157;font-size:24rpx;font-weight:650}.booking-card__line{margin-top:10rpx;color:#758195;font-size:21rpx}.actions{display:flex;justify-content:flex-end;gap:12rpx;margin-top:22rpx}.actions .danger{color:#c84f5d;background:#fff0f1}.actions .detail{color:#247bb4;background:#edf6fb}
 .summary__actions{display:flex;gap:10rpx;margin-left:14rpx;flex-shrink:0}
+.booking-card__duration{color:#2188c7}
 </style>

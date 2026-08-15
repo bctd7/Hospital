@@ -1,4 +1,5 @@
 import type { AppointmentMessage, AppointmentMessageType } from "@/types/appointment";
+import { formatEstimatedDuration } from "@/utils/appointmentManagement";
 
 const chinaOffsetMilliseconds = 8 * 60 * 60 * 1000;
 
@@ -38,7 +39,7 @@ export function appointmentMessageSchedule(value: AppointmentMessage): string {
   const location = [booking.campusName, booking.roomDisplayName]
     .filter((current) => current?.trim())
     .join(" · ");
-  return `${booking.serviceDate} ${clock(booking.itemStartTime)}–${clock(booking.itemEndTime)}${location ? ` · ${location}` : ""}`;
+  return `${booking.serviceDate} ${clock(booking.itemStartTime)}–${clock(booking.itemEndTime)} · ${formatEstimatedDuration(booking.estimatedDurationMinutes)}${location ? ` · ${location}` : ""}`;
 }
 
 export function appointmentMessageTime(value: string): string {

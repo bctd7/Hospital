@@ -4,15 +4,16 @@ import "time"
 
 // ExaminationItem 是检查项目的完整业务数据。
 type ExaminationItem struct {
-	ItemID            string
-	OwnerDepartmentID string
-	Name              string
-	Description       string
-	ReportTemplate    ReportTemplate
-	Status            Status
-	Version           int64
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	ItemID                   string
+	OwnerDepartmentID        string
+	Name                     string
+	Description              string
+	EstimatedDurationMinutes int32
+	ReportTemplate           ReportTemplate
+	Status                   Status
+	Version                  int64
+	CreatedAt                time.Time
+	UpdatedAt                time.Time
 }
 
 // ReportTemplate 是检查项目为新报告提供的固定四字段初始正文；版本 0 表示尚未配置。

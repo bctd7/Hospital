@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   examinationWindowRelation,
+  formatEstimatedDuration,
   canReadAppointmentManagement,
   itemWindowTimeValid,
   roomWindowTimeValid,
@@ -11,6 +12,11 @@ import {
 } from "@/utils/appointmentManagement";
 
 describe("appointment management view rules", () => {
+  it("formats estimated examination duration for shared booking displays", () => {
+    expect(formatEstimatedDuration(20)).toBe("预计用时约 20 分钟");
+    expect(formatEstimatedDuration(90)).toBe("预计用时约 1 小时 30 分钟");
+    expect(formatEstimatedDuration(120)).toBe("预计用时约 2 小时");
+  });
   it("requires both a staff role and appointment read permission", () => {
     expect(canReadAppointmentManagement({ roles: ["department_doctor"], permissions: ["appointment.read"] })).toBe(true);
     expect(canReadAppointmentManagement({ roles: [], permissions: ["appointment.read"] })).toBe(false);

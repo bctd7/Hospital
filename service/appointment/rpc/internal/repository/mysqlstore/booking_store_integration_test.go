@@ -75,6 +75,9 @@ func TestBookingCapacityAllowsOnlyOneConcurrentWinner(t *testing.T) {
 	if len(options) != 2 || options[0].RemainingCapacity != 1 || options[1].RemainingCapacity != 1 {
 		t.Fatalf("booking options=%+v, want two options with one remaining capacity", options)
 	}
+	if options[0].EstimatedDurationMinutes != 35 || options[1].EstimatedDurationMinutes != 35 {
+		t.Fatalf("booking option durations=%d/%d, want 35/35", options[0].EstimatedDurationMinutes, options[1].EstimatedDurationMinutes)
+	}
 	commands := []patientmanager.CreateBookingCommand{
 		{ItemID: bookingTestItem, RoomID: bookingTestRoom, ServiceDate: serviceDate.Format("2006-01-02"), Session: session, PatientDisplayName: "测试患者甲", PatientPhoneMasked: "134****0001", OperationID: "41000000-0000-0000-0000-000000000011"},
 		{ItemID: bookingTestItem, RoomID: bookingTestRoom, ServiceDate: serviceDate.Format("2006-01-02"), Session: session, PatientDisplayName: "测试患者乙", PatientPhoneMasked: "134****0002", OperationID: "41000000-0000-0000-0000-000000000012"},
@@ -122,6 +125,19 @@ func TestBookingCapacityAllowsOnlyOneConcurrentWinner(t *testing.T) {
 	}
 	if winner.booking.Building != "T" || winner.booking.FloorNumber != 1 || winner.booking.RoomNumber != "101" {
 		t.Fatalf("booking address=%q/%d/%q, want T/1/101", winner.booking.Building, winner.booking.FloorNumber, winner.booking.RoomNumber)
+	}
+	if winner.booking.EstimatedDurationMinutes != 35 {
+		t.Fatalf("booking duration=%d, want snapshot 35", winner.booking.EstimatedDurationMinutes)
+	}
+	if _, err := store.db.ExecContext(ctx, `UPDATE appointment_examination_items SET estimated_duration_minutes = 45 WHERE id = ?`, bookingTestItem); err != nil {
+		t.Fatal(err)
+	}
+	persisted, err := store.GetBooking(ctx, winner.booking.BookingID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if persisted.EstimatedDurationMinutes != 35 {
+		t.Fatalf("persisted booking duration=%d after project update, want snapshot 35", persisted.EstimatedDurationMinutes)
 	}
 	winner.command.RequestID = "retry-with-a-different-request-id"
 	retried, err := manager.CreateBooking(ctx, winner.patient, winner.command)
@@ -499,11 +515,11 @@ func seedBookingIntegrationData(t *testing.T, store *Store, ctx context.Context,
 		args  []any
 	}{
 		{`INSERT INTO appointment_examination_items
-            (id, owner_department_id, name, description,
+			(id, owner_department_id, name, description, estimated_duration_minutes,
              report_template_objective_findings, report_template_impression,
              report_template_recommendation, report_template_notes, report_template_version,
              status, version, created_at, updated_at)
-            VALUES (?, ?, 'Booking integration item', 'test', '', '', '', '', 0, 'active', 1, ?, ?)`, []any{bookingTestItem, bookingTestDepartment, now, now}},
+			VALUES (?, ?, 'Booking integration item', 'test', 35, '', '', '', '', 0, 'active', 1, ?, ?)`, []any{bookingTestItem, bookingTestDepartment, now, now}},
 		{`INSERT INTO appointment_rooms (id, department_id, campus_id, building, floor_number, room_number, version, created_at, updated_at) VALUES (?, ?, ?, 'T', 1, '101', 1, ?, ?)`, []any{bookingTestRoom, bookingTestDepartment, bookingTestCampus, now, now}},
 		{`INSERT INTO appointment_rooms (id, department_id, campus_id, building, floor_number, room_number, version, created_at, updated_at) VALUES (?, ?, ?, 'T', 1, '102', 1, ?, ?)`, []any{bookingTestRoomTwo, bookingTestDepartment, bookingTestCampus, now, now}},
 		{`INSERT INTO appointment_room_examination_items (id, room_id, item_id, status, version, created_at, updated_at) VALUES (?, ?, ?, 'active', 1, ?, ?)`, []any{bookingTestRelation, bookingTestRoom, bookingTestItem, now, now}},

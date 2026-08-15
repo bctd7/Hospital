@@ -100,22 +100,23 @@ type AppointmentRoomResponse struct {
 }
 
 type BookingOptionResponse struct {
-	ItemID            string `json:"item_id"`
-	RoomID            string `json:"room_id"`
-	RoomDisplayName   string `json:"room_display_name"`
-	CampusID          string `json:"campus_id"`
-	Building          string `json:"building"`
-	FloorNumber       int32  `json:"floor_number"`
-	RoomNumber        string `json:"room_number"`
-	ServiceDate       string `json:"service_date"`
-	Session           string `json:"session"`
-	RoomOpenTime      string `json:"room_open_time"`
-	RoomCloseTime     string `json:"room_close_time"`
-	ItemStartTime     string `json:"item_start_time"`
-	ItemEndTime       string `json:"item_end_time"`
-	BookingCutoffTime string `json:"booking_cutoff_time"`
-	TotalCapacity     int64  `json:"total_capacity"`
-	RemainingCapacity int64  `json:"remaining_capacity"`
+	ItemID                   string `json:"item_id"`
+	RoomID                   string `json:"room_id"`
+	RoomDisplayName          string `json:"room_display_name"`
+	CampusID                 string `json:"campus_id"`
+	Building                 string `json:"building"`
+	FloorNumber              int32  `json:"floor_number"`
+	RoomNumber               string `json:"room_number"`
+	ServiceDate              string `json:"service_date"`
+	Session                  string `json:"session"`
+	RoomOpenTime             string `json:"room_open_time"`
+	RoomCloseTime            string `json:"room_close_time"`
+	ItemStartTime            string `json:"item_start_time"`
+	ItemEndTime              string `json:"item_end_time"`
+	BookingCutoffTime        string `json:"booking_cutoff_time"`
+	TotalCapacity            int64  `json:"total_capacity"`
+	RemainingCapacity        int64  `json:"remaining_capacity"`
+	EstimatedDurationMinutes int32  `json:"estimated_duration_minutes"`
 }
 
 type BookingOptionsPathRequest struct {
@@ -127,41 +128,42 @@ type BookingPathRequest struct {
 }
 
 type BookingResponse struct {
-	BookingID              string `json:"booking_id"`
-	PatientAccountID       string `json:"patient_account_id"`
-	PatientDisplayName     string `json:"patient_display_name"`
-	PatientPhoneMasked     string `json:"patient_phone_masked"`
-	DepartmentID           string `json:"department_id"`
-	DepartmentName         string `json:"department_name"`
-	ItemID                 string `json:"item_id"`
-	ItemName               string `json:"item_name"`
-	RoomID                 string `json:"room_id"`
-	RoomDisplayName        string `json:"room_display_name"`
-	CampusID               string `json:"campus_id"`
-	CampusName             string `json:"campus_name"`
-	ServiceDate            string `json:"service_date"`
-	Session                string `json:"session"`
-	Status                 string `json:"status"`
-	RoomOpenTime           string `json:"room_open_time"`
-	RoomCloseTime          string `json:"room_close_time"`
-	ItemStartTime          string `json:"item_start_time"`
-	ItemEndTime            string `json:"item_end_time"`
-	BookingCutoffTime      string `json:"booking_cutoff_time"`
-	Version                int64  `json:"version"`
-	CreatedAt              string `json:"created_at"`
-	UpdatedAt              string `json:"updated_at"`
-	StartedAt              string `json:"started_at,omitempty"`
-	StartedBy              string `json:"started_by,omitempty"`
-	StartedByDisplayName   string `json:"started_by_display_name,omitempty"`
-	CompletedAt            string `json:"completed_at,omitempty"`
-	CompletedBy            string `json:"completed_by,omitempty"`
-	CompletedByDisplayName string `json:"completed_by_display_name,omitempty"`
-	Building               string `json:"building"`
-	FloorNumber            int32  `json:"floor_number"`
-	RoomNumber             string `json:"room_number"`
-	ReportID               string `json:"report_id,omitempty"`
-	ReportStatus           string `json:"report_status,omitempty"`
-	ReportVersion          int64  `json:"report_version,omitempty"`
+	BookingID                string `json:"booking_id"`
+	PatientAccountID         string `json:"patient_account_id"`
+	PatientDisplayName       string `json:"patient_display_name"`
+	PatientPhoneMasked       string `json:"patient_phone_masked"`
+	DepartmentID             string `json:"department_id"`
+	DepartmentName           string `json:"department_name"`
+	ItemID                   string `json:"item_id"`
+	ItemName                 string `json:"item_name"`
+	RoomID                   string `json:"room_id"`
+	RoomDisplayName          string `json:"room_display_name"`
+	CampusID                 string `json:"campus_id"`
+	CampusName               string `json:"campus_name"`
+	ServiceDate              string `json:"service_date"`
+	Session                  string `json:"session"`
+	Status                   string `json:"status"`
+	RoomOpenTime             string `json:"room_open_time"`
+	RoomCloseTime            string `json:"room_close_time"`
+	ItemStartTime            string `json:"item_start_time"`
+	ItemEndTime              string `json:"item_end_time"`
+	BookingCutoffTime        string `json:"booking_cutoff_time"`
+	EstimatedDurationMinutes int32  `json:"estimated_duration_minutes"`
+	Version                  int64  `json:"version"`
+	CreatedAt                string `json:"created_at"`
+	UpdatedAt                string `json:"updated_at"`
+	StartedAt                string `json:"started_at,omitempty"`
+	StartedBy                string `json:"started_by,omitempty"`
+	StartedByDisplayName     string `json:"started_by_display_name,omitempty"`
+	CompletedAt              string `json:"completed_at,omitempty"`
+	CompletedBy              string `json:"completed_by,omitempty"`
+	CompletedByDisplayName   string `json:"completed_by_display_name,omitempty"`
+	Building                 string `json:"building"`
+	FloorNumber              int32  `json:"floor_number"`
+	RoomNumber               string `json:"room_number"`
+	ReportID                 string `json:"report_id,omitempty"`
+	ReportStatus             string `json:"report_status,omitempty"`
+	ReportVersion            int64  `json:"report_version,omitempty"`
 }
 
 type CampusSummaryResponse struct {
@@ -239,10 +241,11 @@ type CreateBookingAPIRequest struct {
 }
 
 type CreateExaminationItemRequest struct {
-	OwnerDepartmentID string `json:"owner_department_id"`
-	Name              string `json:"name"`
-	Description       string `json:"description"`
-	OperationID       string `json:"operation_id"`
+	OwnerDepartmentID        string `json:"owner_department_id"`
+	Name                     string `json:"name"`
+	Description              string `json:"description"`
+	EstimatedDurationMinutes int32  `json:"estimated_duration_minutes"`
+	OperationID              string `json:"operation_id"`
 }
 
 type CreateOrganizationUnitRequest struct {
@@ -319,14 +322,15 @@ type ExaminationItemReportTemplateResponse struct {
 }
 
 type ExaminationItemResponse struct {
-	ItemID            string `json:"item_id"`
-	OwnerDepartmentID string `json:"owner_department_id"`
-	Name              string `json:"name"`
-	Description       string `json:"description"`
-	Status            string `json:"status"`
-	Version           int64  `json:"version"`
-	CreatedAt         string `json:"created_at"`
-	UpdatedAt         string `json:"updated_at"`
+	ItemID                   string `json:"item_id"`
+	OwnerDepartmentID        string `json:"owner_department_id"`
+	Name                     string `json:"name"`
+	Description              string `json:"description"`
+	EstimatedDurationMinutes int32  `json:"estimated_duration_minutes"`
+	Status                   string `json:"status"`
+	Version                  int64  `json:"version"`
+	CreatedAt                string `json:"created_at"`
+	UpdatedAt                string `json:"updated_at"`
 }
 
 type ExaminationReportResponse struct {
@@ -757,11 +761,12 @@ type UpdateDoctorRequest struct {
 }
 
 type UpdateExaminationItemRequest struct {
-	ItemID          string  `path:"itemId"`
-	Name            *string `json:"name,optional"`
-	Description     *string `json:"description,optional"`
-	ExpectedVersion int64   `json:"expected_version"`
-	OperationID     string  `json:"operation_id"`
+	ItemID                   string  `path:"itemId"`
+	Name                     *string `json:"name,optional"`
+	Description              *string `json:"description,optional"`
+	EstimatedDurationMinutes *int32  `json:"estimated_duration_minutes,optional"`
+	ExpectedVersion          int64   `json:"expected_version"`
+	OperationID              string  `json:"operation_id"`
 }
 
 type UpdateOrganizationUnitRequest struct {
