@@ -18,6 +18,7 @@ const view = ref<AppointmentListView>("active");
 const isCompletedView = computed(() => view.value === "completed");
 const nowTick = ref(Date.now());
 let clockTimer: ReturnType<typeof setInterval> | undefined;
+let lastExpiredRefreshAt = 0;
 
 onLoad((query) => {
   view.value = query?.view === "completed" ? "completed" : "active";
@@ -28,10 +29,19 @@ onLoad((query) => {
 onShow(() => {
   nowTick.value = Date.now();
   if (clockTimer) clearInterval(clockTimer);
-  clockTimer = setInterval(() => { nowTick.value = Date.now(); }, 1000);
+  clockTimer = setInterval(tickBookingClock, 1000);
   void loadBookings();
 });
 onHide(() => { if (clockTimer) clearInterval(clockTimer); clockTimer = undefined; });
+
+function tickBookingClock() {
+  nowTick.value = Date.now();
+  const hasExpiredCall = bookings.value.some((booking) => booking.status === "called"
+    && Boolean(booking.callDeadline) && nowTick.value >= Date.parse(booking.callDeadline!));
+  if (!hasExpiredCall || nowTick.value - lastExpiredRefreshAt < 2000) return;
+  lastExpiredRefreshAt = nowTick.value;
+  void loadBookings();
+}
 
 async function loadBookings() {
   if (loading.value) return;

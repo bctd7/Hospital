@@ -42,6 +42,17 @@ describe("appointment management view rules", () => {
     expect(source).toContain("openBooking(endedBooking)");
   });
 
+  it("refreshes the staff queue automatically when a call expires", () => {
+    const source = readFileSync(
+      new URL("../src/pages/admin/appointment/bookings.vue", import.meta.url),
+      "utf8",
+    );
+    expect(source).toContain("叫号剩余");
+    expect(source).toContain("叫号已超时，正在更新候检队列");
+    expect(source).toContain("setInterval(tickQueueClock, 1000)");
+    expect(source).toContain("void loadPage()");
+  });
+
   it("validates the two different weekly time models", () => {
     expect(roomWindowTimeValid("08:00", "12:00")).toBe(true);
     expect(roomWindowTimeValid("12:00", "08:00")).toBe(false);

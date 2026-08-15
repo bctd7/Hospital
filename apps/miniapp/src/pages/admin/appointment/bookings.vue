@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onLoad, onShow } from "@dcloudio/uni-app";
+import { onHide, onLoad, onShow } from "@dcloudio/uni-app";
 import { computed, ref } from "vue";
 
 import { appointmentManagementApi, staffBookingApi } from "@/api/appointment";
@@ -21,6 +21,9 @@ const loading = ref(false);
 const pendingId = ref("");
 const errorMessage = ref("");
 const view = ref<AppointmentListView>("active");
+const nowTick = ref(Date.now());
+let clockTimer: ReturnType<typeof setInterval> | undefined;
+let lastExpiredRefreshAt = 0;
 
 const isCompletedView = computed(() => view.value === "completed");
 const isToday = computed(() => serviceDate.value === today());
@@ -28,6 +31,14 @@ const canSwitchDepartment = computed(() => !departmentLocked.value && department
 const currentExamination = computed(() => bookings.value.find((value) => value.status === "in_progress"));
 const currentCalled = computed(() => bookings.value.find((value) => value.status === "called"));
 const currentBooking = computed(() => currentExamination.value ?? currentCalled.value);
+const currentCallExpired = computed(() => Boolean(currentCalled.value?.callDeadline)
+  && nowTick.value >= Date.parse(currentCalled.value!.callDeadline!));
+const currentCallHint = computed(() => {
+  const deadline = currentCalled.value?.callDeadline;
+  if (!deadline) return "请患者立即前往检查房间，并留意现场广播";
+  const remaining = Math.max(0, Math.ceil((Date.parse(deadline) - nowTick.value) / 1000));
+  return remaining > 0 ? `叫号剩余 ${remaining} 秒，超时后自动返回候检队列` : "叫号已超时，正在更新候检队列…";
+});
 const queuedBookings = computed(() => bookings.value.filter((value) => value.status === "queued").sort((a, b) => a.queueNumber - b.queueNumber));
 const confirmedBookings = computed(() => bookings.value.filter((value) => value.status === "confirmed"));
 
@@ -40,7 +51,21 @@ onLoad((query) => {
   uni.setNavigationBarTitle({ title: isCompletedView.value ? "检查记录" : "科室预约" });
   if (!departmentLocked.value) void prepareDepartmentSelection();
 });
-onShow(() => void loadPage());
+onShow(() => {
+  nowTick.value = Date.now();
+  if (clockTimer) clearInterval(clockTimer);
+  clockTimer = setInterval(tickQueueClock, 1000);
+  void loadPage();
+});
+onHide(() => { if (clockTimer) clearInterval(clockTimer); clockTimer = undefined; });
+
+function tickQueueClock() {
+  nowTick.value = Date.now();
+  const deadline = currentCalled.value?.callDeadline;
+  if (!deadline || nowTick.value < Date.parse(deadline) || nowTick.value - lastExpiredRefreshAt < 2000) return;
+  lastExpiredRefreshAt = nowTick.value;
+  void loadPage();
+}
 
 async function prepareDepartmentSelection() {
   try {
@@ -159,7 +184,7 @@ function bookingAddress(value: PatientBooking) { return `${value.building} · ${
     <template v-else-if="selectedRoomId">
       <view class="current-panel" :class="{ 'current-panel--called': currentCalled && !currentExamination }">
         <text class="section-label">{{ currentExamination ? '当前检查' : currentCalled ? '当前叫号' : '房间状态' }}</text>
-        <template v-if="currentBooking"><view class="card-heading"><text class="current-name">{{ currentBooking.patientDisplayName }}</text><text class="current-number">{{ currentBooking.queueNumber }} 号</text></view><text class="project">{{ currentBooking.itemName }} · {{ currentBooking.patientPhoneMasked }}</text><button v-if="isToday && currentCalled" class="primary" :disabled="Boolean(pendingId)" @tap="startExamination(currentCalled)">确认患者到场并开始检查</button><button v-if="isToday && currentExamination" class="primary" :disabled="Boolean(pendingId)" @tap="endExamination(currentExamination)">结束本次检查</button></template>
+        <template v-if="currentBooking"><view class="card-heading"><text class="current-name">{{ currentBooking.patientDisplayName }}</text><text class="current-number">{{ currentBooking.queueNumber }} 号</text></view><text class="project">{{ currentBooking.itemName }} · {{ currentBooking.patientPhoneMasked }}</text><text v-if="currentCalled" class="call-hint">{{ currentCallHint }}</text><button v-if="isToday && currentCalled" class="primary" :disabled="Boolean(pendingId) || currentCallExpired" @tap="startExamination(currentCalled)">确认患者到场并开始检查</button><button v-if="isToday && currentExamination" class="primary" :disabled="Boolean(pendingId)" @tap="endExamination(currentExamination)">结束本次检查</button></template>
         <text v-else class="idle">当前没有正在叫号或检查的患者</text>
       </view>
       <view class="queue-section"><view class="section-heading"><view><text class="section-title">候检队列</text><text class="section-count">{{ queuedBookings.length }} 人</text></view><button v-if="isToday" class="call-button" :disabled="Boolean(currentBooking) || !queuedBookings.length || Boolean(pendingId)" @tap="callNext">叫下一位</button></view><view v-if="!queuedBookings.length" class="empty">暂无已报到患者</view><view v-for="booking in queuedBookings" :key="booking.bookingId" class="queue-row" @tap="openBooking(booking)"><text class="ticket">{{ booking.queueNumber }}</text><view class="queue-person"><text>{{ booking.patientDisplayName }}</text><text>{{ booking.itemName }} · {{ booking.patientPhoneMasked }}</text></view><text class="attempts">{{ booking.callAttempts ? `已叫 ${booking.callAttempts} 次` : '等待叫号' }}</text></view></view>
@@ -170,5 +195,5 @@ function bookingAddress(value: PatientBooking) { return `${value.building} · ${
 </template>
 
 <style scoped>
-button::after{display:none}.page{min-height:100vh;padding:22rpx 22rpx calc(32rpx + env(safe-area-inset-bottom));box-sizing:border-box;background:#f3f5f8;color:#263348}.summary,.search,.date-bar,.current-panel,.queue-section,.record,.state{background:#fff;border:1rpx solid #e1e6ed;border-radius:18rpx}.summary{display:flex;align-items:center;justify-content:space-between;padding:24rpx}.summary__title,.summary__minor,.project,.line,.section-label,.idle{display:block}.summary__title{font-size:28rpx;font-weight:700}.summary__minor{margin-top:7rpx;color:#8995a5;font-size:19rpx}.summary__actions{display:flex;gap:10rpx}.summary button,.search button{width:auto;margin:0;padding:0 20rpx;color:#247eb7;font-size:20rpx;line-height:56rpx;background:#edf6fb;border-radius:28rpx}.search{display:grid;grid-template-columns:1fr auto;gap:12rpx;margin-top:16rpx;padding:14rpx}.search input{height:60rpx;padding:0 18rpx;font-size:21rpx;background:#f3f6f9;border-radius:14rpx}.date-bar{display:flex;align-items:center;gap:18rpx;margin-top:16rpx;padding:20rpx 24rpx;font-size:21rpx}.date-value{color:#2188c7;font-weight:650}.readonly{margin-left:auto;color:#9aa5b3;font-size:18rpx}.rooms{margin:16rpx 0;white-space:nowrap}.room-row{display:inline-flex;gap:12rpx}.room-chip{padding:18rpx 22rpx;color:#68778a;font-size:20rpx;background:#fff;border:1rpx solid #dfe6ee;border-radius:16rpx}.room-chip--active{color:#fff;background:#2188c7;border-color:#2188c7}.state{margin-top:18rpx;padding:30rpx;color:#8490a0;font-size:22rpx;text-align:center}.state--error{color:#bd4d5c}.current-panel{padding:26rpx;border-left:7rpx solid #22a276}.current-panel--called{border-left-color:#2188c7;background:#f7fcff}.section-label{color:#8190a3;font-size:19rpx}.card-heading,.section-heading,.waiting-row{display:flex;align-items:center;justify-content:space-between}.current-name{margin-top:12rpx;font-size:34rpx;font-weight:750}.current-number{color:#2188c7;font-size:28rpx;font-weight:750}.project{margin-top:13rpx;color:#627188;font-size:22rpx}.idle{margin-top:16rpx;color:#8995a5;font-size:22rpx}.primary,.call-button{margin:24rpx 0 0;padding:0;color:#fff;font-size:22rpx;line-height:68rpx;background:#2188c7;border-radius:34rpx}.queue-section{margin-top:18rpx;padding:24rpx}.section-title{font-size:26rpx;font-weight:700}.section-count{margin-left:10rpx;color:#8090a3;font-size:20rpx}.call-button{width:auto;margin:0;padding:0 22rpx;line-height:58rpx}.call-button[disabled]{color:#9aa6b4;background:#edf1f5}.empty{padding:34rpx 0 18rpx;color:#9aa5b3;font-size:21rpx;text-align:center}.queue-row,.waiting-row{margin-top:16rpx;padding:18rpx;background:#f7f9fb;border-radius:14rpx}.queue-row{display:flex;align-items:center;gap:16rpx}.ticket{display:flex;align-items:center;justify-content:center;width:58rpx;height:58rpx;color:#fff;font-size:24rpx;font-weight:700;background:#2188c7;border-radius:50%}.queue-person{flex:1}.queue-person text{display:block;font-size:23rpx}.queue-person text+text{margin-top:6rpx;color:#8190a3;font-size:18rpx}.attempts,.status{color:#247eb7;font-size:18rpx}.patient{font-size:25rpx;font-weight:700}.line{margin-top:8rpx;color:#7d8999;font-size:20rpx}.record{margin-top:16rpx;padding:24rpx}.record .project{color:#344157;font-weight:650}
+button::after{display:none}.page{min-height:100vh;padding:22rpx 22rpx calc(32rpx + env(safe-area-inset-bottom));box-sizing:border-box;background:#f3f5f8;color:#263348}.summary,.search,.date-bar,.current-panel,.queue-section,.record,.state{background:#fff;border:1rpx solid #e1e6ed;border-radius:18rpx}.summary{display:flex;align-items:center;justify-content:space-between;padding:24rpx}.summary__title,.summary__minor,.project,.line,.section-label,.idle,.call-hint{display:block}.summary__title{font-size:28rpx;font-weight:700}.summary__minor{margin-top:7rpx;color:#8995a5;font-size:19rpx}.summary__actions{display:flex;gap:10rpx}.summary button,.search button{width:auto;margin:0;padding:0 20rpx;color:#247eb7;font-size:20rpx;line-height:56rpx;background:#edf6fb;border-radius:28rpx}.search{display:grid;grid-template-columns:1fr auto;gap:12rpx;margin-top:16rpx;padding:14rpx}.search input{height:60rpx;padding:0 18rpx;font-size:21rpx;background:#f3f6f9;border-radius:14rpx}.date-bar{display:flex;align-items:center;gap:18rpx;margin-top:16rpx;padding:20rpx 24rpx;font-size:21rpx}.date-value{color:#2188c7;font-weight:650}.readonly{margin-left:auto;color:#9aa5b3;font-size:18rpx}.rooms{margin:16rpx 0;white-space:nowrap}.room-row{display:inline-flex;gap:12rpx}.room-chip{padding:18rpx 22rpx;color:#68778a;font-size:20rpx;background:#fff;border:1rpx solid #dfe6ee;border-radius:16rpx}.room-chip--active{color:#fff;background:#2188c7;border-color:#2188c7}.state{margin-top:18rpx;padding:30rpx;color:#8490a0;font-size:22rpx;text-align:center}.state--error{color:#bd4d5c}.current-panel{padding:26rpx;border-left:7rpx solid #22a276}.current-panel--called{border-left-color:#2188c7;background:#f7fcff}.section-label{color:#8190a3;font-size:19rpx}.card-heading,.section-heading,.waiting-row{display:flex;align-items:center;justify-content:space-between}.current-name{margin-top:12rpx;font-size:34rpx;font-weight:750}.current-number{color:#2188c7;font-size:28rpx;font-weight:750}.project{margin-top:13rpx;color:#627188;font-size:22rpx}.call-hint{margin-top:12rpx;color:#247eb7;font-size:20rpx}.idle{margin-top:16rpx;color:#8995a5;font-size:22rpx}.primary,.call-button{margin:24rpx 0 0;padding:0;color:#fff;font-size:22rpx;line-height:68rpx;background:#2188c7;border-radius:34rpx}.primary[disabled]{color:#9aa6b4;background:#edf1f5}.queue-section{margin-top:18rpx;padding:24rpx}.section-title{font-size:26rpx;font-weight:700}.section-count{margin-left:10rpx;color:#8090a3;font-size:20rpx}.call-button{width:auto;margin:0;padding:0 22rpx;line-height:58rpx}.call-button[disabled]{color:#9aa6b4;background:#edf1f5}.empty{padding:34rpx 0 18rpx;color:#9aa5b3;font-size:21rpx;text-align:center}.queue-row,.waiting-row{margin-top:16rpx;padding:18rpx;background:#f7f9fb;border-radius:14rpx}.queue-row{display:flex;align-items:center;gap:16rpx}.ticket{display:flex;align-items:center;justify-content:center;width:58rpx;height:58rpx;color:#fff;font-size:24rpx;font-weight:700;background:#2188c7;border-radius:50%}.queue-person{flex:1}.queue-person text{display:block;font-size:23rpx}.queue-person text+text{margin-top:6rpx;color:#8190a3;font-size:18rpx}.attempts,.status{color:#247eb7;font-size:18rpx}.patient{font-size:25rpx;font-weight:700}.line{margin-top:8rpx;color:#7d8999;font-size:20rpx}.record{margin-top:16rpx;padding:24rpx}.record .project{color:#344157;font-weight:650}
 </style>

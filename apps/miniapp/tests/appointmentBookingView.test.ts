@@ -30,4 +30,14 @@ describe("patient appointment booking view", () => {
     expect(source).not.toContain(">院区可切换</text>");
     expect(source).not.toContain("grid-template-columns:190rpx 238rpx minmax(0,1fr)");
   });
+
+  it("refreshes the patient booking state after a call deadline expires", () => {
+    const source = readFileSync(
+      new URL("../src/pages/profile/appointments/index.vue", import.meta.url),
+      "utf8",
+    );
+    expect(source).toContain("setInterval(tickBookingClock, 1000)");
+    expect(source).toContain("hasExpiredCall");
+    expect(source).toContain("void loadBookings()");
+  });
 });
