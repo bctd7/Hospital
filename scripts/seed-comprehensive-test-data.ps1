@@ -1,3 +1,7 @@
+param(
+    [switch]$Reset
+)
+
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
@@ -7,6 +11,56 @@ Import-ProjectEnvironment -RepositoryRoot $repositoryRoot -Override
 
 if ((Get-RequiredEnvironmentValue -Name "APP_ENV") -ne "local") {
     throw "Comprehensive test data may only be loaded in APP_ENV=local."
+}
+
+$composeFile = Join-Path $repositoryRoot "deploy/compose/docker-compose.yml"
+$environmentFile = Join-Path $repositoryRoot ".env"
+
+if ($Reset) {
+    & docker compose --env-file $environmentFile -f $composeFile up -d mysql redis
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to start MySQL before resetting comprehensive test data."
+    }
+    $ready = $false
+    for ($attempt = 1; $attempt -le 30; $attempt++) {
+        & docker compose --env-file $environmentFile -f $composeFile exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysqladmin ping --protocol=socket -uroot --silent' *> $null
+        if ($LASTEXITCODE -eq 0) {
+            $ready = $true
+            break
+        }
+        Start-Sleep -Seconds 2
+    }
+    if (-not $ready) {
+        throw "MySQL did not become ready before resetting comprehensive test data."
+    }
+    $redisReady = $false
+    for ($attempt = 1; $attempt -le 30; $attempt++) {
+        & docker compose --env-file $environmentFile -f $composeFile exec -T redis sh -c 'redis-cli -a "$REDIS_PASSWORD" ping 2>/dev/null' *> $null
+        if ($LASTEXITCODE -eq 0) {
+            $redisReady = $true
+            break
+        }
+        Start-Sleep -Seconds 1
+    }
+    if (-not $redisReady) {
+        throw "Redis did not become ready before resetting comprehensive test data."
+    }
+    & docker compose --env-file $environmentFile -f $composeFile exec -T redis sh -c 'redis-cli -a "$REDIS_PASSWORD" FLUSHDB 2>/dev/null' | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to clear local sessions, authorization versions, and Appointment caches."
+    }
+    $dropSQL = @"
+DROP DATABASE IF EXISTS hospital_appointment;
+DROP DATABASE IF EXISTS hospital_identity;
+"@
+    $dropSQL | & docker compose --env-file $environmentFile -f $composeFile exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --protocol=socket -uroot'
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to reset local Identity and Appointment databases."
+    }
+    & (Join-Path $PSScriptRoot "db-bootstrap-local.ps1")
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to rebuild the latest local database schema."
+    }
 }
 
 $lookupKey = [Convert]::FromBase64String((Get-RequiredEnvironmentValue -Name "IDENTITY_PHONE_LOOKUP_KEY_BASE64"))
@@ -59,15 +113,29 @@ $variables = foreach ($entry in $phones.GetEnumerator()) {
 
 $seedFile = Join-Path $PSScriptRoot "seed-comprehensive-test-data.sql"
 $sql = ($variables -join "`n") + "`n" + (Get-Content -Raw -LiteralPath $seedFile -Encoding UTF8)
-$composeFile = Join-Path $repositoryRoot "deploy/compose/docker-compose.yml"
-$environmentFile = Join-Path $repositoryRoot ".env"
-
 $sql | & docker compose --env-file $environmentFile -f $composeFile exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --protocol=socket -uroot --default-character-set=utf8mb4'
 if ($LASTEXITCODE -ne 0) {
     throw "Failed to load comprehensive test data."
 }
 
+$verificationSQL = @"
+SELECT IF(
+  (SELECT COUNT(*) FROM hospital_identity.identity_organization_units WHERE unit_type = 'campus' AND status = 'active') >= 2
+  AND (SELECT COUNT(*) FROM hospital_identity.identity_organization_units WHERE unit_type = 'department' AND status = 'active') >= 4
+  AND (SELECT COUNT(DISTINCT status) FROM hospital_appointment.appointment_bookings) = 5
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings WHERE status = 'canceled') >= 1
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings WHERE status = 'in_progress' AND service_date < CURDATE()) >= 1
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_report_versions WHERE version_kind = 'correction' AND status = 'published') >= 1
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_message_reads) >= 1,
+  'ready', 'incomplete');
+"@
+$verification = $verificationSQL | & docker compose --env-file $environmentFile -f $composeFile exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --protocol=socket -uroot -N'
+if ($LASTEXITCODE -ne 0 -or ($verification | Select-Object -Last 1).Trim() -ne "ready") {
+    throw "Comprehensive test data verification failed."
+}
+
 Write-Output "Comprehensive local test data loaded."
+Write-Output "Reset mode: $Reset"
 Write-Output "Local administrator: 13482154556"
 Write-Output "Radiology doctor: 13800000001"
 Write-Output "Ultrasound doctor: 13800000002"

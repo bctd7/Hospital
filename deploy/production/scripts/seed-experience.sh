@@ -60,6 +60,7 @@ SELECT CONCAT('\''organization_units='\'', COUNT(*)) FROM hospital_identity.iden
 SELECT CONCAT('\''rooms='\'', COUNT(*)) FROM hospital_appointment.appointment_rooms;
 SELECT CONCAT('\''items='\'', COUNT(*)) FROM hospital_appointment.appointment_examination_items;
 SELECT CONCAT('\''bookings='\'', COUNT(*)) FROM hospital_appointment.appointment_bookings;
+SELECT CONCAT('\''booking_statuses='\'', GROUP_CONCAT(status, '\''='\'', total ORDER BY status SEPARATOR '\'','\'')) FROM (SELECT status, COUNT(*) total FROM hospital_appointment.appointment_bookings GROUP BY status) statuses;
 SELECT CONCAT('\''reports='\'', COUNT(*)) FROM hospital_appointment.appointment_examination_reports;"'
 
 echo "Experience test data loaded. Bootstrap administrator phone numbers were preserved from .env.production."
