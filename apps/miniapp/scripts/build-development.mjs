@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -47,6 +47,13 @@ const child = spawn(
 const outputRoot = join(appRoot, "dist", "dev", "mp-weixin");
 const environmentPath = join(outputRoot, "config", "environment.js");
 const clientPath = join(outputRoot, "api", "client.js");
+const requiredOutputPaths = [
+  join(outputRoot, "app.js"),
+  join(outputRoot, "app.json"),
+  join(outputRoot, "app.wxss"),
+  join(outputRoot, "project.config.json"),
+];
+const buildStartedAt = Date.now();
 let completed = false;
 let buildSignaled = false;
 let terminating = false;
@@ -57,26 +64,78 @@ const timeout = setTimeout(() => {
   console.error("Development miniapp build timed out.");
 }, 120_000);
 
+function outputFiles(directory) {
+  if (!existsSync(directory)) return [];
+  return readdirSync(directory, { withFileTypes: true })
+    .flatMap((entry) => {
+      const path = join(directory, entry.name);
+      return entry.isDirectory() ? outputFiles(path) : [path];
+    })
+    .sort();
+}
+
+function validJsonOutput(files) {
+  try {
+    for (const path of files.filter((value) => value.endsWith(".json"))) {
+      JSON.parse(readFileSync(path, "utf8"));
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function completeOutputState() {
+  if (
+    !existsSync(environmentPath) ||
+    !existsSync(clientPath) ||
+    requiredOutputPaths.some((path) => !existsSync(path) || statSync(path).size === 0)
+  ) {
+    return "";
+  }
+
+  const files = outputFiles(outputRoot);
+  if (!files.length || !validJsonOutput(files)) return "";
+  const environmentOutput = readFileSync(environmentPath, "utf8");
+  const clientOutput = readFileSync(clientPath, "utf8");
+  if (
+    !environmentOutput.includes(developmentEnv.VITE_API_BASE_URL.trim()) ||
+    !clientOutput.includes("directRequest") ||
+    !files.some((path) => statSync(path).mtimeMs >= buildStartedAt)
+  ) {
+    return "";
+  }
+
+  return files
+    .map((path) => {
+      const stats = statSync(path);
+      return `${path}:${stats.size}:${stats.mtimeMs}`;
+    })
+    .join("\n");
+}
+
 function forward(chunk, destination) {
   const value = chunk.toString();
   destination.write(value);
   if (!buildSignaled && value.includes("DONE  Build complete.")) {
     buildSignaled = true;
     const outputDeadline = Date.now() + 10_000;
+    let lastOutputState = "";
+    let stableSince = 0;
     const outputPoll = setInterval(() => {
-      if (existsSync(environmentPath) && existsSync(clientPath)) {
-        const environmentOutput = readFileSync(environmentPath, "utf8");
-        const clientOutput = readFileSync(clientPath, "utf8");
-        const outputIsComplete =
-          environmentOutput.includes(developmentEnv.VITE_API_BASE_URL.trim()) &&
-          clientOutput.includes("directRequest");
-        if (outputIsComplete) {
+      const outputState = completeOutputState();
+      if (outputState && outputState === lastOutputState) {
+        if (stableSince === 0) stableSince = Date.now();
+        if (Date.now() - stableSince >= 1_000) {
           clearInterval(outputPoll);
           completed = true;
           terminating = true;
           child.kill();
           return;
         }
+      } else {
+        lastOutputState = outputState;
+        stableSince = 0;
       }
       if (Date.now() >= outputDeadline) {
         clearInterval(outputPoll);
