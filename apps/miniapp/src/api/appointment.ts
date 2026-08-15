@@ -25,6 +25,10 @@ import type {
   PatientBooking,
   StaffBookingApi,
   PatientBookingStatus,
+  AppointmentMessage,
+  AppointmentMessageApi,
+  AppointmentMessagePage,
+  AppointmentMessageType,
 } from "@/types/appointment";
 
 interface ItemResponse {
@@ -147,6 +151,26 @@ interface BookingResponse {
   completed_at?: string;
   completed_by?: string;
   completed_by_display_name?: string;
+}
+
+interface MessageResponse {
+  message_key: string;
+  message_type: AppointmentMessageType;
+  occurred_at: string;
+  read_at?: string;
+  booking: BookingResponse;
+  report_id?: string;
+  report_version_id?: string;
+  report_version_no?: number;
+}
+
+interface ListMessagesResponse {
+  messages: MessageResponse[] | null;
+  page: number;
+  page_size: number;
+  total: number;
+  unread_count: number;
+  department_unread_counts?: Array<{ department_id: string; unread_count: number }>;
 }
 
 interface ReportContentResponse {
@@ -384,6 +408,29 @@ const booking = (value: BookingResponse): PatientBooking => ({
   completedByDisplayName: value.completed_by_display_name,
 });
 
+const appointmentMessage = (value: MessageResponse): AppointmentMessage => ({
+  messageKey: value.message_key,
+  messageType: value.message_type,
+  occurredAt: value.occurred_at,
+  readAt: value.read_at,
+  booking: booking(value.booking),
+  reportId: value.report_id,
+  reportVersionId: value.report_version_id,
+  reportVersionNo: value.report_version_no,
+});
+
+const appointmentMessagePage = (value: ListMessagesResponse): AppointmentMessagePage => ({
+  items: arrayOrEmpty(value.messages).map(appointmentMessage),
+  page: value.page,
+  pageSize: value.page_size,
+  total: value.total,
+  unreadCount: value.unread_count,
+  departmentUnreadCounts: arrayOrEmpty(value.department_unread_counts).map((current) => ({
+    departmentId: current.department_id,
+    unreadCount: current.unread_count,
+  })),
+});
+
 const retryOperationIds = new Map<string, string>();
 
 async function mutation<T>(
@@ -415,6 +462,42 @@ function page<T>(values: T[], value: { page: number; page_size: number; total: n
 function arrayOrEmpty<T>(values: T[] | null | undefined): T[] {
   return Array.isArray(values) ? values : [];
 }
+
+export const appointmentMessageApi: AppointmentMessageApi = {
+  async listMine(currentPage = 1, pageSize = 50) {
+    const value = await request<ListMessagesResponse>({
+      path: queryPath("/api/v1/appointment/messages", { page: currentPage, page_size: pageSize }),
+      authenticated: true,
+    });
+    return appointmentMessagePage(value);
+  },
+
+  async markMineRead(messageKey) {
+    return appointmentMessage(await request<MessageResponse>({
+      path: "/api/v1/appointment/messages/read",
+      method: "PUT",
+      authenticated: true,
+      data: { message_key: messageKey },
+    }));
+  },
+
+  async listDepartment(departmentId, currentPage = 1, pageSize = 50) {
+    const value = await request<ListMessagesResponse>({
+      path: queryPath("/api/v1/admin/appointment/messages", { department_id: departmentId, page: currentPage, page_size: pageSize }),
+      authenticated: true,
+    });
+    return appointmentMessagePage(value);
+  },
+
+  async markDepartmentRead(departmentId, messageKey) {
+    return appointmentMessage(await request<MessageResponse>({
+      path: queryPath("/api/v1/admin/appointment/messages/read", { department_id: departmentId }),
+      method: "PUT",
+      authenticated: true,
+      data: { message_key: messageKey },
+    }));
+  },
+};
 
 export const appointmentManagementApi: AppointmentManagementApi = {
   async listItems(departmentId, status, currentPage = 1, pageSize = 50) {

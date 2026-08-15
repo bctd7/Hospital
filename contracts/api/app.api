@@ -20,7 +20,6 @@ type HealthResponse {
 	Service string `json:"service"`
 	Version string `json:"version"`
 }
-
 @server (
 	prefix: /api/v1
 	group:  system

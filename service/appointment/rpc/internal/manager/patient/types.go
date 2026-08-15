@@ -30,6 +30,7 @@ const (
 	StatusActive             = common.StatusActive
 	BookingStatusConfirmed   = common.BookingStatusConfirmed
 	BookingStatusNoShow      = common.BookingStatusNoShow
+	BookingStatusCanceled    = common.BookingStatusCanceled
 	BookingListViewActive    = common.BookingListViewActive
 	BookingListViewCompleted = common.BookingListViewCompleted
 	ReportStatusPublished    = common.ReportStatusPublished

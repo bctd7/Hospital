@@ -60,7 +60,7 @@ func TestBookingCapacityAllowsOnlyOneConcurrentWinner(t *testing.T) {
 	defer cleanupBookingIntegrationData(t, store, ctx)
 	seedBookingIntegrationData(t, store, ctx, weekday, session, openTime, cutoffTime, closeTime)
 
-	manager, err := patientmanager.NewManager(store, store, store, nil)
+	manager, err := patientmanager.NewManager(store, store, store, store, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -171,11 +171,11 @@ func TestPatientSessionClaimBlocksMultipleRoomsUntilExaminationStarts(t *testing
 	defer cleanupBookingIntegrationData(t, store, ctx)
 	seedBookingIntegrationData(t, store, ctx, weekday, session, openTime, cutoffTime, closeTime)
 
-	patientManager, err := patientmanager.NewManager(store, store, store, nil)
+	patientManager, err := patientmanager.NewManager(store, store, store, store, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	staffManager, err := staffmanager.NewManager(store, store, store, store, nil)
+	staffManager, err := staffmanager.NewManager(store, store, store, store, store, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -265,11 +265,11 @@ func TestWeeklyQuotaIsNotReturnedAfterBookingDeletion(t *testing.T) {
 	defer cleanupBookingIntegrationData(t, store, ctx)
 	seedBookingIntegrationData(t, store, ctx, weekday, session, openTime, cutoffTime, closeTime)
 
-	patientManager, err := patientmanager.NewManager(store, store, store, nil)
+	patientManager, err := patientmanager.NewManager(store, store, store, store, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	staffManager, err := staffmanager.NewManager(store, store, store, store, nil)
+	staffManager, err := staffmanager.NewManager(store, store, store, store, store, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -340,7 +340,7 @@ func TestExpiredConfirmedBookingBecomesNoShow(t *testing.T) {
 	defer cleanupBookingIntegrationData(t, store, ctx)
 	seedBookingIntegrationData(t, store, ctx, weekday, session, openTime, cutoffTime, closeTime)
 
-	patientManager, err := patientmanager.NewManager(store, store, store, nil)
+	patientManager, err := patientmanager.NewManager(store, store, store, store, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -418,11 +418,11 @@ func TestExaminationReportPublishAndCorrectionPreserveHistory(t *testing.T) {
 	defer cleanupBookingIntegrationData(t, store, ctx)
 	seedBookingIntegrationData(t, store, ctx, weekday, session, openTime, cutoffTime, closeTime)
 
-	patientManager, err := patientmanager.NewManager(store, store, store, nil)
+	patientManager, err := patientmanager.NewManager(store, store, store, store, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	staffManager, err := staffmanager.NewManager(store, store, store, store, nil)
+	staffManager, err := staffmanager.NewManager(store, store, store, store, store, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

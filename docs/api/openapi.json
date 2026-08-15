@@ -2151,6 +2151,471 @@
         }
       }
     },
+    "/api/v1/admin/appointment/messages": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listMessages",
+        "operationId": "appointmentbookingsListMessages",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "department_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "department_unread_counts": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "department_id",
+                      "unread_count"
+                    ],
+                    "properties": {
+                      "department_id": {
+                        "type": "string"
+                      },
+                      "unread_count": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "messages": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "message_key",
+                      "message_type",
+                      "occurred_at",
+                      "read_at",
+                      "booking",
+                      "report_id",
+                      "report_version_id",
+                      "report_version_no"
+                    ],
+                    "properties": {
+                      "booking": {
+                        "type": "object",
+                        "required": [
+                          "booking_id",
+                          "patient_account_id",
+                          "patient_display_name",
+                          "patient_phone_masked",
+                          "department_id",
+                          "department_name",
+                          "item_id",
+                          "item_name",
+                          "room_id",
+                          "room_display_name",
+                          "campus_id",
+                          "campus_name",
+                          "service_date",
+                          "session",
+                          "status",
+                          "room_open_time",
+                          "room_close_time",
+                          "item_start_time",
+                          "item_end_time",
+                          "booking_cutoff_time",
+                          "version",
+                          "created_at",
+                          "updated_at",
+                          "started_at",
+                          "started_by",
+                          "started_by_display_name",
+                          "completed_at",
+                          "completed_by",
+                          "completed_by_display_name",
+                          "building",
+                          "floor_number",
+                          "room_number"
+                        ],
+                        "properties": {
+                          "booking_cutoff_time": {
+                            "type": "string"
+                          },
+                          "booking_id": {
+                            "type": "string"
+                          },
+                          "building": {
+                            "type": "string"
+                          },
+                          "campus_id": {
+                            "type": "string"
+                          },
+                          "campus_name": {
+                            "type": "string"
+                          },
+                          "completed_at": {
+                            "type": "string"
+                          },
+                          "completed_by": {
+                            "type": "string"
+                          },
+                          "completed_by_display_name": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "department_id": {
+                            "type": "string"
+                          },
+                          "department_name": {
+                            "type": "string"
+                          },
+                          "floor_number": {
+                            "type": "integer"
+                          },
+                          "item_end_time": {
+                            "type": "string"
+                          },
+                          "item_id": {
+                            "type": "string"
+                          },
+                          "item_name": {
+                            "type": "string"
+                          },
+                          "item_start_time": {
+                            "type": "string"
+                          },
+                          "patient_account_id": {
+                            "type": "string"
+                          },
+                          "patient_display_name": {
+                            "type": "string"
+                          },
+                          "patient_phone_masked": {
+                            "type": "string"
+                          },
+                          "room_close_time": {
+                            "type": "string"
+                          },
+                          "room_display_name": {
+                            "type": "string"
+                          },
+                          "room_id": {
+                            "type": "string"
+                          },
+                          "room_number": {
+                            "type": "string"
+                          },
+                          "room_open_time": {
+                            "type": "string"
+                          },
+                          "service_date": {
+                            "type": "string"
+                          },
+                          "session": {
+                            "type": "string"
+                          },
+                          "started_at": {
+                            "type": "string"
+                          },
+                          "started_by": {
+                            "type": "string"
+                          },
+                          "started_by_display_name": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "integer"
+                          }
+                        }
+                      },
+                      "message_key": {
+                        "type": "string"
+                      },
+                      "message_type": {
+                        "type": "string"
+                      },
+                      "occurred_at": {
+                        "type": "string"
+                      },
+                      "read_at": {
+                        "type": "string"
+                      },
+                      "report_id": {
+                        "type": "string"
+                      },
+                      "report_version_id": {
+                        "type": "string"
+                      },
+                      "report_version_no": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "integer"
+                },
+                "page_size": {
+                  "type": "integer"
+                },
+                "total": {
+                  "type": "integer"
+                },
+                "unread_count": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/appointment/messages/read": {
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "markMessageRead",
+        "operationId": "appointmentbookingsMarkMessageRead",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "department_id",
+            "in": "formData",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "message_key"
+              ],
+              "properties": {
+                "message_key": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "booking": {
+                  "type": "object",
+                  "required": [
+                    "booking_id",
+                    "patient_account_id",
+                    "patient_display_name",
+                    "patient_phone_masked",
+                    "department_id",
+                    "department_name",
+                    "item_id",
+                    "item_name",
+                    "room_id",
+                    "room_display_name",
+                    "campus_id",
+                    "campus_name",
+                    "service_date",
+                    "session",
+                    "status",
+                    "room_open_time",
+                    "room_close_time",
+                    "item_start_time",
+                    "item_end_time",
+                    "booking_cutoff_time",
+                    "version",
+                    "created_at",
+                    "updated_at",
+                    "started_at",
+                    "started_by",
+                    "started_by_display_name",
+                    "completed_at",
+                    "completed_by",
+                    "completed_by_display_name",
+                    "building",
+                    "floor_number",
+                    "room_number"
+                  ],
+                  "properties": {
+                    "booking_cutoff_time": {
+                      "type": "string"
+                    },
+                    "booking_id": {
+                      "type": "string"
+                    },
+                    "building": {
+                      "type": "string"
+                    },
+                    "campus_id": {
+                      "type": "string"
+                    },
+                    "campus_name": {
+                      "type": "string"
+                    },
+                    "completed_at": {
+                      "type": "string"
+                    },
+                    "completed_by": {
+                      "type": "string"
+                    },
+                    "completed_by_display_name": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "department_id": {
+                      "type": "string"
+                    },
+                    "department_name": {
+                      "type": "string"
+                    },
+                    "floor_number": {
+                      "type": "integer"
+                    },
+                    "item_end_time": {
+                      "type": "string"
+                    },
+                    "item_id": {
+                      "type": "string"
+                    },
+                    "item_name": {
+                      "type": "string"
+                    },
+                    "item_start_time": {
+                      "type": "string"
+                    },
+                    "patient_account_id": {
+                      "type": "string"
+                    },
+                    "patient_display_name": {
+                      "type": "string"
+                    },
+                    "patient_phone_masked": {
+                      "type": "string"
+                    },
+                    "room_close_time": {
+                      "type": "string"
+                    },
+                    "room_display_name": {
+                      "type": "string"
+                    },
+                    "room_id": {
+                      "type": "string"
+                    },
+                    "room_number": {
+                      "type": "string"
+                    },
+                    "room_open_time": {
+                      "type": "string"
+                    },
+                    "service_date": {
+                      "type": "string"
+                    },
+                    "session": {
+                      "type": "string"
+                    },
+                    "started_at": {
+                      "type": "string"
+                    },
+                    "started_by": {
+                      "type": "string"
+                    },
+                    "started_by_display_name": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "message_key": {
+                  "type": "string"
+                },
+                "message_type": {
+                  "type": "string"
+                },
+                "occurred_at": {
+                  "type": "string"
+                },
+                "read_at": {
+                  "type": "string"
+                },
+                "report_id": {
+                  "type": "string"
+                },
+                "report_version_id": {
+                  "type": "string"
+                },
+                "report_version_no": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/admin/appointment/reports": {
       "get": {
         "security": [
@@ -6541,6 +7006,459 @@
         }
       }
     },
+    "/api/v1/appointment/messages": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "listMyMessages",
+        "operationId": "appointmentbookingsListMyMessages",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "example": 1,
+            "name": "page",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "example": 20,
+            "name": "page_size",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "department_unread_counts": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "department_id",
+                      "unread_count"
+                    ],
+                    "properties": {
+                      "department_id": {
+                        "type": "string"
+                      },
+                      "unread_count": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "messages": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "message_key",
+                      "message_type",
+                      "occurred_at",
+                      "read_at",
+                      "booking",
+                      "report_id",
+                      "report_version_id",
+                      "report_version_no"
+                    ],
+                    "properties": {
+                      "booking": {
+                        "type": "object",
+                        "required": [
+                          "booking_id",
+                          "patient_account_id",
+                          "patient_display_name",
+                          "patient_phone_masked",
+                          "department_id",
+                          "department_name",
+                          "item_id",
+                          "item_name",
+                          "room_id",
+                          "room_display_name",
+                          "campus_id",
+                          "campus_name",
+                          "service_date",
+                          "session",
+                          "status",
+                          "room_open_time",
+                          "room_close_time",
+                          "item_start_time",
+                          "item_end_time",
+                          "booking_cutoff_time",
+                          "version",
+                          "created_at",
+                          "updated_at",
+                          "started_at",
+                          "started_by",
+                          "started_by_display_name",
+                          "completed_at",
+                          "completed_by",
+                          "completed_by_display_name",
+                          "building",
+                          "floor_number",
+                          "room_number"
+                        ],
+                        "properties": {
+                          "booking_cutoff_time": {
+                            "type": "string"
+                          },
+                          "booking_id": {
+                            "type": "string"
+                          },
+                          "building": {
+                            "type": "string"
+                          },
+                          "campus_id": {
+                            "type": "string"
+                          },
+                          "campus_name": {
+                            "type": "string"
+                          },
+                          "completed_at": {
+                            "type": "string"
+                          },
+                          "completed_by": {
+                            "type": "string"
+                          },
+                          "completed_by_display_name": {
+                            "type": "string"
+                          },
+                          "created_at": {
+                            "type": "string"
+                          },
+                          "department_id": {
+                            "type": "string"
+                          },
+                          "department_name": {
+                            "type": "string"
+                          },
+                          "floor_number": {
+                            "type": "integer"
+                          },
+                          "item_end_time": {
+                            "type": "string"
+                          },
+                          "item_id": {
+                            "type": "string"
+                          },
+                          "item_name": {
+                            "type": "string"
+                          },
+                          "item_start_time": {
+                            "type": "string"
+                          },
+                          "patient_account_id": {
+                            "type": "string"
+                          },
+                          "patient_display_name": {
+                            "type": "string"
+                          },
+                          "patient_phone_masked": {
+                            "type": "string"
+                          },
+                          "room_close_time": {
+                            "type": "string"
+                          },
+                          "room_display_name": {
+                            "type": "string"
+                          },
+                          "room_id": {
+                            "type": "string"
+                          },
+                          "room_number": {
+                            "type": "string"
+                          },
+                          "room_open_time": {
+                            "type": "string"
+                          },
+                          "service_date": {
+                            "type": "string"
+                          },
+                          "session": {
+                            "type": "string"
+                          },
+                          "started_at": {
+                            "type": "string"
+                          },
+                          "started_by": {
+                            "type": "string"
+                          },
+                          "started_by_display_name": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          },
+                          "version": {
+                            "type": "integer"
+                          }
+                        }
+                      },
+                      "message_key": {
+                        "type": "string"
+                      },
+                      "message_type": {
+                        "type": "string"
+                      },
+                      "occurred_at": {
+                        "type": "string"
+                      },
+                      "read_at": {
+                        "type": "string"
+                      },
+                      "report_id": {
+                        "type": "string"
+                      },
+                      "report_version_id": {
+                        "type": "string"
+                      },
+                      "report_version_no": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                },
+                "page": {
+                  "type": "integer"
+                },
+                "page_size": {
+                  "type": "integer"
+                },
+                "total": {
+                  "type": "integer"
+                },
+                "unread_count": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/appointment/messages/read": {
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "schemes": [
+          "https"
+        ],
+        "summary": "markMyMessageRead",
+        "operationId": "appointmentbookingsMarkMyMessageRead",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": [
+                "message_key"
+              ],
+              "properties": {
+                "message_key": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "booking": {
+                  "type": "object",
+                  "required": [
+                    "booking_id",
+                    "patient_account_id",
+                    "patient_display_name",
+                    "patient_phone_masked",
+                    "department_id",
+                    "department_name",
+                    "item_id",
+                    "item_name",
+                    "room_id",
+                    "room_display_name",
+                    "campus_id",
+                    "campus_name",
+                    "service_date",
+                    "session",
+                    "status",
+                    "room_open_time",
+                    "room_close_time",
+                    "item_start_time",
+                    "item_end_time",
+                    "booking_cutoff_time",
+                    "version",
+                    "created_at",
+                    "updated_at",
+                    "started_at",
+                    "started_by",
+                    "started_by_display_name",
+                    "completed_at",
+                    "completed_by",
+                    "completed_by_display_name",
+                    "building",
+                    "floor_number",
+                    "room_number"
+                  ],
+                  "properties": {
+                    "booking_cutoff_time": {
+                      "type": "string"
+                    },
+                    "booking_id": {
+                      "type": "string"
+                    },
+                    "building": {
+                      "type": "string"
+                    },
+                    "campus_id": {
+                      "type": "string"
+                    },
+                    "campus_name": {
+                      "type": "string"
+                    },
+                    "completed_at": {
+                      "type": "string"
+                    },
+                    "completed_by": {
+                      "type": "string"
+                    },
+                    "completed_by_display_name": {
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "department_id": {
+                      "type": "string"
+                    },
+                    "department_name": {
+                      "type": "string"
+                    },
+                    "floor_number": {
+                      "type": "integer"
+                    },
+                    "item_end_time": {
+                      "type": "string"
+                    },
+                    "item_id": {
+                      "type": "string"
+                    },
+                    "item_name": {
+                      "type": "string"
+                    },
+                    "item_start_time": {
+                      "type": "string"
+                    },
+                    "patient_account_id": {
+                      "type": "string"
+                    },
+                    "patient_display_name": {
+                      "type": "string"
+                    },
+                    "patient_phone_masked": {
+                      "type": "string"
+                    },
+                    "room_close_time": {
+                      "type": "string"
+                    },
+                    "room_display_name": {
+                      "type": "string"
+                    },
+                    "room_id": {
+                      "type": "string"
+                    },
+                    "room_number": {
+                      "type": "string"
+                    },
+                    "room_open_time": {
+                      "type": "string"
+                    },
+                    "service_date": {
+                      "type": "string"
+                    },
+                    "session": {
+                      "type": "string"
+                    },
+                    "started_at": {
+                      "type": "string"
+                    },
+                    "started_by": {
+                      "type": "string"
+                    },
+                    "started_by_display_name": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "message_key": {
+                  "type": "string"
+                },
+                "message_type": {
+                  "type": "string"
+                },
+                "occurred_at": {
+                  "type": "string"
+                },
+                "read_at": {
+                  "type": "string"
+                },
+                "report_id": {
+                  "type": "string"
+                },
+                "report_version_id": {
+                  "type": "string"
+                },
+                "report_version_no": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/appointment/reports": {
       "get": {
         "security": [
@@ -7415,7 +8333,7 @@
       "in": "header"
     }
   },
-  "x-date": "2026-08-15 02:51:10",
+  "x-date": "2026-08-15 13:04:17",
   "x-description": "This is a goctl generated swagger file.",
   "x-github": "https://github.com/zeromicro/go-zero",
   "x-go-zero-doc": "https://go-zero.dev/",

@@ -287,7 +287,7 @@ CREATE TABLE appointment_bookings (
     CONSTRAINT chk_appointment_bookings_session
         CHECK (session IN ('morning', 'afternoon')),
     CONSTRAINT chk_appointment_bookings_status
-        CHECK (status IN ('confirmed', 'in_progress', 'completed', 'no_show')),
+        CHECK (status IN ('confirmed', 'in_progress', 'completed', 'no_show', 'canceled')),
     CONSTRAINT chk_appointment_bookings_room_time
         CHECK (room_open_time_snapshot < room_close_time_snapshot),
     CONSTRAINT chk_appointment_bookings_item_time
@@ -298,7 +298,7 @@ CREATE TABLE appointment_bookings (
             AND item_end_time_snapshot <= room_close_time_snapshot
         ),
     CONSTRAINT chk_appointment_bookings_lifecycle CHECK (
-        (status IN ('confirmed', 'no_show') AND started_at IS NULL AND started_by IS NULL
+        (status IN ('confirmed', 'no_show', 'canceled') AND started_at IS NULL AND started_by IS NULL
             AND completed_at IS NULL AND completed_by IS NULL)
         OR (status = 'in_progress' AND started_at IS NOT NULL AND started_by IS NOT NULL
             AND completed_at IS NULL AND completed_by IS NULL)
@@ -306,6 +306,15 @@ CREATE TABLE appointment_bookings (
             AND completed_at IS NOT NULL AND completed_by IS NOT NULL)
     ),
     CONSTRAINT chk_appointment_bookings_version CHECK (version > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 消息正文由预约与报告事实动态生成；这里只保存每个账号独立的已读游标。
+CREATE TABLE appointment_message_reads (
+    account_id  CHAR(36)     NOT NULL,
+    message_key VARCHAR(160) NOT NULL,
+    read_at     DATETIME(3)  NOT NULL,
+    PRIMARY KEY (account_id, message_key),
+    KEY idx_appointment_message_reads_account_time (account_id, read_at DESC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- A patient may hold only one not-yet-started booking in a concrete date/session.

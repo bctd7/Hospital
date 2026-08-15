@@ -23,5 +23,6 @@ type BookingTxStore interface {
 	GetBookingForUpdate(ctx context.Context, bookingID string) (Booking, error)
 	CreateBooking(ctx context.Context, booking Booking) error
 	MarkBookingNoShow(ctx context.Context, booking Booking, expectedVersion int64) error
+	// DeleteBooking 保留既有调用名称以兼容取消接口；持久化实现必须把预约标记为 canceled，而不是物理删除。
 	DeleteBooking(ctx context.Context, bookingID string) error
 }

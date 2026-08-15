@@ -281,6 +281,11 @@ type DepartmentSummaryResponse struct {
 	Version      int64  `json:"version"`
 }
 
+type DepartmentUnreadCountResponse struct {
+	DepartmentID string `json:"department_id"`
+	UnreadCount  int64  `json:"unread_count"`
+}
+
 type DirectoryDoctorPathRequest struct {
 	DepartmentID string `path:"departmentId"`
 	Page         int64  `form:"page,default=1"`
@@ -475,10 +480,30 @@ type ListItemWeeklyWindowsAPIResponse struct {
 	Windows []ItemWeeklyWindowResponse `json:"windows"`
 }
 
+type ListMessagesAPIRequest struct {
+	DepartmentID string `form:"department_id"`
+	Page         int64  `form:"page,default=1"`
+	PageSize     int64  `form:"page_size,default=20"`
+}
+
+type ListMessagesAPIResponse struct {
+	Messages               []MessageResponse               `json:"messages"`
+	Page                   int64                           `json:"page"`
+	PageSize               int64                           `json:"page_size"`
+	Total                  int64                           `json:"total"`
+	UnreadCount            int64                           `json:"unread_count"`
+	DepartmentUnreadCounts []DepartmentUnreadCountResponse `json:"department_unread_counts,omitempty"`
+}
+
 type ListMyBookingsAPIRequest struct {
 	Page     int64  `form:"page,default=1"`
 	PageSize int64  `form:"page_size,default=20"`
 	View     string `form:"view,default=active"`
+}
+
+type ListMyMessagesAPIRequest struct {
+	Page     int64 `form:"page,default=1"`
+	PageSize int64 `form:"page_size,default=20"`
 }
 
 type ListMyReportsAPIRequest struct {
@@ -523,6 +548,26 @@ type ListRoomExaminationItemsAPIResponse struct {
 
 type ListRoomWeeklyWindowsAPIResponse struct {
 	Windows []RoomWeeklyWindowResponse `json:"windows"`
+}
+
+type MarkMessageReadAPIRequest struct {
+	DepartmentID string `form:"department_id"`
+	MessageKey   string `json:"message_key"`
+}
+
+type MarkMyMessageReadAPIRequest struct {
+	MessageKey string `json:"message_key"`
+}
+
+type MessageResponse struct {
+	MessageKey      string          `json:"message_key"`
+	MessageType     string          `json:"message_type"`
+	OccurredAt      string          `json:"occurred_at"`
+	ReadAt          string          `json:"read_at,omitempty"`
+	Booking         BookingResponse `json:"booking"`
+	ReportID        string          `json:"report_id,omitempty"`
+	ReportVersionID string          `json:"report_version_id,omitempty"`
+	ReportVersionNo int64           `json:"report_version_no,omitempty"`
 }
 
 type OrganizationContextResponse struct {

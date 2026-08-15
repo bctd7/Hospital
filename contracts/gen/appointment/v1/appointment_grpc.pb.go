@@ -48,10 +48,14 @@ const (
 	AppointmentService_GetMyBooking_FullMethodName                        = "/hospital.appointment.v1.AppointmentService/GetMyBooking"
 	AppointmentService_ListMyBookings_FullMethodName                      = "/hospital.appointment.v1.AppointmentService/ListMyBookings"
 	AppointmentService_DeleteMyBooking_FullMethodName                     = "/hospital.appointment.v1.AppointmentService/DeleteMyBooking"
+	AppointmentService_ListMyMessages_FullMethodName                      = "/hospital.appointment.v1.AppointmentService/ListMyMessages"
+	AppointmentService_MarkMyMessageRead_FullMethodName                   = "/hospital.appointment.v1.AppointmentService/MarkMyMessageRead"
 	AppointmentService_GetBooking_FullMethodName                          = "/hospital.appointment.v1.AppointmentService/GetBooking"
 	AppointmentService_ListBookings_FullMethodName                        = "/hospital.appointment.v1.AppointmentService/ListBookings"
 	AppointmentService_StartExamination_FullMethodName                    = "/hospital.appointment.v1.AppointmentService/StartExamination"
 	AppointmentService_DeleteBooking_FullMethodName                       = "/hospital.appointment.v1.AppointmentService/DeleteBooking"
+	AppointmentService_ListMessages_FullMethodName                        = "/hospital.appointment.v1.AppointmentService/ListMessages"
+	AppointmentService_MarkMessageRead_FullMethodName                     = "/hospital.appointment.v1.AppointmentService/MarkMessageRead"
 	AppointmentService_SaveExaminationReportDraft_FullMethodName          = "/hospital.appointment.v1.AppointmentService/SaveExaminationReportDraft"
 	AppointmentService_CompleteAndPublishExaminationReport_FullMethodName = "/hospital.appointment.v1.AppointmentService/CompleteAndPublishExaminationReport"
 	AppointmentService_CorrectExaminationReport_FullMethodName            = "/hospital.appointment.v1.AppointmentService/CorrectExaminationReport"
@@ -95,10 +99,14 @@ type AppointmentServiceClient interface {
 	GetMyBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 	ListMyBookings(ctx context.Context, in *ListMyBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
 	DeleteMyBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
+	ListMyMessages(ctx context.Context, in *ListMyMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error)
+	MarkMyMessageRead(ctx context.Context, in *MarkMessageReadRequest, opts ...grpc.CallOption) (*Message, error)
 	GetBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 	ListBookings(ctx context.Context, in *ListBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
 	StartExamination(ctx context.Context, in *StartExaminationRequest, opts ...grpc.CallOption) (*Booking, error)
 	DeleteBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
+	ListMessages(ctx context.Context, in *ListMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error)
+	MarkMessageRead(ctx context.Context, in *MarkMessageReadRequest, opts ...grpc.CallOption) (*Message, error)
 	SaveExaminationReportDraft(ctx context.Context, in *SaveExaminationReportDraftRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
 	CompleteAndPublishExaminationReport(ctx context.Context, in *CompleteAndPublishExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
 	CorrectExaminationReport(ctx context.Context, in *CorrectExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
@@ -407,6 +415,26 @@ func (c *appointmentServiceClient) DeleteMyBooking(ctx context.Context, in *Dele
 	return out, nil
 }
 
+func (c *appointmentServiceClient) ListMyMessages(ctx context.Context, in *ListMyMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListMessagesResponse)
+	err := c.cc.Invoke(ctx, AppointmentService_ListMyMessages_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) MarkMyMessageRead(ctx context.Context, in *MarkMessageReadRequest, opts ...grpc.CallOption) (*Message, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Message)
+	err := c.cc.Invoke(ctx, AppointmentService_MarkMyMessageRead_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *appointmentServiceClient) GetBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Booking)
@@ -441,6 +469,26 @@ func (c *appointmentServiceClient) DeleteBooking(ctx context.Context, in *Delete
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteBookingResponse)
 	err := c.cc.Invoke(ctx, AppointmentService_DeleteBooking_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) ListMessages(ctx context.Context, in *ListMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListMessagesResponse)
+	err := c.cc.Invoke(ctx, AppointmentService_ListMessages_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) MarkMessageRead(ctx context.Context, in *MarkMessageReadRequest, opts ...grpc.CallOption) (*Message, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Message)
+	err := c.cc.Invoke(ctx, AppointmentService_MarkMessageRead_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -560,10 +608,14 @@ type AppointmentServiceServer interface {
 	GetMyBooking(context.Context, *GetBookingRequest) (*Booking, error)
 	ListMyBookings(context.Context, *ListMyBookingsRequest) (*ListBookingsResponse, error)
 	DeleteMyBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error)
+	ListMyMessages(context.Context, *ListMyMessagesRequest) (*ListMessagesResponse, error)
+	MarkMyMessageRead(context.Context, *MarkMessageReadRequest) (*Message, error)
 	GetBooking(context.Context, *GetBookingRequest) (*Booking, error)
 	ListBookings(context.Context, *ListBookingsRequest) (*ListBookingsResponse, error)
 	StartExamination(context.Context, *StartExaminationRequest) (*Booking, error)
 	DeleteBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error)
+	ListMessages(context.Context, *ListMessagesRequest) (*ListMessagesResponse, error)
+	MarkMessageRead(context.Context, *MarkMessageReadRequest) (*Message, error)
 	SaveExaminationReportDraft(context.Context, *SaveExaminationReportDraftRequest) (*ExaminationReport, error)
 	CompleteAndPublishExaminationReport(context.Context, *CompleteAndPublishExaminationReportRequest) (*ExaminationReport, error)
 	CorrectExaminationReport(context.Context, *CorrectExaminationReportRequest) (*ExaminationReport, error)
@@ -669,6 +721,12 @@ func (UnimplementedAppointmentServiceServer) ListMyBookings(context.Context, *Li
 func (UnimplementedAppointmentServiceServer) DeleteMyBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteMyBooking not implemented")
 }
+func (UnimplementedAppointmentServiceServer) ListMyMessages(context.Context, *ListMyMessagesRequest) (*ListMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMyMessages not implemented")
+}
+func (UnimplementedAppointmentServiceServer) MarkMyMessageRead(context.Context, *MarkMessageReadRequest) (*Message, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MarkMyMessageRead not implemented")
+}
 func (UnimplementedAppointmentServiceServer) GetBooking(context.Context, *GetBookingRequest) (*Booking, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBooking not implemented")
 }
@@ -680,6 +738,12 @@ func (UnimplementedAppointmentServiceServer) StartExamination(context.Context, *
 }
 func (UnimplementedAppointmentServiceServer) DeleteBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteBooking not implemented")
+}
+func (UnimplementedAppointmentServiceServer) ListMessages(context.Context, *ListMessagesRequest) (*ListMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMessages not implemented")
+}
+func (UnimplementedAppointmentServiceServer) MarkMessageRead(context.Context, *MarkMessageReadRequest) (*Message, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MarkMessageRead not implemented")
 }
 func (UnimplementedAppointmentServiceServer) SaveExaminationReportDraft(context.Context, *SaveExaminationReportDraftRequest) (*ExaminationReport, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveExaminationReportDraft not implemented")
@@ -1248,6 +1312,42 @@ func _AppointmentService_DeleteMyBooking_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AppointmentService_ListMyMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMyMessagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).ListMyMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_ListMyMessages_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).ListMyMessages(ctx, req.(*ListMyMessagesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_MarkMyMessageRead_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MarkMessageReadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).MarkMyMessageRead(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_MarkMyMessageRead_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).MarkMyMessageRead(ctx, req.(*MarkMessageReadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _AppointmentService_GetBooking_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetBookingRequest)
 	if err := dec(in); err != nil {
@@ -1316,6 +1416,42 @@ func _AppointmentService_DeleteBooking_Handler(srv interface{}, ctx context.Cont
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppointmentServiceServer).DeleteBooking(ctx, req.(*DeleteBookingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_ListMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMessagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).ListMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_ListMessages_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).ListMessages(ctx, req.(*ListMessagesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_MarkMessageRead_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MarkMessageReadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).MarkMessageRead(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_MarkMessageRead_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).MarkMessageRead(ctx, req.(*MarkMessageReadRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1588,6 +1724,14 @@ var AppointmentService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AppointmentService_DeleteMyBooking_Handler,
 		},
 		{
+			MethodName: "ListMyMessages",
+			Handler:    _AppointmentService_ListMyMessages_Handler,
+		},
+		{
+			MethodName: "MarkMyMessageRead",
+			Handler:    _AppointmentService_MarkMyMessageRead_Handler,
+		},
+		{
 			MethodName: "GetBooking",
 			Handler:    _AppointmentService_GetBooking_Handler,
 		},
@@ -1602,6 +1746,14 @@ var AppointmentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteBooking",
 			Handler:    _AppointmentService_DeleteBooking_Handler,
+		},
+		{
+			MethodName: "ListMessages",
+			Handler:    _AppointmentService_ListMessages_Handler,
+		},
+		{
+			MethodName: "MarkMessageRead",
+			Handler:    _AppointmentService_MarkMessageRead_Handler,
 		},
 		{
 			MethodName: "SaveExaminationReportDraft",

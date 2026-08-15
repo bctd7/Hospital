@@ -3,6 +3,7 @@ import { onLaunch, onShow } from "@dcloudio/uni-app";
 import { watch } from "vue";
 
 import { initializeCloudBase } from "@/platform/cloudbase";
+import { refreshMessageBadge } from "@/services/messageBadge";
 import { restoreSession, sessionState } from "@/stores/session";
 import { applyAppVariantNavigation } from "@/utils/appShell";
 
@@ -14,11 +15,15 @@ onLaunch(() => {
 
 onShow(() => {
   applyAppVariantNavigation(sessionState.appVariant);
+  void refreshMessageBadge();
 });
 
 watch(
   () => sessionState.appVariant,
-  (variant) => applyAppVariantNavigation(variant),
+  (variant) => {
+    applyAppVariantNavigation(variant);
+    void refreshMessageBadge();
+  },
 );
 </script>
 

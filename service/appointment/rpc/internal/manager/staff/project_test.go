@@ -34,7 +34,7 @@ func (stubStore) WithinProjectTransaction(context.Context, func(ProjectTxStore) 
 }
 
 func TestManagerRequiresProjectWriteStore(t *testing.T) {
-	if _, err := NewManager(nil, nil, nil, nil, nil); err == nil {
+	if _, err := NewManager(nil, nil, nil, nil, nil, nil); err == nil {
 		t.Fatal("expected nil project store to be rejected")
 	}
 	if manager, _ := projectTestManager(stubStore{}); manager == nil {

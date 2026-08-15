@@ -60,7 +60,7 @@ function messageOf(error: unknown, fallback: string) {
 }
 function sessionLabel(value: string) { return value === "morning" ? "上午" : "下午"; }
 function statusLabel(value: PatientBookingStatus) {
-  return ({ confirmed: "待检查", in_progress: "检查中", completed: "已完成", no_show: "未到场" } as const)[value];
+  return ({ confirmed: "待检查", in_progress: "检查中", completed: "已完成", no_show: "未到场", canceled: "已取消" } as const)[value];
 }
 </script>
 

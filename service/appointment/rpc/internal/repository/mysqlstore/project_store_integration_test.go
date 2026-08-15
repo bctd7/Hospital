@@ -39,7 +39,7 @@ func TestMySQLProjectLifecycle(t *testing.T) {
 	cleanupProjectIntegrationData(t, store, ctx)
 	defer cleanupProjectIntegrationData(t, store, ctx)
 
-	manager, err := staffmanager.NewManager(store, store, store, store, nil)
+	manager, err := staffmanager.NewManager(store, store, store, store, store, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

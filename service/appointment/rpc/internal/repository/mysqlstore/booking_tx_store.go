@@ -409,13 +409,16 @@ WHERE id = ? AND status = 'in_progress' AND version = ?`,
 }
 
 func (s *bookingTxStore) DeleteBooking(ctx context.Context, bookingID string) error {
-	result, err := s.tx.ExecContext(ctx, `DELETE FROM appointment_bookings WHERE id = ?`, bookingID)
+	result, err := s.tx.ExecContext(ctx, `
+UPDATE appointment_bookings
+SET status = 'canceled', version = version + 1, updated_at = ?
+WHERE id = ? AND status = 'confirmed'`, time.Now().UTC(), bookingID)
 	if err != nil {
-		return fmt.Errorf("delete booking: %w", err)
+		return fmt.Errorf("cancel booking: %w", err)
 	}
 	affected, err := result.RowsAffected()
 	if err != nil {
-		return fmt.Errorf("read delete booking result: %w", err)
+		return fmt.Errorf("read cancel booking result: %w", err)
 	}
 	if affected != 1 {
 		return appointmentmanager.ErrNotFound

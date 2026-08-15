@@ -62,6 +62,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				},
 				{
 					Method:  http.MethodGet,
+					Path:    "/admin/appointment/messages",
+					Handler: appointmentbookings.ListMessagesHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/admin/appointment/messages/read",
+					Handler: appointmentbookings.MarkMessageReadHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
 					Path:    "/admin/appointment/reports",
 					Handler: appointmentbookings.ListExaminationReportsHandler(serverCtx),
 				},
@@ -104,6 +114,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Method:  http.MethodGet,
 					Path:    "/appointment/examination-items/:itemId/booking-options",
 					Handler: appointmentbookings.ListBookingOptionsHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/appointment/messages",
+					Handler: appointmentbookings.ListMyMessagesHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/appointment/messages/read",
+					Handler: appointmentbookings.MarkMyMessageReadHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodGet,

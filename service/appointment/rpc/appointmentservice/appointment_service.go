@@ -26,6 +26,7 @@ type (
 	CreateRoomRequest                          = v1_appointmentv1.CreateRoomRequest
 	DeleteBookingRequest                       = v1_appointmentv1.DeleteBookingRequest
 	DeleteBookingResponse                      = v1_appointmentv1.DeleteBookingResponse
+	DepartmentUnreadCount                      = v1_appointmentv1.DepartmentUnreadCount
 	ExaminationItem                            = v1_appointmentv1.ExaminationItem
 	ExaminationItemInput                       = v1_appointmentv1.ExaminationItemInput
 	ExaminationItemReportTemplate              = v1_appointmentv1.ExaminationItemReportTemplate
@@ -49,14 +50,19 @@ type (
 	ListExaminationReportsRequest              = v1_appointmentv1.ListExaminationReportsRequest
 	ListExaminationReportsResponse             = v1_appointmentv1.ListExaminationReportsResponse
 	ListItemWeeklyWindowsResponse              = v1_appointmentv1.ListItemWeeklyWindowsResponse
+	ListMessagesRequest                        = v1_appointmentv1.ListMessagesRequest
+	ListMessagesResponse                       = v1_appointmentv1.ListMessagesResponse
 	ListMyBookingsRequest                      = v1_appointmentv1.ListMyBookingsRequest
 	ListMyExaminationReportsRequest            = v1_appointmentv1.ListMyExaminationReportsRequest
+	ListMyMessagesRequest                      = v1_appointmentv1.ListMyMessagesRequest
 	ListRoomExaminationItemsRequest            = v1_appointmentv1.ListRoomExaminationItemsRequest
 	ListRoomExaminationItemsResponse           = v1_appointmentv1.ListRoomExaminationItemsResponse
 	ListRoomWeeklyWindowsResponse              = v1_appointmentv1.ListRoomWeeklyWindowsResponse
 	ListRoomsRequest                           = v1_appointmentv1.ListRoomsRequest
 	ListRoomsResponse                          = v1_appointmentv1.ListRoomsResponse
 	ListWeeklyWindowsRequest                   = v1_appointmentv1.ListWeeklyWindowsRequest
+	MarkMessageReadRequest                     = v1_appointmentv1.MarkMessageReadRequest
+	Message                                    = v1_appointmentv1.Message
 	RetireRoomRequest                          = v1_appointmentv1.RetireRoomRequest
 	Room                                       = v1_appointmentv1.Room
 	RoomExaminationItem                        = v1_appointmentv1.RoomExaminationItem
@@ -99,10 +105,14 @@ type (
 		GetMyBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 		ListMyBookings(ctx context.Context, in *ListMyBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
 		DeleteMyBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
+		ListMyMessages(ctx context.Context, in *ListMyMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error)
+		MarkMyMessageRead(ctx context.Context, in *MarkMessageReadRequest, opts ...grpc.CallOption) (*Message, error)
 		GetBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 		ListBookings(ctx context.Context, in *ListBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
 		StartExamination(ctx context.Context, in *StartExaminationRequest, opts ...grpc.CallOption) (*Booking, error)
 		DeleteBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
+		ListMessages(ctx context.Context, in *ListMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error)
+		MarkMessageRead(ctx context.Context, in *MarkMessageReadRequest, opts ...grpc.CallOption) (*Message, error)
 		SaveExaminationReportDraft(ctx context.Context, in *SaveExaminationReportDraftRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
 		CompleteAndPublishExaminationReport(ctx context.Context, in *CompleteAndPublishExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
 		CorrectExaminationReport(ctx context.Context, in *CorrectExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
@@ -269,6 +279,16 @@ func (m *defaultAppointmentService) DeleteMyBooking(ctx context.Context, in *Del
 	return client.DeleteMyBooking(ctx, in, opts...)
 }
 
+func (m *defaultAppointmentService) ListMyMessages(ctx context.Context, in *ListMyMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.ListMyMessages(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) MarkMyMessageRead(ctx context.Context, in *MarkMessageReadRequest, opts ...grpc.CallOption) (*Message, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.MarkMyMessageRead(ctx, in, opts...)
+}
+
 func (m *defaultAppointmentService) GetBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
 	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.GetBooking(ctx, in, opts...)
@@ -287,6 +307,16 @@ func (m *defaultAppointmentService) StartExamination(ctx context.Context, in *St
 func (m *defaultAppointmentService) DeleteBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error) {
 	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.DeleteBooking(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) ListMessages(ctx context.Context, in *ListMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.ListMessages(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) MarkMessageRead(ctx context.Context, in *MarkMessageReadRequest, opts ...grpc.CallOption) (*Message, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.MarkMessageRead(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) SaveExaminationReportDraft(ctx context.Context, in *SaveExaminationReportDraftRequest, opts ...grpc.CallOption) (*ExaminationReport, error) {

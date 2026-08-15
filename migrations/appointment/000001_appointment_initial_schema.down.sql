@@ -1,5 +1,6 @@
 ALTER TABLE appointment_examination_reports
     DROP FOREIGN KEY fk_appointment_examination_reports_current_version;
+DROP TABLE IF EXISTS appointment_message_reads;
 DROP TABLE IF EXISTS appointment_examination_report_versions;
 DROP TABLE IF EXISTS appointment_examination_reports;
 DROP TABLE IF EXISTS appointment_booking_operations;

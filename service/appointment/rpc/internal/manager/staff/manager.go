@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"hospital/common/authn"
+	"hospital/service/appointment/rpc/internal/manager/common"
 	staffinput "hospital/service/appointment/rpc/internal/manager/staff/input"
 	staffsupport "hospital/service/appointment/rpc/internal/manager/staff/support"
 )
@@ -18,6 +19,7 @@ type Manager struct {
 	rooms         RoomStore
 	bookings      BookingStore
 	reports       ReportStore
+	messages      common.MessageStore
 	cache         staffsupport.Cache
 	flights       staffsupport.FlightGroup
 }
@@ -49,7 +51,7 @@ func (m *Manager) InvalidateItem(ctx context.Context, departmentID, itemID strin
 }
 
 // NewManager 组装工作人员写操作、房间开放时间配置和预约处理所需的最小持久化端口。
-func NewManager(projects ProjectStore, rooms RoomStore, bookingStore BookingStore, reportStore ReportStore, cache staffsupport.Cache) (*Manager, error) {
+func NewManager(projects ProjectStore, rooms RoomStore, bookingStore BookingStore, reportStore ReportStore, messageStore common.MessageStore, cache staffsupport.Cache) (*Manager, error) {
 	if projects == nil {
 		return nil, errors.New("appointment project store is required")
 	}
@@ -62,5 +64,8 @@ func NewManager(projects ProjectStore, rooms RoomStore, bookingStore BookingStor
 	if reportStore == nil {
 		return nil, errors.New("appointment report store is required")
 	}
-	return &Manager{projectWrites: projects, projects: projects, rooms: rooms, bookings: bookingStore, reports: reportStore, cache: cache}, nil
+	if messageStore == nil {
+		return nil, errors.New("appointment message store is required")
+	}
+	return &Manager{projectWrites: projects, projects: projects, rooms: rooms, bookings: bookingStore, reports: reportStore, messages: messageStore, cache: cache}, nil
 }

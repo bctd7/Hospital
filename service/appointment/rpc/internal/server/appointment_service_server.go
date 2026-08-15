@@ -168,6 +168,16 @@ func (s *AppointmentServiceServer) DeleteMyBooking(ctx context.Context, in *v1_a
 	return l.DeleteMyBooking(in)
 }
 
+func (s *AppointmentServiceServer) ListMyMessages(ctx context.Context, in *v1_appointmentv1.ListMyMessagesRequest) (*v1_appointmentv1.ListMessagesResponse, error) {
+	l := logic.NewListMyMessagesLogic(ctx, s.svcCtx)
+	return l.ListMyMessages(in)
+}
+
+func (s *AppointmentServiceServer) MarkMyMessageRead(ctx context.Context, in *v1_appointmentv1.MarkMessageReadRequest) (*v1_appointmentv1.Message, error) {
+	l := logic.NewMarkMyMessageReadLogic(ctx, s.svcCtx)
+	return l.MarkMyMessageRead(in)
+}
+
 func (s *AppointmentServiceServer) GetBooking(ctx context.Context, in *v1_appointmentv1.GetBookingRequest) (*v1_appointmentv1.Booking, error) {
 	l := logic.NewGetBookingLogic(ctx, s.svcCtx)
 	return l.GetBooking(in)
@@ -186,6 +196,16 @@ func (s *AppointmentServiceServer) StartExamination(ctx context.Context, in *v1_
 func (s *AppointmentServiceServer) DeleteBooking(ctx context.Context, in *v1_appointmentv1.DeleteBookingRequest) (*v1_appointmentv1.DeleteBookingResponse, error) {
 	l := logic.NewDeleteBookingLogic(ctx, s.svcCtx)
 	return l.DeleteBooking(in)
+}
+
+func (s *AppointmentServiceServer) ListMessages(ctx context.Context, in *v1_appointmentv1.ListMessagesRequest) (*v1_appointmentv1.ListMessagesResponse, error) {
+	l := logic.NewListMessagesLogic(ctx, s.svcCtx)
+	return l.ListMessages(in)
+}
+
+func (s *AppointmentServiceServer) MarkMessageRead(ctx context.Context, in *v1_appointmentv1.MarkMessageReadRequest) (*v1_appointmentv1.Message, error) {
+	l := logic.NewMarkMessageReadLogic(ctx, s.svcCtx)
+	return l.MarkMessageRead(in)
 }
 
 func (s *AppointmentServiceServer) SaveExaminationReportDraft(ctx context.Context, in *v1_appointmentv1.SaveExaminationReportDraftRequest) (*v1_appointmentv1.ExaminationReport, error) {

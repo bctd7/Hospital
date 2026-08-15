@@ -38,10 +38,14 @@ service AppointmentService {
   rpc GetMyBooking(GetBookingRequest) returns (Booking);
   rpc ListMyBookings(ListMyBookingsRequest) returns (ListBookingsResponse);
   rpc DeleteMyBooking(DeleteBookingRequest) returns (DeleteBookingResponse);
+  rpc ListMyMessages(ListMyMessagesRequest) returns (ListMessagesResponse);
+  rpc MarkMyMessageRead(MarkMessageReadRequest) returns (Message);
   rpc GetBooking(GetBookingRequest) returns (Booking);
   rpc ListBookings(ListBookingsRequest) returns (ListBookingsResponse);
   rpc StartExamination(StartExaminationRequest) returns (Booking);
   rpc DeleteBooking(DeleteBookingRequest) returns (DeleteBookingResponse);
+  rpc ListMessages(ListMessagesRequest) returns (ListMessagesResponse);
+  rpc MarkMessageRead(MarkMessageReadRequest) returns (Message);
 
   rpc SaveExaminationReportDraft(SaveExaminationReportDraftRequest) returns (ExaminationReport);
   rpc CompleteAndPublishExaminationReport(CompleteAndPublishExaminationReportRequest) returns (ExaminationReport);
@@ -407,6 +411,50 @@ message ListBookingsResponse {
   int64 page = 2;
   int64 page_size = 3;
   int64 total = 4;
+}
+
+message ListMyMessagesRequest {
+  int64 page = 1;
+  int64 page_size = 2;
+  string request_id = 3;
+}
+
+message ListMessagesRequest {
+  string department_id = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  string request_id = 4;
+}
+
+message MarkMessageReadRequest {
+  string message_key = 1;
+  string department_id = 2;
+  string request_id = 3;
+}
+
+message Message {
+  string message_key = 1;
+  string message_type = 2;
+  string occurred_at = 3;
+  string read_at = 4;
+  Booking booking = 5;
+  string report_id = 6;
+  string report_version_id = 7;
+  int64 report_version_no = 8;
+}
+
+message DepartmentUnreadCount {
+  string department_id = 1;
+  int64 unread_count = 2;
+}
+
+message ListMessagesResponse {
+  repeated Message messages = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  int64 total = 4;
+  int64 unread_count = 5;
+  repeated DepartmentUnreadCount department_unread_counts = 6;
 }
 
 message ExaminationReportContent {

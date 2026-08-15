@@ -9,6 +9,7 @@ import {
 } from "@/services/organization";
 import type { AppointmentListView, PatientBooking, PatientBookingStatus } from "@/types/appointment";
 import { examinationWindowRelation } from "@/utils/appointmentManagement";
+import { currentStaffDepartmentId, rememberStaffDepartmentId } from "@/utils/staffDepartmentContext";
 
 const departmentId = ref("");
 const departmentLabel = ref("科室预约");
@@ -32,8 +33,9 @@ const statusOptions: Array<{ label: string; value: PatientBookingStatus | "" }> 
 
 onLoad((query) => {
   view.value = query?.view === "completed" ? "completed" : "active";
-  departmentId.value = decode(query?.department_id);
-  departmentLocked.value = Boolean(departmentId.value);
+  const queryDepartmentId = decode(query?.department_id);
+  departmentId.value = queryDepartmentId || currentStaffDepartmentId();
+  departmentLocked.value = Boolean(queryDepartmentId);
   departmentLabel.value = decode(query?.department_label) || "科室预约";
   uni.setNavigationBarTitle({ title: departmentLabel.value });
   if (!departmentLocked.value) void prepareDepartmentSelection();
@@ -46,12 +48,14 @@ async function prepareDepartmentSelection() {
   errorMessage.value = "";
   try {
     departmentOptions.value = await loadDepartmentOptions();
-    const first = departmentOptions.value[0];
-    if (!first) {
+    const selected = departmentOptions.value.find(
+      (option) => option.department.departmentId === departmentId.value,
+    );
+    if (!selected) {
       errorMessage.value = "暂无可查看的科室";
       return;
     }
-    selectDepartment(first);
+    selectDepartment(selected);
     await loadBookings();
   } catch (error) {
     errorMessage.value = messageOf(error, "科室列表加载失败");
@@ -63,6 +67,7 @@ async function prepareDepartmentSelection() {
 function selectDepartment(option: DepartmentOption) {
   departmentId.value = option.department.departmentId;
   departmentLabel.value = option.label;
+  rememberStaffDepartmentId(departmentId.value);
 }
 
 function switchDepartment() {
@@ -156,7 +161,7 @@ function decode(value?: string) { try { return value ? decodeURIComponent(value)
 function messageOf(error: unknown, fallback: string) { return error instanceof Error && error.message.trim() ? error.message : fallback; }
 function sessionLabel(value: string) { return value === "morning" ? "上午" : "下午"; }
 function statusLabel(value: PatientBookingStatus) {
-  return ({ confirmed: "待检查", in_progress: "检查中", completed: "已完成", no_show: "未到场" } as const)[value];
+  return ({ confirmed: "待检查", in_progress: "检查中", completed: "已完成", no_show: "未到场", canceled: "已取消" } as const)[value];
 }
 function examinationActionLabel(value: PatientBooking) {
   const relation = examinationWindowRelation(value.serviceDate, value.itemStartTime, value.itemEndTime);

@@ -20,13 +20,14 @@ import {
   hasRole,
   messageOf,
 } from "@/utils/appointmentManagement";
+import { currentStaffDepartmentId, rememberStaffDepartmentId } from "@/utils/staffDepartmentContext";
 
 interface SearchInputEvent {
   detail: { value?: string };
 }
 
 let rememberedCampusId = "";
-let rememberedDepartmentId = "";
+let rememberedDepartmentId = currentStaffDepartmentId();
 let rememberedRoomId = "";
 const hospitalName = ref("");
 const campuses = ref<CampusSummary[]>([]);
@@ -106,6 +107,7 @@ async function initialize(force: boolean) {
       selectedCampusId.value = option?.campus.campusId ?? "";
       departments.value = option ? [option.department] : [];
       selectedDepartmentId.value = option?.department.departmentId ?? "";
+      if (selectedDepartmentId.value) rememberStaffDepartmentId(selectedDepartmentId.value);
     } else {
       campuses.value = context.campuses.filter((campus) => campus.status === "active");
       const nextCampus = campuses.value.find(
@@ -141,6 +143,7 @@ async function refreshDepartments(force: boolean) {
   ) ?? departments.value[0];
   selectedDepartmentId.value = nextDepartment?.departmentId ?? "";
   rememberedDepartmentId = selectedDepartmentId.value;
+  if (selectedDepartmentId.value) rememberStaffDepartmentId(selectedDepartmentId.value);
 }
 
 async function loadRooms(force = false) {
@@ -232,6 +235,7 @@ function chooseDepartment(department: DepartmentSummary) {
   showingRoomItems.value = false;
   selectedDepartmentId.value = department.departmentId;
   rememberedDepartmentId = department.departmentId;
+  rememberStaffDepartmentId(department.departmentId);
   rememberedRoomId = "";
   void loadRooms(false);
 }

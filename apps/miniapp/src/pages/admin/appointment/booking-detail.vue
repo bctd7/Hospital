@@ -168,7 +168,7 @@ function clearContent() { fillContent({ objectiveFindings: "", impression: "", r
 function decode(value: string) { try { return decodeURIComponent(value); } catch { return ""; } }
 function messageOf(error: unknown, fallback: string) { return error instanceof Error && error.message.trim() ? error.message : fallback; }
 function sessionLabel(value: string) { return value === "morning" ? "上午" : "下午"; }
-function statusLabel(value: PatientBookingStatus) { return ({ confirmed: "待检查", in_progress: "检查中", completed: "已完成", no_show: "未到场" } as const)[value]; }
+function statusLabel(value: PatientBookingStatus) { return ({ confirmed: "待检查", in_progress: "检查中", completed: "已完成", no_show: "未到场", canceled: "已取消" } as const)[value]; }
 function examinationWindowDescription(value: PatientBooking) { return `只能在 ${value.serviceDate} ${clockLabel(value.itemStartTime)}–${clockLabel(value.itemEndTime)} 内开始检查。`; }
 function clockLabel(value: string) { return value.slice(0, 5); }
 </script>

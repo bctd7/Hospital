@@ -104,6 +104,44 @@ type (
 		PageSize int64             `json:"page_size"`
 		Total    int64             `json:"total"`
 	}
+	ListMyMessagesAPIRequest {
+		Page     int64 `form:"page,default=1"`
+		PageSize int64 `form:"page_size,default=20"`
+	}
+	ListMessagesAPIRequest {
+		DepartmentID string `form:"department_id"`
+		Page         int64  `form:"page,default=1"`
+		PageSize     int64  `form:"page_size,default=20"`
+	}
+	MarkMyMessageReadAPIRequest {
+		MessageKey string `json:"message_key"`
+	}
+	MarkMessageReadAPIRequest {
+		DepartmentID string `form:"department_id"`
+		MessageKey   string `json:"message_key"`
+	}
+	MessageResponse {
+		MessageKey      string          `json:"message_key"`
+		MessageType     string          `json:"message_type"`
+		OccurredAt      string          `json:"occurred_at"`
+		ReadAt          string          `json:"read_at,omitempty"`
+		Booking         BookingResponse `json:"booking"`
+		ReportID        string          `json:"report_id,omitempty"`
+		ReportVersionID string          `json:"report_version_id,omitempty"`
+		ReportVersionNo int64           `json:"report_version_no,omitempty"`
+	}
+	DepartmentUnreadCountResponse {
+		DepartmentID string `json:"department_id"`
+		UnreadCount  int64  `json:"unread_count"`
+	}
+	ListMessagesAPIResponse {
+		Messages               []MessageResponse               `json:"messages"`
+		Page                   int64                           `json:"page"`
+		PageSize               int64                           `json:"page_size"`
+		Total                  int64                           `json:"total"`
+		UnreadCount            int64                           `json:"unread_count"`
+		DepartmentUnreadCounts []DepartmentUnreadCountResponse `json:"department_unread_counts,omitempty"`
+	}
 	DeleteBookingAPIResponse {
 		BookingID string `json:"booking_id"`
 		Deleted   bool   `json:"deleted"`
@@ -223,6 +261,10 @@ service app-api {
 	get /appointment/bookings/:bookingId (BookingPathRequest) returns (BookingResponse)
 	@handler deleteMyBooking
 	delete /appointment/bookings/:bookingId (DeleteBookingAPIRequest) returns (DeleteBookingAPIResponse)
+	@handler listMyMessages
+	get /appointment/messages (ListMyMessagesAPIRequest) returns (ListMessagesAPIResponse)
+	@handler markMyMessageRead
+	put /appointment/messages/read (MarkMyMessageReadAPIRequest) returns (MessageResponse)
 
 	@handler listBookings
 	get /admin/appointment/bookings (ListBookingsAPIRequest) returns (ListBookingsAPIResponse)
@@ -244,6 +286,10 @@ service app-api {
 	get /admin/appointment/reports/:reportId/versions (ReportPathRequest) returns (ListReportVersionsAPIResponse)
 	@handler deleteBooking
 	delete /admin/appointment/bookings/:bookingId (DeleteBookingAPIRequest) returns (DeleteBookingAPIResponse)
+	@handler listMessages
+	get /admin/appointment/messages (ListMessagesAPIRequest) returns (ListMessagesAPIResponse)
+	@handler markMessageRead
+	put /admin/appointment/messages/read (MarkMessageReadAPIRequest) returns (MessageResponse)
 
 	@handler listMyExaminationReports
 	get /appointment/reports (ListMyReportsAPIRequest) returns (ListReportsAPIResponse)

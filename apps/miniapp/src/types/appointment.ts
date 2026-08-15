@@ -1,6 +1,6 @@
 export type AppointmentStatus = "active" | "disabled";
 export type AppointmentSession = "morning" | "afternoon";
-export type PatientBookingStatus = "confirmed" | "in_progress" | "completed" | "no_show";
+export type PatientBookingStatus = "confirmed" | "in_progress" | "completed" | "no_show" | "canceled";
 export type AppointmentListView = "active" | "completed";
 export type ExaminationReportStatus = "draft" | "published";
 export type ExaminationReportVersionKind = "original" | "correction";
@@ -197,6 +197,45 @@ export interface PatientBooking {
   completedAt?: string;
   completedBy?: string;
   completedByDisplayName?: string;
+}
+
+export type AppointmentMessageType =
+  | "booking_created"
+  | "arrival_60m"
+  | "arrival_30m"
+  | "booking_canceled"
+  | "booking_no_show"
+  | "report_due"
+  | "report_overdue"
+  | "report_published"
+  | "report_corrected";
+
+export interface AppointmentMessage {
+  messageKey: string;
+  messageType: AppointmentMessageType;
+  occurredAt: string;
+  readAt?: string;
+  booking: PatientBooking;
+  reportId?: string;
+  reportVersionId?: string;
+  reportVersionNo?: number;
+}
+
+export interface DepartmentUnreadCount {
+  departmentId: string;
+  unreadCount: number;
+}
+
+export interface AppointmentMessagePage extends AppointmentPage<AppointmentMessage> {
+  unreadCount: number;
+  departmentUnreadCounts: DepartmentUnreadCount[];
+}
+
+export interface AppointmentMessageApi {
+  listMine(page?: number, pageSize?: number): Promise<AppointmentMessagePage>;
+  markMineRead(messageKey: string): Promise<AppointmentMessage>;
+  listDepartment(departmentId: string, page?: number, pageSize?: number): Promise<AppointmentMessagePage>;
+  markDepartmentRead(departmentId: string, messageKey: string): Promise<AppointmentMessage>;
 }
 
 export interface ExaminationReportVersion extends ExaminationReportContent {

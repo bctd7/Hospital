@@ -12,6 +12,7 @@ const (
 	BookingStatusInProgress BookingStatus = "in_progress"
 	BookingStatusCompleted  BookingStatus = "completed"
 	BookingStatusNoShow     BookingStatus = "no_show"
+	BookingStatusCanceled   BookingStatus = "canceled"
 )
 
 const (
@@ -25,7 +26,7 @@ func (v BookingListView) Valid() bool {
 
 func (s BookingStatus) Valid() bool {
 	return s == BookingStatusConfirmed || s == BookingStatusInProgress ||
-		s == BookingStatusCompleted || s == BookingStatusNoShow
+		s == BookingStatusCompleted || s == BookingStatusNoShow || s == BookingStatusCanceled
 }
 
 type Booking struct {
