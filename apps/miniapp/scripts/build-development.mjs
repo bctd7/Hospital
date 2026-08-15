@@ -2,8 +2,17 @@ import { existsSync, readFileSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadEnv } from "vite";
 
 const appRoot = dirname(dirname(fileURLToPath(import.meta.url)));
+const developmentEnv = loadEnv("development", appRoot, "VITE_");
+if (developmentEnv.VITE_API_TRANSPORT !== "direct") {
+  throw new Error("development transport must be direct");
+}
+if (!developmentEnv.VITE_API_BASE_URL?.trim()) {
+  throw new Error("VITE_API_BASE_URL is required for development builds");
+}
+
 const uni = join(
   appRoot,
   "node_modules",
@@ -12,10 +21,18 @@ const uni = join(
   "bin",
   "uni.js",
 );
-const childEnv = {
-  ...process.env,
+const childEnv = { ...process.env };
+// PowerShell or a previous release build may leave VITE_* variables in the
+// parent process. Process variables take precedence over .env.local, so clear
+// them before applying the development configuration explicitly.
+for (const key of Object.keys(childEnv)) {
+  if (key.startsWith("VITE_")) delete childEnv[key];
+}
+Object.assign(childEnv, developmentEnv, {
   NODE_ENV: "development",
-};
+  VITE_API_TRANSPORT: "direct",
+  VITE_API_BASE_URL: developmentEnv.VITE_API_BASE_URL.trim(),
+});
 
 const child = spawn(
   process.execPath,
@@ -48,11 +65,18 @@ function forward(chunk, destination) {
     const outputDeadline = Date.now() + 10_000;
     const outputPoll = setInterval(() => {
       if (existsSync(environmentPath) && existsSync(clientPath)) {
-        clearInterval(outputPoll);
-        completed = true;
-        terminating = true;
-        child.kill();
-        return;
+        const environmentOutput = readFileSync(environmentPath, "utf8");
+        const clientOutput = readFileSync(clientPath, "utf8");
+        const outputIsComplete =
+          environmentOutput.includes(developmentEnv.VITE_API_BASE_URL.trim()) &&
+          clientOutput.includes("directRequest");
+        if (outputIsComplete) {
+          clearInterval(outputPoll);
+          completed = true;
+          terminating = true;
+          child.kill();
+          return;
+        }
       }
       if (Date.now() >= outputDeadline) {
         clearInterval(outputPoll);
@@ -81,7 +105,10 @@ child.on("exit", (code) => {
     "utf8",
   );
   const clientOutput = readFileSync(clientPath, "utf8");
-  if (!environmentOutput.includes("API_BASE_URL") || !clientOutput.includes("directRequest")) {
+  if (
+    !environmentOutput.includes(developmentEnv.VITE_API_BASE_URL.trim()) ||
+    !clientOutput.includes("directRequest")
+  ) {
     throw new Error("development output is not using direct API transport");
   }
   console.log("Development transport verified: direct API request");
