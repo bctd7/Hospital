@@ -69,7 +69,8 @@ try {
         }
         Invoke-ExternalCheck -Label "Running miniapp tests" -Command "npm" -Arguments @("test", "--", "--run")
         Invoke-ExternalCheck -Label "Checking miniapp types" -Command "npm" -Arguments @("run", "type-check")
-        Invoke-ExternalCheck -Label "Building WeChat miniapp" -Command "npm" -Arguments @("run", "build:mp-weixin")
+        Invoke-ExternalCheck -Label "Building development WeChat miniapp" -Command "npm" -Arguments @("run", "build:dev:mp-weixin")
+        Invoke-ExternalCheck -Label "Building release WeChat miniapp" -Command "npm" -Arguments @("run", "build:mp-weixin")
     }
     finally {
         Pop-Location

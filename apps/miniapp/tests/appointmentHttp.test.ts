@@ -152,4 +152,42 @@ describe("appointment HTTP adapter", () => {
       requestMock.mock.calls[1]?.[0]?.data.operation_id,
     );
   });
+
+  it("maps patient messages and normalizes optional collections", async () => {
+    requestMock.mockResolvedValueOnce({
+      messages: null,
+      page: 1,
+      page_size: 50,
+      total: 0,
+      unread_count: 3,
+      department_unread_counts: null,
+    });
+    const { appointmentMessageApi } = await import("@/api/appointment");
+
+    const result = await appointmentMessageApi.listMine();
+
+    expect(result.items).toEqual([]);
+    expect(result.departmentUnreadCounts).toEqual([]);
+    expect(result.unreadCount).toBe(3);
+    expect(requestMock).toHaveBeenCalledWith({
+      path: "/api/v1/appointment/messages?page=1&page_size=50",
+      authenticated: true,
+    });
+  });
+
+  it("requests the administrator unread overview without inventing a department", async () => {
+    requestMock.mockResolvedValueOnce({
+      messages: [], page: 1, page_size: 1, total: 0, unread_count: 7,
+      department_unread_counts: [{ department_id: "department-a", unread_count: 7 }],
+    });
+    const { appointmentMessageApi } = await import("@/api/appointment");
+
+    const result = await appointmentMessageApi.listDepartment("", 1, 1);
+
+    expect(result.departmentUnreadCounts).toEqual([{ departmentId: "department-a", unreadCount: 7 }]);
+    expect(requestMock).toHaveBeenCalledWith({
+      path: "/api/v1/admin/appointment/messages?page=1&page_size=1",
+      authenticated: true,
+    });
+  });
 });

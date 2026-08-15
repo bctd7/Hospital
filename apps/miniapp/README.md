@@ -76,6 +76,16 @@ npm run build:mp-weixin
 apps/miniapp/dist/build/mp-weixin
 ```
 
+一次性刷新开发版和发布版两个产物：
+
+```powershell
+npm run build:all:mp-weixin
+```
+
+`build:dev:mp-weixin` 会完成一次开发配置编译并退出，供自动检查和开发者工具刷新使用；日常持续监听仍使用
+`dev:mp-weixin`。仓库总检查会同时生成 `dist/dev/mp-weixin` 与 `dist/build/mp-weixin`，避免其中一个目录
+残留旧页面。
+
 正式构建固定读取受 Git 管理的 `release.config.json` 并强制使用 CloudBase AnyService，不继承 `.env.local`、
 `.env.production.local` 或当前 Shell 中的 `VITE_*`。构建结束会检查产物；发现局域网 API 地址、
 缺失 CloudBase 环境或没有编译为 AnyService 调用时直接失败。不要绕过该脚本直接执行 `uni build`。

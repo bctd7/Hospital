@@ -6,8 +6,15 @@ import { appointmentMessageApi } from "@/api/appointment";
 import AppPage from "@/components/layout/AppPage.vue";
 import { loadDepartmentOptions, type DepartmentOption } from "@/services/organization";
 import { sessionState } from "@/stores/session";
-import type { AppointmentMessage, AppointmentMessageType } from "@/types/appointment";
+import type { AppointmentMessage } from "@/types/appointment";
 import { hasRole } from "@/utils/appointmentManagement";
+import {
+  appointmentMessageDetail,
+  appointmentMessageSchedule,
+  appointmentMessageTarget,
+  appointmentMessageTime,
+  appointmentMessageTitle,
+} from "@/utils/appointmentMessages";
 import { currentStaffDepartmentId, rememberStaffDepartmentId } from "@/utils/staffDepartmentContext";
 
 const messages = ref<AppointmentMessage[]>([]);
@@ -113,51 +120,35 @@ async function openMessage(value: AppointmentMessage) {
         : await appointmentMessageApi.markMineRead(value.messageKey);
       value.readAt = updated.readAt;
       unreadCount.value = Math.max(0, unreadCount.value - 1);
+      if (isStaff.value) {
+        departmentUnreadCounts.value[departmentId.value] = Math.max(
+          0,
+          (departmentUnreadCounts.value[departmentId.value] ?? 0) - 1,
+        );
+      }
       updateBadge(unreadCount.value);
     } catch (error) {
       uni.showToast({ title: messageOf(error, "标记已读失败"), icon: "none" });
       return;
     }
   }
-  if (isStaff.value) {
-    uni.navigateTo({ url: `/pages/admin/appointment/booking-detail?booking_id=${encodeURIComponent(value.booking.bookingId)}` });
-    return;
-  }
-  if (value.messageType === "report_published" || value.messageType === "report_corrected") {
-    uni.navigateTo({ url: `/pages/profile/reports/detail?booking_id=${encodeURIComponent(value.booking.bookingId)}` });
-    return;
-  }
-  uni.navigateTo({ url: "/pages/profile/appointments/index" });
+  uni.navigateTo({ url: appointmentMessageTarget(value, isStaff.value) });
 }
 
-function titleOf(type: AppointmentMessageType) {
-  return ({
-    booking_created: isStaff.value ? "收到新的检查预约" : "预约成功",
-    arrival_60m: "距离最晚到院时间还有 1 小时",
-    arrival_30m: "距离最晚到院时间还有 30 分钟",
-    booking_canceled: "预约已取消",
-    booking_no_show: "患者未到场",
-    report_due: "检查报告待完成",
-    report_overdue: "检查报告仍未完成",
-    report_published: "检查报告已发布",
-    report_corrected: "检查报告已更正",
-  } as Record<AppointmentMessageType, string>)[type];
+function titleOf(value: AppointmentMessage) {
+  return appointmentMessageTitle(value.messageType, isStaff.value);
 }
 
 function detailOf(value: AppointmentMessage) {
-  const booking = value.booking;
-  if (isStaff.value) return `${booking.patientDisplayName || "患者"} · ${booking.itemName}`;
-  return `${booking.itemName} · ${booking.departmentName || "检查科室"}`;
+  return appointmentMessageDetail(value, isStaff.value);
 }
 
 function appointmentOf(value: AppointmentMessage) {
-  const booking = value.booking;
-  return `${booking.serviceDate} ${booking.itemStartTime.slice(0, 5)}–${booking.itemEndTime.slice(0, 5)} · ${booking.roomDisplayName}`;
+  return appointmentMessageSchedule(value);
 }
 
 function formatTime(value: string) {
-  const match = value.match(/^(\d{4}-\d{2}-\d{2})[T\s](\d{2}:\d{2})/);
-  return match ? `${match[1]} ${match[2]}` : value;
+  return appointmentMessageTime(value);
 }
 
 function updateBadge(count: number) {
@@ -196,7 +187,7 @@ function messageOf(error: unknown, fallback: string) {
         <view class="message-card__topline">
           <view class="message-card__title-row">
             <view v-if="!message.readAt" class="unread-dot" />
-            <text class="message-card__title">{{ titleOf(message.messageType) }}</text>
+            <text class="message-card__title">{{ titleOf(message) }}</text>
           </view>
           <text class="message-card__time">{{ formatTime(message.occurredAt) }}</text>
         </view>

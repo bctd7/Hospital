@@ -7,7 +7,9 @@
   },
   "scripts": {
     "dev:mp-weixin": "uni -p mp-weixin",
+    "build:dev:mp-weixin": "node scripts/build-development.mjs",
     "build:mp-weixin": "node scripts/build-release.mjs",
+    "build:all:mp-weixin": "npm run build:dev:mp-weixin && npm run build:mp-weixin",
     "test": "vitest run",
     "type-check": "vue-tsc --noEmit"
   },

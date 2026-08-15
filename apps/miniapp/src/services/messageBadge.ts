@@ -3,7 +3,10 @@ import { sessionState } from "@/stores/session";
 import { hasRole } from "@/utils/appointmentManagement";
 import { currentStaffDepartmentId } from "@/utils/staffDepartmentContext";
 
+let refreshGeneration = 0;
+
 export async function refreshMessageBadge() {
+  const generation = ++refreshGeneration;
   if (sessionState.status !== "authenticated") {
     clearMessageBadge();
     return;
@@ -22,6 +25,7 @@ export async function refreshMessageBadge() {
     } else {
       unreadCount = (await appointmentMessageApi.listMine(1, 1)).unreadCount;
     }
+    if (generation !== refreshGeneration) return;
     if (unreadCount > 0) {
       uni.setTabBarBadge({ index: 2, text: unreadCount > 99 ? "99+" : String(unreadCount) });
     } else {
