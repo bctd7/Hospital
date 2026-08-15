@@ -114,7 +114,11 @@ $variables = foreach ($entry in $phones.GetEnumerator()) {
 }
 
 $seedFile = Join-Path $PSScriptRoot "seed-comprehensive-test-data.sql"
-$sql = ($variables -join "`n") + "`n" + (Get-Content -Raw -LiteralPath $seedFile -Encoding UTF8)
+$patientOneSnapshotVariables = @(
+    "SET @phone_patient_1_masked = '153****8538';"
+    "SET @phone_patient_1_last4 = '8538';"
+)
+$sql = (($variables + $patientOneSnapshotVariables) -join "`n") + "`n" + (Get-Content -Raw -LiteralPath $seedFile -Encoding UTF8)
 $sql | & docker compose --env-file $environmentFile -f $composeFile exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --protocol=socket -uroot --default-character-set=utf8mb4'
 if ($LASTEXITCODE -ne 0) {
     throw "Failed to load comprehensive test data."

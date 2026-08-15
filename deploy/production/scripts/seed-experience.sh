@@ -27,9 +27,32 @@ fingerprint() {
   ' sh "${normalized_phone}"
 }
 
+admin_phones_value="$(docker inspect hospital-production-identity-bootstrap-admin-1 --format '{{range .Config.Env}}{{println .}}{{end}}' | sed -n 's/^IDENTITY_BOOTSTRAP_ADMIN_PHONES=//p')"
+patient_admin_phone=""
+IFS=',' read -r -a configured_admin_phones <<<"${admin_phones_value}"
+for configured_phone in "${configured_admin_phones[@]}"; do
+  phone_digits="${configured_phone//[!0-9]/}"
+  if [[ "${phone_digits}" =~ ^86(153[0-9]{8})$ ]]; then
+    phone_digits="${BASH_REMATCH[1]}"
+  fi
+  if [[ "${phone_digits}" =~ ^153[0-9]{8}$ ]]; then
+    [[ -z "${patient_admin_phone}" ]] || {
+      echo "Experience seed refused: more than one configured administrator starts with 153." >&2
+      exit 1
+    }
+    patient_admin_phone="${phone_digits}"
+  fi
+done
+[[ -n "${patient_admin_phone}" ]] || {
+  echo "Experience seed refused: no configured administrator starts with 153." >&2
+  exit 1
+}
+
 phone_doctor_1="$(fingerprint +8613800000001)"
 phone_doctor_2="$(fingerprint +8613800000002)"
-phone_patient_1="$(fingerprint +8615363658538)"
+phone_patient_1="$(fingerprint "+86${patient_admin_phone}")"
+phone_patient_1_masked="${patient_admin_phone:0:3}****${patient_admin_phone:7:4}"
+phone_patient_1_last4="${patient_admin_phone:7:4}"
 phone_patient_2="$(fingerprint +8613900000002)"
 phone_patient_3="$(fingerprint +8613900000003)"
 phone_patient_4="$(fingerprint +8613900000004)"
@@ -46,7 +69,7 @@ SELECT IF(
        WHERE p.phone_fingerprint = UNHEX('${phone_patient_1}')) = 1
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_items) = 0,
   'ready', 'refuse');\"" | grep -qx ready || {
-    echo "Experience seed refused: expected a fresh database, two bootstrap administrators, and 15363658538 bound to one administrator." >&2
+    echo "Experience seed refused: expected a fresh database, two bootstrap administrators, and the configured 153 administrator bound exactly once." >&2
     exit 1
   }
 
@@ -54,6 +77,8 @@ SELECT IF(
   printf "SET @phone_doctor_1 = UNHEX('%s');\n" "${phone_doctor_1}"
   printf "SET @phone_doctor_2 = UNHEX('%s');\n" "${phone_doctor_2}"
   printf "SET @phone_patient_1 = UNHEX('%s');\n" "${phone_patient_1}"
+  printf "SET @phone_patient_1_masked = '%s';\n" "${phone_patient_1_masked}"
+  printf "SET @phone_patient_1_last4 = '%s';\n" "${phone_patient_1_last4}"
   printf "SET @phone_patient_2 = UNHEX('%s');\n" "${phone_patient_2}"
   printf "SET @phone_patient_3 = UNHEX('%s');\n" "${phone_patient_3}"
   printf "SET @phone_patient_4 = UNHEX('%s');\n" "${phone_patient_4}"
