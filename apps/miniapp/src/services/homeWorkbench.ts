@@ -53,6 +53,14 @@ function patientHome(): HomeWorkbenchView {
             tone: "violet",
             target: { type: "navigate", url: "/pages/profile/patients/index" },
           },
+          {
+            id: "walking-route",
+            title: "检查导航",
+            description: "选择起终点查看步行路线",
+            symbol: "导",
+            tone: "cyan",
+            target: { type: "navigate", url: "/pages/guidance/route/index" },
+          },
         ],
       },
       {
@@ -168,9 +176,11 @@ export function buildHomeWorkbench(
       group.id === "before-visit"
         ? {
             ...group,
-            actions: group.actions.map((action) =>
-              action.id === "my-appointments" ? departmentBookingAction : action,
-            ),
+            actions: group.actions
+              .filter((action) => action.id !== "walking-route")
+              .map((action) =>
+                action.id === "my-appointments" ? departmentBookingAction : action,
+              ),
           }
         : group.id === "after-visit"
           ? {

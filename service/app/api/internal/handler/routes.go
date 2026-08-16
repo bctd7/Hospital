@@ -10,6 +10,7 @@ import (
 	appointmentcatalog "hospital/service/app/api/internal/handler/appointmentcatalog"
 	appointmentresources "hospital/service/app/api/internal/handler/appointmentresources"
 	auth "hospital/service/app/api/internal/handler/auth"
+	guidancerouting "hospital/service/app/api/internal/handler/guidancerouting"
 	guidancerules "hospital/service/app/api/internal/handler/guidancerules"
 	identityadmin "hospital/service/app/api/internal/handler/identityadmin"
 	identityprofile "hospital/service/app/api/internal/handler/identityprofile"
@@ -337,6 +338,20 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: auth.RevokeTokenHandler(serverCtx),
 			},
 		},
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AccessToken},
+			[]rest.Route{
+				{
+					Method:  http.MethodPost,
+					Path:    "/guidance/routes/walking",
+					Handler: guidancerouting.CalculateWalkingRouteHandler(serverCtx),
+				},
+			}...,
+		),
 		rest.WithPrefix("/api/v1"),
 	)
 

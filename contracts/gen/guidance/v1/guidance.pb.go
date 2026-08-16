@@ -577,6 +577,354 @@ func (x *ListPrecedenceRulesResponse) GetRules() []*PrecedenceRule {
 	return nil
 }
 
+type LocationPoint struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Name            string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Address         string                 `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
+	Latitude        float64                `protobuf:"fixed64,3,opt,name=latitude,proto3" json:"latitude,omitempty"`
+	Longitude       float64                `protobuf:"fixed64,4,opt,name=longitude,proto3" json:"longitude,omitempty"`
+	ProviderPlaceId string                 `protobuf:"bytes,5,opt,name=provider_place_id,json=providerPlaceId,proto3" json:"provider_place_id,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *LocationPoint) Reset() {
+	*x = LocationPoint{}
+	mi := &file_guidance_v1_guidance_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *LocationPoint) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LocationPoint) ProtoMessage() {}
+
+func (x *LocationPoint) ProtoReflect() protoreflect.Message {
+	mi := &file_guidance_v1_guidance_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LocationPoint.ProtoReflect.Descriptor instead.
+func (*LocationPoint) Descriptor() ([]byte, []int) {
+	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *LocationPoint) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *LocationPoint) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+func (x *LocationPoint) GetLatitude() float64 {
+	if x != nil {
+		return x.Latitude
+	}
+	return 0
+}
+
+func (x *LocationPoint) GetLongitude() float64 {
+	if x != nil {
+		return x.Longitude
+	}
+	return 0
+}
+
+func (x *LocationPoint) GetProviderPlaceId() string {
+	if x != nil {
+		return x.ProviderPlaceId
+	}
+	return ""
+}
+
+type RoutePoint struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Latitude      float64                `protobuf:"fixed64,1,opt,name=latitude,proto3" json:"latitude,omitempty"`
+	Longitude     float64                `protobuf:"fixed64,2,opt,name=longitude,proto3" json:"longitude,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RoutePoint) Reset() {
+	*x = RoutePoint{}
+	mi := &file_guidance_v1_guidance_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RoutePoint) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RoutePoint) ProtoMessage() {}
+
+func (x *RoutePoint) ProtoReflect() protoreflect.Message {
+	mi := &file_guidance_v1_guidance_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RoutePoint.ProtoReflect.Descriptor instead.
+func (*RoutePoint) Descriptor() ([]byte, []int) {
+	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *RoutePoint) GetLatitude() float64 {
+	if x != nil {
+		return x.Latitude
+	}
+	return 0
+}
+
+func (x *RoutePoint) GetLongitude() float64 {
+	if x != nil {
+		return x.Longitude
+	}
+	return 0
+}
+
+type WalkingRouteStep struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Instruction     string                 `protobuf:"bytes,1,opt,name=instruction,proto3" json:"instruction,omitempty"`
+	RoadName        string                 `protobuf:"bytes,2,opt,name=road_name,json=roadName,proto3" json:"road_name,omitempty"`
+	DistanceMeters  int32                  `protobuf:"varint,3,opt,name=distance_meters,json=distanceMeters,proto3" json:"distance_meters,omitempty"`
+	DurationSeconds int32                  `protobuf:"varint,4,opt,name=duration_seconds,json=durationSeconds,proto3" json:"duration_seconds,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *WalkingRouteStep) Reset() {
+	*x = WalkingRouteStep{}
+	mi := &file_guidance_v1_guidance_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WalkingRouteStep) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WalkingRouteStep) ProtoMessage() {}
+
+func (x *WalkingRouteStep) ProtoReflect() protoreflect.Message {
+	mi := &file_guidance_v1_guidance_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WalkingRouteStep.ProtoReflect.Descriptor instead.
+func (*WalkingRouteStep) Descriptor() ([]byte, []int) {
+	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *WalkingRouteStep) GetInstruction() string {
+	if x != nil {
+		return x.Instruction
+	}
+	return ""
+}
+
+func (x *WalkingRouteStep) GetRoadName() string {
+	if x != nil {
+		return x.RoadName
+	}
+	return ""
+}
+
+func (x *WalkingRouteStep) GetDistanceMeters() int32 {
+	if x != nil {
+		return x.DistanceMeters
+	}
+	return 0
+}
+
+func (x *WalkingRouteStep) GetDurationSeconds() int32 {
+	if x != nil {
+		return x.DurationSeconds
+	}
+	return 0
+}
+
+type CalculateWalkingRouteRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Origin        *LocationPoint         `protobuf:"bytes,1,opt,name=origin,proto3" json:"origin,omitempty"`
+	Destination   *LocationPoint         `protobuf:"bytes,2,opt,name=destination,proto3" json:"destination,omitempty"`
+	RequestId     string                 `protobuf:"bytes,3,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CalculateWalkingRouteRequest) Reset() {
+	*x = CalculateWalkingRouteRequest{}
+	mi := &file_guidance_v1_guidance_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CalculateWalkingRouteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CalculateWalkingRouteRequest) ProtoMessage() {}
+
+func (x *CalculateWalkingRouteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_guidance_v1_guidance_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CalculateWalkingRouteRequest.ProtoReflect.Descriptor instead.
+func (*CalculateWalkingRouteRequest) Descriptor() ([]byte, []int) {
+	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *CalculateWalkingRouteRequest) GetOrigin() *LocationPoint {
+	if x != nil {
+		return x.Origin
+	}
+	return nil
+}
+
+func (x *CalculateWalkingRouteRequest) GetDestination() *LocationPoint {
+	if x != nil {
+		return x.Destination
+	}
+	return nil
+}
+
+func (x *CalculateWalkingRouteRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+type WalkingRoute struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Origin          *LocationPoint         `protobuf:"bytes,1,opt,name=origin,proto3" json:"origin,omitempty"`
+	Destination     *LocationPoint         `protobuf:"bytes,2,opt,name=destination,proto3" json:"destination,omitempty"`
+	DistanceMeters  int32                  `protobuf:"varint,3,opt,name=distance_meters,json=distanceMeters,proto3" json:"distance_meters,omitempty"`
+	DurationSeconds int32                  `protobuf:"varint,4,opt,name=duration_seconds,json=durationSeconds,proto3" json:"duration_seconds,omitempty"`
+	Polyline        []*RoutePoint          `protobuf:"bytes,5,rep,name=polyline,proto3" json:"polyline,omitempty"`
+	Steps           []*WalkingRouteStep    `protobuf:"bytes,6,rep,name=steps,proto3" json:"steps,omitempty"`
+	Provider        string                 `protobuf:"bytes,7,opt,name=provider,proto3" json:"provider,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *WalkingRoute) Reset() {
+	*x = WalkingRoute{}
+	mi := &file_guidance_v1_guidance_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WalkingRoute) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WalkingRoute) ProtoMessage() {}
+
+func (x *WalkingRoute) ProtoReflect() protoreflect.Message {
+	mi := &file_guidance_v1_guidance_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WalkingRoute.ProtoReflect.Descriptor instead.
+func (*WalkingRoute) Descriptor() ([]byte, []int) {
+	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *WalkingRoute) GetOrigin() *LocationPoint {
+	if x != nil {
+		return x.Origin
+	}
+	return nil
+}
+
+func (x *WalkingRoute) GetDestination() *LocationPoint {
+	if x != nil {
+		return x.Destination
+	}
+	return nil
+}
+
+func (x *WalkingRoute) GetDistanceMeters() int32 {
+	if x != nil {
+		return x.DistanceMeters
+	}
+	return 0
+}
+
+func (x *WalkingRoute) GetDurationSeconds() int32 {
+	if x != nil {
+		return x.DurationSeconds
+	}
+	return 0
+}
+
+func (x *WalkingRoute) GetPolyline() []*RoutePoint {
+	if x != nil {
+		return x.Polyline
+	}
+	return nil
+}
+
+func (x *WalkingRoute) GetSteps() []*WalkingRouteStep {
+	if x != nil {
+		return x.Steps
+	}
+	return nil
+}
+
+func (x *WalkingRoute) GetProvider() string {
+	if x != nil {
+		return x.Provider
+	}
+	return ""
+}
+
 var File_guidance_v1_guidance_proto protoreflect.FileDescriptor
 
 const file_guidance_v1_guidance_proto_rawDesc = "" +
@@ -635,12 +983,41 @@ const file_guidance_v1_guidance_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\x0f \x01(\tR\tupdatedAt\"Y\n" +
 	"\x1bListPrecedenceRulesResponse\x12:\n" +
-	"\x05rules\x18\x01 \x03(\v2$.hospital.guidance.v1.PrecedenceRuleR\x05rules2\xee\x03\n" +
+	"\x05rules\x18\x01 \x03(\v2$.hospital.guidance.v1.PrecedenceRuleR\x05rules\"\xa3\x01\n" +
+	"\rLocationPoint\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
+	"\aaddress\x18\x02 \x01(\tR\aaddress\x12\x1a\n" +
+	"\blatitude\x18\x03 \x01(\x01R\blatitude\x12\x1c\n" +
+	"\tlongitude\x18\x04 \x01(\x01R\tlongitude\x12*\n" +
+	"\x11provider_place_id\x18\x05 \x01(\tR\x0fproviderPlaceId\"F\n" +
+	"\n" +
+	"RoutePoint\x12\x1a\n" +
+	"\blatitude\x18\x01 \x01(\x01R\blatitude\x12\x1c\n" +
+	"\tlongitude\x18\x02 \x01(\x01R\tlongitude\"\xa5\x01\n" +
+	"\x10WalkingRouteStep\x12 \n" +
+	"\vinstruction\x18\x01 \x01(\tR\vinstruction\x12\x1b\n" +
+	"\troad_name\x18\x02 \x01(\tR\broadName\x12'\n" +
+	"\x0fdistance_meters\x18\x03 \x01(\x05R\x0edistanceMeters\x12)\n" +
+	"\x10duration_seconds\x18\x04 \x01(\x05R\x0fdurationSeconds\"\xc1\x01\n" +
+	"\x1cCalculateWalkingRouteRequest\x12;\n" +
+	"\x06origin\x18\x01 \x01(\v2#.hospital.guidance.v1.LocationPointR\x06origin\x12E\n" +
+	"\vdestination\x18\x02 \x01(\v2#.hospital.guidance.v1.LocationPointR\vdestination\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x03 \x01(\tR\trequestId\"\xfe\x02\n" +
+	"\fWalkingRoute\x12;\n" +
+	"\x06origin\x18\x01 \x01(\v2#.hospital.guidance.v1.LocationPointR\x06origin\x12E\n" +
+	"\vdestination\x18\x02 \x01(\v2#.hospital.guidance.v1.LocationPointR\vdestination\x12'\n" +
+	"\x0fdistance_meters\x18\x03 \x01(\x05R\x0edistanceMeters\x12)\n" +
+	"\x10duration_seconds\x18\x04 \x01(\x05R\x0fdurationSeconds\x12<\n" +
+	"\bpolyline\x18\x05 \x03(\v2 .hospital.guidance.v1.RoutePointR\bpolyline\x12<\n" +
+	"\x05steps\x18\x06 \x03(\v2&.hospital.guidance.v1.WalkingRouteStepR\x05steps\x12\x1a\n" +
+	"\bprovider\x18\a \x01(\tR\bprovider2\xdf\x04\n" +
 	"\x0fGuidanceService\x12o\n" +
 	"\x14CreatePrecedenceRule\x121.hospital.guidance.v1.CreatePrecedenceRuleRequest\x1a$.hospital.guidance.v1.PrecedenceRule\x12o\n" +
 	"\x14UpdatePrecedenceRule\x121.hospital.guidance.v1.UpdatePrecedenceRuleRequest\x1a$.hospital.guidance.v1.PrecedenceRule\x12}\n" +
 	"\x14DeletePrecedenceRule\x121.hospital.guidance.v1.DeletePrecedenceRuleRequest\x1a2.hospital.guidance.v1.DeletePrecedenceRuleResponse\x12z\n" +
-	"\x13ListPrecedenceRules\x120.hospital.guidance.v1.ListPrecedenceRulesRequest\x1a1.hospital.guidance.v1.ListPrecedenceRulesResponseB/Z-hospital/contracts/gen/guidance/v1;guidancev1b\x06proto3"
+	"\x13ListPrecedenceRules\x120.hospital.guidance.v1.ListPrecedenceRulesRequest\x1a1.hospital.guidance.v1.ListPrecedenceRulesResponse\x12o\n" +
+	"\x15CalculateWalkingRoute\x122.hospital.guidance.v1.CalculateWalkingRouteRequest\x1a\".hospital.guidance.v1.WalkingRouteB/Z-hospital/contracts/gen/guidance/v1;guidancev1b\x06proto3"
 
 var (
 	file_guidance_v1_guidance_proto_rawDescOnce sync.Once
@@ -654,7 +1031,7 @@ func file_guidance_v1_guidance_proto_rawDescGZIP() []byte {
 	return file_guidance_v1_guidance_proto_rawDescData
 }
 
-var file_guidance_v1_guidance_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_guidance_v1_guidance_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_guidance_v1_guidance_proto_goTypes = []any{
 	(*CreatePrecedenceRuleRequest)(nil),  // 0: hospital.guidance.v1.CreatePrecedenceRuleRequest
 	(*UpdatePrecedenceRuleRequest)(nil),  // 1: hospital.guidance.v1.UpdatePrecedenceRuleRequest
@@ -663,22 +1040,35 @@ var file_guidance_v1_guidance_proto_goTypes = []any{
 	(*ListPrecedenceRulesRequest)(nil),   // 4: hospital.guidance.v1.ListPrecedenceRulesRequest
 	(*PrecedenceRule)(nil),               // 5: hospital.guidance.v1.PrecedenceRule
 	(*ListPrecedenceRulesResponse)(nil),  // 6: hospital.guidance.v1.ListPrecedenceRulesResponse
+	(*LocationPoint)(nil),                // 7: hospital.guidance.v1.LocationPoint
+	(*RoutePoint)(nil),                   // 8: hospital.guidance.v1.RoutePoint
+	(*WalkingRouteStep)(nil),             // 9: hospital.guidance.v1.WalkingRouteStep
+	(*CalculateWalkingRouteRequest)(nil), // 10: hospital.guidance.v1.CalculateWalkingRouteRequest
+	(*WalkingRoute)(nil),                 // 11: hospital.guidance.v1.WalkingRoute
 }
 var file_guidance_v1_guidance_proto_depIdxs = []int32{
-	5, // 0: hospital.guidance.v1.ListPrecedenceRulesResponse.rules:type_name -> hospital.guidance.v1.PrecedenceRule
-	0, // 1: hospital.guidance.v1.GuidanceService.CreatePrecedenceRule:input_type -> hospital.guidance.v1.CreatePrecedenceRuleRequest
-	1, // 2: hospital.guidance.v1.GuidanceService.UpdatePrecedenceRule:input_type -> hospital.guidance.v1.UpdatePrecedenceRuleRequest
-	2, // 3: hospital.guidance.v1.GuidanceService.DeletePrecedenceRule:input_type -> hospital.guidance.v1.DeletePrecedenceRuleRequest
-	4, // 4: hospital.guidance.v1.GuidanceService.ListPrecedenceRules:input_type -> hospital.guidance.v1.ListPrecedenceRulesRequest
-	5, // 5: hospital.guidance.v1.GuidanceService.CreatePrecedenceRule:output_type -> hospital.guidance.v1.PrecedenceRule
-	5, // 6: hospital.guidance.v1.GuidanceService.UpdatePrecedenceRule:output_type -> hospital.guidance.v1.PrecedenceRule
-	3, // 7: hospital.guidance.v1.GuidanceService.DeletePrecedenceRule:output_type -> hospital.guidance.v1.DeletePrecedenceRuleResponse
-	6, // 8: hospital.guidance.v1.GuidanceService.ListPrecedenceRules:output_type -> hospital.guidance.v1.ListPrecedenceRulesResponse
-	5, // [5:9] is the sub-list for method output_type
-	1, // [1:5] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	5,  // 0: hospital.guidance.v1.ListPrecedenceRulesResponse.rules:type_name -> hospital.guidance.v1.PrecedenceRule
+	7,  // 1: hospital.guidance.v1.CalculateWalkingRouteRequest.origin:type_name -> hospital.guidance.v1.LocationPoint
+	7,  // 2: hospital.guidance.v1.CalculateWalkingRouteRequest.destination:type_name -> hospital.guidance.v1.LocationPoint
+	7,  // 3: hospital.guidance.v1.WalkingRoute.origin:type_name -> hospital.guidance.v1.LocationPoint
+	7,  // 4: hospital.guidance.v1.WalkingRoute.destination:type_name -> hospital.guidance.v1.LocationPoint
+	8,  // 5: hospital.guidance.v1.WalkingRoute.polyline:type_name -> hospital.guidance.v1.RoutePoint
+	9,  // 6: hospital.guidance.v1.WalkingRoute.steps:type_name -> hospital.guidance.v1.WalkingRouteStep
+	0,  // 7: hospital.guidance.v1.GuidanceService.CreatePrecedenceRule:input_type -> hospital.guidance.v1.CreatePrecedenceRuleRequest
+	1,  // 8: hospital.guidance.v1.GuidanceService.UpdatePrecedenceRule:input_type -> hospital.guidance.v1.UpdatePrecedenceRuleRequest
+	2,  // 9: hospital.guidance.v1.GuidanceService.DeletePrecedenceRule:input_type -> hospital.guidance.v1.DeletePrecedenceRuleRequest
+	4,  // 10: hospital.guidance.v1.GuidanceService.ListPrecedenceRules:input_type -> hospital.guidance.v1.ListPrecedenceRulesRequest
+	10, // 11: hospital.guidance.v1.GuidanceService.CalculateWalkingRoute:input_type -> hospital.guidance.v1.CalculateWalkingRouteRequest
+	5,  // 12: hospital.guidance.v1.GuidanceService.CreatePrecedenceRule:output_type -> hospital.guidance.v1.PrecedenceRule
+	5,  // 13: hospital.guidance.v1.GuidanceService.UpdatePrecedenceRule:output_type -> hospital.guidance.v1.PrecedenceRule
+	3,  // 14: hospital.guidance.v1.GuidanceService.DeletePrecedenceRule:output_type -> hospital.guidance.v1.DeletePrecedenceRuleResponse
+	6,  // 15: hospital.guidance.v1.GuidanceService.ListPrecedenceRules:output_type -> hospital.guidance.v1.ListPrecedenceRulesResponse
+	11, // 16: hospital.guidance.v1.GuidanceService.CalculateWalkingRoute:output_type -> hospital.guidance.v1.WalkingRoute
+	12, // [12:17] is the sub-list for method output_type
+	7,  // [7:12] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_guidance_v1_guidance_proto_init() }
@@ -692,7 +1082,7 @@ func file_guidance_v1_guidance_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_guidance_v1_guidance_proto_rawDesc), len(file_guidance_v1_guidance_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

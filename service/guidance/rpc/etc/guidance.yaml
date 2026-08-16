@@ -23,3 +23,8 @@ AppointmentRPC:
   Endpoints:
     - 127.0.0.1:8081
   NonBlock: true
+BaiduMap:
+  Endpoint: https://api.map.baidu.com/direction/v2/walking
+  AccessKey: ${BAIDU_MAP_SERVER_AK}
+  SecurityKey: ${BAIDU_MAP_SERVER_SK}
+  TimeoutMilliseconds: 5000

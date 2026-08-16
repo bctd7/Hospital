@@ -15,6 +15,9 @@
       "ignoreDevUnusedFiles": false,
       "ignoreUploadUnusedFiles": false
     },
+    "requiredPrivateInfos": [
+      "chooseLocation"
+    ],
     "usingComponents": true
   },
   "uniStatistics": {

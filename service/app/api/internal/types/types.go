@@ -176,6 +176,11 @@ type BookingResponse struct {
 	ReportVersion                 int64  `json:"report_version,omitempty"`
 }
 
+type CalculateWalkingRouteRequest struct {
+	Origin      GuidanceLocationPoint `json:"origin"`
+	Destination GuidanceLocationPoint `json:"destination"`
+}
+
 type CallNextBookingAPIRequest struct {
 	RoomID       string `path:"roomId"`
 	DepartmentID string `json:"department_id"`
@@ -407,6 +412,19 @@ type ExaminationReportResponse struct {
 	CurrentVersion         ReportVersionResponse `json:"current_version"`
 	CreatedAt              string                `json:"created_at"`
 	UpdatedAt              string                `json:"updated_at"`
+}
+
+type GuidanceLocationPoint struct {
+	Name            string  `json:"name"`
+	Address         string  `json:"address,optional"`
+	Latitude        float64 `json:"latitude"`
+	Longitude       float64 `json:"longitude"`
+	ProviderPlaceID string  `json:"provider_place_id,optional"`
+}
+
+type GuidanceRoutePoint struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
 }
 
 type HealthResponse struct {
@@ -862,6 +880,23 @@ type UpdatePrecedenceRuleRequest struct {
 	PatientMessage  string `json:"patient_message,optional"`
 	ExpectedVersion int64  `json:"expected_version"`
 	OperationID     string `json:"operation_id"`
+}
+
+type WalkingRouteResponse struct {
+	Origin          GuidanceLocationPoint      `json:"origin"`
+	Destination     GuidanceLocationPoint      `json:"destination"`
+	DistanceMeters  int32                      `json:"distance_meters"`
+	DurationSeconds int32                      `json:"duration_seconds"`
+	Polyline        []GuidanceRoutePoint       `json:"polyline"`
+	Steps           []WalkingRouteStepResponse `json:"steps"`
+	Provider        string                     `json:"provider"`
+}
+
+type WalkingRouteStepResponse struct {
+	Instruction     string `json:"instruction"`
+	RoadName        string `json:"road_name"`
+	DistanceMeters  int32  `json:"distance_meters"`
+	DurationSeconds int32  `json:"duration_seconds"`
 }
 
 type WeeklyWindowsPathRequest struct {

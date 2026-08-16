@@ -19,10 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GuidanceService_CreatePrecedenceRule_FullMethodName = "/hospital.guidance.v1.GuidanceService/CreatePrecedenceRule"
-	GuidanceService_UpdatePrecedenceRule_FullMethodName = "/hospital.guidance.v1.GuidanceService/UpdatePrecedenceRule"
-	GuidanceService_DeletePrecedenceRule_FullMethodName = "/hospital.guidance.v1.GuidanceService/DeletePrecedenceRule"
-	GuidanceService_ListPrecedenceRules_FullMethodName  = "/hospital.guidance.v1.GuidanceService/ListPrecedenceRules"
+	GuidanceService_CreatePrecedenceRule_FullMethodName  = "/hospital.guidance.v1.GuidanceService/CreatePrecedenceRule"
+	GuidanceService_UpdatePrecedenceRule_FullMethodName  = "/hospital.guidance.v1.GuidanceService/UpdatePrecedenceRule"
+	GuidanceService_DeletePrecedenceRule_FullMethodName  = "/hospital.guidance.v1.GuidanceService/DeletePrecedenceRule"
+	GuidanceService_ListPrecedenceRules_FullMethodName   = "/hospital.guidance.v1.GuidanceService/ListPrecedenceRules"
+	GuidanceService_CalculateWalkingRoute_FullMethodName = "/hospital.guidance.v1.GuidanceService/CalculateWalkingRoute"
 )
 
 // GuidanceServiceClient is the client API for GuidanceService service.
@@ -33,6 +34,7 @@ type GuidanceServiceClient interface {
 	UpdatePrecedenceRule(ctx context.Context, in *UpdatePrecedenceRuleRequest, opts ...grpc.CallOption) (*PrecedenceRule, error)
 	DeletePrecedenceRule(ctx context.Context, in *DeletePrecedenceRuleRequest, opts ...grpc.CallOption) (*DeletePrecedenceRuleResponse, error)
 	ListPrecedenceRules(ctx context.Context, in *ListPrecedenceRulesRequest, opts ...grpc.CallOption) (*ListPrecedenceRulesResponse, error)
+	CalculateWalkingRoute(ctx context.Context, in *CalculateWalkingRouteRequest, opts ...grpc.CallOption) (*WalkingRoute, error)
 }
 
 type guidanceServiceClient struct {
@@ -83,6 +85,16 @@ func (c *guidanceServiceClient) ListPrecedenceRules(ctx context.Context, in *Lis
 	return out, nil
 }
 
+func (c *guidanceServiceClient) CalculateWalkingRoute(ctx context.Context, in *CalculateWalkingRouteRequest, opts ...grpc.CallOption) (*WalkingRoute, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(WalkingRoute)
+	err := c.cc.Invoke(ctx, GuidanceService_CalculateWalkingRoute_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GuidanceServiceServer is the server API for GuidanceService service.
 // All implementations must embed UnimplementedGuidanceServiceServer
 // for forward compatibility.
@@ -91,6 +103,7 @@ type GuidanceServiceServer interface {
 	UpdatePrecedenceRule(context.Context, *UpdatePrecedenceRuleRequest) (*PrecedenceRule, error)
 	DeletePrecedenceRule(context.Context, *DeletePrecedenceRuleRequest) (*DeletePrecedenceRuleResponse, error)
 	ListPrecedenceRules(context.Context, *ListPrecedenceRulesRequest) (*ListPrecedenceRulesResponse, error)
+	CalculateWalkingRoute(context.Context, *CalculateWalkingRouteRequest) (*WalkingRoute, error)
 	mustEmbedUnimplementedGuidanceServiceServer()
 }
 
@@ -112,6 +125,9 @@ func (UnimplementedGuidanceServiceServer) DeletePrecedenceRule(context.Context, 
 }
 func (UnimplementedGuidanceServiceServer) ListPrecedenceRules(context.Context, *ListPrecedenceRulesRequest) (*ListPrecedenceRulesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListPrecedenceRules not implemented")
+}
+func (UnimplementedGuidanceServiceServer) CalculateWalkingRoute(context.Context, *CalculateWalkingRouteRequest) (*WalkingRoute, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CalculateWalkingRoute not implemented")
 }
 func (UnimplementedGuidanceServiceServer) mustEmbedUnimplementedGuidanceServiceServer() {}
 func (UnimplementedGuidanceServiceServer) testEmbeddedByValue()                         {}
@@ -206,6 +222,24 @@ func _GuidanceService_ListPrecedenceRules_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GuidanceService_CalculateWalkingRoute_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CalculateWalkingRouteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GuidanceServiceServer).CalculateWalkingRoute(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GuidanceService_CalculateWalkingRoute_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GuidanceServiceServer).CalculateWalkingRoute(ctx, req.(*CalculateWalkingRouteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GuidanceService_ServiceDesc is the grpc.ServiceDesc for GuidanceService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -228,6 +262,10 @@ var GuidanceService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListPrecedenceRules",
 			Handler:    _GuidanceService_ListPrecedenceRules_Handler,
+		},
+		{
+			MethodName: "CalculateWalkingRoute",
+			Handler:    _GuidanceService_CalculateWalkingRoute_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

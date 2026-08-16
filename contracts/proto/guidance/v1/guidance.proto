@@ -9,6 +9,7 @@ service GuidanceService {
   rpc UpdatePrecedenceRule(UpdatePrecedenceRuleRequest) returns (PrecedenceRule);
   rpc DeletePrecedenceRule(DeletePrecedenceRuleRequest) returns (DeletePrecedenceRuleResponse);
   rpc ListPrecedenceRules(ListPrecedenceRulesRequest) returns (ListPrecedenceRulesResponse);
+  rpc CalculateWalkingRoute(CalculateWalkingRouteRequest) returns (WalkingRoute);
 }
 
 message CreatePrecedenceRuleRequest {
@@ -68,4 +69,40 @@ message PrecedenceRule {
 
 message ListPrecedenceRulesResponse {
   repeated PrecedenceRule rules = 1;
+}
+
+message LocationPoint {
+  string name = 1;
+  string address = 2;
+  double latitude = 3;
+  double longitude = 4;
+  string provider_place_id = 5;
+}
+
+message RoutePoint {
+  double latitude = 1;
+  double longitude = 2;
+}
+
+message WalkingRouteStep {
+  string instruction = 1;
+  string road_name = 2;
+  int32 distance_meters = 3;
+  int32 duration_seconds = 4;
+}
+
+message CalculateWalkingRouteRequest {
+  LocationPoint origin = 1;
+  LocationPoint destination = 2;
+  string request_id = 3;
+}
+
+message WalkingRoute {
+  LocationPoint origin = 1;
+  LocationPoint destination = 2;
+  int32 distance_meters = 3;
+  int32 duration_seconds = 4;
+  repeated RoutePoint polyline = 5;
+  repeated WalkingRouteStep steps = 6;
+  string provider = 7;
 }

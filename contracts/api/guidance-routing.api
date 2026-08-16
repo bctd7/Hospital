@@ -1,0 +1,49 @@
+syntax = "v1"
+
+type (
+	GuidanceLocationPoint {
+		Name            string  `json:"name"`
+		Address         string  `json:"address,optional"`
+		Latitude        float64 `json:"latitude"`
+		Longitude       float64 `json:"longitude"`
+		ProviderPlaceID string  `json:"provider_place_id,optional"`
+	}
+
+	GuidanceRoutePoint {
+		Latitude  float64 `json:"latitude"`
+		Longitude float64 `json:"longitude"`
+	}
+
+	WalkingRouteStepResponse {
+		Instruction    string `json:"instruction"`
+		RoadName       string `json:"road_name"`
+		DistanceMeters int32  `json:"distance_meters"`
+		DurationSeconds int32 `json:"duration_seconds"`
+	}
+
+	CalculateWalkingRouteRequest {
+		Origin      GuidanceLocationPoint `json:"origin"`
+		Destination GuidanceLocationPoint `json:"destination"`
+	}
+
+	WalkingRouteResponse {
+		Origin          GuidanceLocationPoint       `json:"origin"`
+		Destination     GuidanceLocationPoint       `json:"destination"`
+		DistanceMeters  int32                       `json:"distance_meters"`
+		DurationSeconds int32                       `json:"duration_seconds"`
+		Polyline        []GuidanceRoutePoint        `json:"polyline"`
+		Steps           []WalkingRouteStepResponse `json:"steps"`
+		Provider        string                      `json:"provider"`
+	}
+)
+
+@server (
+	prefix:     /api/v1
+	group:      guidancerouting
+	middleware: AccessToken
+	authType:   BearerAuth
+)
+service app-api {
+	@handler calculateWalkingRoute
+	post /guidance/routes/walking (CalculateWalkingRouteRequest) returns (WalkingRouteResponse)
+}

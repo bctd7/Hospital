@@ -42,3 +42,8 @@ func (s *GuidanceServiceServer) ListPrecedenceRules(ctx context.Context, in *v1_
 	l := logic.NewListPrecedenceRulesLogic(ctx, s.svcCtx)
 	return l.ListPrecedenceRules(in)
 }
+
+func (s *GuidanceServiceServer) CalculateWalkingRoute(ctx context.Context, in *v1_guidancev1.CalculateWalkingRouteRequest) (*v1_guidancev1.WalkingRoute, error) {
+	l := logic.NewCalculateWalkingRouteLogic(ctx, s.svcCtx)
+	return l.CalculateWalkingRoute(in)
+}

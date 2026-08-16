@@ -37,6 +37,14 @@ describe("home workbench", () => {
         url: "/pages/profile/appointments/index",
       },
     });
+    expect(view.serviceGroups[0]?.actions[2]).toMatchObject({
+      id: "walking-route",
+      title: "检查导航",
+      target: {
+        type: "navigate",
+        url: "/pages/guidance/route/index",
+      },
+    });
     expect(view.serviceGroups[2]?.actions.map((action) => action.id)).toEqual([
       "reports",
       "invoice",
@@ -84,6 +92,7 @@ describe("home workbench", () => {
       "invoice",
       "inpatient-copy",
     ]);
+    expect(view.serviceGroups[0]?.actions.map((action) => action.id)).not.toContain("walking-route");
   });
 
   it("uses the examination management entry for an administrator", () => {

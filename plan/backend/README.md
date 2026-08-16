@@ -1,6 +1,6 @@
 # 后端规划
 
-后端当前由 App API、Identity RPC 和 Appointment RPC 三个可运行服务组成。这里保留稳定架构和模块状态，
+后端当前由 App API、Identity RPC、Appointment RPC 和 Guidance RPC 四个可运行服务组成。这里保留稳定架构和模块状态，
 不复制契约字段或 SQL 表结构。
 
 ## 文档
@@ -21,12 +21,13 @@ HTTP Handler
   -> gRPC Client
   -> RPC Interceptor
   -> RPC Logic
-  -> Domain Manager
+  -> Domain Manager / Calculator
   -> Store / Repository
 ```
 
 - Handler、Server 和 Logic 只做协议适配、上下文读取与错误转换；
 - Manager 负责权限、状态机、幂等、事务和领域规则；
+- 无状态且职责单一的计算能力可以使用含义明确的 Calculator，不强行包装成 Manager；
 - 领域根包保存模型、稳定错误和窄 Store 端口；
 - Repository 实现 Store，不反向决定业务状态；
 - ServiceContext 只创建、装配和关闭依赖。

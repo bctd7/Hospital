@@ -79,6 +79,12 @@
       "style": {
         "navigationBarTitleText": "设置"
       }
+    },
+    {
+      "path": "pages/guidance/route/index",
+      "style": {
+        "navigationBarTitleText": "检查导航"
+      }
     }
   ],
   "subPackages": [
