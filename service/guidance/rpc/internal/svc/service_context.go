@@ -16,6 +16,8 @@ import (
 	"hospital/common/authz/version/redisstore"
 	"hospital/service/appointment/rpc/appointmentservice"
 	"hospital/service/guidance/rpc/internal/config"
+	"hospital/service/guidance/rpc/internal/planning"
+	"hospital/service/guidance/rpc/internal/projectconfiguration"
 	"hospital/service/guidance/rpc/internal/repository/mysqlstore"
 	"hospital/service/guidance/rpc/internal/routing"
 	"hospital/service/guidance/rpc/internal/routing/amap"
@@ -26,6 +28,8 @@ import (
 type ServiceContext struct {
 	Config                        config.Config
 	PrecedenceManager             *precedencemanager.Manager
+	ProjectConfigurationManager   *projectconfiguration.Manager
+	PlanningManager               *planning.Manager
 	RoutingManager                *routing.Manager
 	TokenManager                  *authn.TokenManager
 	AuthorizationVersionValidator *authversion.Validator
@@ -79,6 +83,10 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		return nil, fmt.Errorf("create guidance authorization version validator: %w", err)
 	}
 	appointmentClient := appointmentservice.NewAppointmentService(zrpc.MustNewClient(c.AppointmentRPC))
+	appointmentGateway, err := projectconfiguration.NewAppointmentGateway(appointmentClient)
+	if err != nil {
+		return nil, err
+	}
 	directory, err := appointmentcatalog.New(appointmentClient)
 	if err != nil {
 		return nil, err
@@ -86,6 +94,18 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 	manager, err := precedencemanager.New(store, directory)
 	if err != nil {
 		return nil, err
+	}
+	configurationManager, err := projectconfiguration.NewManager(store, appointmentGateway, appointmentGateway)
+	if err != nil {
+		return nil, fmt.Errorf("create guidance project configuration manager: %w", err)
+	}
+	planningGateway, err := planning.NewAppointmentGateway(appointmentClient)
+	if err != nil {
+		return nil, err
+	}
+	planningManager, err := planning.NewManager(store, planningGateway)
+	if err != nil {
+		return nil, fmt.Errorf("create guidance planning manager: %w", err)
 	}
 	mapClient := amap.New(amap.Config{
 		PlaceSearchEndpoint: c.AMap.PlaceSearchEndpoint, GeocodeEndpoint: c.AMap.GeocodeEndpoint,
@@ -98,7 +118,7 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 	}
 	assembled = true
 	return &ServiceContext{
-		Config: c, PrecedenceManager: manager, RoutingManager: routingManager,
+		Config: c, PrecedenceManager: manager, ProjectConfigurationManager: configurationManager, PlanningManager: planningManager, RoutingManager: routingManager,
 		TokenManager: tokenManager, AuthorizationVersionValidator: validator,
 		store: store, authorizationRedis: authorizationRedis,
 	}, nil

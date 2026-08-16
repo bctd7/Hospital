@@ -52,10 +52,11 @@ if ($Reset) {
     $dropSQL = @"
 DROP DATABASE IF EXISTS hospital_appointment;
 DROP DATABASE IF EXISTS hospital_identity;
+DROP DATABASE IF EXISTS hospital_guidance;
 "@
     $dropSQL | & docker compose --env-file $environmentFile -f $composeFile exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --protocol=socket -uroot'
     if ($LASTEXITCODE -ne 0) {
-        throw "Failed to reset local Identity and Appointment databases."
+        throw "Failed to reset local Identity, Appointment, and Guidance databases."
     }
     & (Join-Path $PSScriptRoot "db-bootstrap-local.ps1")
     if ($LASTEXITCODE -ne 0) {
@@ -160,7 +161,10 @@ SELECT IF(
        JOIN hospital_identity.identity_roles r ON r.id = ar.role_id AND r.code = 'super_admin'
        JOIN hospital_appointment.appointment_examination_reports report ON report.patient_account_id = p.account_id
        WHERE p.phone_fingerprint = @phone_patient_1 AND report.status = 'published') >= 4
-  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_message_reads) >= 1,
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_message_reads) >= 1
+  AND (SELECT COUNT(*) FROM hospital_guidance.guidance_item_configurations) = 10
+  AND (SELECT COUNT(*) FROM hospital_guidance.guidance_precedence_rules
+       WHERE predecessor_department_id <> successor_department_id) >= 1,
   'ready', 'incomplete');
 "@
 $verification = $verificationSQL | & docker compose --env-file $environmentFile -f $composeFile exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --protocol=socket -uroot -N'

@@ -32,33 +32,6 @@ describe("appointment HTTP adapter", () => {
     expect(relations.items).toEqual([]);
   });
 
-  it("creates an examination item with a fresh idempotency id", async () => {
-    requestMock.mockResolvedValueOnce({
-      item_id: "item-a",
-      owner_department_id: "department-a",
-      name: "胸部 CT",
-      description: "说明",
-      status: "active",
-      version: 1,
-      created_at: "now",
-      updated_at: "now",
-    });
-    const { appointmentManagementApi } = await import("@/api/appointment");
-
-    const created = await appointmentManagementApi.createItem("department-a", "胸部 CT", "说明");
-
-    expect(created.ownerDepartmentId).toBe("department-a");
-    expect(requestMock).toHaveBeenCalledWith(expect.objectContaining({
-      path: "/api/v1/admin/appointment/examination-items",
-      method: "POST",
-      authenticated: true,
-      data: expect.objectContaining({
-        owner_department_id: "department-a",
-        operation_id: expect.stringMatching(/^[0-9a-f-]{36}$/),
-      }),
-    }));
-  });
-
   it("uses the relation id and optimistic version when disabling a room item", async () => {
     requestMock.mockResolvedValueOnce({
       relation_id: "relation-a",

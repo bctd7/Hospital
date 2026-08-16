@@ -42,3 +42,102 @@ export interface SearchGuidancePlacesInput {
 export interface SearchGuidancePlacesResult {
   places: GuidanceLocationPoint[];
 }
+
+export type PreparationRuleType = "fasting" | "no_water" | "drink_water";
+export type PreparationStartMode = "advance_range" | "previous_day_time";
+
+export interface GuidancePreparationRule {
+  rule_type: PreparationRuleType;
+  start_mode: PreparationStartMode;
+  min_advance_minutes: number;
+  recommended_advance_minutes: number;
+  max_advance_minutes: number;
+  previous_day_time: string;
+  readiness_hint: string;
+}
+
+export interface GuidancePatientReminder {
+  text: string;
+  advance_minutes: number;
+}
+
+export interface PreparationRulePreview {
+  description: string;
+  preparation_rules: GuidancePreparationRule[];
+  reminders: GuidancePatientReminder[];
+  unresolved_fragments: string[];
+}
+
+export interface ConfiguredPrecedenceRule {
+  predecessor_item_id: string;
+  successor_item_id: string;
+  staff_reason: string;
+  patient_message: string;
+}
+
+export interface ExaminationItemConfiguration {
+  item_id: string;
+  owner_department_id: string;
+  item_name: string;
+  estimated_duration_minutes: number;
+  status: string;
+  item_version: number;
+  description: string;
+  precedence_rules: ConfiguredPrecedenceRule[];
+  preparation_rules: GuidancePreparationRule[];
+  reminders: GuidancePatientReminder[];
+  configuration_version: number;
+  updated_at: string;
+}
+
+export interface ConfigureExaminationItemInput {
+  action: "create" | "update";
+  item_id?: string;
+  owner_department_id: string;
+  item_name: string;
+  estimated_duration_minutes: number;
+  expected_item_version: number;
+  description: string;
+  precedence_rules: ConfiguredPrecedenceRule[];
+  preparation_rules: GuidancePreparationRule[];
+  reminders: GuidancePatientReminder[];
+  expected_configuration_version: number;
+  operation_id: string;
+}
+
+export interface SmartAppointmentPlanItem {
+  item_id: string;
+  item_name: string;
+  room_id: string;
+  room_display_name: string;
+  campus_id: string;
+  building: string;
+  floor_number: number;
+  room_number: string;
+  service_date: string;
+  session: "morning" | "afternoon";
+  estimated_duration_minutes: number;
+  reason: string;
+}
+
+export interface SmartAppointmentPlan {
+  plan_id: string;
+  title: string;
+  summary: string;
+  items: SmartAppointmentPlanItem[];
+  expires_at: string;
+}
+
+export interface TodayRecommendationStage {
+  stage_no: number;
+  title: string;
+  status: string;
+  items: SmartAppointmentPlanItem[];
+  focus: string;
+}
+
+export interface TodayExaminationRecommendation {
+  service_date: string;
+  stages: TodayRecommendationStage[];
+  updated_at: string;
+}

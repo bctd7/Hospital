@@ -26,11 +26,11 @@ function patientHome(): HomeWorkbenchView {
     secondaryAction: {
       id: "smart-guide",
       title: "智能导诊",
-      description: "智能导诊",
+      description: "按准备规则生成本周预约方案",
       symbol: "诊",
       tone: "cyan",
-      badge: "建设中",
-      target: { type: "unavailable", message: "智能导诊功能正在建设中" },
+      badge: "智能规划",
+      target: { type: "navigate", url: "/pages/guidance/planning/index" },
     },
     serviceGroups: [
       {
@@ -52,6 +52,14 @@ function patientHome(): HomeWorkbenchView {
             symbol: "人",
             tone: "violet",
             target: { type: "navigate", url: "/pages/profile/patients/index" },
+          },
+          {
+            id: "today-guidance",
+            title: "当日检查顺序",
+            description: "查看今天的推荐检查阶段",
+            symbol: "序",
+            tone: "cyan",
+            target: { type: "navigate", url: "/pages/guidance/today/index" },
           },
           {
             id: "walking-route",
@@ -134,15 +142,27 @@ export function buildHomeWorkbench(
   const view = { ...patientHome(), variant };
   if (variant === "staff") {
     view.primaryAction = {
-      id: "manage-examination-items",
-      title: "检查项目管理",
-      description: "维护项目、房间与每周开放时间",
+      id: "manage-examination-resources",
+      title: "检查资源管理",
+      description: "维护房间、项目关联与每周开放时间",
       symbol: "检",
       tone: "cyan",
       badge: "真实数据",
       target: {
         type: "navigate",
         url: "/pages/admin/appointment/index",
+      },
+    };
+    view.secondaryAction = {
+      id: "manage-guidance-rules",
+      title: "导诊管理",
+      description: "创建检查项目并配置先后与准备规则",
+      symbol: "导",
+      tone: "cyan",
+      badge: "真实数据",
+      target: {
+        type: "navigate",
+        url: "/pages/admin/guidance/index",
       },
     };
     const departmentId = principal?.department_id?.trim() ?? "";
@@ -177,7 +197,7 @@ export function buildHomeWorkbench(
         ? {
             ...group,
             actions: group.actions
-              .filter((action) => action.id !== "walking-route")
+              .filter((action) => action.id !== "walking-route" && action.id !== "today-guidance")
               .map((action) =>
                 action.id === "my-appointments" ? departmentBookingAction : action,
               ),
@@ -192,7 +212,7 @@ export function buildHomeWorkbench(
             }
           : group,
     );
-    view.notice = "检查项目、房间和每周配置已接入真实 Appointment 数据。";
+    view.notice = "检查资源由 Appointment 管理，项目创建与导诊规则由 Guidance 一次性配置。";
     view.mock = false;
   }
   return view;

@@ -14,6 +14,11 @@ service AppointmentService {
   rpc GetExaminationItemReportTemplate(GetExaminationItemRequest) returns (ExaminationItemReportTemplate);
   rpc SaveExaminationItemReportTemplate(SaveExaminationItemReportTemplateRequest) returns (ExaminationItemReportTemplate);
 
+  // Guidance 使用以下三个窄接口协调项目完整配置。预提交数据对普通项目查询不可见。
+  rpc PrepareExaminationItemConfiguration(PrepareExaminationItemConfigurationRequest) returns (PreparedExaminationItemConfiguration);
+  rpc ConfirmExaminationItemConfiguration(ExaminationItemConfigurationTransactionRequest) returns (ExaminationItem);
+  rpc CancelExaminationItemConfiguration(ExaminationItemConfigurationTransactionRequest) returns (CancelExaminationItemConfigurationResponse);
+
   rpc CreateRoom(CreateRoomRequest) returns (Room);
   rpc GetRoom(GetRoomRequest) returns (Room);
   rpc ListRooms(ListRoomsRequest) returns (ListRoomsResponse);
@@ -35,6 +40,7 @@ service AppointmentService {
 
   rpc ListBookingOptions(ListBookingOptionsRequest) returns (ListBookingOptionsResponse);
   rpc CreateBooking(CreateBookingRequest) returns (Booking);
+  rpc CreateBookingBatch(CreateBookingBatchRequest) returns (CreateBookingBatchResponse);
   rpc CheckInBooking(CheckInBookingRequest) returns (Booking);
   rpc GetMyBooking(GetBookingRequest) returns (Booking);
   rpc ListMyBookings(ListMyBookingsRequest) returns (ListBookingsResponse);
@@ -143,6 +149,38 @@ message SaveExaminationItemReportTemplateRequest {
   int64 expected_template_version = 3;
   string operation_id = 4;
   string request_id = 5;
+}
+
+message PrepareExaminationItemConfigurationRequest {
+  string transaction_id = 1;
+  string action = 2;
+  string item_id = 3;
+  string owner_department_id = 4;
+  string name = 5;
+  int32 estimated_duration_minutes = 6;
+  int64 expected_version = 7;
+  string operation_id = 8;
+  string request_id = 9;
+  // Guidance 是说明的事实来源；Appointment 只保存患者目录读取所需的发布快照。
+  string description = 10;
+}
+
+message PreparedExaminationItemConfiguration {
+  string transaction_id = 1;
+  string action = 2;
+  string item_id = 3;
+  int64 expected_version = 4;
+  string state = 5;
+}
+
+message ExaminationItemConfigurationTransactionRequest {
+  string transaction_id = 1;
+  string request_id = 2;
+}
+
+message CancelExaminationItemConfigurationResponse {
+  string transaction_id = 1;
+  bool cancelled = 2;
 }
 
 message CreateRoomRequest {
@@ -336,6 +374,25 @@ message CreateBookingRequest {
   string request_id = 6;
   string patient_display_name = 7;
   string patient_phone_masked = 8;
+}
+
+message BookingBatchItem {
+  string item_id = 1;
+  string room_id = 2;
+  string service_date = 3;
+  string session = 4;
+}
+
+message CreateBookingBatchRequest {
+  repeated BookingBatchItem items = 1;
+  string operation_id = 2;
+  string request_id = 3;
+  string patient_display_name = 4;
+  string patient_phone_masked = 5;
+}
+
+message CreateBookingBatchResponse {
+  repeated Booking bookings = 1;
 }
 
 message GetBookingRequest {

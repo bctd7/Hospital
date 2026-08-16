@@ -299,7 +299,7 @@ async function loadMoreRooms() {
   }
 }
 
-function openItem(item?: RoomExaminationItem) {
+function openItem(item: RoomExaminationItem) {
   const label = `${currentCampus.value?.name ?? "院区"} / ${selectedDepartment.value?.name ?? "所属科室"}`;
   navigate(`/pages/admin/appointment/item-detail?department_id=${encodeURIComponent(selectedDepartmentId.value)}&item_id=${encodeURIComponent(item?.itemId ?? "")}&department_label=${encodeURIComponent(label)}`);
 }
@@ -446,7 +446,6 @@ function navigate(url: string) {
               <text class="column-heading__title">检查项目</text>
               <text class="column-heading__count">{{ relations.length }}</text>
             </view>
-            <button v-if="canCreate && selectedDepartmentId" class="column-add" @tap="openItem()">新增</button>
           </view>
           <scroll-view scroll-y class="column-body">
             <text v-if="loadingRelations" class="column-empty">加载中...</text>

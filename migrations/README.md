@@ -14,8 +14,8 @@ migrations/
 压平，Guidance 从首个版本开始使用独立初始迁移：
 
 - `identity/000001_identity_initial_schema`：12 张业务表；
-- `appointment/000001_appointment_initial_schema`：20 张业务表；
-- `guidance/000001_guidance_initial_schema`：检查项目直接先后关系。
+- `appointment/000001_appointment_initial_schema`：21 张业务表；
+- `guidance/000001_guidance_initial_schema`：直接先后关系、项目准备配置、配置事务和智能预约候选。
 
 `schema_migrations` 由迁移工具维护，不属于业务模型。仓库中已经不存在需要按顺序回放的旧业务迁移。
 

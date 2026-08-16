@@ -67,7 +67,8 @@ SELECT IF(
        JOIN hospital_identity.identity_account_roles ar ON ar.account_id = p.account_id
        JOIN hospital_identity.identity_roles r ON r.id = ar.role_id AND r.code = 'super_admin'
        WHERE p.phone_fingerprint = UNHEX('${phone_patient_1}')) = 1
-  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_items) = 0,
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_items) = 0
+  AND (SELECT COUNT(*) FROM hospital_guidance.guidance_item_configurations) = 0,
   'ready', 'refuse');\"" | grep -qx ready || {
     echo "Experience seed refused: expected a fresh database, two bootstrap administrators, and the configured 153 administrator bound exactly once." >&2
     exit 1
@@ -92,7 +93,9 @@ SELECT CONCAT('\''rooms='\'', COUNT(*)) FROM hospital_appointment.appointment_ro
 SELECT CONCAT('\''items='\'', COUNT(*)) FROM hospital_appointment.appointment_examination_items;
 SELECT CONCAT('\''bookings='\'', COUNT(*)) FROM hospital_appointment.appointment_bookings;
 SELECT CONCAT('\''booking_statuses='\'', GROUP_CONCAT(status, '\''='\'', total ORDER BY status SEPARATOR '\'','\'')) FROM (SELECT status, COUNT(*) total FROM hospital_appointment.appointment_bookings GROUP BY status) statuses;
-SELECT CONCAT('\''reports='\'', COUNT(*)) FROM hospital_appointment.appointment_examination_reports;"'
+SELECT CONCAT('\''reports='\'', COUNT(*)) FROM hospital_appointment.appointment_examination_reports;
+SELECT CONCAT('\''guidance_configurations='\'', COUNT(*)) FROM hospital_guidance.guidance_item_configurations;
+SELECT CONCAT('\''guidance_precedence_rules='\'', COUNT(*)) FROM hospital_guidance.guidance_precedence_rules;"'
 
 "${compose[@]}" exec -T mysql sh -c "MYSQL_PWD=\"\$MYSQL_ROOT_PASSWORD\" mysql --protocol=socket -uroot -N -e \"
 SELECT IF(COUNT(*) >= 1, 'report_admin_binding=ready', 'report_admin_binding=missing')
@@ -102,6 +105,16 @@ JOIN hospital_identity.identity_roles r ON r.id = ar.role_id AND r.code = 'super
 JOIN hospital_appointment.appointment_examination_reports report ON report.patient_account_id = p.account_id
 WHERE p.phone_fingerprint = UNHEX('${phone_patient_1}') AND report.status = 'published';\"" | grep -qx report_admin_binding=ready || {
   echo "Experience seed verification failed: the 153 administrator has no published report." >&2
+  exit 1
+}
+
+"${compose[@]}" exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --protocol=socket -uroot -N -e "
+SELECT IF(
+  (SELECT COUNT(*) FROM hospital_guidance.guidance_item_configurations) = 10
+  AND (SELECT COUNT(*) FROM hospital_guidance.guidance_precedence_rules
+       WHERE predecessor_department_id <> successor_department_id) >= 1,
+  '\''guidance_seed=ready'\'', '\''guidance_seed=incomplete'\'');"' | grep -qx guidance_seed=ready || {
+  echo "Experience seed verification failed: Guidance project configurations are incomplete." >&2
   exit 1
 }
 

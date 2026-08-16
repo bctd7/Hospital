@@ -16,6 +16,7 @@ contracts/
 - HTTP：`contracts/api/app.api`；
 - Identity RPC：`contracts/proto/identity/v1/identity.proto`；
 - Appointment RPC：`contracts/proto/appointment/v1/appointment.proto`；
+- Guidance RPC：`contracts/proto/guidance/v1/guidance.proto`；
 - 权限目录：`contracts/authz/permissions.yaml`；
 - 事件信封：`contracts/events/event-envelope.schema.json`；
 

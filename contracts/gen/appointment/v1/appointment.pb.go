@@ -768,6 +768,303 @@ func (x *SaveExaminationItemReportTemplateRequest) GetRequestId() string {
 	return ""
 }
 
+type PrepareExaminationItemConfigurationRequest struct {
+	state                    protoimpl.MessageState `protogen:"open.v1"`
+	TransactionId            string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	Action                   string                 `protobuf:"bytes,2,opt,name=action,proto3" json:"action,omitempty"`
+	ItemId                   string                 `protobuf:"bytes,3,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	OwnerDepartmentId        string                 `protobuf:"bytes,4,opt,name=owner_department_id,json=ownerDepartmentId,proto3" json:"owner_department_id,omitempty"`
+	Name                     string                 `protobuf:"bytes,5,opt,name=name,proto3" json:"name,omitempty"`
+	EstimatedDurationMinutes int32                  `protobuf:"varint,6,opt,name=estimated_duration_minutes,json=estimatedDurationMinutes,proto3" json:"estimated_duration_minutes,omitempty"`
+	ExpectedVersion          int64                  `protobuf:"varint,7,opt,name=expected_version,json=expectedVersion,proto3" json:"expected_version,omitempty"`
+	OperationId              string                 `protobuf:"bytes,8,opt,name=operation_id,json=operationId,proto3" json:"operation_id,omitempty"`
+	RequestId                string                 `protobuf:"bytes,9,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	// Guidance 是说明的事实来源；Appointment 只保存患者目录读取所需的发布快照。
+	Description   string `protobuf:"bytes,10,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PrepareExaminationItemConfigurationRequest) Reset() {
+	*x = PrepareExaminationItemConfigurationRequest{}
+	mi := &file_appointment_v1_appointment_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PrepareExaminationItemConfigurationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PrepareExaminationItemConfigurationRequest) ProtoMessage() {}
+
+func (x *PrepareExaminationItemConfigurationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_appointment_v1_appointment_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PrepareExaminationItemConfigurationRequest.ProtoReflect.Descriptor instead.
+func (*PrepareExaminationItemConfigurationRequest) Descriptor() ([]byte, []int) {
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *PrepareExaminationItemConfigurationRequest) GetTransactionId() string {
+	if x != nil {
+		return x.TransactionId
+	}
+	return ""
+}
+
+func (x *PrepareExaminationItemConfigurationRequest) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
+func (x *PrepareExaminationItemConfigurationRequest) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+func (x *PrepareExaminationItemConfigurationRequest) GetOwnerDepartmentId() string {
+	if x != nil {
+		return x.OwnerDepartmentId
+	}
+	return ""
+}
+
+func (x *PrepareExaminationItemConfigurationRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *PrepareExaminationItemConfigurationRequest) GetEstimatedDurationMinutes() int32 {
+	if x != nil {
+		return x.EstimatedDurationMinutes
+	}
+	return 0
+}
+
+func (x *PrepareExaminationItemConfigurationRequest) GetExpectedVersion() int64 {
+	if x != nil {
+		return x.ExpectedVersion
+	}
+	return 0
+}
+
+func (x *PrepareExaminationItemConfigurationRequest) GetOperationId() string {
+	if x != nil {
+		return x.OperationId
+	}
+	return ""
+}
+
+func (x *PrepareExaminationItemConfigurationRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *PrepareExaminationItemConfigurationRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+type PreparedExaminationItemConfiguration struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	TransactionId   string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	Action          string                 `protobuf:"bytes,2,opt,name=action,proto3" json:"action,omitempty"`
+	ItemId          string                 `protobuf:"bytes,3,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	ExpectedVersion int64                  `protobuf:"varint,4,opt,name=expected_version,json=expectedVersion,proto3" json:"expected_version,omitempty"`
+	State           string                 `protobuf:"bytes,5,opt,name=state,proto3" json:"state,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *PreparedExaminationItemConfiguration) Reset() {
+	*x = PreparedExaminationItemConfiguration{}
+	mi := &file_appointment_v1_appointment_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PreparedExaminationItemConfiguration) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PreparedExaminationItemConfiguration) ProtoMessage() {}
+
+func (x *PreparedExaminationItemConfiguration) ProtoReflect() protoreflect.Message {
+	mi := &file_appointment_v1_appointment_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PreparedExaminationItemConfiguration.ProtoReflect.Descriptor instead.
+func (*PreparedExaminationItemConfiguration) Descriptor() ([]byte, []int) {
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *PreparedExaminationItemConfiguration) GetTransactionId() string {
+	if x != nil {
+		return x.TransactionId
+	}
+	return ""
+}
+
+func (x *PreparedExaminationItemConfiguration) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
+func (x *PreparedExaminationItemConfiguration) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+func (x *PreparedExaminationItemConfiguration) GetExpectedVersion() int64 {
+	if x != nil {
+		return x.ExpectedVersion
+	}
+	return 0
+}
+
+func (x *PreparedExaminationItemConfiguration) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+type ExaminationItemConfigurationTransactionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TransactionId string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	RequestId     string                 `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExaminationItemConfigurationTransactionRequest) Reset() {
+	*x = ExaminationItemConfigurationTransactionRequest{}
+	mi := &file_appointment_v1_appointment_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExaminationItemConfigurationTransactionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExaminationItemConfigurationTransactionRequest) ProtoMessage() {}
+
+func (x *ExaminationItemConfigurationTransactionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_appointment_v1_appointment_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExaminationItemConfigurationTransactionRequest.ProtoReflect.Descriptor instead.
+func (*ExaminationItemConfigurationTransactionRequest) Descriptor() ([]byte, []int) {
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ExaminationItemConfigurationTransactionRequest) GetTransactionId() string {
+	if x != nil {
+		return x.TransactionId
+	}
+	return ""
+}
+
+func (x *ExaminationItemConfigurationTransactionRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+type CancelExaminationItemConfigurationResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TransactionId string                 `protobuf:"bytes,1,opt,name=transaction_id,json=transactionId,proto3" json:"transaction_id,omitempty"`
+	Cancelled     bool                   `protobuf:"varint,2,opt,name=cancelled,proto3" json:"cancelled,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CancelExaminationItemConfigurationResponse) Reset() {
+	*x = CancelExaminationItemConfigurationResponse{}
+	mi := &file_appointment_v1_appointment_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CancelExaminationItemConfigurationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CancelExaminationItemConfigurationResponse) ProtoMessage() {}
+
+func (x *CancelExaminationItemConfigurationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_appointment_v1_appointment_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CancelExaminationItemConfigurationResponse.ProtoReflect.Descriptor instead.
+func (*CancelExaminationItemConfigurationResponse) Descriptor() ([]byte, []int) {
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *CancelExaminationItemConfigurationResponse) GetTransactionId() string {
+	if x != nil {
+		return x.TransactionId
+	}
+	return ""
+}
+
+func (x *CancelExaminationItemConfigurationResponse) GetCancelled() bool {
+	if x != nil {
+		return x.Cancelled
+	}
+	return false
+}
+
 type CreateRoomRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	DepartmentId  string                 `protobuf:"bytes,1,opt,name=department_id,json=departmentId,proto3" json:"department_id,omitempty"`
@@ -783,7 +1080,7 @@ type CreateRoomRequest struct {
 
 func (x *CreateRoomRequest) Reset() {
 	*x = CreateRoomRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[10]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -795,7 +1092,7 @@ func (x *CreateRoomRequest) String() string {
 func (*CreateRoomRequest) ProtoMessage() {}
 
 func (x *CreateRoomRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[10]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -808,7 +1105,7 @@ func (x *CreateRoomRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateRoomRequest.ProtoReflect.Descriptor instead.
 func (*CreateRoomRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{10}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *CreateRoomRequest) GetDepartmentId() string {
@@ -870,7 +1167,7 @@ type GetRoomRequest struct {
 
 func (x *GetRoomRequest) Reset() {
 	*x = GetRoomRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[11]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -882,7 +1179,7 @@ func (x *GetRoomRequest) String() string {
 func (*GetRoomRequest) ProtoMessage() {}
 
 func (x *GetRoomRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[11]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -895,7 +1192,7 @@ func (x *GetRoomRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRoomRequest.ProtoReflect.Descriptor instead.
 func (*GetRoomRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{11}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetRoomRequest) GetRoomId() string {
@@ -924,7 +1221,7 @@ type ListRoomsRequest struct {
 
 func (x *ListRoomsRequest) Reset() {
 	*x = ListRoomsRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[12]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -936,7 +1233,7 @@ func (x *ListRoomsRequest) String() string {
 func (*ListRoomsRequest) ProtoMessage() {}
 
 func (x *ListRoomsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[12]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -949,7 +1246,7 @@ func (x *ListRoomsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListRoomsRequest.ProtoReflect.Descriptor instead.
 func (*ListRoomsRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{12}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ListRoomsRequest) GetDepartmentId() string {
@@ -992,7 +1289,7 @@ type ListRoomsResponse struct {
 
 func (x *ListRoomsResponse) Reset() {
 	*x = ListRoomsResponse{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[13]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1004,7 +1301,7 @@ func (x *ListRoomsResponse) String() string {
 func (*ListRoomsResponse) ProtoMessage() {}
 
 func (x *ListRoomsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[13]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1017,7 +1314,7 @@ func (x *ListRoomsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListRoomsResponse.ProtoReflect.Descriptor instead.
 func (*ListRoomsResponse) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{13}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ListRoomsResponse) GetRooms() []*Room {
@@ -1064,7 +1361,7 @@ type UpdateRoomRequest struct {
 
 func (x *UpdateRoomRequest) Reset() {
 	*x = UpdateRoomRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[14]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1076,7 +1373,7 @@ func (x *UpdateRoomRequest) String() string {
 func (*UpdateRoomRequest) ProtoMessage() {}
 
 func (x *UpdateRoomRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[14]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1089,7 +1386,7 @@ func (x *UpdateRoomRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateRoomRequest.ProtoReflect.Descriptor instead.
 func (*UpdateRoomRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{14}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *UpdateRoomRequest) GetRoomId() string {
@@ -1160,7 +1457,7 @@ type RetireRoomRequest struct {
 
 func (x *RetireRoomRequest) Reset() {
 	*x = RetireRoomRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[15]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1172,7 +1469,7 @@ func (x *RetireRoomRequest) String() string {
 func (*RetireRoomRequest) ProtoMessage() {}
 
 func (x *RetireRoomRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[15]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1185,7 +1482,7 @@ func (x *RetireRoomRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RetireRoomRequest.ProtoReflect.Descriptor instead.
 func (*RetireRoomRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{15}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *RetireRoomRequest) GetRoomId() string {
@@ -1228,7 +1525,7 @@ type ChangeResourceStatusRequest struct {
 
 func (x *ChangeResourceStatusRequest) Reset() {
 	*x = ChangeResourceStatusRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[16]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1240,7 +1537,7 @@ func (x *ChangeResourceStatusRequest) String() string {
 func (*ChangeResourceStatusRequest) ProtoMessage() {}
 
 func (x *ChangeResourceStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[16]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1253,7 +1550,7 @@ func (x *ChangeResourceStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChangeResourceStatusRequest.ProtoReflect.Descriptor instead.
 func (*ChangeResourceStatusRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{16}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ChangeResourceStatusRequest) GetResourceId() string {
@@ -1302,7 +1599,7 @@ type Room struct {
 
 func (x *Room) Reset() {
 	*x = Room{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[17]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1314,7 +1611,7 @@ func (x *Room) String() string {
 func (*Room) ProtoMessage() {}
 
 func (x *Room) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[17]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1327,7 +1624,7 @@ func (x *Room) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Room.ProtoReflect.Descriptor instead.
 func (*Room) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{17}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *Room) GetRoomId() string {
@@ -1412,7 +1709,7 @@ type AddRoomExaminationItemRequest struct {
 
 func (x *AddRoomExaminationItemRequest) Reset() {
 	*x = AddRoomExaminationItemRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[18]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1424,7 +1721,7 @@ func (x *AddRoomExaminationItemRequest) String() string {
 func (*AddRoomExaminationItemRequest) ProtoMessage() {}
 
 func (x *AddRoomExaminationItemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[18]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1437,7 +1734,7 @@ func (x *AddRoomExaminationItemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddRoomExaminationItemRequest.ProtoReflect.Descriptor instead.
 func (*AddRoomExaminationItemRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{18}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *AddRoomExaminationItemRequest) GetRoomId() string {
@@ -1481,7 +1778,7 @@ type ListRoomExaminationItemsRequest struct {
 
 func (x *ListRoomExaminationItemsRequest) Reset() {
 	*x = ListRoomExaminationItemsRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[19]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1493,7 +1790,7 @@ func (x *ListRoomExaminationItemsRequest) String() string {
 func (*ListRoomExaminationItemsRequest) ProtoMessage() {}
 
 func (x *ListRoomExaminationItemsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[19]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1506,7 +1803,7 @@ func (x *ListRoomExaminationItemsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListRoomExaminationItemsRequest.ProtoReflect.Descriptor instead.
 func (*ListRoomExaminationItemsRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{19}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *ListRoomExaminationItemsRequest) GetRoomId() string {
@@ -1555,7 +1852,7 @@ type ListAvailableRoomsByExaminationItemRequest struct {
 
 func (x *ListAvailableRoomsByExaminationItemRequest) Reset() {
 	*x = ListAvailableRoomsByExaminationItemRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[20]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1567,7 +1864,7 @@ func (x *ListAvailableRoomsByExaminationItemRequest) String() string {
 func (*ListAvailableRoomsByExaminationItemRequest) ProtoMessage() {}
 
 func (x *ListAvailableRoomsByExaminationItemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[20]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1580,7 +1877,7 @@ func (x *ListAvailableRoomsByExaminationItemRequest) ProtoReflect() protoreflect
 
 // Deprecated: Use ListAvailableRoomsByExaminationItemRequest.ProtoReflect.Descriptor instead.
 func (*ListAvailableRoomsByExaminationItemRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{20}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *ListAvailableRoomsByExaminationItemRequest) GetItemId() string {
@@ -1616,7 +1913,7 @@ type ListRoomExaminationItemsResponse struct {
 
 func (x *ListRoomExaminationItemsResponse) Reset() {
 	*x = ListRoomExaminationItemsResponse{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[21]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1628,7 +1925,7 @@ func (x *ListRoomExaminationItemsResponse) String() string {
 func (*ListRoomExaminationItemsResponse) ProtoMessage() {}
 
 func (x *ListRoomExaminationItemsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[21]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1641,7 +1938,7 @@ func (x *ListRoomExaminationItemsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListRoomExaminationItemsResponse.ProtoReflect.Descriptor instead.
 func (*ListRoomExaminationItemsResponse) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{21}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ListRoomExaminationItemsResponse) GetRelations() []*RoomExaminationItem {
@@ -1693,7 +1990,7 @@ type RoomExaminationItem struct {
 
 func (x *RoomExaminationItem) Reset() {
 	*x = RoomExaminationItem{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[22]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1705,7 +2002,7 @@ func (x *RoomExaminationItem) String() string {
 func (*RoomExaminationItem) ProtoMessage() {}
 
 func (x *RoomExaminationItem) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[22]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1718,7 +2015,7 @@ func (x *RoomExaminationItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoomExaminationItem.ProtoReflect.Descriptor instead.
 func (*RoomExaminationItem) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{22}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *RoomExaminationItem) GetRelationId() string {
@@ -1830,7 +2127,7 @@ type SetRoomWeeklyWindowRequest struct {
 
 func (x *SetRoomWeeklyWindowRequest) Reset() {
 	*x = SetRoomWeeklyWindowRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[23]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1842,7 +2139,7 @@ func (x *SetRoomWeeklyWindowRequest) String() string {
 func (*SetRoomWeeklyWindowRequest) ProtoMessage() {}
 
 func (x *SetRoomWeeklyWindowRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[23]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1855,7 +2152,7 @@ func (x *SetRoomWeeklyWindowRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetRoomWeeklyWindowRequest.ProtoReflect.Descriptor instead.
 func (*SetRoomWeeklyWindowRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{23}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *SetRoomWeeklyWindowRequest) GetWindowId() string {
@@ -1946,7 +2243,7 @@ type SetItemWeeklyWindowRequest struct {
 
 func (x *SetItemWeeklyWindowRequest) Reset() {
 	*x = SetItemWeeklyWindowRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[24]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1958,7 +2255,7 @@ func (x *SetItemWeeklyWindowRequest) String() string {
 func (*SetItemWeeklyWindowRequest) ProtoMessage() {}
 
 func (x *SetItemWeeklyWindowRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[24]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1971,7 +2268,7 @@ func (x *SetItemWeeklyWindowRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetItemWeeklyWindowRequest.ProtoReflect.Descriptor instead.
 func (*SetItemWeeklyWindowRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{24}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *SetItemWeeklyWindowRequest) GetWindowId() string {
@@ -2055,7 +2352,7 @@ type ListWeeklyWindowsRequest struct {
 
 func (x *ListWeeklyWindowsRequest) Reset() {
 	*x = ListWeeklyWindowsRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[25]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2067,7 +2364,7 @@ func (x *ListWeeklyWindowsRequest) String() string {
 func (*ListWeeklyWindowsRequest) ProtoMessage() {}
 
 func (x *ListWeeklyWindowsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[25]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2080,7 +2377,7 @@ func (x *ListWeeklyWindowsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListWeeklyWindowsRequest.ProtoReflect.Descriptor instead.
 func (*ListWeeklyWindowsRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{25}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *ListWeeklyWindowsRequest) GetResourceId() string {
@@ -2113,7 +2410,7 @@ type ListRoomWeeklyWindowsResponse struct {
 
 func (x *ListRoomWeeklyWindowsResponse) Reset() {
 	*x = ListRoomWeeklyWindowsResponse{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[26]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2125,7 +2422,7 @@ func (x *ListRoomWeeklyWindowsResponse) String() string {
 func (*ListRoomWeeklyWindowsResponse) ProtoMessage() {}
 
 func (x *ListRoomWeeklyWindowsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[26]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2138,7 +2435,7 @@ func (x *ListRoomWeeklyWindowsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListRoomWeeklyWindowsResponse.ProtoReflect.Descriptor instead.
 func (*ListRoomWeeklyWindowsResponse) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{26}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *ListRoomWeeklyWindowsResponse) GetWindows() []*RoomWeeklyWindow {
@@ -2157,7 +2454,7 @@ type ListItemWeeklyWindowsResponse struct {
 
 func (x *ListItemWeeklyWindowsResponse) Reset() {
 	*x = ListItemWeeklyWindowsResponse{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[27]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2169,7 +2466,7 @@ func (x *ListItemWeeklyWindowsResponse) String() string {
 func (*ListItemWeeklyWindowsResponse) ProtoMessage() {}
 
 func (x *ListItemWeeklyWindowsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[27]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2182,7 +2479,7 @@ func (x *ListItemWeeklyWindowsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListItemWeeklyWindowsResponse.ProtoReflect.Descriptor instead.
 func (*ListItemWeeklyWindowsResponse) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{27}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *ListItemWeeklyWindowsResponse) GetWindows() []*ItemWeeklyWindow {
@@ -2202,7 +2499,7 @@ type ListBookingOptionsRequest struct {
 
 func (x *ListBookingOptionsRequest) Reset() {
 	*x = ListBookingOptionsRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[28]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2214,7 +2511,7 @@ func (x *ListBookingOptionsRequest) String() string {
 func (*ListBookingOptionsRequest) ProtoMessage() {}
 
 func (x *ListBookingOptionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[28]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2227,7 +2524,7 @@ func (x *ListBookingOptionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListBookingOptionsRequest.ProtoReflect.Descriptor instead.
 func (*ListBookingOptionsRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{28}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *ListBookingOptionsRequest) GetItemId() string {
@@ -2269,7 +2566,7 @@ type BookingOption struct {
 
 func (x *BookingOption) Reset() {
 	*x = BookingOption{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[29]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2281,7 +2578,7 @@ func (x *BookingOption) String() string {
 func (*BookingOption) ProtoMessage() {}
 
 func (x *BookingOption) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[29]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2294,7 +2591,7 @@ func (x *BookingOption) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BookingOption.ProtoReflect.Descriptor instead.
 func (*BookingOption) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{29}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *BookingOption) GetItemId() string {
@@ -2427,7 +2724,7 @@ type ListBookingOptionsResponse struct {
 
 func (x *ListBookingOptionsResponse) Reset() {
 	*x = ListBookingOptionsResponse{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[30]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2439,7 +2736,7 @@ func (x *ListBookingOptionsResponse) String() string {
 func (*ListBookingOptionsResponse) ProtoMessage() {}
 
 func (x *ListBookingOptionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[30]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2452,7 +2749,7 @@ func (x *ListBookingOptionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListBookingOptionsResponse.ProtoReflect.Descriptor instead.
 func (*ListBookingOptionsResponse) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{30}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *ListBookingOptionsResponse) GetOptions() []*BookingOption {
@@ -2492,7 +2789,7 @@ type CreateBookingRequest struct {
 
 func (x *CreateBookingRequest) Reset() {
 	*x = CreateBookingRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[31]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2504,7 +2801,7 @@ func (x *CreateBookingRequest) String() string {
 func (*CreateBookingRequest) ProtoMessage() {}
 
 func (x *CreateBookingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[31]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2517,7 +2814,7 @@ func (x *CreateBookingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateBookingRequest.ProtoReflect.Descriptor instead.
 func (*CreateBookingRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{31}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *CreateBookingRequest) GetItemId() string {
@@ -2576,6 +2873,194 @@ func (x *CreateBookingRequest) GetPatientPhoneMasked() string {
 	return ""
 }
 
+type BookingBatchItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ItemId        string                 `protobuf:"bytes,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	RoomId        string                 `protobuf:"bytes,2,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	ServiceDate   string                 `protobuf:"bytes,3,opt,name=service_date,json=serviceDate,proto3" json:"service_date,omitempty"`
+	Session       string                 `protobuf:"bytes,4,opt,name=session,proto3" json:"session,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *BookingBatchItem) Reset() {
+	*x = BookingBatchItem{}
+	mi := &file_appointment_v1_appointment_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BookingBatchItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BookingBatchItem) ProtoMessage() {}
+
+func (x *BookingBatchItem) ProtoReflect() protoreflect.Message {
+	mi := &file_appointment_v1_appointment_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BookingBatchItem.ProtoReflect.Descriptor instead.
+func (*BookingBatchItem) Descriptor() ([]byte, []int) {
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *BookingBatchItem) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+func (x *BookingBatchItem) GetRoomId() string {
+	if x != nil {
+		return x.RoomId
+	}
+	return ""
+}
+
+func (x *BookingBatchItem) GetServiceDate() string {
+	if x != nil {
+		return x.ServiceDate
+	}
+	return ""
+}
+
+func (x *BookingBatchItem) GetSession() string {
+	if x != nil {
+		return x.Session
+	}
+	return ""
+}
+
+type CreateBookingBatchRequest struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Items              []*BookingBatchItem    `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	OperationId        string                 `protobuf:"bytes,2,opt,name=operation_id,json=operationId,proto3" json:"operation_id,omitempty"`
+	RequestId          string                 `protobuf:"bytes,3,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	PatientDisplayName string                 `protobuf:"bytes,4,opt,name=patient_display_name,json=patientDisplayName,proto3" json:"patient_display_name,omitempty"`
+	PatientPhoneMasked string                 `protobuf:"bytes,5,opt,name=patient_phone_masked,json=patientPhoneMasked,proto3" json:"patient_phone_masked,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *CreateBookingBatchRequest) Reset() {
+	*x = CreateBookingBatchRequest{}
+	mi := &file_appointment_v1_appointment_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateBookingBatchRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateBookingBatchRequest) ProtoMessage() {}
+
+func (x *CreateBookingBatchRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_appointment_v1_appointment_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateBookingBatchRequest.ProtoReflect.Descriptor instead.
+func (*CreateBookingBatchRequest) Descriptor() ([]byte, []int) {
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *CreateBookingBatchRequest) GetItems() []*BookingBatchItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *CreateBookingBatchRequest) GetOperationId() string {
+	if x != nil {
+		return x.OperationId
+	}
+	return ""
+}
+
+func (x *CreateBookingBatchRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *CreateBookingBatchRequest) GetPatientDisplayName() string {
+	if x != nil {
+		return x.PatientDisplayName
+	}
+	return ""
+}
+
+func (x *CreateBookingBatchRequest) GetPatientPhoneMasked() string {
+	if x != nil {
+		return x.PatientPhoneMasked
+	}
+	return ""
+}
+
+type CreateBookingBatchResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Bookings      []*Booking             `protobuf:"bytes,1,rep,name=bookings,proto3" json:"bookings,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateBookingBatchResponse) Reset() {
+	*x = CreateBookingBatchResponse{}
+	mi := &file_appointment_v1_appointment_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateBookingBatchResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateBookingBatchResponse) ProtoMessage() {}
+
+func (x *CreateBookingBatchResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_appointment_v1_appointment_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateBookingBatchResponse.ProtoReflect.Descriptor instead.
+func (*CreateBookingBatchResponse) Descriptor() ([]byte, []int) {
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *CreateBookingBatchResponse) GetBookings() []*Booking {
+	if x != nil {
+		return x.Bookings
+	}
+	return nil
+}
+
 type GetBookingRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	BookingId     string                 `protobuf:"bytes,1,opt,name=booking_id,json=bookingId,proto3" json:"booking_id,omitempty"`
@@ -2586,7 +3071,7 @@ type GetBookingRequest struct {
 
 func (x *GetBookingRequest) Reset() {
 	*x = GetBookingRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[32]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2598,7 +3083,7 @@ func (x *GetBookingRequest) String() string {
 func (*GetBookingRequest) ProtoMessage() {}
 
 func (x *GetBookingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[32]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2611,7 +3096,7 @@ func (x *GetBookingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetBookingRequest.ProtoReflect.Descriptor instead.
 func (*GetBookingRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{32}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *GetBookingRequest) GetBookingId() string {
@@ -2640,7 +3125,7 @@ type ListMyBookingsRequest struct {
 
 func (x *ListMyBookingsRequest) Reset() {
 	*x = ListMyBookingsRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[33]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2652,7 +3137,7 @@ func (x *ListMyBookingsRequest) String() string {
 func (*ListMyBookingsRequest) ProtoMessage() {}
 
 func (x *ListMyBookingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[33]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2665,7 +3150,7 @@ func (x *ListMyBookingsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMyBookingsRequest.ProtoReflect.Descriptor instead.
 func (*ListMyBookingsRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{33}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *ListMyBookingsRequest) GetPage() int64 {
@@ -2715,7 +3200,7 @@ type ListBookingsRequest struct {
 
 func (x *ListBookingsRequest) Reset() {
 	*x = ListBookingsRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[34]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2727,7 +3212,7 @@ func (x *ListBookingsRequest) String() string {
 func (*ListBookingsRequest) ProtoMessage() {}
 
 func (x *ListBookingsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[34]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2740,7 +3225,7 @@ func (x *ListBookingsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListBookingsRequest.ProtoReflect.Descriptor instead.
 func (*ListBookingsRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{34}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *ListBookingsRequest) GetDepartmentId() string {
@@ -2832,7 +3317,7 @@ type DeleteBookingRequest struct {
 
 func (x *DeleteBookingRequest) Reset() {
 	*x = DeleteBookingRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[35]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2844,7 +3329,7 @@ func (x *DeleteBookingRequest) String() string {
 func (*DeleteBookingRequest) ProtoMessage() {}
 
 func (x *DeleteBookingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[35]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2857,7 +3342,7 @@ func (x *DeleteBookingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteBookingRequest.ProtoReflect.Descriptor instead.
 func (*DeleteBookingRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{35}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *DeleteBookingRequest) GetBookingId() string {
@@ -2898,7 +3383,7 @@ type DeleteBookingResponse struct {
 
 func (x *DeleteBookingResponse) Reset() {
 	*x = DeleteBookingResponse{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[36]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2910,7 +3395,7 @@ func (x *DeleteBookingResponse) String() string {
 func (*DeleteBookingResponse) ProtoMessage() {}
 
 func (x *DeleteBookingResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[36]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2923,7 +3408,7 @@ func (x *DeleteBookingResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteBookingResponse.ProtoReflect.Descriptor instead.
 func (*DeleteBookingResponse) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{36}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *DeleteBookingResponse) GetBookingId() string {
@@ -2953,7 +3438,7 @@ type StartExaminationRequest struct {
 
 func (x *StartExaminationRequest) Reset() {
 	*x = StartExaminationRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[37]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2965,7 +3450,7 @@ func (x *StartExaminationRequest) String() string {
 func (*StartExaminationRequest) ProtoMessage() {}
 
 func (x *StartExaminationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[37]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2978,7 +3463,7 @@ func (x *StartExaminationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartExaminationRequest.ProtoReflect.Descriptor instead.
 func (*StartExaminationRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{37}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *StartExaminationRequest) GetBookingId() string {
@@ -3028,7 +3513,7 @@ type CheckInBookingRequest struct {
 
 func (x *CheckInBookingRequest) Reset() {
 	*x = CheckInBookingRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[38]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3040,7 +3525,7 @@ func (x *CheckInBookingRequest) String() string {
 func (*CheckInBookingRequest) ProtoMessage() {}
 
 func (x *CheckInBookingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[38]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3053,7 +3538,7 @@ func (x *CheckInBookingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CheckInBookingRequest.ProtoReflect.Descriptor instead.
 func (*CheckInBookingRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{38}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *CheckInBookingRequest) GetBookingId() string {
@@ -3097,7 +3582,7 @@ type CallNextBookingRequest struct {
 
 func (x *CallNextBookingRequest) Reset() {
 	*x = CallNextBookingRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[39]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3109,7 +3594,7 @@ func (x *CallNextBookingRequest) String() string {
 func (*CallNextBookingRequest) ProtoMessage() {}
 
 func (x *CallNextBookingRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[39]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3122,7 +3607,7 @@ func (x *CallNextBookingRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CallNextBookingRequest.ProtoReflect.Descriptor instead.
 func (*CallNextBookingRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{39}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *CallNextBookingRequest) GetDepartmentId() string {
@@ -3173,7 +3658,7 @@ type EndExaminationRequest struct {
 
 func (x *EndExaminationRequest) Reset() {
 	*x = EndExaminationRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[40]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3185,7 +3670,7 @@ func (x *EndExaminationRequest) String() string {
 func (*EndExaminationRequest) ProtoMessage() {}
 
 func (x *EndExaminationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[40]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3198,7 +3683,7 @@ func (x *EndExaminationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EndExaminationRequest.ProtoReflect.Descriptor instead.
 func (*EndExaminationRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{40}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *EndExaminationRequest) GetBookingId() string {
@@ -3288,7 +3773,7 @@ type Booking struct {
 
 func (x *Booking) Reset() {
 	*x = Booking{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[41]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3300,7 +3785,7 @@ func (x *Booking) String() string {
 func (*Booking) ProtoMessage() {}
 
 func (x *Booking) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[41]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3313,7 +3798,7 @@ func (x *Booking) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Booking.ProtoReflect.Descriptor instead.
 func (*Booking) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{41}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *Booking) GetBookingId() string {
@@ -3636,7 +4121,7 @@ type ListBookingsResponse struct {
 
 func (x *ListBookingsResponse) Reset() {
 	*x = ListBookingsResponse{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[42]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3648,7 +4133,7 @@ func (x *ListBookingsResponse) String() string {
 func (*ListBookingsResponse) ProtoMessage() {}
 
 func (x *ListBookingsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[42]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3661,7 +4146,7 @@ func (x *ListBookingsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListBookingsResponse.ProtoReflect.Descriptor instead.
 func (*ListBookingsResponse) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{42}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *ListBookingsResponse) GetBookings() []*Booking {
@@ -3703,7 +4188,7 @@ type ListMyMessagesRequest struct {
 
 func (x *ListMyMessagesRequest) Reset() {
 	*x = ListMyMessagesRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[43]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3715,7 +4200,7 @@ func (x *ListMyMessagesRequest) String() string {
 func (*ListMyMessagesRequest) ProtoMessage() {}
 
 func (x *ListMyMessagesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[43]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3728,7 +4213,7 @@ func (x *ListMyMessagesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMyMessagesRequest.ProtoReflect.Descriptor instead.
 func (*ListMyMessagesRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{43}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *ListMyMessagesRequest) GetPage() int64 {
@@ -3764,7 +4249,7 @@ type ListMessagesRequest struct {
 
 func (x *ListMessagesRequest) Reset() {
 	*x = ListMessagesRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[44]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3776,7 +4261,7 @@ func (x *ListMessagesRequest) String() string {
 func (*ListMessagesRequest) ProtoMessage() {}
 
 func (x *ListMessagesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[44]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3789,7 +4274,7 @@ func (x *ListMessagesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMessagesRequest.ProtoReflect.Descriptor instead.
 func (*ListMessagesRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{44}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *ListMessagesRequest) GetDepartmentId() string {
@@ -3831,7 +4316,7 @@ type MarkMessageReadRequest struct {
 
 func (x *MarkMessageReadRequest) Reset() {
 	*x = MarkMessageReadRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[45]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3843,7 +4328,7 @@ func (x *MarkMessageReadRequest) String() string {
 func (*MarkMessageReadRequest) ProtoMessage() {}
 
 func (x *MarkMessageReadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[45]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3856,7 +4341,7 @@ func (x *MarkMessageReadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MarkMessageReadRequest.ProtoReflect.Descriptor instead.
 func (*MarkMessageReadRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{45}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *MarkMessageReadRequest) GetMessageKey() string {
@@ -3896,7 +4381,7 @@ type Message struct {
 
 func (x *Message) Reset() {
 	*x = Message{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[46]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3908,7 +4393,7 @@ func (x *Message) String() string {
 func (*Message) ProtoMessage() {}
 
 func (x *Message) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[46]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3921,7 +4406,7 @@ func (x *Message) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Message.ProtoReflect.Descriptor instead.
 func (*Message) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{46}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *Message) GetMessageKey() string {
@@ -3990,7 +4475,7 @@ type DepartmentUnreadCount struct {
 
 func (x *DepartmentUnreadCount) Reset() {
 	*x = DepartmentUnreadCount{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[47]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4002,7 +4487,7 @@ func (x *DepartmentUnreadCount) String() string {
 func (*DepartmentUnreadCount) ProtoMessage() {}
 
 func (x *DepartmentUnreadCount) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[47]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4015,7 +4500,7 @@ func (x *DepartmentUnreadCount) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DepartmentUnreadCount.ProtoReflect.Descriptor instead.
 func (*DepartmentUnreadCount) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{47}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *DepartmentUnreadCount) GetDepartmentId() string {
@@ -4046,7 +4531,7 @@ type ListMessagesResponse struct {
 
 func (x *ListMessagesResponse) Reset() {
 	*x = ListMessagesResponse{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[48]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4058,7 +4543,7 @@ func (x *ListMessagesResponse) String() string {
 func (*ListMessagesResponse) ProtoMessage() {}
 
 func (x *ListMessagesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[48]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4071,7 +4556,7 @@ func (x *ListMessagesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMessagesResponse.ProtoReflect.Descriptor instead.
 func (*ListMessagesResponse) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{48}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{55}
 }
 
 func (x *ListMessagesResponse) GetMessages() []*Message {
@@ -4128,7 +4613,7 @@ type ExaminationReportContent struct {
 
 func (x *ExaminationReportContent) Reset() {
 	*x = ExaminationReportContent{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[49]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4140,7 +4625,7 @@ func (x *ExaminationReportContent) String() string {
 func (*ExaminationReportContent) ProtoMessage() {}
 
 func (x *ExaminationReportContent) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[49]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4153,7 +4638,7 @@ func (x *ExaminationReportContent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExaminationReportContent.ProtoReflect.Descriptor instead.
 func (*ExaminationReportContent) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{49}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *ExaminationReportContent) GetObjectiveFindings() string {
@@ -4198,7 +4683,7 @@ type SaveExaminationReportDraftRequest struct {
 
 func (x *SaveExaminationReportDraftRequest) Reset() {
 	*x = SaveExaminationReportDraftRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[50]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4210,7 +4695,7 @@ func (x *SaveExaminationReportDraftRequest) String() string {
 func (*SaveExaminationReportDraftRequest) ProtoMessage() {}
 
 func (x *SaveExaminationReportDraftRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[50]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4223,7 +4708,7 @@ func (x *SaveExaminationReportDraftRequest) ProtoReflect() protoreflect.Message 
 
 // Deprecated: Use SaveExaminationReportDraftRequest.ProtoReflect.Descriptor instead.
 func (*SaveExaminationReportDraftRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{50}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{57}
 }
 
 func (x *SaveExaminationReportDraftRequest) GetBookingId() string {
@@ -4285,7 +4770,7 @@ type CompleteAndPublishExaminationReportRequest struct {
 
 func (x *CompleteAndPublishExaminationReportRequest) Reset() {
 	*x = CompleteAndPublishExaminationReportRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[51]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4297,7 +4782,7 @@ func (x *CompleteAndPublishExaminationReportRequest) String() string {
 func (*CompleteAndPublishExaminationReportRequest) ProtoMessage() {}
 
 func (x *CompleteAndPublishExaminationReportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[51]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4310,7 +4795,7 @@ func (x *CompleteAndPublishExaminationReportRequest) ProtoReflect() protoreflect
 
 // Deprecated: Use CompleteAndPublishExaminationReportRequest.ProtoReflect.Descriptor instead.
 func (*CompleteAndPublishExaminationReportRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{51}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{58}
 }
 
 func (x *CompleteAndPublishExaminationReportRequest) GetBookingId() string {
@@ -4391,7 +4876,7 @@ type CorrectExaminationReportRequest struct {
 
 func (x *CorrectExaminationReportRequest) Reset() {
 	*x = CorrectExaminationReportRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[52]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4403,7 +4888,7 @@ func (x *CorrectExaminationReportRequest) String() string {
 func (*CorrectExaminationReportRequest) ProtoMessage() {}
 
 func (x *CorrectExaminationReportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[52]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4416,7 +4901,7 @@ func (x *CorrectExaminationReportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CorrectExaminationReportRequest.ProtoReflect.Descriptor instead.
 func (*CorrectExaminationReportRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{52}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{59}
 }
 
 func (x *CorrectExaminationReportRequest) GetReportId() string {
@@ -4478,7 +4963,7 @@ type GetExaminationReportRequest struct {
 
 func (x *GetExaminationReportRequest) Reset() {
 	*x = GetExaminationReportRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[53]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4490,7 +4975,7 @@ func (x *GetExaminationReportRequest) String() string {
 func (*GetExaminationReportRequest) ProtoMessage() {}
 
 func (x *GetExaminationReportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[53]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4503,7 +4988,7 @@ func (x *GetExaminationReportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExaminationReportRequest.ProtoReflect.Descriptor instead.
 func (*GetExaminationReportRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{53}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{60}
 }
 
 func (x *GetExaminationReportRequest) GetBookingId() string {
@@ -4533,7 +5018,7 @@ type ListExaminationReportsRequest struct {
 
 func (x *ListExaminationReportsRequest) Reset() {
 	*x = ListExaminationReportsRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[54]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4545,7 +5030,7 @@ func (x *ListExaminationReportsRequest) String() string {
 func (*ListExaminationReportsRequest) ProtoMessage() {}
 
 func (x *ListExaminationReportsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[54]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4558,7 +5043,7 @@ func (x *ListExaminationReportsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListExaminationReportsRequest.ProtoReflect.Descriptor instead.
 func (*ListExaminationReportsRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{54}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{61}
 }
 
 func (x *ListExaminationReportsRequest) GetDepartmentId() string {
@@ -4606,7 +5091,7 @@ type ListExaminationReportVersionsRequest struct {
 
 func (x *ListExaminationReportVersionsRequest) Reset() {
 	*x = ListExaminationReportVersionsRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[55]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4618,7 +5103,7 @@ func (x *ListExaminationReportVersionsRequest) String() string {
 func (*ListExaminationReportVersionsRequest) ProtoMessage() {}
 
 func (x *ListExaminationReportVersionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[55]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4631,7 +5116,7 @@ func (x *ListExaminationReportVersionsRequest) ProtoReflect() protoreflect.Messa
 
 // Deprecated: Use ListExaminationReportVersionsRequest.ProtoReflect.Descriptor instead.
 func (*ListExaminationReportVersionsRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{55}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{62}
 }
 
 func (x *ListExaminationReportVersionsRequest) GetReportId() string {
@@ -4659,7 +5144,7 @@ type ListMyExaminationReportsRequest struct {
 
 func (x *ListMyExaminationReportsRequest) Reset() {
 	*x = ListMyExaminationReportsRequest{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[56]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4671,7 +5156,7 @@ func (x *ListMyExaminationReportsRequest) String() string {
 func (*ListMyExaminationReportsRequest) ProtoMessage() {}
 
 func (x *ListMyExaminationReportsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[56]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4684,7 +5169,7 @@ func (x *ListMyExaminationReportsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListMyExaminationReportsRequest.ProtoReflect.Descriptor instead.
 func (*ListMyExaminationReportsRequest) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{56}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{63}
 }
 
 func (x *ListMyExaminationReportsRequest) GetPage() int64 {
@@ -4732,7 +5217,7 @@ type ExaminationReportVersion struct {
 
 func (x *ExaminationReportVersion) Reset() {
 	*x = ExaminationReportVersion{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[57]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[64]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4744,7 +5229,7 @@ func (x *ExaminationReportVersion) String() string {
 func (*ExaminationReportVersion) ProtoMessage() {}
 
 func (x *ExaminationReportVersion) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[57]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[64]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4757,7 +5242,7 @@ func (x *ExaminationReportVersion) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExaminationReportVersion.ProtoReflect.Descriptor instead.
 func (*ExaminationReportVersion) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{57}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{64}
 }
 
 func (x *ExaminationReportVersion) GetVersionId() string {
@@ -4905,7 +5390,7 @@ type ExaminationReport struct {
 
 func (x *ExaminationReport) Reset() {
 	*x = ExaminationReport{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[58]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[65]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4917,7 +5402,7 @@ func (x *ExaminationReport) String() string {
 func (*ExaminationReport) ProtoMessage() {}
 
 func (x *ExaminationReport) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[58]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[65]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4930,7 +5415,7 @@ func (x *ExaminationReport) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExaminationReport.ProtoReflect.Descriptor instead.
 func (*ExaminationReport) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{58}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{65}
 }
 
 func (x *ExaminationReport) GetReportId() string {
@@ -5117,7 +5602,7 @@ type ListExaminationReportVersionsResponse struct {
 
 func (x *ListExaminationReportVersionsResponse) Reset() {
 	*x = ListExaminationReportVersionsResponse{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[59]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[66]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5129,7 +5614,7 @@ func (x *ListExaminationReportVersionsResponse) String() string {
 func (*ListExaminationReportVersionsResponse) ProtoMessage() {}
 
 func (x *ListExaminationReportVersionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[59]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[66]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5142,7 +5627,7 @@ func (x *ListExaminationReportVersionsResponse) ProtoReflect() protoreflect.Mess
 
 // Deprecated: Use ListExaminationReportVersionsResponse.ProtoReflect.Descriptor instead.
 func (*ListExaminationReportVersionsResponse) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{59}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{66}
 }
 
 func (x *ListExaminationReportVersionsResponse) GetVersions() []*ExaminationReportVersion {
@@ -5164,7 +5649,7 @@ type ListExaminationReportsResponse struct {
 
 func (x *ListExaminationReportsResponse) Reset() {
 	*x = ListExaminationReportsResponse{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[60]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[67]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5176,7 +5661,7 @@ func (x *ListExaminationReportsResponse) String() string {
 func (*ListExaminationReportsResponse) ProtoMessage() {}
 
 func (x *ListExaminationReportsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[60]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[67]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5189,7 +5674,7 @@ func (x *ListExaminationReportsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListExaminationReportsResponse.ProtoReflect.Descriptor instead.
 func (*ListExaminationReportsResponse) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{60}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{67}
 }
 
 func (x *ListExaminationReportsResponse) GetReports() []*ExaminationReport {
@@ -5239,7 +5724,7 @@ type RoomWeeklyWindow struct {
 
 func (x *RoomWeeklyWindow) Reset() {
 	*x = RoomWeeklyWindow{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[61]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[68]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5251,7 +5736,7 @@ func (x *RoomWeeklyWindow) String() string {
 func (*RoomWeeklyWindow) ProtoMessage() {}
 
 func (x *RoomWeeklyWindow) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[61]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[68]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5264,7 +5749,7 @@ func (x *RoomWeeklyWindow) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoomWeeklyWindow.ProtoReflect.Descriptor instead.
 func (*RoomWeeklyWindow) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{61}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{68}
 }
 
 func (x *RoomWeeklyWindow) GetWindowId() string {
@@ -5363,7 +5848,7 @@ type ItemWeeklyWindow struct {
 
 func (x *ItemWeeklyWindow) Reset() {
 	*x = ItemWeeklyWindow{}
-	mi := &file_appointment_v1_appointment_proto_msgTypes[62]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[69]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5375,7 +5860,7 @@ func (x *ItemWeeklyWindow) String() string {
 func (*ItemWeeklyWindow) ProtoMessage() {}
 
 func (x *ItemWeeklyWindow) ProtoReflect() protoreflect.Message {
-	mi := &file_appointment_v1_appointment_proto_msgTypes[62]
+	mi := &file_appointment_v1_appointment_proto_msgTypes[69]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5388,7 +5873,7 @@ func (x *ItemWeeklyWindow) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ItemWeeklyWindow.ProtoReflect.Descriptor instead.
 func (*ItemWeeklyWindow) Descriptor() ([]byte, []int) {
-	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{62}
+	return file_appointment_v1_appointment_proto_rawDescGZIP(), []int{69}
 }
 
 func (x *ItemWeeklyWindow) GetWindowId() string {
@@ -5542,7 +6027,33 @@ const file_appointment_v1_appointment_proto_rawDesc = "" +
 	"\x19expected_template_version\x18\x03 \x01(\x03R\x17expectedTemplateVersion\x12!\n" +
 	"\foperation_id\x18\x04 \x01(\tR\voperationId\x12\x1d\n" +
 	"\n" +
-	"request_id\x18\x05 \x01(\tR\trequestId\"\xf7\x01\n" +
+	"request_id\x18\x05 \x01(\tR\trequestId\"\x95\x03\n" +
+	"*PrepareExaminationItemConfigurationRequest\x12%\n" +
+	"\x0etransaction_id\x18\x01 \x01(\tR\rtransactionId\x12\x16\n" +
+	"\x06action\x18\x02 \x01(\tR\x06action\x12\x17\n" +
+	"\aitem_id\x18\x03 \x01(\tR\x06itemId\x12.\n" +
+	"\x13owner_department_id\x18\x04 \x01(\tR\x11ownerDepartmentId\x12\x12\n" +
+	"\x04name\x18\x05 \x01(\tR\x04name\x12<\n" +
+	"\x1aestimated_duration_minutes\x18\x06 \x01(\x05R\x18estimatedDurationMinutes\x12)\n" +
+	"\x10expected_version\x18\a \x01(\x03R\x0fexpectedVersion\x12!\n" +
+	"\foperation_id\x18\b \x01(\tR\voperationId\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\t \x01(\tR\trequestId\x12 \n" +
+	"\vdescription\x18\n" +
+	" \x01(\tR\vdescription\"\xbf\x01\n" +
+	"$PreparedExaminationItemConfiguration\x12%\n" +
+	"\x0etransaction_id\x18\x01 \x01(\tR\rtransactionId\x12\x16\n" +
+	"\x06action\x18\x02 \x01(\tR\x06action\x12\x17\n" +
+	"\aitem_id\x18\x03 \x01(\tR\x06itemId\x12)\n" +
+	"\x10expected_version\x18\x04 \x01(\x03R\x0fexpectedVersion\x12\x14\n" +
+	"\x05state\x18\x05 \x01(\tR\x05state\"v\n" +
+	".ExaminationItemConfigurationTransactionRequest\x12%\n" +
+	"\x0etransaction_id\x18\x01 \x01(\tR\rtransactionId\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x02 \x01(\tR\trequestId\"q\n" +
+	"*CancelExaminationItemConfigurationResponse\x12%\n" +
+	"\x0etransaction_id\x18\x01 \x01(\tR\rtransactionId\x12\x1c\n" +
+	"\tcancelled\x18\x02 \x01(\bR\tcancelled\"\xf7\x01\n" +
 	"\x11CreateRoomRequest\x12#\n" +
 	"\rdepartment_id\x18\x01 \x01(\tR\fdepartmentId\x12\x1b\n" +
 	"\tcampus_id\x18\x02 \x01(\tR\bcampusId\x12\x1a\n" +
@@ -5726,7 +6237,21 @@ const file_appointment_v1_appointment_proto_rawDesc = "" +
 	"\n" +
 	"request_id\x18\x06 \x01(\tR\trequestId\x120\n" +
 	"\x14patient_display_name\x18\a \x01(\tR\x12patientDisplayName\x120\n" +
-	"\x14patient_phone_masked\x18\b \x01(\tR\x12patientPhoneMasked\"Q\n" +
+	"\x14patient_phone_masked\x18\b \x01(\tR\x12patientPhoneMasked\"\x81\x01\n" +
+	"\x10BookingBatchItem\x12\x17\n" +
+	"\aitem_id\x18\x01 \x01(\tR\x06itemId\x12\x17\n" +
+	"\aroom_id\x18\x02 \x01(\tR\x06roomId\x12!\n" +
+	"\fservice_date\x18\x03 \x01(\tR\vserviceDate\x12\x18\n" +
+	"\asession\x18\x04 \x01(\tR\asession\"\x82\x02\n" +
+	"\x19CreateBookingBatchRequest\x12?\n" +
+	"\x05items\x18\x01 \x03(\v2).hospital.appointment.v1.BookingBatchItemR\x05items\x12!\n" +
+	"\foperation_id\x18\x02 \x01(\tR\voperationId\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x03 \x01(\tR\trequestId\x120\n" +
+	"\x14patient_display_name\x18\x04 \x01(\tR\x12patientDisplayName\x120\n" +
+	"\x14patient_phone_masked\x18\x05 \x01(\tR\x12patientPhoneMasked\"Z\n" +
+	"\x1aCreateBookingBatchResponse\x12<\n" +
+	"\bbookings\x18\x01 \x03(\v2 .hospital.appointment.v1.BookingR\bbookings\"Q\n" +
 	"\x11GetBookingRequest\x12\x1d\n" +
 	"\n" +
 	"booking_id\x18\x01 \x01(\tR\tbookingId\x12\x1d\n" +
@@ -6042,7 +6567,7 @@ const file_appointment_v1_appointment_proto_rawDesc = "" +
 	"created_at\x18\n" +
 	" \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\v \x01(\tR\tupdatedAt2\x95.\n" +
+	"updated_at\x18\v \x01(\tR\tupdatedAt2\x903\n" +
 	"\x12AppointmentService\x12x\n" +
 	"\x15CreateExaminationItem\x125.hospital.appointment.v1.CreateExaminationItemRequest\x1a(.hospital.appointment.v1.ExaminationItem\x12r\n" +
 	"\x12GetExaminationItem\x122.hospital.appointment.v1.GetExaminationItemRequest\x1a(.hospital.appointment.v1.ExaminationItem\x12\x83\x01\n" +
@@ -6051,7 +6576,10 @@ const file_appointment_v1_appointment_proto_rawDesc = "" +
 	"\x16DisableExaminationItem\x12;.hospital.appointment.v1.ChangeExaminationItemStatusRequest\x1a(.hospital.appointment.v1.ExaminationItem\x12~\n" +
 	"\x15EnableExaminationItem\x12;.hospital.appointment.v1.ChangeExaminationItemStatusRequest\x1a(.hospital.appointment.v1.ExaminationItem\x12\x8e\x01\n" +
 	" GetExaminationItemReportTemplate\x122.hospital.appointment.v1.GetExaminationItemRequest\x1a6.hospital.appointment.v1.ExaminationItemReportTemplate\x12\x9e\x01\n" +
-	"!SaveExaminationItemReportTemplate\x12A.hospital.appointment.v1.SaveExaminationItemReportTemplateRequest\x1a6.hospital.appointment.v1.ExaminationItemReportTemplate\x12W\n" +
+	"!SaveExaminationItemReportTemplate\x12A.hospital.appointment.v1.SaveExaminationItemReportTemplateRequest\x1a6.hospital.appointment.v1.ExaminationItemReportTemplate\x12\xa9\x01\n" +
+	"#PrepareExaminationItemConfiguration\x12C.hospital.appointment.v1.PrepareExaminationItemConfigurationRequest\x1a=.hospital.appointment.v1.PreparedExaminationItemConfiguration\x12\x98\x01\n" +
+	"#ConfirmExaminationItemConfiguration\x12G.hospital.appointment.v1.ExaminationItemConfigurationTransactionRequest\x1a(.hospital.appointment.v1.ExaminationItem\x12\xb2\x01\n" +
+	"\"CancelExaminationItemConfiguration\x12G.hospital.appointment.v1.ExaminationItemConfigurationTransactionRequest\x1aC.hospital.appointment.v1.CancelExaminationItemConfigurationResponse\x12W\n" +
 	"\n" +
 	"CreateRoom\x12*.hospital.appointment.v1.CreateRoomRequest\x1a\x1d.hospital.appointment.v1.Room\x12Q\n" +
 	"\aGetRoom\x12'.hospital.appointment.v1.GetRoomRequest\x1a\x1d.hospital.appointment.v1.Room\x12b\n" +
@@ -6072,7 +6600,8 @@ const file_appointment_v1_appointment_proto_rawDesc = "" +
 	"\x17DisableItemWeeklyWindow\x124.hospital.appointment.v1.ChangeResourceStatusRequest\x1a).hospital.appointment.v1.ItemWeeklyWindow\x12\x82\x01\n" +
 	"\x15ListItemWeeklyWindows\x121.hospital.appointment.v1.ListWeeklyWindowsRequest\x1a6.hospital.appointment.v1.ListItemWeeklyWindowsResponse\x12}\n" +
 	"\x12ListBookingOptions\x122.hospital.appointment.v1.ListBookingOptionsRequest\x1a3.hospital.appointment.v1.ListBookingOptionsResponse\x12`\n" +
-	"\rCreateBooking\x12-.hospital.appointment.v1.CreateBookingRequest\x1a .hospital.appointment.v1.Booking\x12b\n" +
+	"\rCreateBooking\x12-.hospital.appointment.v1.CreateBookingRequest\x1a .hospital.appointment.v1.Booking\x12}\n" +
+	"\x12CreateBookingBatch\x122.hospital.appointment.v1.CreateBookingBatchRequest\x1a3.hospital.appointment.v1.CreateBookingBatchResponse\x12b\n" +
 	"\x0eCheckInBooking\x12..hospital.appointment.v1.CheckInBookingRequest\x1a .hospital.appointment.v1.Booking\x12\\\n" +
 	"\fGetMyBooking\x12*.hospital.appointment.v1.GetBookingRequest\x1a .hospital.appointment.v1.Booking\x12o\n" +
 	"\x0eListMyBookings\x12..hospital.appointment.v1.ListMyBookingsRequest\x1a-.hospital.appointment.v1.ListBookingsResponse\x12p\n" +
@@ -6110,195 +6639,212 @@ func file_appointment_v1_appointment_proto_rawDescGZIP() []byte {
 	return file_appointment_v1_appointment_proto_rawDescData
 }
 
-var file_appointment_v1_appointment_proto_msgTypes = make([]protoimpl.MessageInfo, 63)
+var file_appointment_v1_appointment_proto_msgTypes = make([]protoimpl.MessageInfo, 70)
 var file_appointment_v1_appointment_proto_goTypes = []any{
-	(*ExaminationItemInput)(nil),                       // 0: hospital.appointment.v1.ExaminationItemInput
-	(*CreateExaminationItemRequest)(nil),               // 1: hospital.appointment.v1.CreateExaminationItemRequest
-	(*GetExaminationItemRequest)(nil),                  // 2: hospital.appointment.v1.GetExaminationItemRequest
-	(*ListExaminationItemsRequest)(nil),                // 3: hospital.appointment.v1.ListExaminationItemsRequest
-	(*ListExaminationItemsResponse)(nil),               // 4: hospital.appointment.v1.ListExaminationItemsResponse
-	(*UpdateExaminationItemRequest)(nil),               // 5: hospital.appointment.v1.UpdateExaminationItemRequest
-	(*ChangeExaminationItemStatusRequest)(nil),         // 6: hospital.appointment.v1.ChangeExaminationItemStatusRequest
-	(*ExaminationItem)(nil),                            // 7: hospital.appointment.v1.ExaminationItem
-	(*ExaminationItemReportTemplate)(nil),              // 8: hospital.appointment.v1.ExaminationItemReportTemplate
-	(*SaveExaminationItemReportTemplateRequest)(nil),   // 9: hospital.appointment.v1.SaveExaminationItemReportTemplateRequest
-	(*CreateRoomRequest)(nil),                          // 10: hospital.appointment.v1.CreateRoomRequest
-	(*GetRoomRequest)(nil),                             // 11: hospital.appointment.v1.GetRoomRequest
-	(*ListRoomsRequest)(nil),                           // 12: hospital.appointment.v1.ListRoomsRequest
-	(*ListRoomsResponse)(nil),                          // 13: hospital.appointment.v1.ListRoomsResponse
-	(*UpdateRoomRequest)(nil),                          // 14: hospital.appointment.v1.UpdateRoomRequest
-	(*RetireRoomRequest)(nil),                          // 15: hospital.appointment.v1.RetireRoomRequest
-	(*ChangeResourceStatusRequest)(nil),                // 16: hospital.appointment.v1.ChangeResourceStatusRequest
-	(*Room)(nil),                                       // 17: hospital.appointment.v1.Room
-	(*AddRoomExaminationItemRequest)(nil),              // 18: hospital.appointment.v1.AddRoomExaminationItemRequest
-	(*ListRoomExaminationItemsRequest)(nil),            // 19: hospital.appointment.v1.ListRoomExaminationItemsRequest
-	(*ListAvailableRoomsByExaminationItemRequest)(nil), // 20: hospital.appointment.v1.ListAvailableRoomsByExaminationItemRequest
-	(*ListRoomExaminationItemsResponse)(nil),           // 21: hospital.appointment.v1.ListRoomExaminationItemsResponse
-	(*RoomExaminationItem)(nil),                        // 22: hospital.appointment.v1.RoomExaminationItem
-	(*SetRoomWeeklyWindowRequest)(nil),                 // 23: hospital.appointment.v1.SetRoomWeeklyWindowRequest
-	(*SetItemWeeklyWindowRequest)(nil),                 // 24: hospital.appointment.v1.SetItemWeeklyWindowRequest
-	(*ListWeeklyWindowsRequest)(nil),                   // 25: hospital.appointment.v1.ListWeeklyWindowsRequest
-	(*ListRoomWeeklyWindowsResponse)(nil),              // 26: hospital.appointment.v1.ListRoomWeeklyWindowsResponse
-	(*ListItemWeeklyWindowsResponse)(nil),              // 27: hospital.appointment.v1.ListItemWeeklyWindowsResponse
-	(*ListBookingOptionsRequest)(nil),                  // 28: hospital.appointment.v1.ListBookingOptionsRequest
-	(*BookingOption)(nil),                              // 29: hospital.appointment.v1.BookingOption
-	(*ListBookingOptionsResponse)(nil),                 // 30: hospital.appointment.v1.ListBookingOptionsResponse
-	(*CreateBookingRequest)(nil),                       // 31: hospital.appointment.v1.CreateBookingRequest
-	(*GetBookingRequest)(nil),                          // 32: hospital.appointment.v1.GetBookingRequest
-	(*ListMyBookingsRequest)(nil),                      // 33: hospital.appointment.v1.ListMyBookingsRequest
-	(*ListBookingsRequest)(nil),                        // 34: hospital.appointment.v1.ListBookingsRequest
-	(*DeleteBookingRequest)(nil),                       // 35: hospital.appointment.v1.DeleteBookingRequest
-	(*DeleteBookingResponse)(nil),                      // 36: hospital.appointment.v1.DeleteBookingResponse
-	(*StartExaminationRequest)(nil),                    // 37: hospital.appointment.v1.StartExaminationRequest
-	(*CheckInBookingRequest)(nil),                      // 38: hospital.appointment.v1.CheckInBookingRequest
-	(*CallNextBookingRequest)(nil),                     // 39: hospital.appointment.v1.CallNextBookingRequest
-	(*EndExaminationRequest)(nil),                      // 40: hospital.appointment.v1.EndExaminationRequest
-	(*Booking)(nil),                                    // 41: hospital.appointment.v1.Booking
-	(*ListBookingsResponse)(nil),                       // 42: hospital.appointment.v1.ListBookingsResponse
-	(*ListMyMessagesRequest)(nil),                      // 43: hospital.appointment.v1.ListMyMessagesRequest
-	(*ListMessagesRequest)(nil),                        // 44: hospital.appointment.v1.ListMessagesRequest
-	(*MarkMessageReadRequest)(nil),                     // 45: hospital.appointment.v1.MarkMessageReadRequest
-	(*Message)(nil),                                    // 46: hospital.appointment.v1.Message
-	(*DepartmentUnreadCount)(nil),                      // 47: hospital.appointment.v1.DepartmentUnreadCount
-	(*ListMessagesResponse)(nil),                       // 48: hospital.appointment.v1.ListMessagesResponse
-	(*ExaminationReportContent)(nil),                   // 49: hospital.appointment.v1.ExaminationReportContent
-	(*SaveExaminationReportDraftRequest)(nil),          // 50: hospital.appointment.v1.SaveExaminationReportDraftRequest
-	(*CompleteAndPublishExaminationReportRequest)(nil), // 51: hospital.appointment.v1.CompleteAndPublishExaminationReportRequest
-	(*CorrectExaminationReportRequest)(nil),            // 52: hospital.appointment.v1.CorrectExaminationReportRequest
-	(*GetExaminationReportRequest)(nil),                // 53: hospital.appointment.v1.GetExaminationReportRequest
-	(*ListExaminationReportsRequest)(nil),              // 54: hospital.appointment.v1.ListExaminationReportsRequest
-	(*ListExaminationReportVersionsRequest)(nil),       // 55: hospital.appointment.v1.ListExaminationReportVersionsRequest
-	(*ListMyExaminationReportsRequest)(nil),            // 56: hospital.appointment.v1.ListMyExaminationReportsRequest
-	(*ExaminationReportVersion)(nil),                   // 57: hospital.appointment.v1.ExaminationReportVersion
-	(*ExaminationReport)(nil),                          // 58: hospital.appointment.v1.ExaminationReport
-	(*ListExaminationReportVersionsResponse)(nil),      // 59: hospital.appointment.v1.ListExaminationReportVersionsResponse
-	(*ListExaminationReportsResponse)(nil),             // 60: hospital.appointment.v1.ListExaminationReportsResponse
-	(*RoomWeeklyWindow)(nil),                           // 61: hospital.appointment.v1.RoomWeeklyWindow
-	(*ItemWeeklyWindow)(nil),                           // 62: hospital.appointment.v1.ItemWeeklyWindow
+	(*ExaminationItemInput)(nil),                           // 0: hospital.appointment.v1.ExaminationItemInput
+	(*CreateExaminationItemRequest)(nil),                   // 1: hospital.appointment.v1.CreateExaminationItemRequest
+	(*GetExaminationItemRequest)(nil),                      // 2: hospital.appointment.v1.GetExaminationItemRequest
+	(*ListExaminationItemsRequest)(nil),                    // 3: hospital.appointment.v1.ListExaminationItemsRequest
+	(*ListExaminationItemsResponse)(nil),                   // 4: hospital.appointment.v1.ListExaminationItemsResponse
+	(*UpdateExaminationItemRequest)(nil),                   // 5: hospital.appointment.v1.UpdateExaminationItemRequest
+	(*ChangeExaminationItemStatusRequest)(nil),             // 6: hospital.appointment.v1.ChangeExaminationItemStatusRequest
+	(*ExaminationItem)(nil),                                // 7: hospital.appointment.v1.ExaminationItem
+	(*ExaminationItemReportTemplate)(nil),                  // 8: hospital.appointment.v1.ExaminationItemReportTemplate
+	(*SaveExaminationItemReportTemplateRequest)(nil),       // 9: hospital.appointment.v1.SaveExaminationItemReportTemplateRequest
+	(*PrepareExaminationItemConfigurationRequest)(nil),     // 10: hospital.appointment.v1.PrepareExaminationItemConfigurationRequest
+	(*PreparedExaminationItemConfiguration)(nil),           // 11: hospital.appointment.v1.PreparedExaminationItemConfiguration
+	(*ExaminationItemConfigurationTransactionRequest)(nil), // 12: hospital.appointment.v1.ExaminationItemConfigurationTransactionRequest
+	(*CancelExaminationItemConfigurationResponse)(nil),     // 13: hospital.appointment.v1.CancelExaminationItemConfigurationResponse
+	(*CreateRoomRequest)(nil),                              // 14: hospital.appointment.v1.CreateRoomRequest
+	(*GetRoomRequest)(nil),                                 // 15: hospital.appointment.v1.GetRoomRequest
+	(*ListRoomsRequest)(nil),                               // 16: hospital.appointment.v1.ListRoomsRequest
+	(*ListRoomsResponse)(nil),                              // 17: hospital.appointment.v1.ListRoomsResponse
+	(*UpdateRoomRequest)(nil),                              // 18: hospital.appointment.v1.UpdateRoomRequest
+	(*RetireRoomRequest)(nil),                              // 19: hospital.appointment.v1.RetireRoomRequest
+	(*ChangeResourceStatusRequest)(nil),                    // 20: hospital.appointment.v1.ChangeResourceStatusRequest
+	(*Room)(nil),                                           // 21: hospital.appointment.v1.Room
+	(*AddRoomExaminationItemRequest)(nil),                  // 22: hospital.appointment.v1.AddRoomExaminationItemRequest
+	(*ListRoomExaminationItemsRequest)(nil),                // 23: hospital.appointment.v1.ListRoomExaminationItemsRequest
+	(*ListAvailableRoomsByExaminationItemRequest)(nil),     // 24: hospital.appointment.v1.ListAvailableRoomsByExaminationItemRequest
+	(*ListRoomExaminationItemsResponse)(nil),               // 25: hospital.appointment.v1.ListRoomExaminationItemsResponse
+	(*RoomExaminationItem)(nil),                            // 26: hospital.appointment.v1.RoomExaminationItem
+	(*SetRoomWeeklyWindowRequest)(nil),                     // 27: hospital.appointment.v1.SetRoomWeeklyWindowRequest
+	(*SetItemWeeklyWindowRequest)(nil),                     // 28: hospital.appointment.v1.SetItemWeeklyWindowRequest
+	(*ListWeeklyWindowsRequest)(nil),                       // 29: hospital.appointment.v1.ListWeeklyWindowsRequest
+	(*ListRoomWeeklyWindowsResponse)(nil),                  // 30: hospital.appointment.v1.ListRoomWeeklyWindowsResponse
+	(*ListItemWeeklyWindowsResponse)(nil),                  // 31: hospital.appointment.v1.ListItemWeeklyWindowsResponse
+	(*ListBookingOptionsRequest)(nil),                      // 32: hospital.appointment.v1.ListBookingOptionsRequest
+	(*BookingOption)(nil),                                  // 33: hospital.appointment.v1.BookingOption
+	(*ListBookingOptionsResponse)(nil),                     // 34: hospital.appointment.v1.ListBookingOptionsResponse
+	(*CreateBookingRequest)(nil),                           // 35: hospital.appointment.v1.CreateBookingRequest
+	(*BookingBatchItem)(nil),                               // 36: hospital.appointment.v1.BookingBatchItem
+	(*CreateBookingBatchRequest)(nil),                      // 37: hospital.appointment.v1.CreateBookingBatchRequest
+	(*CreateBookingBatchResponse)(nil),                     // 38: hospital.appointment.v1.CreateBookingBatchResponse
+	(*GetBookingRequest)(nil),                              // 39: hospital.appointment.v1.GetBookingRequest
+	(*ListMyBookingsRequest)(nil),                          // 40: hospital.appointment.v1.ListMyBookingsRequest
+	(*ListBookingsRequest)(nil),                            // 41: hospital.appointment.v1.ListBookingsRequest
+	(*DeleteBookingRequest)(nil),                           // 42: hospital.appointment.v1.DeleteBookingRequest
+	(*DeleteBookingResponse)(nil),                          // 43: hospital.appointment.v1.DeleteBookingResponse
+	(*StartExaminationRequest)(nil),                        // 44: hospital.appointment.v1.StartExaminationRequest
+	(*CheckInBookingRequest)(nil),                          // 45: hospital.appointment.v1.CheckInBookingRequest
+	(*CallNextBookingRequest)(nil),                         // 46: hospital.appointment.v1.CallNextBookingRequest
+	(*EndExaminationRequest)(nil),                          // 47: hospital.appointment.v1.EndExaminationRequest
+	(*Booking)(nil),                                        // 48: hospital.appointment.v1.Booking
+	(*ListBookingsResponse)(nil),                           // 49: hospital.appointment.v1.ListBookingsResponse
+	(*ListMyMessagesRequest)(nil),                          // 50: hospital.appointment.v1.ListMyMessagesRequest
+	(*ListMessagesRequest)(nil),                            // 51: hospital.appointment.v1.ListMessagesRequest
+	(*MarkMessageReadRequest)(nil),                         // 52: hospital.appointment.v1.MarkMessageReadRequest
+	(*Message)(nil),                                        // 53: hospital.appointment.v1.Message
+	(*DepartmentUnreadCount)(nil),                          // 54: hospital.appointment.v1.DepartmentUnreadCount
+	(*ListMessagesResponse)(nil),                           // 55: hospital.appointment.v1.ListMessagesResponse
+	(*ExaminationReportContent)(nil),                       // 56: hospital.appointment.v1.ExaminationReportContent
+	(*SaveExaminationReportDraftRequest)(nil),              // 57: hospital.appointment.v1.SaveExaminationReportDraftRequest
+	(*CompleteAndPublishExaminationReportRequest)(nil),     // 58: hospital.appointment.v1.CompleteAndPublishExaminationReportRequest
+	(*CorrectExaminationReportRequest)(nil),                // 59: hospital.appointment.v1.CorrectExaminationReportRequest
+	(*GetExaminationReportRequest)(nil),                    // 60: hospital.appointment.v1.GetExaminationReportRequest
+	(*ListExaminationReportsRequest)(nil),                  // 61: hospital.appointment.v1.ListExaminationReportsRequest
+	(*ListExaminationReportVersionsRequest)(nil),           // 62: hospital.appointment.v1.ListExaminationReportVersionsRequest
+	(*ListMyExaminationReportsRequest)(nil),                // 63: hospital.appointment.v1.ListMyExaminationReportsRequest
+	(*ExaminationReportVersion)(nil),                       // 64: hospital.appointment.v1.ExaminationReportVersion
+	(*ExaminationReport)(nil),                              // 65: hospital.appointment.v1.ExaminationReport
+	(*ListExaminationReportVersionsResponse)(nil),          // 66: hospital.appointment.v1.ListExaminationReportVersionsResponse
+	(*ListExaminationReportsResponse)(nil),                 // 67: hospital.appointment.v1.ListExaminationReportsResponse
+	(*RoomWeeklyWindow)(nil),                               // 68: hospital.appointment.v1.RoomWeeklyWindow
+	(*ItemWeeklyWindow)(nil),                               // 69: hospital.appointment.v1.ItemWeeklyWindow
 }
 var file_appointment_v1_appointment_proto_depIdxs = []int32{
 	0,  // 0: hospital.appointment.v1.CreateExaminationItemRequest.examination_item:type_name -> hospital.appointment.v1.ExaminationItemInput
 	7,  // 1: hospital.appointment.v1.ListExaminationItemsResponse.items:type_name -> hospital.appointment.v1.ExaminationItem
-	49, // 2: hospital.appointment.v1.ExaminationItemReportTemplate.content:type_name -> hospital.appointment.v1.ExaminationReportContent
-	49, // 3: hospital.appointment.v1.SaveExaminationItemReportTemplateRequest.content:type_name -> hospital.appointment.v1.ExaminationReportContent
-	17, // 4: hospital.appointment.v1.ListRoomsResponse.rooms:type_name -> hospital.appointment.v1.Room
-	22, // 5: hospital.appointment.v1.ListRoomExaminationItemsResponse.relations:type_name -> hospital.appointment.v1.RoomExaminationItem
-	61, // 6: hospital.appointment.v1.ListRoomWeeklyWindowsResponse.windows:type_name -> hospital.appointment.v1.RoomWeeklyWindow
-	62, // 7: hospital.appointment.v1.ListItemWeeklyWindowsResponse.windows:type_name -> hospital.appointment.v1.ItemWeeklyWindow
-	29, // 8: hospital.appointment.v1.ListBookingOptionsResponse.options:type_name -> hospital.appointment.v1.BookingOption
-	41, // 9: hospital.appointment.v1.ListBookingsResponse.bookings:type_name -> hospital.appointment.v1.Booking
-	41, // 10: hospital.appointment.v1.Message.booking:type_name -> hospital.appointment.v1.Booking
-	46, // 11: hospital.appointment.v1.ListMessagesResponse.messages:type_name -> hospital.appointment.v1.Message
-	47, // 12: hospital.appointment.v1.ListMessagesResponse.department_unread_counts:type_name -> hospital.appointment.v1.DepartmentUnreadCount
-	49, // 13: hospital.appointment.v1.SaveExaminationReportDraftRequest.content:type_name -> hospital.appointment.v1.ExaminationReportContent
-	49, // 14: hospital.appointment.v1.CompleteAndPublishExaminationReportRequest.content:type_name -> hospital.appointment.v1.ExaminationReportContent
-	49, // 15: hospital.appointment.v1.CorrectExaminationReportRequest.content:type_name -> hospital.appointment.v1.ExaminationReportContent
-	57, // 16: hospital.appointment.v1.ExaminationReport.current_version:type_name -> hospital.appointment.v1.ExaminationReportVersion
-	57, // 17: hospital.appointment.v1.ListExaminationReportVersionsResponse.versions:type_name -> hospital.appointment.v1.ExaminationReportVersion
-	58, // 18: hospital.appointment.v1.ListExaminationReportsResponse.reports:type_name -> hospital.appointment.v1.ExaminationReport
-	1,  // 19: hospital.appointment.v1.AppointmentService.CreateExaminationItem:input_type -> hospital.appointment.v1.CreateExaminationItemRequest
-	2,  // 20: hospital.appointment.v1.AppointmentService.GetExaminationItem:input_type -> hospital.appointment.v1.GetExaminationItemRequest
-	3,  // 21: hospital.appointment.v1.AppointmentService.ListExaminationItems:input_type -> hospital.appointment.v1.ListExaminationItemsRequest
-	5,  // 22: hospital.appointment.v1.AppointmentService.UpdateExaminationItem:input_type -> hospital.appointment.v1.UpdateExaminationItemRequest
-	6,  // 23: hospital.appointment.v1.AppointmentService.DisableExaminationItem:input_type -> hospital.appointment.v1.ChangeExaminationItemStatusRequest
-	6,  // 24: hospital.appointment.v1.AppointmentService.EnableExaminationItem:input_type -> hospital.appointment.v1.ChangeExaminationItemStatusRequest
-	2,  // 25: hospital.appointment.v1.AppointmentService.GetExaminationItemReportTemplate:input_type -> hospital.appointment.v1.GetExaminationItemRequest
-	9,  // 26: hospital.appointment.v1.AppointmentService.SaveExaminationItemReportTemplate:input_type -> hospital.appointment.v1.SaveExaminationItemReportTemplateRequest
-	10, // 27: hospital.appointment.v1.AppointmentService.CreateRoom:input_type -> hospital.appointment.v1.CreateRoomRequest
-	11, // 28: hospital.appointment.v1.AppointmentService.GetRoom:input_type -> hospital.appointment.v1.GetRoomRequest
-	12, // 29: hospital.appointment.v1.AppointmentService.ListRooms:input_type -> hospital.appointment.v1.ListRoomsRequest
-	14, // 30: hospital.appointment.v1.AppointmentService.UpdateRoom:input_type -> hospital.appointment.v1.UpdateRoomRequest
-	15, // 31: hospital.appointment.v1.AppointmentService.RetireRoom:input_type -> hospital.appointment.v1.RetireRoomRequest
-	18, // 32: hospital.appointment.v1.AppointmentService.AddRoomExaminationItem:input_type -> hospital.appointment.v1.AddRoomExaminationItemRequest
-	16, // 33: hospital.appointment.v1.AppointmentService.DisableRoomExaminationItem:input_type -> hospital.appointment.v1.ChangeResourceStatusRequest
-	16, // 34: hospital.appointment.v1.AppointmentService.EnableRoomExaminationItem:input_type -> hospital.appointment.v1.ChangeResourceStatusRequest
-	19, // 35: hospital.appointment.v1.AppointmentService.ListRoomExaminationItems:input_type -> hospital.appointment.v1.ListRoomExaminationItemsRequest
-	20, // 36: hospital.appointment.v1.AppointmentService.ListAvailableRoomsByExaminationItem:input_type -> hospital.appointment.v1.ListAvailableRoomsByExaminationItemRequest
-	23, // 37: hospital.appointment.v1.AppointmentService.SetRoomWeeklyWindow:input_type -> hospital.appointment.v1.SetRoomWeeklyWindowRequest
-	16, // 38: hospital.appointment.v1.AppointmentService.DisableRoomWeeklyWindow:input_type -> hospital.appointment.v1.ChangeResourceStatusRequest
-	25, // 39: hospital.appointment.v1.AppointmentService.ListRoomWeeklyWindows:input_type -> hospital.appointment.v1.ListWeeklyWindowsRequest
-	24, // 40: hospital.appointment.v1.AppointmentService.SetItemWeeklyWindow:input_type -> hospital.appointment.v1.SetItemWeeklyWindowRequest
-	16, // 41: hospital.appointment.v1.AppointmentService.DisableItemWeeklyWindow:input_type -> hospital.appointment.v1.ChangeResourceStatusRequest
-	25, // 42: hospital.appointment.v1.AppointmentService.ListItemWeeklyWindows:input_type -> hospital.appointment.v1.ListWeeklyWindowsRequest
-	28, // 43: hospital.appointment.v1.AppointmentService.ListBookingOptions:input_type -> hospital.appointment.v1.ListBookingOptionsRequest
-	31, // 44: hospital.appointment.v1.AppointmentService.CreateBooking:input_type -> hospital.appointment.v1.CreateBookingRequest
-	38, // 45: hospital.appointment.v1.AppointmentService.CheckInBooking:input_type -> hospital.appointment.v1.CheckInBookingRequest
-	32, // 46: hospital.appointment.v1.AppointmentService.GetMyBooking:input_type -> hospital.appointment.v1.GetBookingRequest
-	33, // 47: hospital.appointment.v1.AppointmentService.ListMyBookings:input_type -> hospital.appointment.v1.ListMyBookingsRequest
-	35, // 48: hospital.appointment.v1.AppointmentService.DeleteMyBooking:input_type -> hospital.appointment.v1.DeleteBookingRequest
-	43, // 49: hospital.appointment.v1.AppointmentService.ListMyMessages:input_type -> hospital.appointment.v1.ListMyMessagesRequest
-	45, // 50: hospital.appointment.v1.AppointmentService.MarkMyMessageRead:input_type -> hospital.appointment.v1.MarkMessageReadRequest
-	32, // 51: hospital.appointment.v1.AppointmentService.GetBooking:input_type -> hospital.appointment.v1.GetBookingRequest
-	34, // 52: hospital.appointment.v1.AppointmentService.ListBookings:input_type -> hospital.appointment.v1.ListBookingsRequest
-	37, // 53: hospital.appointment.v1.AppointmentService.StartExamination:input_type -> hospital.appointment.v1.StartExaminationRequest
-	39, // 54: hospital.appointment.v1.AppointmentService.CallNextBooking:input_type -> hospital.appointment.v1.CallNextBookingRequest
-	40, // 55: hospital.appointment.v1.AppointmentService.EndExamination:input_type -> hospital.appointment.v1.EndExaminationRequest
-	35, // 56: hospital.appointment.v1.AppointmentService.DeleteBooking:input_type -> hospital.appointment.v1.DeleteBookingRequest
-	44, // 57: hospital.appointment.v1.AppointmentService.ListMessages:input_type -> hospital.appointment.v1.ListMessagesRequest
-	45, // 58: hospital.appointment.v1.AppointmentService.MarkMessageRead:input_type -> hospital.appointment.v1.MarkMessageReadRequest
-	50, // 59: hospital.appointment.v1.AppointmentService.SaveExaminationReportDraft:input_type -> hospital.appointment.v1.SaveExaminationReportDraftRequest
-	51, // 60: hospital.appointment.v1.AppointmentService.CompleteAndPublishExaminationReport:input_type -> hospital.appointment.v1.CompleteAndPublishExaminationReportRequest
-	52, // 61: hospital.appointment.v1.AppointmentService.CorrectExaminationReport:input_type -> hospital.appointment.v1.CorrectExaminationReportRequest
-	53, // 62: hospital.appointment.v1.AppointmentService.GetExaminationReport:input_type -> hospital.appointment.v1.GetExaminationReportRequest
-	54, // 63: hospital.appointment.v1.AppointmentService.ListExaminationReports:input_type -> hospital.appointment.v1.ListExaminationReportsRequest
-	55, // 64: hospital.appointment.v1.AppointmentService.ListExaminationReportVersions:input_type -> hospital.appointment.v1.ListExaminationReportVersionsRequest
-	53, // 65: hospital.appointment.v1.AppointmentService.GetMyExaminationReport:input_type -> hospital.appointment.v1.GetExaminationReportRequest
-	56, // 66: hospital.appointment.v1.AppointmentService.ListMyExaminationReports:input_type -> hospital.appointment.v1.ListMyExaminationReportsRequest
-	2,  // 67: hospital.appointment.v1.AppointmentService.GetExaminationItemReference:input_type -> hospital.appointment.v1.GetExaminationItemRequest
-	7,  // 68: hospital.appointment.v1.AppointmentService.CreateExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
-	7,  // 69: hospital.appointment.v1.AppointmentService.GetExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
-	4,  // 70: hospital.appointment.v1.AppointmentService.ListExaminationItems:output_type -> hospital.appointment.v1.ListExaminationItemsResponse
-	7,  // 71: hospital.appointment.v1.AppointmentService.UpdateExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
-	7,  // 72: hospital.appointment.v1.AppointmentService.DisableExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
-	7,  // 73: hospital.appointment.v1.AppointmentService.EnableExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
-	8,  // 74: hospital.appointment.v1.AppointmentService.GetExaminationItemReportTemplate:output_type -> hospital.appointment.v1.ExaminationItemReportTemplate
-	8,  // 75: hospital.appointment.v1.AppointmentService.SaveExaminationItemReportTemplate:output_type -> hospital.appointment.v1.ExaminationItemReportTemplate
-	17, // 76: hospital.appointment.v1.AppointmentService.CreateRoom:output_type -> hospital.appointment.v1.Room
-	17, // 77: hospital.appointment.v1.AppointmentService.GetRoom:output_type -> hospital.appointment.v1.Room
-	13, // 78: hospital.appointment.v1.AppointmentService.ListRooms:output_type -> hospital.appointment.v1.ListRoomsResponse
-	17, // 79: hospital.appointment.v1.AppointmentService.UpdateRoom:output_type -> hospital.appointment.v1.Room
-	17, // 80: hospital.appointment.v1.AppointmentService.RetireRoom:output_type -> hospital.appointment.v1.Room
-	22, // 81: hospital.appointment.v1.AppointmentService.AddRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
-	22, // 82: hospital.appointment.v1.AppointmentService.DisableRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
-	22, // 83: hospital.appointment.v1.AppointmentService.EnableRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
-	21, // 84: hospital.appointment.v1.AppointmentService.ListRoomExaminationItems:output_type -> hospital.appointment.v1.ListRoomExaminationItemsResponse
-	21, // 85: hospital.appointment.v1.AppointmentService.ListAvailableRoomsByExaminationItem:output_type -> hospital.appointment.v1.ListRoomExaminationItemsResponse
-	61, // 86: hospital.appointment.v1.AppointmentService.SetRoomWeeklyWindow:output_type -> hospital.appointment.v1.RoomWeeklyWindow
-	61, // 87: hospital.appointment.v1.AppointmentService.DisableRoomWeeklyWindow:output_type -> hospital.appointment.v1.RoomWeeklyWindow
-	26, // 88: hospital.appointment.v1.AppointmentService.ListRoomWeeklyWindows:output_type -> hospital.appointment.v1.ListRoomWeeklyWindowsResponse
-	62, // 89: hospital.appointment.v1.AppointmentService.SetItemWeeklyWindow:output_type -> hospital.appointment.v1.ItemWeeklyWindow
-	62, // 90: hospital.appointment.v1.AppointmentService.DisableItemWeeklyWindow:output_type -> hospital.appointment.v1.ItemWeeklyWindow
-	27, // 91: hospital.appointment.v1.AppointmentService.ListItemWeeklyWindows:output_type -> hospital.appointment.v1.ListItemWeeklyWindowsResponse
-	30, // 92: hospital.appointment.v1.AppointmentService.ListBookingOptions:output_type -> hospital.appointment.v1.ListBookingOptionsResponse
-	41, // 93: hospital.appointment.v1.AppointmentService.CreateBooking:output_type -> hospital.appointment.v1.Booking
-	41, // 94: hospital.appointment.v1.AppointmentService.CheckInBooking:output_type -> hospital.appointment.v1.Booking
-	41, // 95: hospital.appointment.v1.AppointmentService.GetMyBooking:output_type -> hospital.appointment.v1.Booking
-	42, // 96: hospital.appointment.v1.AppointmentService.ListMyBookings:output_type -> hospital.appointment.v1.ListBookingsResponse
-	36, // 97: hospital.appointment.v1.AppointmentService.DeleteMyBooking:output_type -> hospital.appointment.v1.DeleteBookingResponse
-	48, // 98: hospital.appointment.v1.AppointmentService.ListMyMessages:output_type -> hospital.appointment.v1.ListMessagesResponse
-	46, // 99: hospital.appointment.v1.AppointmentService.MarkMyMessageRead:output_type -> hospital.appointment.v1.Message
-	41, // 100: hospital.appointment.v1.AppointmentService.GetBooking:output_type -> hospital.appointment.v1.Booking
-	42, // 101: hospital.appointment.v1.AppointmentService.ListBookings:output_type -> hospital.appointment.v1.ListBookingsResponse
-	41, // 102: hospital.appointment.v1.AppointmentService.StartExamination:output_type -> hospital.appointment.v1.Booking
-	41, // 103: hospital.appointment.v1.AppointmentService.CallNextBooking:output_type -> hospital.appointment.v1.Booking
-	41, // 104: hospital.appointment.v1.AppointmentService.EndExamination:output_type -> hospital.appointment.v1.Booking
-	36, // 105: hospital.appointment.v1.AppointmentService.DeleteBooking:output_type -> hospital.appointment.v1.DeleteBookingResponse
-	48, // 106: hospital.appointment.v1.AppointmentService.ListMessages:output_type -> hospital.appointment.v1.ListMessagesResponse
-	46, // 107: hospital.appointment.v1.AppointmentService.MarkMessageRead:output_type -> hospital.appointment.v1.Message
-	58, // 108: hospital.appointment.v1.AppointmentService.SaveExaminationReportDraft:output_type -> hospital.appointment.v1.ExaminationReport
-	58, // 109: hospital.appointment.v1.AppointmentService.CompleteAndPublishExaminationReport:output_type -> hospital.appointment.v1.ExaminationReport
-	58, // 110: hospital.appointment.v1.AppointmentService.CorrectExaminationReport:output_type -> hospital.appointment.v1.ExaminationReport
-	58, // 111: hospital.appointment.v1.AppointmentService.GetExaminationReport:output_type -> hospital.appointment.v1.ExaminationReport
-	60, // 112: hospital.appointment.v1.AppointmentService.ListExaminationReports:output_type -> hospital.appointment.v1.ListExaminationReportsResponse
-	59, // 113: hospital.appointment.v1.AppointmentService.ListExaminationReportVersions:output_type -> hospital.appointment.v1.ListExaminationReportVersionsResponse
-	58, // 114: hospital.appointment.v1.AppointmentService.GetMyExaminationReport:output_type -> hospital.appointment.v1.ExaminationReport
-	60, // 115: hospital.appointment.v1.AppointmentService.ListMyExaminationReports:output_type -> hospital.appointment.v1.ListExaminationReportsResponse
-	7,  // 116: hospital.appointment.v1.AppointmentService.GetExaminationItemReference:output_type -> hospital.appointment.v1.ExaminationItem
-	68, // [68:117] is the sub-list for method output_type
-	19, // [19:68] is the sub-list for method input_type
-	19, // [19:19] is the sub-list for extension type_name
-	19, // [19:19] is the sub-list for extension extendee
-	0,  // [0:19] is the sub-list for field type_name
+	56, // 2: hospital.appointment.v1.ExaminationItemReportTemplate.content:type_name -> hospital.appointment.v1.ExaminationReportContent
+	56, // 3: hospital.appointment.v1.SaveExaminationItemReportTemplateRequest.content:type_name -> hospital.appointment.v1.ExaminationReportContent
+	21, // 4: hospital.appointment.v1.ListRoomsResponse.rooms:type_name -> hospital.appointment.v1.Room
+	26, // 5: hospital.appointment.v1.ListRoomExaminationItemsResponse.relations:type_name -> hospital.appointment.v1.RoomExaminationItem
+	68, // 6: hospital.appointment.v1.ListRoomWeeklyWindowsResponse.windows:type_name -> hospital.appointment.v1.RoomWeeklyWindow
+	69, // 7: hospital.appointment.v1.ListItemWeeklyWindowsResponse.windows:type_name -> hospital.appointment.v1.ItemWeeklyWindow
+	33, // 8: hospital.appointment.v1.ListBookingOptionsResponse.options:type_name -> hospital.appointment.v1.BookingOption
+	36, // 9: hospital.appointment.v1.CreateBookingBatchRequest.items:type_name -> hospital.appointment.v1.BookingBatchItem
+	48, // 10: hospital.appointment.v1.CreateBookingBatchResponse.bookings:type_name -> hospital.appointment.v1.Booking
+	48, // 11: hospital.appointment.v1.ListBookingsResponse.bookings:type_name -> hospital.appointment.v1.Booking
+	48, // 12: hospital.appointment.v1.Message.booking:type_name -> hospital.appointment.v1.Booking
+	53, // 13: hospital.appointment.v1.ListMessagesResponse.messages:type_name -> hospital.appointment.v1.Message
+	54, // 14: hospital.appointment.v1.ListMessagesResponse.department_unread_counts:type_name -> hospital.appointment.v1.DepartmentUnreadCount
+	56, // 15: hospital.appointment.v1.SaveExaminationReportDraftRequest.content:type_name -> hospital.appointment.v1.ExaminationReportContent
+	56, // 16: hospital.appointment.v1.CompleteAndPublishExaminationReportRequest.content:type_name -> hospital.appointment.v1.ExaminationReportContent
+	56, // 17: hospital.appointment.v1.CorrectExaminationReportRequest.content:type_name -> hospital.appointment.v1.ExaminationReportContent
+	64, // 18: hospital.appointment.v1.ExaminationReport.current_version:type_name -> hospital.appointment.v1.ExaminationReportVersion
+	64, // 19: hospital.appointment.v1.ListExaminationReportVersionsResponse.versions:type_name -> hospital.appointment.v1.ExaminationReportVersion
+	65, // 20: hospital.appointment.v1.ListExaminationReportsResponse.reports:type_name -> hospital.appointment.v1.ExaminationReport
+	1,  // 21: hospital.appointment.v1.AppointmentService.CreateExaminationItem:input_type -> hospital.appointment.v1.CreateExaminationItemRequest
+	2,  // 22: hospital.appointment.v1.AppointmentService.GetExaminationItem:input_type -> hospital.appointment.v1.GetExaminationItemRequest
+	3,  // 23: hospital.appointment.v1.AppointmentService.ListExaminationItems:input_type -> hospital.appointment.v1.ListExaminationItemsRequest
+	5,  // 24: hospital.appointment.v1.AppointmentService.UpdateExaminationItem:input_type -> hospital.appointment.v1.UpdateExaminationItemRequest
+	6,  // 25: hospital.appointment.v1.AppointmentService.DisableExaminationItem:input_type -> hospital.appointment.v1.ChangeExaminationItemStatusRequest
+	6,  // 26: hospital.appointment.v1.AppointmentService.EnableExaminationItem:input_type -> hospital.appointment.v1.ChangeExaminationItemStatusRequest
+	2,  // 27: hospital.appointment.v1.AppointmentService.GetExaminationItemReportTemplate:input_type -> hospital.appointment.v1.GetExaminationItemRequest
+	9,  // 28: hospital.appointment.v1.AppointmentService.SaveExaminationItemReportTemplate:input_type -> hospital.appointment.v1.SaveExaminationItemReportTemplateRequest
+	10, // 29: hospital.appointment.v1.AppointmentService.PrepareExaminationItemConfiguration:input_type -> hospital.appointment.v1.PrepareExaminationItemConfigurationRequest
+	12, // 30: hospital.appointment.v1.AppointmentService.ConfirmExaminationItemConfiguration:input_type -> hospital.appointment.v1.ExaminationItemConfigurationTransactionRequest
+	12, // 31: hospital.appointment.v1.AppointmentService.CancelExaminationItemConfiguration:input_type -> hospital.appointment.v1.ExaminationItemConfigurationTransactionRequest
+	14, // 32: hospital.appointment.v1.AppointmentService.CreateRoom:input_type -> hospital.appointment.v1.CreateRoomRequest
+	15, // 33: hospital.appointment.v1.AppointmentService.GetRoom:input_type -> hospital.appointment.v1.GetRoomRequest
+	16, // 34: hospital.appointment.v1.AppointmentService.ListRooms:input_type -> hospital.appointment.v1.ListRoomsRequest
+	18, // 35: hospital.appointment.v1.AppointmentService.UpdateRoom:input_type -> hospital.appointment.v1.UpdateRoomRequest
+	19, // 36: hospital.appointment.v1.AppointmentService.RetireRoom:input_type -> hospital.appointment.v1.RetireRoomRequest
+	22, // 37: hospital.appointment.v1.AppointmentService.AddRoomExaminationItem:input_type -> hospital.appointment.v1.AddRoomExaminationItemRequest
+	20, // 38: hospital.appointment.v1.AppointmentService.DisableRoomExaminationItem:input_type -> hospital.appointment.v1.ChangeResourceStatusRequest
+	20, // 39: hospital.appointment.v1.AppointmentService.EnableRoomExaminationItem:input_type -> hospital.appointment.v1.ChangeResourceStatusRequest
+	23, // 40: hospital.appointment.v1.AppointmentService.ListRoomExaminationItems:input_type -> hospital.appointment.v1.ListRoomExaminationItemsRequest
+	24, // 41: hospital.appointment.v1.AppointmentService.ListAvailableRoomsByExaminationItem:input_type -> hospital.appointment.v1.ListAvailableRoomsByExaminationItemRequest
+	27, // 42: hospital.appointment.v1.AppointmentService.SetRoomWeeklyWindow:input_type -> hospital.appointment.v1.SetRoomWeeklyWindowRequest
+	20, // 43: hospital.appointment.v1.AppointmentService.DisableRoomWeeklyWindow:input_type -> hospital.appointment.v1.ChangeResourceStatusRequest
+	29, // 44: hospital.appointment.v1.AppointmentService.ListRoomWeeklyWindows:input_type -> hospital.appointment.v1.ListWeeklyWindowsRequest
+	28, // 45: hospital.appointment.v1.AppointmentService.SetItemWeeklyWindow:input_type -> hospital.appointment.v1.SetItemWeeklyWindowRequest
+	20, // 46: hospital.appointment.v1.AppointmentService.DisableItemWeeklyWindow:input_type -> hospital.appointment.v1.ChangeResourceStatusRequest
+	29, // 47: hospital.appointment.v1.AppointmentService.ListItemWeeklyWindows:input_type -> hospital.appointment.v1.ListWeeklyWindowsRequest
+	32, // 48: hospital.appointment.v1.AppointmentService.ListBookingOptions:input_type -> hospital.appointment.v1.ListBookingOptionsRequest
+	35, // 49: hospital.appointment.v1.AppointmentService.CreateBooking:input_type -> hospital.appointment.v1.CreateBookingRequest
+	37, // 50: hospital.appointment.v1.AppointmentService.CreateBookingBatch:input_type -> hospital.appointment.v1.CreateBookingBatchRequest
+	45, // 51: hospital.appointment.v1.AppointmentService.CheckInBooking:input_type -> hospital.appointment.v1.CheckInBookingRequest
+	39, // 52: hospital.appointment.v1.AppointmentService.GetMyBooking:input_type -> hospital.appointment.v1.GetBookingRequest
+	40, // 53: hospital.appointment.v1.AppointmentService.ListMyBookings:input_type -> hospital.appointment.v1.ListMyBookingsRequest
+	42, // 54: hospital.appointment.v1.AppointmentService.DeleteMyBooking:input_type -> hospital.appointment.v1.DeleteBookingRequest
+	50, // 55: hospital.appointment.v1.AppointmentService.ListMyMessages:input_type -> hospital.appointment.v1.ListMyMessagesRequest
+	52, // 56: hospital.appointment.v1.AppointmentService.MarkMyMessageRead:input_type -> hospital.appointment.v1.MarkMessageReadRequest
+	39, // 57: hospital.appointment.v1.AppointmentService.GetBooking:input_type -> hospital.appointment.v1.GetBookingRequest
+	41, // 58: hospital.appointment.v1.AppointmentService.ListBookings:input_type -> hospital.appointment.v1.ListBookingsRequest
+	44, // 59: hospital.appointment.v1.AppointmentService.StartExamination:input_type -> hospital.appointment.v1.StartExaminationRequest
+	46, // 60: hospital.appointment.v1.AppointmentService.CallNextBooking:input_type -> hospital.appointment.v1.CallNextBookingRequest
+	47, // 61: hospital.appointment.v1.AppointmentService.EndExamination:input_type -> hospital.appointment.v1.EndExaminationRequest
+	42, // 62: hospital.appointment.v1.AppointmentService.DeleteBooking:input_type -> hospital.appointment.v1.DeleteBookingRequest
+	51, // 63: hospital.appointment.v1.AppointmentService.ListMessages:input_type -> hospital.appointment.v1.ListMessagesRequest
+	52, // 64: hospital.appointment.v1.AppointmentService.MarkMessageRead:input_type -> hospital.appointment.v1.MarkMessageReadRequest
+	57, // 65: hospital.appointment.v1.AppointmentService.SaveExaminationReportDraft:input_type -> hospital.appointment.v1.SaveExaminationReportDraftRequest
+	58, // 66: hospital.appointment.v1.AppointmentService.CompleteAndPublishExaminationReport:input_type -> hospital.appointment.v1.CompleteAndPublishExaminationReportRequest
+	59, // 67: hospital.appointment.v1.AppointmentService.CorrectExaminationReport:input_type -> hospital.appointment.v1.CorrectExaminationReportRequest
+	60, // 68: hospital.appointment.v1.AppointmentService.GetExaminationReport:input_type -> hospital.appointment.v1.GetExaminationReportRequest
+	61, // 69: hospital.appointment.v1.AppointmentService.ListExaminationReports:input_type -> hospital.appointment.v1.ListExaminationReportsRequest
+	62, // 70: hospital.appointment.v1.AppointmentService.ListExaminationReportVersions:input_type -> hospital.appointment.v1.ListExaminationReportVersionsRequest
+	60, // 71: hospital.appointment.v1.AppointmentService.GetMyExaminationReport:input_type -> hospital.appointment.v1.GetExaminationReportRequest
+	63, // 72: hospital.appointment.v1.AppointmentService.ListMyExaminationReports:input_type -> hospital.appointment.v1.ListMyExaminationReportsRequest
+	2,  // 73: hospital.appointment.v1.AppointmentService.GetExaminationItemReference:input_type -> hospital.appointment.v1.GetExaminationItemRequest
+	7,  // 74: hospital.appointment.v1.AppointmentService.CreateExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
+	7,  // 75: hospital.appointment.v1.AppointmentService.GetExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
+	4,  // 76: hospital.appointment.v1.AppointmentService.ListExaminationItems:output_type -> hospital.appointment.v1.ListExaminationItemsResponse
+	7,  // 77: hospital.appointment.v1.AppointmentService.UpdateExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
+	7,  // 78: hospital.appointment.v1.AppointmentService.DisableExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
+	7,  // 79: hospital.appointment.v1.AppointmentService.EnableExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
+	8,  // 80: hospital.appointment.v1.AppointmentService.GetExaminationItemReportTemplate:output_type -> hospital.appointment.v1.ExaminationItemReportTemplate
+	8,  // 81: hospital.appointment.v1.AppointmentService.SaveExaminationItemReportTemplate:output_type -> hospital.appointment.v1.ExaminationItemReportTemplate
+	11, // 82: hospital.appointment.v1.AppointmentService.PrepareExaminationItemConfiguration:output_type -> hospital.appointment.v1.PreparedExaminationItemConfiguration
+	7,  // 83: hospital.appointment.v1.AppointmentService.ConfirmExaminationItemConfiguration:output_type -> hospital.appointment.v1.ExaminationItem
+	13, // 84: hospital.appointment.v1.AppointmentService.CancelExaminationItemConfiguration:output_type -> hospital.appointment.v1.CancelExaminationItemConfigurationResponse
+	21, // 85: hospital.appointment.v1.AppointmentService.CreateRoom:output_type -> hospital.appointment.v1.Room
+	21, // 86: hospital.appointment.v1.AppointmentService.GetRoom:output_type -> hospital.appointment.v1.Room
+	17, // 87: hospital.appointment.v1.AppointmentService.ListRooms:output_type -> hospital.appointment.v1.ListRoomsResponse
+	21, // 88: hospital.appointment.v1.AppointmentService.UpdateRoom:output_type -> hospital.appointment.v1.Room
+	21, // 89: hospital.appointment.v1.AppointmentService.RetireRoom:output_type -> hospital.appointment.v1.Room
+	26, // 90: hospital.appointment.v1.AppointmentService.AddRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
+	26, // 91: hospital.appointment.v1.AppointmentService.DisableRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
+	26, // 92: hospital.appointment.v1.AppointmentService.EnableRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
+	25, // 93: hospital.appointment.v1.AppointmentService.ListRoomExaminationItems:output_type -> hospital.appointment.v1.ListRoomExaminationItemsResponse
+	25, // 94: hospital.appointment.v1.AppointmentService.ListAvailableRoomsByExaminationItem:output_type -> hospital.appointment.v1.ListRoomExaminationItemsResponse
+	68, // 95: hospital.appointment.v1.AppointmentService.SetRoomWeeklyWindow:output_type -> hospital.appointment.v1.RoomWeeklyWindow
+	68, // 96: hospital.appointment.v1.AppointmentService.DisableRoomWeeklyWindow:output_type -> hospital.appointment.v1.RoomWeeklyWindow
+	30, // 97: hospital.appointment.v1.AppointmentService.ListRoomWeeklyWindows:output_type -> hospital.appointment.v1.ListRoomWeeklyWindowsResponse
+	69, // 98: hospital.appointment.v1.AppointmentService.SetItemWeeklyWindow:output_type -> hospital.appointment.v1.ItemWeeklyWindow
+	69, // 99: hospital.appointment.v1.AppointmentService.DisableItemWeeklyWindow:output_type -> hospital.appointment.v1.ItemWeeklyWindow
+	31, // 100: hospital.appointment.v1.AppointmentService.ListItemWeeklyWindows:output_type -> hospital.appointment.v1.ListItemWeeklyWindowsResponse
+	34, // 101: hospital.appointment.v1.AppointmentService.ListBookingOptions:output_type -> hospital.appointment.v1.ListBookingOptionsResponse
+	48, // 102: hospital.appointment.v1.AppointmentService.CreateBooking:output_type -> hospital.appointment.v1.Booking
+	38, // 103: hospital.appointment.v1.AppointmentService.CreateBookingBatch:output_type -> hospital.appointment.v1.CreateBookingBatchResponse
+	48, // 104: hospital.appointment.v1.AppointmentService.CheckInBooking:output_type -> hospital.appointment.v1.Booking
+	48, // 105: hospital.appointment.v1.AppointmentService.GetMyBooking:output_type -> hospital.appointment.v1.Booking
+	49, // 106: hospital.appointment.v1.AppointmentService.ListMyBookings:output_type -> hospital.appointment.v1.ListBookingsResponse
+	43, // 107: hospital.appointment.v1.AppointmentService.DeleteMyBooking:output_type -> hospital.appointment.v1.DeleteBookingResponse
+	55, // 108: hospital.appointment.v1.AppointmentService.ListMyMessages:output_type -> hospital.appointment.v1.ListMessagesResponse
+	53, // 109: hospital.appointment.v1.AppointmentService.MarkMyMessageRead:output_type -> hospital.appointment.v1.Message
+	48, // 110: hospital.appointment.v1.AppointmentService.GetBooking:output_type -> hospital.appointment.v1.Booking
+	49, // 111: hospital.appointment.v1.AppointmentService.ListBookings:output_type -> hospital.appointment.v1.ListBookingsResponse
+	48, // 112: hospital.appointment.v1.AppointmentService.StartExamination:output_type -> hospital.appointment.v1.Booking
+	48, // 113: hospital.appointment.v1.AppointmentService.CallNextBooking:output_type -> hospital.appointment.v1.Booking
+	48, // 114: hospital.appointment.v1.AppointmentService.EndExamination:output_type -> hospital.appointment.v1.Booking
+	43, // 115: hospital.appointment.v1.AppointmentService.DeleteBooking:output_type -> hospital.appointment.v1.DeleteBookingResponse
+	55, // 116: hospital.appointment.v1.AppointmentService.ListMessages:output_type -> hospital.appointment.v1.ListMessagesResponse
+	53, // 117: hospital.appointment.v1.AppointmentService.MarkMessageRead:output_type -> hospital.appointment.v1.Message
+	65, // 118: hospital.appointment.v1.AppointmentService.SaveExaminationReportDraft:output_type -> hospital.appointment.v1.ExaminationReport
+	65, // 119: hospital.appointment.v1.AppointmentService.CompleteAndPublishExaminationReport:output_type -> hospital.appointment.v1.ExaminationReport
+	65, // 120: hospital.appointment.v1.AppointmentService.CorrectExaminationReport:output_type -> hospital.appointment.v1.ExaminationReport
+	65, // 121: hospital.appointment.v1.AppointmentService.GetExaminationReport:output_type -> hospital.appointment.v1.ExaminationReport
+	67, // 122: hospital.appointment.v1.AppointmentService.ListExaminationReports:output_type -> hospital.appointment.v1.ListExaminationReportsResponse
+	66, // 123: hospital.appointment.v1.AppointmentService.ListExaminationReportVersions:output_type -> hospital.appointment.v1.ListExaminationReportVersionsResponse
+	65, // 124: hospital.appointment.v1.AppointmentService.GetMyExaminationReport:output_type -> hospital.appointment.v1.ExaminationReport
+	67, // 125: hospital.appointment.v1.AppointmentService.ListMyExaminationReports:output_type -> hospital.appointment.v1.ListExaminationReportsResponse
+	7,  // 126: hospital.appointment.v1.AppointmentService.GetExaminationItemReference:output_type -> hospital.appointment.v1.ExaminationItem
+	74, // [74:127] is the sub-list for method output_type
+	21, // [21:74] is the sub-list for method input_type
+	21, // [21:21] is the sub-list for extension type_name
+	21, // [21:21] is the sub-list for extension extendee
+	0,  // [0:21] is the sub-list for field type_name
 }
 
 func init() { file_appointment_v1_appointment_proto_init() }
@@ -6313,7 +6859,7 @@ func file_appointment_v1_appointment_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_appointment_v1_appointment_proto_rawDesc), len(file_appointment_v1_appointment_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   63,
+			NumMessages:   70,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

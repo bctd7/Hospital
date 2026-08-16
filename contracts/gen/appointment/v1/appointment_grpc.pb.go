@@ -27,6 +27,9 @@ const (
 	AppointmentService_EnableExaminationItem_FullMethodName               = "/hospital.appointment.v1.AppointmentService/EnableExaminationItem"
 	AppointmentService_GetExaminationItemReportTemplate_FullMethodName    = "/hospital.appointment.v1.AppointmentService/GetExaminationItemReportTemplate"
 	AppointmentService_SaveExaminationItemReportTemplate_FullMethodName   = "/hospital.appointment.v1.AppointmentService/SaveExaminationItemReportTemplate"
+	AppointmentService_PrepareExaminationItemConfiguration_FullMethodName = "/hospital.appointment.v1.AppointmentService/PrepareExaminationItemConfiguration"
+	AppointmentService_ConfirmExaminationItemConfiguration_FullMethodName = "/hospital.appointment.v1.AppointmentService/ConfirmExaminationItemConfiguration"
+	AppointmentService_CancelExaminationItemConfiguration_FullMethodName  = "/hospital.appointment.v1.AppointmentService/CancelExaminationItemConfiguration"
 	AppointmentService_CreateRoom_FullMethodName                          = "/hospital.appointment.v1.AppointmentService/CreateRoom"
 	AppointmentService_GetRoom_FullMethodName                             = "/hospital.appointment.v1.AppointmentService/GetRoom"
 	AppointmentService_ListRooms_FullMethodName                           = "/hospital.appointment.v1.AppointmentService/ListRooms"
@@ -45,6 +48,7 @@ const (
 	AppointmentService_ListItemWeeklyWindows_FullMethodName               = "/hospital.appointment.v1.AppointmentService/ListItemWeeklyWindows"
 	AppointmentService_ListBookingOptions_FullMethodName                  = "/hospital.appointment.v1.AppointmentService/ListBookingOptions"
 	AppointmentService_CreateBooking_FullMethodName                       = "/hospital.appointment.v1.AppointmentService/CreateBooking"
+	AppointmentService_CreateBookingBatch_FullMethodName                  = "/hospital.appointment.v1.AppointmentService/CreateBookingBatch"
 	AppointmentService_CheckInBooking_FullMethodName                      = "/hospital.appointment.v1.AppointmentService/CheckInBooking"
 	AppointmentService_GetMyBooking_FullMethodName                        = "/hospital.appointment.v1.AppointmentService/GetMyBooking"
 	AppointmentService_ListMyBookings_FullMethodName                      = "/hospital.appointment.v1.AppointmentService/ListMyBookings"
@@ -82,6 +86,10 @@ type AppointmentServiceClient interface {
 	EnableExaminationItem(ctx context.Context, in *ChangeExaminationItemStatusRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 	GetExaminationItemReportTemplate(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItemReportTemplate, error)
 	SaveExaminationItemReportTemplate(ctx context.Context, in *SaveExaminationItemReportTemplateRequest, opts ...grpc.CallOption) (*ExaminationItemReportTemplate, error)
+	// Guidance 使用以下三个窄接口协调项目完整配置。预提交数据对普通项目查询不可见。
+	PrepareExaminationItemConfiguration(ctx context.Context, in *PrepareExaminationItemConfigurationRequest, opts ...grpc.CallOption) (*PreparedExaminationItemConfiguration, error)
+	ConfirmExaminationItemConfiguration(ctx context.Context, in *ExaminationItemConfigurationTransactionRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
+	CancelExaminationItemConfiguration(ctx context.Context, in *ExaminationItemConfigurationTransactionRequest, opts ...grpc.CallOption) (*CancelExaminationItemConfigurationResponse, error)
 	CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*Room, error)
 	GetRoom(ctx context.Context, in *GetRoomRequest, opts ...grpc.CallOption) (*Room, error)
 	ListRooms(ctx context.Context, in *ListRoomsRequest, opts ...grpc.CallOption) (*ListRoomsResponse, error)
@@ -100,6 +108,7 @@ type AppointmentServiceClient interface {
 	ListItemWeeklyWindows(ctx context.Context, in *ListWeeklyWindowsRequest, opts ...grpc.CallOption) (*ListItemWeeklyWindowsResponse, error)
 	ListBookingOptions(ctx context.Context, in *ListBookingOptionsRequest, opts ...grpc.CallOption) (*ListBookingOptionsResponse, error)
 	CreateBooking(ctx context.Context, in *CreateBookingRequest, opts ...grpc.CallOption) (*Booking, error)
+	CreateBookingBatch(ctx context.Context, in *CreateBookingBatchRequest, opts ...grpc.CallOption) (*CreateBookingBatchResponse, error)
 	CheckInBooking(ctx context.Context, in *CheckInBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 	GetMyBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 	ListMyBookings(ctx context.Context, in *ListMyBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
@@ -209,6 +218,36 @@ func (c *appointmentServiceClient) SaveExaminationItemReportTemplate(ctx context
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ExaminationItemReportTemplate)
 	err := c.cc.Invoke(ctx, AppointmentService_SaveExaminationItemReportTemplate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) PrepareExaminationItemConfiguration(ctx context.Context, in *PrepareExaminationItemConfigurationRequest, opts ...grpc.CallOption) (*PreparedExaminationItemConfiguration, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PreparedExaminationItemConfiguration)
+	err := c.cc.Invoke(ctx, AppointmentService_PrepareExaminationItemConfiguration_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) ConfirmExaminationItemConfiguration(ctx context.Context, in *ExaminationItemConfigurationTransactionRequest, opts ...grpc.CallOption) (*ExaminationItem, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExaminationItem)
+	err := c.cc.Invoke(ctx, AppointmentService_ConfirmExaminationItemConfiguration_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) CancelExaminationItemConfiguration(ctx context.Context, in *ExaminationItemConfigurationTransactionRequest, opts ...grpc.CallOption) (*CancelExaminationItemConfigurationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CancelExaminationItemConfigurationResponse)
+	err := c.cc.Invoke(ctx, AppointmentService_CancelExaminationItemConfiguration_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -389,6 +428,16 @@ func (c *appointmentServiceClient) CreateBooking(ctx context.Context, in *Create
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Booking)
 	err := c.cc.Invoke(ctx, AppointmentService_CreateBooking_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) CreateBookingBatch(ctx context.Context, in *CreateBookingBatchRequest, opts ...grpc.CallOption) (*CreateBookingBatchResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateBookingBatchResponse)
+	err := c.cc.Invoke(ctx, AppointmentService_CreateBookingBatch_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -637,6 +686,10 @@ type AppointmentServiceServer interface {
 	EnableExaminationItem(context.Context, *ChangeExaminationItemStatusRequest) (*ExaminationItem, error)
 	GetExaminationItemReportTemplate(context.Context, *GetExaminationItemRequest) (*ExaminationItemReportTemplate, error)
 	SaveExaminationItemReportTemplate(context.Context, *SaveExaminationItemReportTemplateRequest) (*ExaminationItemReportTemplate, error)
+	// Guidance 使用以下三个窄接口协调项目完整配置。预提交数据对普通项目查询不可见。
+	PrepareExaminationItemConfiguration(context.Context, *PrepareExaminationItemConfigurationRequest) (*PreparedExaminationItemConfiguration, error)
+	ConfirmExaminationItemConfiguration(context.Context, *ExaminationItemConfigurationTransactionRequest) (*ExaminationItem, error)
+	CancelExaminationItemConfiguration(context.Context, *ExaminationItemConfigurationTransactionRequest) (*CancelExaminationItemConfigurationResponse, error)
 	CreateRoom(context.Context, *CreateRoomRequest) (*Room, error)
 	GetRoom(context.Context, *GetRoomRequest) (*Room, error)
 	ListRooms(context.Context, *ListRoomsRequest) (*ListRoomsResponse, error)
@@ -655,6 +708,7 @@ type AppointmentServiceServer interface {
 	ListItemWeeklyWindows(context.Context, *ListWeeklyWindowsRequest) (*ListItemWeeklyWindowsResponse, error)
 	ListBookingOptions(context.Context, *ListBookingOptionsRequest) (*ListBookingOptionsResponse, error)
 	CreateBooking(context.Context, *CreateBookingRequest) (*Booking, error)
+	CreateBookingBatch(context.Context, *CreateBookingBatchRequest) (*CreateBookingBatchResponse, error)
 	CheckInBooking(context.Context, *CheckInBookingRequest) (*Booking, error)
 	GetMyBooking(context.Context, *GetBookingRequest) (*Booking, error)
 	ListMyBookings(context.Context, *ListMyBookingsRequest) (*ListBookingsResponse, error)
@@ -714,6 +768,15 @@ func (UnimplementedAppointmentServiceServer) GetExaminationItemReportTemplate(co
 func (UnimplementedAppointmentServiceServer) SaveExaminationItemReportTemplate(context.Context, *SaveExaminationItemReportTemplateRequest) (*ExaminationItemReportTemplate, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveExaminationItemReportTemplate not implemented")
 }
+func (UnimplementedAppointmentServiceServer) PrepareExaminationItemConfiguration(context.Context, *PrepareExaminationItemConfigurationRequest) (*PreparedExaminationItemConfiguration, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PrepareExaminationItemConfiguration not implemented")
+}
+func (UnimplementedAppointmentServiceServer) ConfirmExaminationItemConfiguration(context.Context, *ExaminationItemConfigurationTransactionRequest) (*ExaminationItem, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConfirmExaminationItemConfiguration not implemented")
+}
+func (UnimplementedAppointmentServiceServer) CancelExaminationItemConfiguration(context.Context, *ExaminationItemConfigurationTransactionRequest) (*CancelExaminationItemConfigurationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CancelExaminationItemConfiguration not implemented")
+}
 func (UnimplementedAppointmentServiceServer) CreateRoom(context.Context, *CreateRoomRequest) (*Room, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRoom not implemented")
 }
@@ -767,6 +830,9 @@ func (UnimplementedAppointmentServiceServer) ListBookingOptions(context.Context,
 }
 func (UnimplementedAppointmentServiceServer) CreateBooking(context.Context, *CreateBookingRequest) (*Booking, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateBooking not implemented")
+}
+func (UnimplementedAppointmentServiceServer) CreateBookingBatch(context.Context, *CreateBookingBatchRequest) (*CreateBookingBatchResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateBookingBatch not implemented")
 }
 func (UnimplementedAppointmentServiceServer) CheckInBooking(context.Context, *CheckInBookingRequest) (*Booking, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckInBooking not implemented")
@@ -998,6 +1064,60 @@ func _AppointmentService_SaveExaminationItemReportTemplate_Handler(srv interface
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppointmentServiceServer).SaveExaminationItemReportTemplate(ctx, req.(*SaveExaminationItemReportTemplateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_PrepareExaminationItemConfiguration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PrepareExaminationItemConfigurationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).PrepareExaminationItemConfiguration(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_PrepareExaminationItemConfiguration_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).PrepareExaminationItemConfiguration(ctx, req.(*PrepareExaminationItemConfigurationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_ConfirmExaminationItemConfiguration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExaminationItemConfigurationTransactionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).ConfirmExaminationItemConfiguration(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_ConfirmExaminationItemConfiguration_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).ConfirmExaminationItemConfiguration(ctx, req.(*ExaminationItemConfigurationTransactionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_CancelExaminationItemConfiguration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ExaminationItemConfigurationTransactionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).CancelExaminationItemConfiguration(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_CancelExaminationItemConfiguration_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).CancelExaminationItemConfiguration(ctx, req.(*ExaminationItemConfigurationTransactionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1322,6 +1442,24 @@ func _AppointmentService_CreateBooking_Handler(srv interface{}, ctx context.Cont
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppointmentServiceServer).CreateBooking(ctx, req.(*CreateBookingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_CreateBookingBatch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateBookingBatchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).CreateBookingBatch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_CreateBookingBatch_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).CreateBookingBatch(ctx, req.(*CreateBookingBatchRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1780,6 +1918,18 @@ var AppointmentService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AppointmentService_SaveExaminationItemReportTemplate_Handler,
 		},
 		{
+			MethodName: "PrepareExaminationItemConfiguration",
+			Handler:    _AppointmentService_PrepareExaminationItemConfiguration_Handler,
+		},
+		{
+			MethodName: "ConfirmExaminationItemConfiguration",
+			Handler:    _AppointmentService_ConfirmExaminationItemConfiguration_Handler,
+		},
+		{
+			MethodName: "CancelExaminationItemConfiguration",
+			Handler:    _AppointmentService_CancelExaminationItemConfiguration_Handler,
+		},
+		{
 			MethodName: "CreateRoom",
 			Handler:    _AppointmentService_CreateRoom_Handler,
 		},
@@ -1850,6 +2000,10 @@ var AppointmentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateBooking",
 			Handler:    _AppointmentService_CreateBooking_Handler,
+		},
+		{
+			MethodName: "CreateBookingBatch",
+			Handler:    _AppointmentService_CreateBookingBatch_Handler,
 		},
 		{
 			MethodName: "CheckInBooking",

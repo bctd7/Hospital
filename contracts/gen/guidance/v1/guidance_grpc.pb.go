@@ -19,12 +19,18 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GuidanceService_CreatePrecedenceRule_FullMethodName  = "/hospital.guidance.v1.GuidanceService/CreatePrecedenceRule"
-	GuidanceService_UpdatePrecedenceRule_FullMethodName  = "/hospital.guidance.v1.GuidanceService/UpdatePrecedenceRule"
-	GuidanceService_DeletePrecedenceRule_FullMethodName  = "/hospital.guidance.v1.GuidanceService/DeletePrecedenceRule"
-	GuidanceService_ListPrecedenceRules_FullMethodName   = "/hospital.guidance.v1.GuidanceService/ListPrecedenceRules"
-	GuidanceService_SearchPlaces_FullMethodName          = "/hospital.guidance.v1.GuidanceService/SearchPlaces"
-	GuidanceService_CalculateWalkingRoute_FullMethodName = "/hospital.guidance.v1.GuidanceService/CalculateWalkingRoute"
+	GuidanceService_CreatePrecedenceRule_FullMethodName              = "/hospital.guidance.v1.GuidanceService/CreatePrecedenceRule"
+	GuidanceService_UpdatePrecedenceRule_FullMethodName              = "/hospital.guidance.v1.GuidanceService/UpdatePrecedenceRule"
+	GuidanceService_DeletePrecedenceRule_FullMethodName              = "/hospital.guidance.v1.GuidanceService/DeletePrecedenceRule"
+	GuidanceService_ListPrecedenceRules_FullMethodName               = "/hospital.guidance.v1.GuidanceService/ListPrecedenceRules"
+	GuidanceService_PreviewPreparationRules_FullMethodName           = "/hospital.guidance.v1.GuidanceService/PreviewPreparationRules"
+	GuidanceService_GetExaminationItemConfiguration_FullMethodName   = "/hospital.guidance.v1.GuidanceService/GetExaminationItemConfiguration"
+	GuidanceService_ConfigureExaminationItem_FullMethodName          = "/hospital.guidance.v1.GuidanceService/ConfigureExaminationItem"
+	GuidanceService_GenerateSmartAppointmentPlans_FullMethodName     = "/hospital.guidance.v1.GuidanceService/GenerateSmartAppointmentPlans"
+	GuidanceService_ConfirmSmartAppointmentPlan_FullMethodName       = "/hospital.guidance.v1.GuidanceService/ConfirmSmartAppointmentPlan"
+	GuidanceService_GetTodayExaminationRecommendation_FullMethodName = "/hospital.guidance.v1.GuidanceService/GetTodayExaminationRecommendation"
+	GuidanceService_SearchPlaces_FullMethodName                      = "/hospital.guidance.v1.GuidanceService/SearchPlaces"
+	GuidanceService_CalculateWalkingRoute_FullMethodName             = "/hospital.guidance.v1.GuidanceService/CalculateWalkingRoute"
 )
 
 // GuidanceServiceClient is the client API for GuidanceService service.
@@ -35,6 +41,12 @@ type GuidanceServiceClient interface {
 	UpdatePrecedenceRule(ctx context.Context, in *UpdatePrecedenceRuleRequest, opts ...grpc.CallOption) (*PrecedenceRule, error)
 	DeletePrecedenceRule(ctx context.Context, in *DeletePrecedenceRuleRequest, opts ...grpc.CallOption) (*DeletePrecedenceRuleResponse, error)
 	ListPrecedenceRules(ctx context.Context, in *ListPrecedenceRulesRequest, opts ...grpc.CallOption) (*ListPrecedenceRulesResponse, error)
+	PreviewPreparationRules(ctx context.Context, in *PreviewPreparationRulesRequest, opts ...grpc.CallOption) (*PreparationRulePreview, error)
+	GetExaminationItemConfiguration(ctx context.Context, in *GetExaminationItemConfigurationRequest, opts ...grpc.CallOption) (*ExaminationItemConfiguration, error)
+	ConfigureExaminationItem(ctx context.Context, in *ConfigureExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItemConfiguration, error)
+	GenerateSmartAppointmentPlans(ctx context.Context, in *GenerateSmartAppointmentPlansRequest, opts ...grpc.CallOption) (*SmartAppointmentPlansResponse, error)
+	ConfirmSmartAppointmentPlan(ctx context.Context, in *ConfirmSmartAppointmentPlanRequest, opts ...grpc.CallOption) (*ConfirmedSmartAppointmentPlan, error)
+	GetTodayExaminationRecommendation(ctx context.Context, in *GetTodayExaminationRecommendationRequest, opts ...grpc.CallOption) (*TodayExaminationRecommendation, error)
 	SearchPlaces(ctx context.Context, in *SearchPlacesRequest, opts ...grpc.CallOption) (*SearchPlacesResponse, error)
 	CalculateWalkingRoute(ctx context.Context, in *CalculateWalkingRouteRequest, opts ...grpc.CallOption) (*WalkingRoute, error)
 }
@@ -87,6 +99,66 @@ func (c *guidanceServiceClient) ListPrecedenceRules(ctx context.Context, in *Lis
 	return out, nil
 }
 
+func (c *guidanceServiceClient) PreviewPreparationRules(ctx context.Context, in *PreviewPreparationRulesRequest, opts ...grpc.CallOption) (*PreparationRulePreview, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PreparationRulePreview)
+	err := c.cc.Invoke(ctx, GuidanceService_PreviewPreparationRules_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *guidanceServiceClient) GetExaminationItemConfiguration(ctx context.Context, in *GetExaminationItemConfigurationRequest, opts ...grpc.CallOption) (*ExaminationItemConfiguration, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExaminationItemConfiguration)
+	err := c.cc.Invoke(ctx, GuidanceService_GetExaminationItemConfiguration_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *guidanceServiceClient) ConfigureExaminationItem(ctx context.Context, in *ConfigureExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItemConfiguration, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExaminationItemConfiguration)
+	err := c.cc.Invoke(ctx, GuidanceService_ConfigureExaminationItem_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *guidanceServiceClient) GenerateSmartAppointmentPlans(ctx context.Context, in *GenerateSmartAppointmentPlansRequest, opts ...grpc.CallOption) (*SmartAppointmentPlansResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SmartAppointmentPlansResponse)
+	err := c.cc.Invoke(ctx, GuidanceService_GenerateSmartAppointmentPlans_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *guidanceServiceClient) ConfirmSmartAppointmentPlan(ctx context.Context, in *ConfirmSmartAppointmentPlanRequest, opts ...grpc.CallOption) (*ConfirmedSmartAppointmentPlan, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ConfirmedSmartAppointmentPlan)
+	err := c.cc.Invoke(ctx, GuidanceService_ConfirmSmartAppointmentPlan_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *guidanceServiceClient) GetTodayExaminationRecommendation(ctx context.Context, in *GetTodayExaminationRecommendationRequest, opts ...grpc.CallOption) (*TodayExaminationRecommendation, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TodayExaminationRecommendation)
+	err := c.cc.Invoke(ctx, GuidanceService_GetTodayExaminationRecommendation_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *guidanceServiceClient) SearchPlaces(ctx context.Context, in *SearchPlacesRequest, opts ...grpc.CallOption) (*SearchPlacesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SearchPlacesResponse)
@@ -115,6 +187,12 @@ type GuidanceServiceServer interface {
 	UpdatePrecedenceRule(context.Context, *UpdatePrecedenceRuleRequest) (*PrecedenceRule, error)
 	DeletePrecedenceRule(context.Context, *DeletePrecedenceRuleRequest) (*DeletePrecedenceRuleResponse, error)
 	ListPrecedenceRules(context.Context, *ListPrecedenceRulesRequest) (*ListPrecedenceRulesResponse, error)
+	PreviewPreparationRules(context.Context, *PreviewPreparationRulesRequest) (*PreparationRulePreview, error)
+	GetExaminationItemConfiguration(context.Context, *GetExaminationItemConfigurationRequest) (*ExaminationItemConfiguration, error)
+	ConfigureExaminationItem(context.Context, *ConfigureExaminationItemRequest) (*ExaminationItemConfiguration, error)
+	GenerateSmartAppointmentPlans(context.Context, *GenerateSmartAppointmentPlansRequest) (*SmartAppointmentPlansResponse, error)
+	ConfirmSmartAppointmentPlan(context.Context, *ConfirmSmartAppointmentPlanRequest) (*ConfirmedSmartAppointmentPlan, error)
+	GetTodayExaminationRecommendation(context.Context, *GetTodayExaminationRecommendationRequest) (*TodayExaminationRecommendation, error)
 	SearchPlaces(context.Context, *SearchPlacesRequest) (*SearchPlacesResponse, error)
 	CalculateWalkingRoute(context.Context, *CalculateWalkingRouteRequest) (*WalkingRoute, error)
 	mustEmbedUnimplementedGuidanceServiceServer()
@@ -138,6 +216,24 @@ func (UnimplementedGuidanceServiceServer) DeletePrecedenceRule(context.Context, 
 }
 func (UnimplementedGuidanceServiceServer) ListPrecedenceRules(context.Context, *ListPrecedenceRulesRequest) (*ListPrecedenceRulesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListPrecedenceRules not implemented")
+}
+func (UnimplementedGuidanceServiceServer) PreviewPreparationRules(context.Context, *PreviewPreparationRulesRequest) (*PreparationRulePreview, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PreviewPreparationRules not implemented")
+}
+func (UnimplementedGuidanceServiceServer) GetExaminationItemConfiguration(context.Context, *GetExaminationItemConfigurationRequest) (*ExaminationItemConfiguration, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetExaminationItemConfiguration not implemented")
+}
+func (UnimplementedGuidanceServiceServer) ConfigureExaminationItem(context.Context, *ConfigureExaminationItemRequest) (*ExaminationItemConfiguration, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConfigureExaminationItem not implemented")
+}
+func (UnimplementedGuidanceServiceServer) GenerateSmartAppointmentPlans(context.Context, *GenerateSmartAppointmentPlansRequest) (*SmartAppointmentPlansResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateSmartAppointmentPlans not implemented")
+}
+func (UnimplementedGuidanceServiceServer) ConfirmSmartAppointmentPlan(context.Context, *ConfirmSmartAppointmentPlanRequest) (*ConfirmedSmartAppointmentPlan, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ConfirmSmartAppointmentPlan not implemented")
+}
+func (UnimplementedGuidanceServiceServer) GetTodayExaminationRecommendation(context.Context, *GetTodayExaminationRecommendationRequest) (*TodayExaminationRecommendation, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTodayExaminationRecommendation not implemented")
 }
 func (UnimplementedGuidanceServiceServer) SearchPlaces(context.Context, *SearchPlacesRequest) (*SearchPlacesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchPlaces not implemented")
@@ -238,6 +334,114 @@ func _GuidanceService_ListPrecedenceRules_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GuidanceService_PreviewPreparationRules_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PreviewPreparationRulesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GuidanceServiceServer).PreviewPreparationRules(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GuidanceService_PreviewPreparationRules_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GuidanceServiceServer).PreviewPreparationRules(ctx, req.(*PreviewPreparationRulesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GuidanceService_GetExaminationItemConfiguration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetExaminationItemConfigurationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GuidanceServiceServer).GetExaminationItemConfiguration(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GuidanceService_GetExaminationItemConfiguration_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GuidanceServiceServer).GetExaminationItemConfiguration(ctx, req.(*GetExaminationItemConfigurationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GuidanceService_ConfigureExaminationItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfigureExaminationItemRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GuidanceServiceServer).ConfigureExaminationItem(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GuidanceService_ConfigureExaminationItem_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GuidanceServiceServer).ConfigureExaminationItem(ctx, req.(*ConfigureExaminationItemRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GuidanceService_GenerateSmartAppointmentPlans_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateSmartAppointmentPlansRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GuidanceServiceServer).GenerateSmartAppointmentPlans(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GuidanceService_GenerateSmartAppointmentPlans_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GuidanceServiceServer).GenerateSmartAppointmentPlans(ctx, req.(*GenerateSmartAppointmentPlansRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GuidanceService_ConfirmSmartAppointmentPlan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfirmSmartAppointmentPlanRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GuidanceServiceServer).ConfirmSmartAppointmentPlan(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GuidanceService_ConfirmSmartAppointmentPlan_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GuidanceServiceServer).ConfirmSmartAppointmentPlan(ctx, req.(*ConfirmSmartAppointmentPlanRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GuidanceService_GetTodayExaminationRecommendation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTodayExaminationRecommendationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GuidanceServiceServer).GetTodayExaminationRecommendation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GuidanceService_GetTodayExaminationRecommendation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GuidanceServiceServer).GetTodayExaminationRecommendation(ctx, req.(*GetTodayExaminationRecommendationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _GuidanceService_SearchPlaces_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SearchPlacesRequest)
 	if err := dec(in); err != nil {
@@ -296,6 +500,30 @@ var GuidanceService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListPrecedenceRules",
 			Handler:    _GuidanceService_ListPrecedenceRules_Handler,
+		},
+		{
+			MethodName: "PreviewPreparationRules",
+			Handler:    _GuidanceService_PreviewPreparationRules_Handler,
+		},
+		{
+			MethodName: "GetExaminationItemConfiguration",
+			Handler:    _GuidanceService_GetExaminationItemConfiguration_Handler,
+		},
+		{
+			MethodName: "ConfigureExaminationItem",
+			Handler:    _GuidanceService_ConfigureExaminationItem_Handler,
+		},
+		{
+			MethodName: "GenerateSmartAppointmentPlans",
+			Handler:    _GuidanceService_GenerateSmartAppointmentPlans_Handler,
+		},
+		{
+			MethodName: "ConfirmSmartAppointmentPlan",
+			Handler:    _GuidanceService_ConfirmSmartAppointmentPlan_Handler,
+		},
+		{
+			MethodName: "GetTodayExaminationRecommendation",
+			Handler:    _GuidanceService_GetTodayExaminationRecommendation_Handler,
 		},
 		{
 			MethodName: "SearchPlaces",

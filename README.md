@@ -5,7 +5,7 @@ Vue 3 和 TypeScript。
 
 ## 当前能力
 
-Identity 与 Appointment 当前规划范围均已落地，Guidance 已完成首批基础能力：
+Identity 与 Appointment 当前规划范围均已落地，Guidance 第一版主流程也已接入：
 
 - 手机号验证码登录、Access/Refresh Token 和授权版本失效；
 - 医院、院区、科室目录，账号与医生管理；
@@ -15,11 +15,11 @@ Identity 与 Appointment 当前规划范围均已落地，Guidance 已完成首�
 - 检查结束、报告待完成、报告模板、草稿、发布与不可覆盖的更正版本；
 - 患者与科室消息、逐账号已读状态；
 - 患者端与工作人员端小程序页面及真实 HTTP 接入；
-- 独立 Guidance 服务的检查项目先后规则、高德地点检索和两点步行路线；
-- 小程序检查导航入口、候选位置地图预览和路线绘制。
+- 独立 Guidance 服务的检查项目完整配置、先后与准备规则、智能预约和当日顺序；
+- Guidance 协调项目配置 TCC，Appointment 原子确认整组预约；
+- 小程序智能预约、当日检查顺序、候选位置地图预览和路线绘制。
 
-完整智能预约方案、医院楼栋入口资料和根据 Appointment 实时状态调整下一站仍处于规划阶段，不能与上述
-Guidance 基础能力混写为已完成。
+医院楼栋入口资料库、跨院区组合和基于可靠现场负载的精细重排仍处于规划阶段，不能与第一版能力混写为已完成。
 
 完整状态见 [规划索引](./plan/README.md)。
 
@@ -31,7 +31,7 @@ Guidance 基础能力混写为已完成。
        -> identity-rpc :8080
        -> appointment-rpc :8081
        -> guidance-rpc :8082
-            -> appointment-rpc（只读项目事实）
+            -> appointment-rpc（项目事实、配置 TCC 与整组预约）
             -> 高德 Web 服务
 
 Identity -> MySQL / Redis / Aliyun PNVS / Kafka
@@ -48,7 +48,7 @@ Guidance -> MySQL
 | `service/app/api/` | 面向小程序的 App API |
 | `service/identity/rpc/` | 认证、账号、权限、组织和医生领域 |
 | `service/appointment/rpc/` | 检查资源、预约、容量、报告和消息领域 |
-| `service/guidance/rpc/` | 检查先后规则、地点检索和步行路线领域 |
+| `service/guidance/rpc/` | 项目配置协调、规则、智能预约、当日顺序和路线领域 |
 | `migrations/` | Identity、Appointment 与 Guidance 数据库版本事实 |
 | `common/` | 认证、授权与可观测性等跨服务技术能力 |
 | `plan/` | 当前有效设计、已实现归档与后续提案 |
@@ -78,7 +78,7 @@ npm install
 npm run dev:mp-weixin
 ```
 
-微信开发者工具导入 `apps/miniapp/dist/dev/mp-weixin`。体验版构建和终端上传见
+微信开发者工具只导入 `apps/miniapp`，由其中的 `miniprogramRoot` 指向开发产物。体验版构建和终端上传见
 [小程序 README](./apps/miniapp/README.md)。
 
 ## 契约

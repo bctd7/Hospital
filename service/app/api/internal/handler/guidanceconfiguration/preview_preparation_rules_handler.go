@@ -1,27 +1,27 @@
 // Code scaffolded by goctl. Safe to edit.
 // goctl 1.10.2
 
-package appointmentcatalog
+package guidanceconfiguration
 
 import (
 	"net/http"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"hospital/service/app/api/internal/logic/appointmentcatalog"
+	"hospital/service/app/api/internal/logic/guidanceconfiguration"
 	"hospital/service/app/api/internal/svc"
 	"hospital/service/app/api/internal/types"
 )
 
-func UpdateExaminationItemHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func PreviewPreparationRulesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.UpdateExaminationItemRequest
+		var req types.PreviewPreparationRulesRequest
 		if err := httpx.Parse(r, &req); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
 
-		l := appointmentcatalog.NewUpdateExaminationItemLogic(r.Context(), svcCtx)
-		resp, err := l.UpdateExaminationItem(&req)
+		l := guidanceconfiguration.NewPreviewPreparationRulesLogic(r.Context(), svcCtx)
+		resp, err := l.PreviewPreparationRules(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

@@ -54,4 +54,40 @@ describe("guidance HTTP adapter", () => {
       authenticated: true,
     });
   });
+
+  it("generates and confirms smart appointment plans through Guidance", async () => {
+    requestMock
+      .mockResolvedValueOnce({ plans: [{ plan_id: "plan-1", items: [] }] })
+      .mockResolvedValueOnce({ plan_id: "plan-1", booking_ids: ["booking-1"] });
+    const { guidanceApi } = await import("@/api/guidance");
+
+    await guidanceApi.generateSmartAppointmentPlans(["item-1", "item-2"], ["2026-08-18", "2026-08-20"]);
+    await guidanceApi.confirmSmartAppointmentPlan("plan-1");
+
+    expect(requestMock.mock.calls[0]?.[0]).toEqual({
+      path: "/api/v1/guidance/smart-appointment/plans",
+      method: "POST",
+      data: { item_ids: ["item-1", "item-2"], candidate_dates: ["2026-08-18", "2026-08-20"] },
+      authenticated: true,
+    });
+    expect(requestMock.mock.calls[1]?.[0]).toEqual(expect.objectContaining({
+      path: "/api/v1/guidance/smart-appointment/plans/plan-1/confirm",
+      method: "POST",
+      data: { operation_id: expect.stringMatching(/^[0-9a-f-]{36}$/) },
+      authenticated: true,
+    }));
+  });
+
+  it("loads the passive day-of recommendation only when requested", async () => {
+    requestMock.mockResolvedValueOnce({ service_date: "2026-08-17", stages: [], updated_at: "now" });
+    const { guidanceApi } = await import("@/api/guidance");
+
+    await guidanceApi.getTodayExaminationRecommendation();
+
+    expect(requestMock).toHaveBeenCalledWith({
+      path: "/api/v1/guidance/today/recommendation",
+      method: "GET",
+      authenticated: true,
+    });
+  });
 });

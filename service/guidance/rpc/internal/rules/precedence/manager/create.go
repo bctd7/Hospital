@@ -56,7 +56,7 @@ func (m *Manager) Create(ctx context.Context, operator authn.Principal, input Cr
 	}
 
 	rule := precedence.Rule{
-		RuleID:            uuid.NewString(),
+		RuleID: uuid.NewString(), OwnerItemID: successor.ItemID,
 		PredecessorItemID: predecessor.ItemID, PredecessorDepartmentID: predecessor.DepartmentID,
 		PredecessorItemName: predecessor.Name,
 		SuccessorItemID:     successor.ItemID, SuccessorDepartmentID: successor.DepartmentID,

@@ -7,6 +7,8 @@ import "appointment-catalog.api"
 import "appointment-resources.api"
 import "appointment-bookings.api"
 import "guidance-rules.api"
+import "guidance-configuration.api"
+import "guidance-planning.api"
 import "guidance-routing.api"
 
 info (

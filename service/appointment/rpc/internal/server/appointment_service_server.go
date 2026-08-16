@@ -33,11 +33,6 @@ func (s *AppointmentServiceServer) GetExaminationItem(ctx context.Context, in *v
 	return l.GetExaminationItem(in)
 }
 
-func (s *AppointmentServiceServer) GetExaminationItemReference(ctx context.Context, in *v1_appointmentv1.GetExaminationItemRequest) (*v1_appointmentv1.ExaminationItem, error) {
-	l := logic.NewGetExaminationItemReferenceLogic(ctx, s.svcCtx)
-	return l.GetExaminationItemReference(in)
-}
-
 func (s *AppointmentServiceServer) ListExaminationItems(ctx context.Context, in *v1_appointmentv1.ListExaminationItemsRequest) (*v1_appointmentv1.ListExaminationItemsResponse, error) {
 	l := logic.NewListExaminationItemsLogic(ctx, s.svcCtx)
 	return l.ListExaminationItems(in)
@@ -66,6 +61,22 @@ func (s *AppointmentServiceServer) GetExaminationItemReportTemplate(ctx context.
 func (s *AppointmentServiceServer) SaveExaminationItemReportTemplate(ctx context.Context, in *v1_appointmentv1.SaveExaminationItemReportTemplateRequest) (*v1_appointmentv1.ExaminationItemReportTemplate, error) {
 	l := logic.NewSaveExaminationItemReportTemplateLogic(ctx, s.svcCtx)
 	return l.SaveExaminationItemReportTemplate(in)
+}
+
+// Guidance 使用以下三个窄接口协调项目完整配置。预提交数据对普通项目查询不可见。
+func (s *AppointmentServiceServer) PrepareExaminationItemConfiguration(ctx context.Context, in *v1_appointmentv1.PrepareExaminationItemConfigurationRequest) (*v1_appointmentv1.PreparedExaminationItemConfiguration, error) {
+	l := logic.NewPrepareExaminationItemConfigurationLogic(ctx, s.svcCtx)
+	return l.PrepareExaminationItemConfiguration(in)
+}
+
+func (s *AppointmentServiceServer) ConfirmExaminationItemConfiguration(ctx context.Context, in *v1_appointmentv1.ExaminationItemConfigurationTransactionRequest) (*v1_appointmentv1.ExaminationItem, error) {
+	l := logic.NewConfirmExaminationItemConfigurationLogic(ctx, s.svcCtx)
+	return l.ConfirmExaminationItemConfiguration(in)
+}
+
+func (s *AppointmentServiceServer) CancelExaminationItemConfiguration(ctx context.Context, in *v1_appointmentv1.ExaminationItemConfigurationTransactionRequest) (*v1_appointmentv1.CancelExaminationItemConfigurationResponse, error) {
+	l := logic.NewCancelExaminationItemConfigurationLogic(ctx, s.svcCtx)
+	return l.CancelExaminationItemConfiguration(in)
 }
 
 func (s *AppointmentServiceServer) CreateRoom(ctx context.Context, in *v1_appointmentv1.CreateRoomRequest) (*v1_appointmentv1.Room, error) {
@@ -156,6 +167,11 @@ func (s *AppointmentServiceServer) ListBookingOptions(ctx context.Context, in *v
 func (s *AppointmentServiceServer) CreateBooking(ctx context.Context, in *v1_appointmentv1.CreateBookingRequest) (*v1_appointmentv1.Booking, error) {
 	l := logic.NewCreateBookingLogic(ctx, s.svcCtx)
 	return l.CreateBooking(in)
+}
+
+func (s *AppointmentServiceServer) CreateBookingBatch(ctx context.Context, in *v1_appointmentv1.CreateBookingBatchRequest) (*v1_appointmentv1.CreateBookingBatchResponse, error) {
+	l := logic.NewCreateBookingBatchLogic(ctx, s.svcCtx)
+	return l.CreateBookingBatch(in)
 }
 
 func (s *AppointmentServiceServer) CheckInBooking(ctx context.Context, in *v1_appointmentv1.CheckInBookingRequest) (*v1_appointmentv1.Booking, error) {
@@ -266,4 +282,10 @@ func (s *AppointmentServiceServer) GetMyExaminationReport(ctx context.Context, i
 func (s *AppointmentServiceServer) ListMyExaminationReports(ctx context.Context, in *v1_appointmentv1.ListMyExaminationReportsRequest) (*v1_appointmentv1.ListExaminationReportsResponse, error) {
 	l := logic.NewListMyExaminationReportsLogic(ctx, s.svcCtx)
 	return l.ListMyExaminationReports(in)
+}
+
+// Guidance 等内部服务只通过该窄用途接口确认项目归属和状态。
+func (s *AppointmentServiceServer) GetExaminationItemReference(ctx context.Context, in *v1_appointmentv1.GetExaminationItemRequest) (*v1_appointmentv1.ExaminationItem, error) {
+	l := logic.NewGetExaminationItemReferenceLogic(ctx, s.svcCtx)
+	return l.GetExaminationItemReference(in)
 }

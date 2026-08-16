@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { onLoad } from "@dcloudio/uni-app";
 import { computed, nextTick, ref } from "vue";
 
 import { ApiError } from "@/api/client";
 import { guidanceApi } from "@/api/guidance";
 import PlaceSearchSheet from "@/components/guidance/PlaceSearchSheet.vue";
 import type { GuidanceLocationPoint, WalkingRoute } from "@/types/guidance";
+import { loadGuidanceRouteItinerary, type GuidanceRouteItinerary } from "@/utils/guidanceRouteImport";
 
 interface MapMarker {
   id: number;
@@ -31,6 +33,11 @@ const route = ref<WalkingRoute>();
 const loading = ref(false);
 const error = ref("");
 const searchTarget = ref<"origin" | "destination">();
+const importedItinerary = ref<GuidanceRouteItinerary>();
+
+onLoad((query) => {
+  if (query?.source === "today") void loadImportedRoute();
+});
 
 const canCalculate = computed(() => Boolean(origin.value && destination.value && !loading.value));
 const mapCenter = computed(() => {
@@ -91,6 +98,21 @@ function choosePoint(target: "origin" | "destination") {
   searchTarget.value = target;
 }
 
+async function loadImportedRoute() {
+  const itinerary = loadGuidanceRouteItinerary();
+  if (!itinerary?.stops.length) return;
+  importedItinerary.value = itinerary;
+  const first = itinerary.stops[0]!;
+  try {
+    const result = await guidanceApi.searchPlaces({ keyword: first.searchKeyword, city: "上海市", limit: 8 });
+    const exact = result.places.find((place) => place.name.includes(first.building)) ?? result.places[0];
+    if (exact) destination.value = exact;
+  } catch {
+    // 地图地点暂不可解析时仍保留导入顺序，患者可以手动选择终点。
+  }
+  searchTarget.value = "origin";
+}
+
 function selectPlace(place: GuidanceLocationPoint) {
   if (searchTarget.value === "origin") origin.value = place;
   else if (searchTarget.value === "destination") destination.value = place;
@@ -142,6 +164,18 @@ async function calculateRoute() {
     <view class="intro">
       <text class="intro__title">检查导航</text>
       <text class="intro__description">选择起点和终点，查看两点之间的步行路线。</text>
+    </view>
+
+    <view v-if="importedItinerary" class="itinerary-panel">
+      <view class="itinerary-panel__heading"><text>已导入今日顺序</text><text>{{ importedItinerary.stops.length }} 个检查地点</text></view>
+      <scroll-view scroll-x class="itinerary-strip">
+        <view class="itinerary-strip__inner">
+          <view v-for="(stop, index) in importedItinerary.stops" :key="`${stop.itemId}-${index}`" class="itinerary-stop">
+            <text class="itinerary-stop__index">{{ index + 1 }}</text><view><text class="itinerary-stop__name">{{ stop.itemName }}</text><text class="itinerary-stop__location">{{ stop.building }} · {{ stop.roomNumber }}室</text></view>
+          </view>
+        </view>
+      </scroll-view>
+      <text class="itinerary-panel__hint">请先选择院外出发地址；首个检查地点已自动作为终点，仍可手动重选。</text>
     </view>
 
     <view class="location-panel">
@@ -230,6 +264,7 @@ button::after { display: none; }
 .intro__title,.intro__description { display: block; }
 .intro__title { color: #172235; font-size: 40rpx; font-weight: 750; }
 .intro__description { margin-top: 10rpx; color: #7d899a; font-size: 24rpx; line-height: 1.6; }
+.itinerary-panel { margin-bottom: 22rpx; padding: 22rpx; background: #fff; border: 1rpx solid #dce8f1; border-radius: 22rpx; }.itinerary-panel text { display: block; }.itinerary-panel__heading { display: flex; align-items: center; justify-content: space-between; }.itinerary-panel__heading text:first-child { color: #2a394d; font-size: 25rpx; font-weight: 700; }.itinerary-panel__heading text:last-child { color: #168fe4; font-size: 20rpx; }.itinerary-strip { width: 100%; margin-top: 18rpx; white-space: nowrap; }.itinerary-strip__inner { display: inline-flex; gap: 12rpx; }.itinerary-stop { display: flex; align-items: center; min-width: 260rpx; padding: 16rpx; background: #f3f7fa; border-radius: 16rpx; }.itinerary-stop__index { display: flex !important; align-items: center; justify-content: center; width: 38rpx; height: 38rpx; margin-right: 12rpx; color: #fff; font-size: 19rpx; font-weight: 700; background: #168fe4; border-radius: 50%; }.itinerary-stop__name { color: #334156; font-size: 22rpx; font-weight: 680; }.itinerary-stop__location { margin-top: 4rpx; color: #8894a4; font-size: 18rpx; }.itinerary-panel__hint { margin-top: 16rpx; color: #738297; font-size: 20rpx; line-height: 1.5; }
 .location-panel,.route-result,.empty-state { background: #fff; border: 1rpx solid #e4eaf1; border-radius: 24rpx; }
 .location-panel { padding: 10rpx 22rpx 24rpx; }
 .location-row { display: flex; align-items: center; width: 100%; min-height: 126rpx; margin: 0; padding: 20rpx 0; color: inherit; text-align: left; background: transparent; border-radius: 0; }

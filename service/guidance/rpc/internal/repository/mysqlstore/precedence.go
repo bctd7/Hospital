@@ -12,7 +12,7 @@ import (
 )
 
 const ruleSelect = `
-SELECT id, predecessor_item_id, predecessor_department_id, predecessor_item_name,
+SELECT id, owner_item_id, predecessor_item_id, predecessor_department_id, predecessor_item_name,
        successor_item_id, successor_department_id, successor_item_name,
        staff_reason, patient_message, created_by, create_operation_id,
        version, created_at, updated_at
@@ -32,6 +32,7 @@ func scanRule(scanner ruleScanner) (precedence.Rule, error) {
 	var rule precedence.Rule
 	err := scanner.Scan(
 		&rule.RuleID,
+		&rule.OwnerItemID,
 		&rule.PredecessorItemID,
 		&rule.PredecessorDepartmentID,
 		&rule.PredecessorItemName,
@@ -114,11 +115,11 @@ func (s *txStore) GetByCreateOperationID(ctx context.Context, operationID string
 func (s *txStore) Insert(ctx context.Context, rule precedence.Rule) (precedence.Rule, error) {
 	_, err := s.tx.ExecContext(ctx, `
 INSERT INTO guidance_precedence_rules (
-    id, predecessor_item_id, predecessor_department_id, predecessor_item_name,
+    id, owner_item_id, predecessor_item_id, predecessor_department_id, predecessor_item_name,
     successor_item_id, successor_department_id, successor_item_name,
     staff_reason, patient_message, created_by, create_operation_id
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		rule.RuleID, rule.PredecessorItemID, rule.PredecessorDepartmentID, rule.PredecessorItemName,
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		rule.RuleID, rule.OwnerItemID, rule.PredecessorItemID, rule.PredecessorDepartmentID, rule.PredecessorItemName,
 		rule.SuccessorItemID, rule.SuccessorDepartmentID, rule.SuccessorItemName,
 		rule.StaffReason, rule.PatientMessage, rule.CreatedBy, rule.CreateOperationID,
 	)

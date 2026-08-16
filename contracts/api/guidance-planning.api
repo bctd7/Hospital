@@ -1,0 +1,76 @@
+syntax = "v1"
+
+type (
+	GenerateSmartAppointmentPlansRequest {
+		ItemIDs        []string `json:"item_ids"`
+		CandidateDates []string `json:"candidate_dates"`
+	}
+
+	SmartAppointmentPlanItem {
+		ItemID                   string `json:"item_id"`
+		ItemName                 string `json:"item_name"`
+		RoomID                   string `json:"room_id"`
+		RoomDisplayName          string `json:"room_display_name"`
+		CampusID                 string `json:"campus_id"`
+		Building                 string `json:"building"`
+		FloorNumber              int32  `json:"floor_number"`
+		RoomNumber               string `json:"room_number"`
+		ServiceDate              string `json:"service_date"`
+		Session                  string `json:"session"`
+		EstimatedDurationMinutes int32  `json:"estimated_duration_minutes"`
+		Reason                   string `json:"reason"`
+	}
+
+	SmartAppointmentPlan {
+		PlanID    string                     `json:"plan_id"`
+		Title     string                     `json:"title"`
+		Summary   string                     `json:"summary"`
+		Items     []SmartAppointmentPlanItem `json:"items"`
+		ExpiresAt string                     `json:"expires_at"`
+	}
+
+	SmartAppointmentPlansResponse {
+		Plans []SmartAppointmentPlan `json:"plans"`
+	}
+
+	ConfirmSmartAppointmentPlanPathRequest {
+		PlanID      string `path:"planId"`
+		OperationID string `json:"operation_id"`
+	}
+
+	ConfirmedSmartAppointmentPlanResponse {
+		PlanID     string   `json:"plan_id"`
+		BookingIDs []string `json:"booking_ids"`
+	}
+
+	TodayRecommendationStage {
+		StageNo int32                      `json:"stage_no"`
+		Title   string                     `json:"title"`
+		Status  string                     `json:"status"`
+		Items   []SmartAppointmentPlanItem `json:"items"`
+		Focus   string                     `json:"focus"`
+	}
+
+	TodayExaminationRecommendationResponse {
+		ServiceDate string                     `json:"service_date"`
+		Stages      []TodayRecommendationStage `json:"stages"`
+		UpdatedAt   string                     `json:"updated_at"`
+	}
+)
+
+@server (
+	prefix:     /api/v1
+	group:      guidanceplanning
+	middleware: AccessToken
+	authType:   BearerAuth
+)
+service app-api {
+	@handler generateSmartAppointmentPlans
+	post /guidance/smart-appointment/plans (GenerateSmartAppointmentPlansRequest) returns (SmartAppointmentPlansResponse)
+
+	@handler confirmSmartAppointmentPlan
+	post /guidance/smart-appointment/plans/:planId/confirm (ConfirmSmartAppointmentPlanPathRequest) returns (ConfirmedSmartAppointmentPlanResponse)
+
+	@handler getTodayExaminationRecommendation
+	get /guidance/today/recommendation returns (TodayExaminationRecommendationResponse)
+}

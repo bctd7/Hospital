@@ -7,6 +7,11 @@ type ProjectWriteStore interface {
 	WithinProjectTransaction(ctx context.Context, fn func(ProjectTxStore) error) error
 }
 
+// ProjectConfigurationStore 保存 Guidance TCC 参与者的不可见预提交记录。
+type ProjectConfigurationStore interface {
+	WithinProjectConfigurationTransaction(ctx context.Context, fn func(ProjectConfigurationTxStore) error) error
+}
+
 // ProjectStore 是工作人员维护检查项目及其预约时间所需的完整入口。
 // 面向页面的普通项目读取仍统一由 shared.Manager 处理。
 type ProjectStore interface {

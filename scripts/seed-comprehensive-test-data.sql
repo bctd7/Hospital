@@ -186,6 +186,43 @@ VALUES
 (@item_thyroid_ultrasound, @dept_ultrasound_main, '甲状腺彩超', '甲状腺及颈部相关区域超声检查。', 20, '甲状腺大小、形态及回声：\n颈部淋巴结：', '甲状腺超声检查结论：', '', '', 1, 'active', 1, @now, @now),
 (@item_liver_function, @dept_laboratory_east, '肝功能检查', '通过静脉采血检测常用肝功能指标，是否空腹请以医嘱为准。', 15, '主要检测指标：', '肝功能检查结论：', '请结合临床及其他检查结果。', '', 1, 'active', 1, @now, @now);
 
+-- Guidance 是检查说明与导诊规则的事实来源；Appointment 中的 description 是患者目录发布快照。
+USE hospital_guidance;
+
+INSERT INTO guidance_item_configurations
+    (item_id, description, preparation_rules, reminders, version, updated_by, created_at, updated_at)
+VALUES
+(@item_ct, '胸部低剂量CT平扫，用于肺部常规筛查。', JSON_ARRAY(), JSON_ARRAY(), 1, @account_doctor_1, @now, @now),
+(@item_xray, '胸部数字化摄影正侧位检查。', JSON_ARRAY(), JSON_ARRAY(), 1, @account_doctor_1, @now, @now),
+(@item_urgent_ct, '用于测试当天时间段内开始检查与报告流程。', JSON_ARRAY(), JSON_ARRAY(), 1, @account_doctor_1, @now, @now),
+(@item_mri_disabled, '头颅 MRI 检查；怀孕或可能怀孕时请提前告知工作人员。', JSON_ARRAY(), JSON_ARRAY(JSON_OBJECT('text', '怀孕或可能怀孕时，请在检查前主动告知工作人员。')), 1, @account_doctor_1, @now, @now),
+(@item_ultrasound, '腹部彩超检查需空腹，前一天20:00后禁食禁水。', JSON_ARRAY(
+    JSON_OBJECT('rule_type', 'fasting', 'start_mode', 'previous_day_time', 'previous_day_time', '20:00'),
+    JSON_OBJECT('rule_type', 'no_water', 'start_mode', 'previous_day_time', 'previous_day_time', '20:00')
+), JSON_ARRAY(), 1, @account_doctor_2, @now, @now),
+(@item_east_ct, '东院区胸部CT平扫。', JSON_ARRAY(), JSON_ARRAY(), 1, @account_doctor_3, @now, @now),
+(@item_blood, '静脉血常规检查。', JSON_ARRAY(), JSON_ARRAY(), 1, @account_doctor_4, @now, @now),
+(@item_cta, '冠状动脉CT血管成像，检查前请遵医嘱完成相关准备和提前用药。', JSON_ARRAY(), JSON_ARRAY(
+    JSON_OBJECT('text', '请按检查说明和医嘱提前用药。')
+), 1, @account_doctor_1, @now, @now),
+(@item_thyroid_ultrasound, '甲状腺及颈部相关区域超声检查。', JSON_ARRAY(), JSON_ARRAY(), 1, @account_doctor_2, @now, @now),
+(@item_liver_function, '肝功能检查需空腹，前一天20:00后禁食禁水。', JSON_ARRAY(
+    JSON_OBJECT('rule_type', 'fasting', 'start_mode', 'previous_day_time', 'previous_day_time', '20:00'),
+    JSON_OBJECT('rule_type', 'no_water', 'start_mode', 'previous_day_time', 'previous_day_time', '20:00')
+), JSON_ARRAY(), 1, @account_doctor_4, @now, @now);
+
+INSERT INTO guidance_precedence_rules
+    (id, owner_item_id, predecessor_item_id, predecessor_department_id, predecessor_item_name,
+     successor_item_id, successor_department_id, successor_item_name,
+     staff_reason, patient_message, created_by, create_operation_id, version, created_at, updated_at)
+VALUES
+('71000000-0000-4000-8000-000000000001', @item_cta,
+ @item_blood, @dept_laboratory_east, '血常规', @item_cta, @dept_radiology_main, '冠状动脉CTA',
+ '相关抽血结果用于增强检查前评估。', '建议先完成抽血，再进行冠状动脉CTA。',
+ @account_doctor_1, '72000000-0000-4000-8000-000000000001', 1, @now, @now);
+
+USE hospital_appointment;
+
 SET @room_ct201 = '31000000-0000-4000-8000-000000000001';
 SET @room_ct202 = '31000000-0000-4000-8000-000000000002';
 SET @room_dr101 = '31000000-0000-4000-8000-000000000003';

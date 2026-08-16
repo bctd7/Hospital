@@ -37,7 +37,22 @@ describe("home workbench", () => {
         url: "/pages/profile/appointments/index",
       },
     });
-    expect(view.serviceGroups[0]?.actions[2]).toMatchObject({
+    expect(view.secondaryAction).toMatchObject({
+      id: "smart-guide",
+      title: "智能导诊",
+      target: {
+        type: "navigate",
+        url: "/pages/guidance/planning/index",
+      },
+    });
+    expect(view.serviceGroups[0]?.actions.find((action) => action.id === "today-guidance")).toMatchObject({
+      title: "当日检查顺序",
+      target: {
+        type: "navigate",
+        url: "/pages/guidance/today/index",
+      },
+    });
+    expect(view.serviceGroups[0]?.actions.find((action) => action.id === "walking-route")).toMatchObject({
       id: "walking-route",
       title: "检查导航",
       target: {
@@ -61,14 +76,14 @@ describe("home workbench", () => {
       principal(["department_doctor"], ["appointment.read"]),
     );
 
-    expect(view.primaryAction?.title).toBe("检查项目管理");
-    expect(view.primaryAction?.description).toBe("维护项目、房间与每周开放时间");
+    expect(view.primaryAction?.title).toBe("检查资源管理");
+    expect(view.primaryAction?.description).toBe("维护房间、项目关联与每周开放时间");
     expect(view.primaryAction?.target).toEqual({
       type: "navigate",
       url: "/pages/admin/appointment/index",
     });
     expect(view.mock).toBe(false);
-    expect(view.secondaryAction?.title).toBe("智能导诊");
+    expect(view.secondaryAction?.title).toBe("导诊管理");
     expect(view.managementActions).toHaveLength(0);
     expect(view.serviceGroups[0]?.actions[0]).toMatchObject({
       id: "department-appointments",
@@ -93,6 +108,7 @@ describe("home workbench", () => {
       "inpatient-copy",
     ]);
     expect(view.serviceGroups[0]?.actions.map((action) => action.id)).not.toContain("walking-route");
+    expect(view.serviceGroups[0]?.actions.map((action) => action.id)).not.toContain("today-guidance");
   });
 
   it("uses the examination management entry for an administrator", () => {
@@ -101,7 +117,7 @@ describe("home workbench", () => {
       principal(["super_admin"], ["identity.account.manage", "appointment.read"]),
     );
 
-    expect(view.primaryAction?.title).toBe("检查项目管理");
+    expect(view.primaryAction?.title).toBe("检查资源管理");
     expect(view.managementActions).toHaveLength(0);
     expect(view.serviceGroups[0]?.actions[0]).toMatchObject({
       title: "科室预约",

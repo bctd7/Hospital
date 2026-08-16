@@ -7,12 +7,12 @@
 | App API | `service/app/api/app.go` | 8888 | 小程序 HTTP、Token 中间件、协议转换与页面聚合 |
 | Identity RPC | `service/identity/rpc/identity.go` | 8080 | 登录、会话、账号、权限、组织和医生 |
 | Appointment RPC | `service/appointment/rpc/appointment.go` | 8081 | 检查资源、预约、容量、报到、候检叫号、检查、报告和消息 |
-| Guidance RPC | `service/guidance/rpc/guidance.go` | 8082 | 检查项目先后规则、地点检索和两点步行路线；后续承载智能预约与当日路线 |
+| Guidance RPC | `service/guidance/rpc/guidance.go` | 8082 | 完整项目配置协调、检查规则、智能预约、当日顺序、地点检索和两点步行路线 |
 
 ```text
 Miniapp -> App API -> Identity RPC
                    -> Appointment RPC
-                   -> Guidance RPC -> Appointment RPC（只读项目事实）
+                   -> Guidance RPC -> Appointment RPC（项目事实、配置 TCC、整组预约）
                                    -> 高德 Web 服务
 ```
 

@@ -1,0 +1,87 @@
+syntax = "v1"
+
+type (
+	GuidancePreparationRule {
+		RuleType                 string `json:"rule_type"`
+		StartMode                string `json:"start_mode"`
+		MinAdvanceMinutes        int32  `json:"min_advance_minutes"`
+		RecommendedAdvanceMinutes int32 `json:"recommended_advance_minutes"`
+		MaxAdvanceMinutes        int32  `json:"max_advance_minutes"`
+		PreviousDayTime          string `json:"previous_day_time"`
+		ReadinessHint            string `json:"readiness_hint"`
+	}
+
+	GuidancePatientReminder {
+		Text           string `json:"text"`
+		AdvanceMinutes int32  `json:"advance_minutes"`
+	}
+
+	PreviewPreparationRulesRequest {
+		Description string `json:"description"`
+	}
+
+	PreparationRulePreviewResponse {
+		Description         string                    `json:"description"`
+		PreparationRules    []GuidancePreparationRule `json:"preparation_rules"`
+		Reminders           []GuidancePatientReminder `json:"reminders"`
+		UnresolvedFragments []string                  `json:"unresolved_fragments"`
+	}
+
+	ConfiguredPrecedenceRuleInput {
+		PredecessorItemID string `json:"predecessor_item_id"`
+		SuccessorItemID   string `json:"successor_item_id"`
+		StaffReason       string `json:"staff_reason"`
+		PatientMessage    string `json:"patient_message,optional"`
+	}
+
+	ExaminationItemConfigurationResponse {
+		ItemID                       string                          `json:"item_id"`
+		OwnerDepartmentID             string                          `json:"owner_department_id"`
+		ItemName                     string                          `json:"item_name"`
+		EstimatedDurationMinutes     int32                           `json:"estimated_duration_minutes"`
+		Status                       string                          `json:"status"`
+		ItemVersion                  int64                           `json:"item_version"`
+		Description                  string                          `json:"description"`
+		PrecedenceRules              []ConfiguredPrecedenceRuleInput `json:"precedence_rules"`
+		PreparationRules             []GuidancePreparationRule       `json:"preparation_rules"`
+		Reminders                    []GuidancePatientReminder       `json:"reminders"`
+		ConfigurationVersion         int64                           `json:"configuration_version"`
+		UpdatedAt                    string                          `json:"updated_at"`
+	}
+
+	ExaminationItemConfigurationPathRequest {
+		ItemID string `path:"itemId"`
+	}
+
+	ConfigureExaminationItemRequest {
+		Action                       string                          `json:"action"`
+		ItemID                       string                          `json:"item_id,optional"`
+		OwnerDepartmentID            string                          `json:"owner_department_id"`
+		ItemName                     string                          `json:"item_name"`
+		EstimatedDurationMinutes     int32                           `json:"estimated_duration_minutes"`
+		ExpectedItemVersion          int64                           `json:"expected_item_version"`
+		Description                  string                          `json:"description,optional"`
+		PrecedenceRules              []ConfiguredPrecedenceRuleInput `json:"precedence_rules"`
+		PreparationRules             []GuidancePreparationRule       `json:"preparation_rules"`
+		Reminders                    []GuidancePatientReminder       `json:"reminders"`
+		ExpectedConfigurationVersion int64                           `json:"expected_configuration_version"`
+		OperationID                  string                          `json:"operation_id"`
+	}
+)
+
+@server (
+	prefix:     /api/v1
+	group:      guidanceconfiguration
+	middleware: AccessToken
+	authType:   BearerAuth
+)
+service app-api {
+	@handler previewPreparationRules
+	post /admin/guidance/preparation-rules/preview (PreviewPreparationRulesRequest) returns (PreparationRulePreviewResponse)
+
+	@handler getExaminationItemConfiguration
+	get /admin/guidance/examination-items/:itemId/configuration (ExaminationItemConfigurationPathRequest) returns (ExaminationItemConfigurationResponse)
+
+	@handler configureExaminationItem
+	post /admin/guidance/examination-items/configuration (ConfigureExaminationItemRequest) returns (ExaminationItemConfigurationResponse)
+}

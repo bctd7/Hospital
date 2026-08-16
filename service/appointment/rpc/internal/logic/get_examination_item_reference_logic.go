@@ -33,10 +33,11 @@ func (l *GetExaminationItemReferenceLogic) GetExaminationItemReference(in *appoi
 		return nil, projectRPCError(err)
 	}
 	return &appointmentv1.ExaminationItem{
-		ItemId:            item.ItemID,
-		OwnerDepartmentId: item.DepartmentID,
-		Name:              item.Name,
-		Status:            string(item.Status),
-		Version:           item.Version,
+		ItemId:                   item.ItemID,
+		OwnerDepartmentId:        item.DepartmentID,
+		Name:                     item.Name,
+		EstimatedDurationMinutes: item.EstimatedDurationMinutes,
+		Status:                   string(item.Status),
+		Version:                  item.Version,
 	}, nil
 }
