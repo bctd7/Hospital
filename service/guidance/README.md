@@ -30,15 +30,17 @@ Guidance 是独立的智能导诊服务，负责检查项目之间的规划规�
 ```text
 rpc/internal/
 ├─ rules/precedence/          检查项目直接先后关系及循环校验
+│  ├─ manager/                规则维护、查询和图校验
+│  └─ appointmentcatalog/     规则写入时读取 Appointment 项目事实
 ├─ routing/                   地点搜索与两点路线的稳定领域契约
-├─ integration/
-│  ├─ amap/                   高德地点搜索和步行路线适配
-│  └─ appointmentcatalog/     Appointment 项目事实读取
+│  └─ amap/                   高德地点搜索、地理编码和步行路线适配
 ├─ repository/mysqlstore/     Guidance 自有规则持久化
 ├─ logic/                     gRPC 协议适配与错误映射
 └─ svc/                       依赖装配
 ```
 
+`routing.Manager` 只编排稳定的地点与路线操作；供应商细节收在 `routing/amap`，不再建立含义宽泛的顶层
+`integration`。Appointment 项目目录只服务于先后规则，因此下降到 `rules/precedence/appointmentcatalog`。
 不为尚未确认的准备规则、规划器或动态导航提前创建空包。
 
 ## 配置与验证
