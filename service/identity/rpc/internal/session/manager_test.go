@@ -60,6 +60,15 @@ func TestManagerStartsAndRotatesRefreshSession(t *testing.T) {
 	}
 }
 
+func TestActivePrincipalRejectsEmptyAccount(t *testing.T) {
+	principal := activeTestPrincipal(1)
+	principal.AccountID = ""
+
+	if _, err := activePrincipal(principal); !errors.Is(err, authn.ErrInactiveAccount) {
+		t.Fatalf("error = %v, want ErrInactiveAccount", err)
+	}
+}
+
 func TestManagerRejectsRefreshAfterAuthorizationChange(t *testing.T) {
 	ctx := context.Background()
 	store := &memorySessionStore{}

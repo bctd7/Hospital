@@ -6,9 +6,8 @@ import (
 	"encoding/json"
 )
 
-// RequestFingerprint returns a compact equality key for an idempotent request.
-// Operation and request identifiers are deliberately excluded by their input
-// types because they identify transport attempts rather than business content.
+// RequestFingerprint 为幂等请求生成紧凑的业务内容指纹。
+// 各输入类型通过 json:"-" 排除 operation_id 和 request_id，避免把传输批次误当成业务内容。
 func RequestFingerprint(payload any) string {
 	data, err := json.Marshal(payload)
 	if err != nil {

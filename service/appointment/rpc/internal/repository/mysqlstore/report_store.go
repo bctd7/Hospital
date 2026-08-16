@@ -18,7 +18,7 @@ SELECT r.id, r.booking_id, r.patient_account_id, r.patient_display_name_snapshot
        r.item_id, r.item_name_snapshot, r.room_id, r.campus_id_snapshot, r.campus_name_snapshot,
        r.building_snapshot, r.floor_number_snapshot, r.room_number_snapshot,
        r.status, COALESCE(r.performed_by, ''), COALESCE(r.performed_by_display_name_snapshot, ''), r.examination_started_at,
-	       r.examination_completed_at, r.current_version_id,
+       r.examination_completed_at, r.current_version_id,
        r.version, r.created_at, r.updated_at,
        v.id, v.version_no, v.version_kind, v.status,
        v.objective_findings, v.impression, v.recommendation, v.notes,
