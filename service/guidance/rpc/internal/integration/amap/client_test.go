@@ -35,7 +35,7 @@ func TestClientSearchesPlacesAndCalculatesWalkingRoute(t *testing.T) {
                   "status":"1","info":"OK","infocode":"10000",
                   "route":{"paths":[{"distance":"820","duration":"640","steps":[
                     {"instruction":"向东步行","road":"院区路","distance":"320","duration":"240","polyline":"121.400000,31.200000;121.405000,31.205000"},
-                    {"instruction":"到达终点","road":"楼前路","distance":"500","duration":"400","polyline":"121.405000,31.205000;121.410000,31.210000"}
+                    {"instruction":"到达终点","road":[],"distance":"500","duration":"400","polyline":"121.405000,31.205000;121.410000,31.210000"}
                   ]}]}
                 }`))
 		default:
@@ -66,6 +66,9 @@ func TestClientSearchesPlacesAndCalculatesWalkingRoute(t *testing.T) {
 	}
 	if route.Provider != "amap" || route.DistanceMeters != 820 || route.DurationSeconds != 640 || len(route.Polyline) != 3 || len(route.Steps) != 2 {
 		t.Fatalf("unexpected route: %#v", route)
+	}
+	if route.Steps[1].RoadName != "" {
+		t.Fatalf("array-valued empty road must be normalized, got %q", route.Steps[1].RoadName)
 	}
 }
 

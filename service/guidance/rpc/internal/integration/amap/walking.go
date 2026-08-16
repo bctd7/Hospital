@@ -51,11 +51,11 @@ type walkingPath struct {
 }
 
 type walkingStep struct {
-	Instruction string `json:"instruction"`
-	Road        string `json:"road"`
-	Distance    string `json:"distance"`
-	Duration    string `json:"duration"`
-	Polyline    string `json:"polyline"`
+	Instruction string         `json:"instruction"`
+	Road        flexibleString `json:"road"`
+	Distance    string         `json:"distance"`
+	Duration    string         `json:"duration"`
+	Polyline    string         `json:"polyline"`
 }
 
 func buildRoute(origin, destination routing.LocationPoint, source walkingPath) (routing.WalkingRoute, error) {
@@ -84,7 +84,7 @@ func buildRoute(origin, destination routing.LocationPoint, source walkingPath) (
 			return routing.WalkingRoute{}, fmt.Errorf("%w: invalid AMap step duration", routing.ErrProvider)
 		}
 		steps = append(steps, routing.Step{
-			Instruction: strings.TrimSpace(sourceStep.Instruction), RoadName: strings.TrimSpace(sourceStep.Road),
+			Instruction: strings.TrimSpace(sourceStep.Instruction), RoadName: strings.TrimSpace(sourceStep.Road.String()),
 			DistanceMeters: stepDistance, DurationSeconds: stepDuration,
 		})
 	}
