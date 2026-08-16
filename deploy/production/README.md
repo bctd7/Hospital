@@ -137,7 +137,7 @@ npm run build:mp-weixin
   --lang zh
 ```
 
-不要从 `apps/miniapp` 项目根目录或 `dist/dev/mp-weixin` 上传；两者可能携带本地 `.env.local` 的局域网地址。
+不要从 `apps/miniapp` 项目根目录或 `dist/dev/mp-weixin` 上传；两者固定用于直连本机 `127.0.0.1` 的开发调试。
 构建前关闭正在打开 `dist/build/mp-weixin` 的开发者工具项目，避免重建产物时出现目录删除提示。终端输出
 `√ upload` 后，再到微信公众平台将该版本设为体验版。不要先上传依赖尚未部署接口的小程序。
 

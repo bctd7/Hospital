@@ -42,14 +42,18 @@ npm install
 npm run dev:mp-weixin
 ```
 
-微信开发者工具导入：
+微信开发者工具只导入工程根目录：
 
 ```text
-apps/miniapp/dist/dev/mp-weixin
+apps/miniapp
 ```
 
-开发工具模拟器可以访问电脑的 `127.0.0.1`；真机需要在 `.env.local` 配置电脑局域网地址。环境文件只保存
-公开连接信息，不能放 AccessKey、JWT 私钥或手机号 HMAC Key。
+该工程的 `miniprogramRoot` 固定指向 `dist/dev/mp-weixin`。开发版只允许通过 `127.0.0.1` 或 `localhost`
+访问本机后端，不再支持手机通过电脑局域网地址直连本地服务。手机测试必须先部署服务器并上传发布产物，再通过
+CloudBase AnyService 访问后端。
+
+不要把 `dist/dev/mp-weixin` 或 `dist/build/mp-weixin` 重新导入成开发项目；二者都是生成产物，直接导入会造成
+开发版、发布版在最近项目中同名且容易打开错误目录。环境文件不能放 AccessKey、JWT 私钥或手机号 HMAC Key。
 
 ## 构建与上传
 
@@ -59,7 +63,7 @@ npm run type-check
 npm run build:all:mp-weixin
 ```
 
-- 开发产物：`dist/dev/mp-weixin`；
+- 开发产物：`dist/dev/mp-weixin`，只由 `apps/miniapp` 工程通过 `miniprogramRoot` 读取；
 - 发布产物：`dist/build/mp-weixin`；
 - 正式构建固定读取 `release.config.json` 并校验 CloudBase AnyService 配置；
 - 不要从项目根目录或 `dist/dev` 上传体验版。

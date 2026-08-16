@@ -12,6 +12,15 @@ if (developmentEnv.VITE_API_TRANSPORT !== "direct") {
 if (!developmentEnv.VITE_API_BASE_URL?.trim()) {
   throw new Error("VITE_API_BASE_URL is required for development builds");
 }
+const developmentURL = new URL(developmentEnv.VITE_API_BASE_URL.trim());
+if (
+  developmentURL.protocol !== "http:" ||
+  !["127.0.0.1", "localhost"].includes(developmentURL.hostname)
+) {
+  throw new Error(
+    "development API must use http://127.0.0.1 or http://localhost; deploy the backend before testing on a phone",
+  );
+}
 
 const uni = join(
   appRoot,
