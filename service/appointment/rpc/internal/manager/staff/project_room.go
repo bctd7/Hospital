@@ -140,7 +140,7 @@ func (m *Manager) changeRelationStatus(ctx context.Context, operator authn.Princ
 		if result.Status != target {
 			if target == StatusDisabled {
 				today, weekEnd := currentBookingWeek()
-				if _, err := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, meta.OperationID, BookingListFilter{
+				if _, err := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, BookingListFilter{
 					RoomID: before.RoomID, ItemID: before.ItemID, FromDate: &today, ThroughDate: &weekEnd,
 				}); err != nil {
 					return nil, "", err

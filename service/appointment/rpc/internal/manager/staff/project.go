@@ -2,9 +2,6 @@ package staff
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -14,6 +11,7 @@ import (
 	"hospital/common/authn"
 	commonauthz "hospital/common/authz"
 	contractauthz "hospital/contracts/authz"
+	"hospital/service/appointment/rpc/internal/manager/common"
 	staffinput "hospital/service/appointment/rpc/internal/manager/staff/input"
 	staffsupport "hospital/service/appointment/rpc/internal/manager/staff/support"
 )
@@ -48,7 +46,7 @@ func (m *Manager) SaveProjectReportTemplate(ctx context.Context, operator authn.
 	if command.ExpectedTemplateVersion < 0 {
 		return ExaminationItem{}, fmt.Errorf("%w: expected_template_version cannot be negative", ErrInvalid)
 	}
-	fingerprint := operationFingerprint(ActionExaminationItemReportTemplateSaved, struct {
+	fingerprint := common.RequestFingerprint(struct {
 		ItemID                  string
 		Template                ReportContent
 		ExpectedTemplateVersion int64
@@ -111,7 +109,7 @@ func (m *Manager) CreateProject(ctx context.Context, operator authn.Principal, c
 	if err := requireDepartmentScope(operator, command.OwnerDepartmentID); err != nil {
 		return ExaminationItem{}, err
 	}
-	fingerprint := operationFingerprint(ActionExaminationItemCreated, struct {
+	fingerprint := common.RequestFingerprint(struct {
 		OwnerDepartmentID        string
 		Name                     string
 		Description              string
@@ -175,7 +173,7 @@ func (m *Manager) UpdateProject(ctx context.Context, operator authn.Principal, c
 	if err != nil {
 		return ExaminationItem{}, err
 	}
-	fingerprint := operationFingerprint(ActionExaminationItemUpdated, struct {
+	fingerprint := common.RequestFingerprint(struct {
 		ItemID                   string
 		Name                     *string
 		Description              *string
@@ -274,7 +272,7 @@ func (m *Manager) changeProjectStatus(
 	if err != nil {
 		return ExaminationItem{}, err
 	}
-	fingerprint := operationFingerprint(action, struct {
+	fingerprint := common.RequestFingerprint(struct {
 		ItemID          string
 		ExpectedVersion int64
 	}{command.ItemID, command.ExpectedVersion})
@@ -311,7 +309,7 @@ func (m *Manager) changeProjectStatus(
 		if before.Status != target {
 			if target == StatusDisabled {
 				today, weekEnd := currentBookingWeek()
-				if _, err := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, command.OperationID, BookingListFilter{
+				if _, err := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, BookingListFilter{
 					ItemID: before.ItemID, FromDate: &today, ThroughDate: &weekEnd,
 				}); err != nil {
 					return err
@@ -382,18 +380,6 @@ func matchingOperation(operation ProjectOperation, operatorAccountID, itemID, ac
 		return operationConflict()
 	}
 	return nil
-}
-
-func operationFingerprint(action string, payload any) string {
-	data, err := json.Marshal(struct {
-		Action  string
-		Payload any
-	}{action, payload})
-	if err != nil {
-		panic(fmt.Sprintf("marshal project operation fingerprint: %v", err))
-	}
-	sum := sha256.Sum256(data)
-	return hex.EncodeToString(sum[:])
 }
 
 func operationConflict() error {
@@ -494,7 +480,7 @@ func (m *Manager) SetItemWindow(ctx context.Context, operator authn.Principal, c
 		} else {
 			if before.StartTime != result.StartTime || before.BookingCutoffTime != result.BookingCutoffTime || before.EndTime != result.EndTime {
 				if serviceDate, relevant := currentWeekDateForWeekday(result.Weekday); relevant {
-					if _, err := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, meta.OperationID, BookingListFilter{
+					if _, err := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, BookingListFilter{
 						ItemID: result.ItemID, ServiceDate: &serviceDate, Session: result.Session,
 					}); err != nil {
 						return nil, "", err
@@ -578,7 +564,7 @@ func (m *Manager) DisableItemWindow(ctx context.Context, operator authn.Principa
 		after := before
 		if after.Status != StatusDisabled {
 			if serviceDate, relevant := currentWeekDateForWeekday(after.Weekday); relevant {
-				if _, deleteErr := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, meta.OperationID, BookingListFilter{
+				if _, deleteErr := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, BookingListFilter{
 					ItemID: after.ItemID, ServiceDate: &serviceDate, Session: after.Session,
 				}); deleteErr != nil {
 					return nil, "", deleteErr

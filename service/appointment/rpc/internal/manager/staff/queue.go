@@ -50,12 +50,11 @@ func (m *Manager) CallNext(ctx context.Context, operator authn.Principal, comman
 	if room.DepartmentID != command.DepartmentID {
 		return Booking{}, ErrForbidden
 	}
-	fingerprint := staffsupport.Fingerprint(bookingActionCallNext, struct {
+	fingerprint := common.RequestFingerprint(struct {
 		DepartmentID string
 		RoomID       string
 		ServiceDate  string
-		OperationID  string
-	}{command.DepartmentID, command.RoomID, command.ServiceDate, command.OperationID})
+	}{command.DepartmentID, command.RoomID, command.ServiceDate})
 	var result Booking
 	err = m.bookings.WithinQueueTransaction(ctx, func(tx QueueTxStore) error {
 		operation, found, findErr := tx.FindBookingOperation(ctx, command.OperationID)

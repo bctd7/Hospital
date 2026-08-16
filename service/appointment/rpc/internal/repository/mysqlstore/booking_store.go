@@ -189,7 +189,7 @@ func (s *Store) ListBookings(ctx context.Context, filter appointmentmanager.Book
 	if err := s.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM appointment_bookings b"+where, args...).Scan(&total); err != nil {
 		return nil, 0, fmt.Errorf("count bookings: %w", err)
 	}
-	queryArgs := append(append([]any(nil), args...), filter.Limit, filter.Offset)
+	queryArgs := append(args, filter.Limit, filter.Offset)
 	rows, err := s.db.QueryContext(ctx, bookingSelect+where+" ORDER BY b.service_date DESC, b.created_at DESC, b.id DESC LIMIT ? OFFSET ?", queryArgs...)
 	if err != nil {
 		return nil, 0, fmt.Errorf("list bookings: %w", err)
@@ -210,9 +210,6 @@ func (s *Store) ListBookings(ctx context.Context, filter appointmentmanager.Book
 }
 
 func (s *Store) WithinBookingTransaction(ctx context.Context, fn func(appointmentmanager.BookingTxStore) error) error {
-	if fn == nil {
-		return errors.New("booking transaction callback is required")
-	}
 	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 	if err != nil {
 		return fmt.Errorf("begin booking transaction: %w", err)
@@ -231,9 +228,6 @@ func (s *Store) WithinBookingTransaction(ctx context.Context, fn func(appointmen
 }
 
 func (s *Store) WithinQueueTransaction(ctx context.Context, fn func(appointmentmanager.QueueTxStore) error) error {
-	if fn == nil {
-		return errors.New("queue transaction callback is required")
-	}
 	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 	if err != nil {
 		return fmt.Errorf("begin queue transaction: %w", err)

@@ -2,8 +2,6 @@ package support
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 
@@ -25,7 +23,7 @@ type OperationMeta struct {
 // Mutate 统一处理房间和开放时间配置写操作的幂等校验、事务执行与审计记录。
 // 具体业务规则仍由调用方传入的 apply 执行，本函数不决定业务状态。
 func Mutate(ctx context.Context, store OperationStore, operator authn.Principal, meta OperationMeta, resourceType, resourceID, action string, payload any, departmentID func() string, apply func(common.ConfigurationTxStore) (any, string, error), replay func([]byte) error) error {
-	fingerprint := Fingerprint(action, payload)
+	fingerprint := common.RequestFingerprint(payload)
 	return store.WithinConfigurationTransaction(ctx, func(tx common.ConfigurationTxStore) error {
 		operation, exists, err := tx.FindOperation(ctx, meta.OperationID)
 		if err != nil {
@@ -56,16 +54,6 @@ func DecodeAfter(data []byte, target any) error {
 		return json.Unmarshal(data, target)
 	}
 	return json.Unmarshal(envelope.After, target)
-}
-
-// Fingerprint 为幂等操作生成稳定的请求指纹。
-func Fingerprint(action string, payload any) string {
-	data, _ := json.Marshal(struct {
-		Action  string
-		Payload any
-	}{action, payload})
-	sum := sha256.Sum256(data)
-	return hex.EncodeToString(sum[:])
 }
 
 func splitResult(value any) (any, any) {

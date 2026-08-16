@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"hospital/common/authn"
+	"hospital/service/appointment/rpc/internal/manager/common"
 )
 
 const bookingActionCheckIn = "check_in"
@@ -37,11 +38,10 @@ func (m *Manager) CheckIn(ctx context.Context, patient authn.Principal, command 
 	if command.ExpectedVersion < 1 {
 		return Booking{}, fmt.Errorf("%w: expected_version must be positive", ErrInvalid)
 	}
-	fingerprint := bookingFingerprint(bookingActionCheckIn, struct {
+	fingerprint := common.RequestFingerprint(struct {
 		BookingID       string
 		ExpectedVersion int64
-		OperationID     string
-	}{command.BookingID, command.ExpectedVersion, command.OperationID})
+	}{command.BookingID, command.ExpectedVersion})
 	var result Booking
 	err = m.bookings.WithinQueueTransaction(ctx, func(tx QueueTxStore) error {
 		operation, found, findErr := tx.FindBookingOperation(ctx, command.OperationID)

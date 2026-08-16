@@ -154,7 +154,7 @@ func (m *Manager) UpdateRoom(ctx context.Context, operator authn.Principal, comm
 			return nil, "", ErrInvalidState
 		}
 		today, weekEnd := currentBookingWeek()
-		if _, err := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, meta.OperationID, BookingListFilter{
+		if _, err := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, BookingListFilter{
 			RoomID: before.RoomID, FromDate: &today, ThroughDate: &weekEnd,
 		}); err != nil {
 			return nil, "", err
@@ -324,14 +324,14 @@ func (m *Manager) SetRoomWindow(ctx context.Context, operator authn.Principal, c
 		} else {
 			if before.OpenTime != result.OpenTime || before.CloseTime != result.CloseTime {
 				if serviceDate, relevant := currentWeekDateForWeekday(result.Weekday); relevant {
-					if _, err := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, meta.OperationID, BookingListFilter{
+					if _, err := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, BookingListFilter{
 						RoomID: result.RoomID, ServiceDate: &serviceDate, Session: result.Session,
 					}); err != nil {
 						return nil, "", err
 					}
 				}
 			}
-			if err := reconcileRoomWindowCapacity(ctx, tx, operator.AccountID, meta.OperationID, result); err != nil {
+			if err := reconcileRoomWindowCapacity(ctx, tx, operator.AccountID, result); err != nil {
 				return nil, "", err
 			}
 			if err := tx.UpdateRoomWindow(ctx, result, command.ExpectedVersion); err != nil {
@@ -401,7 +401,7 @@ func (m *Manager) DisableRoomWindow(ctx context.Context, operator authn.Principa
 		after := before
 		if after.Status != StatusDisabled {
 			if serviceDate, relevant := currentWeekDateForWeekday(after.Weekday); relevant {
-				if _, deleteErr := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, meta.OperationID, BookingListFilter{
+				if _, deleteErr := deleteBookingsForConfiguration(ctx, tx, operator.AccountID, BookingListFilter{
 					RoomID: after.RoomID, ServiceDate: &serviceDate, Session: after.Session,
 				}); deleteErr != nil {
 					return nil, "", deleteErr

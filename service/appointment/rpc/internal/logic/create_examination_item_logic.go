@@ -30,10 +30,7 @@ func (l *CreateExaminationItemLogic) CreateExaminationItem(in *appointmentv1.Cre
 	if err != nil {
 		return nil, err
 	}
-	var itemInput *appointmentv1.ExaminationItemInput
-	if in != nil {
-		itemInput = in.ExaminationItem
-	}
+	itemInput := in.GetExaminationItem()
 	if itemInput == nil {
 		return nil, projectRPCError(common.ErrInvalid)
 	}
@@ -42,8 +39,8 @@ func (l *CreateExaminationItemLogic) CreateExaminationItem(in *appointmentv1.Cre
 		Name:                     itemInput.Name,
 		Description:              itemInput.Description,
 		EstimatedDurationMinutes: itemInput.EstimatedDurationMinutes,
-		OperationID:              in.OperationId,
-		RequestID:                in.RequestId,
+		OperationID:              in.GetOperationId(),
+		RequestID:                in.GetRequestId(),
 	})
 	if err != nil {
 		return nil, projectRPCError(err)

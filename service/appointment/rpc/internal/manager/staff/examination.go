@@ -42,12 +42,11 @@ func (m *Manager) StartExamination(ctx context.Context, operator authn.Principal
 	if err != nil {
 		return Booking{}, err
 	}
-	fingerprint := staffsupport.Fingerprint(bookingActionStartExamination, struct {
+	fingerprint := common.RequestFingerprint(struct {
 		BookingID        string
 		ExpectedVersion  int64
 		ActorDisplayName string
-		OperationID      string
-	}{command.BookingID, command.ExpectedVersion, command.ActorDisplayName, command.OperationID})
+	}{command.BookingID, command.ExpectedVersion, command.ActorDisplayName})
 	var result Booking
 	err = m.reports.WithinReportTransaction(ctx, func(tx ReportTxStore) error {
 		operation, found, findErr := tx.FindBookingOperation(ctx, command.OperationID)
@@ -125,12 +124,11 @@ func (m *Manager) EndExamination(ctx context.Context, operator authn.Principal, 
 	if err != nil {
 		return Booking{}, err
 	}
-	fingerprint := staffsupport.Fingerprint(bookingActionEndExamination, struct {
+	fingerprint := common.RequestFingerprint(struct {
 		BookingID        string
 		ExpectedVersion  int64
 		ActorDisplayName string
-		OperationID      string
-	}{command.BookingID, command.ExpectedVersion, command.ActorDisplayName, command.OperationID})
+	}{command.BookingID, command.ExpectedVersion, command.ActorDisplayName})
 	var result Booking
 	err = m.reports.WithinReportTransaction(ctx, func(tx ReportTxStore) error {
 		operation, found, findErr := tx.FindBookingOperation(ctx, command.OperationID)

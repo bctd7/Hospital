@@ -2,8 +2,6 @@ package staff
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"strings"
@@ -13,6 +11,7 @@ import (
 
 	"hospital/common/authn"
 	contractauthz "hospital/contracts/authz"
+	"hospital/service/appointment/rpc/internal/manager/common"
 	staffinput "hospital/service/appointment/rpc/internal/manager/staff/input"
 	staffsupport "hospital/service/appointment/rpc/internal/manager/staff/support"
 )
@@ -158,11 +157,10 @@ func (m *Manager) DeleteBooking(ctx context.Context, operator authn.Principal, c
 		return "", fmt.Errorf("%w: reason is too long", ErrInvalid)
 	}
 	command.RequestID = strings.TrimSpace(command.RequestID)
-	fingerprintValue := staffsupport.Fingerprint(bookingActionDeleteByStaff, struct {
-		BookingID   string
-		OperationID string
-		Reason      string
-	}{command.BookingID, command.OperationID, command.Reason})
+	fingerprintValue := common.RequestFingerprint(struct {
+		BookingID string
+		Reason    string
+	}{command.BookingID, command.Reason})
 	var deletedID, departmentID string
 	err = m.bookings.WithinBookingTransaction(ctx, func(tx BookingTxStore) error {
 		operation, found, findErr := tx.FindBookingOperation(ctx, command.OperationID)
@@ -244,7 +242,6 @@ func deleteBookingsForConfiguration(
 	ctx context.Context,
 	tx BookingTxStore,
 	operatorAccountID string,
-	configurationOperationID string,
 	filter BookingListFilter,
 ) ([]Booking, error) {
 	bookings, err := tx.ListBookingsForUpdate(ctx, filter)
@@ -261,7 +258,7 @@ func deleteBookingsForConfiguration(
 		if booking.Status != BookingStatusConfirmed {
 			continue
 		}
-		if err := deleteBookingForConfiguration(ctx, tx, operatorAccountID, configurationOperationID, booking); err != nil {
+		if err := deleteBookingForConfiguration(ctx, tx, operatorAccountID, booking); err != nil {
 			return nil, err
 		}
 		deleted = append(deleted, booking)
@@ -269,7 +266,7 @@ func deleteBookingsForConfiguration(
 	return deleted, nil
 }
 
-func deleteBookingForConfiguration(ctx context.Context, tx BookingTxStore, operatorAccountID, configurationOperationID string, booking Booking) error {
+func deleteBookingForConfiguration(ctx context.Context, tx BookingTxStore, operatorAccountID string, booking Booking) error {
 	capacity, found, err := tx.FindDateCapacityForUpdate(ctx, booking.RoomID, booking.ServiceDate, booking.Session)
 	if err != nil {
 		return err
@@ -286,11 +283,10 @@ func deleteBookingForConfiguration(ctx context.Context, tx BookingTxStore, opera
 	if err := tx.DeleteBooking(ctx, booking.BookingID); err != nil {
 		return err
 	}
-	fingerprint := sha256.Sum256([]byte(configurationOperationID + ":" + booking.BookingID))
 	return tx.RecordBookingOperation(ctx, BookingOperationChange{
 		OperationID: uuid.NewString(), OperatorAccountID: operatorAccountID,
 		BookingID: booking.BookingID, Action: "delete_by_configuration",
-		RequestFingerprint: hex.EncodeToString(fingerprint[:]),
+		RequestFingerprint: "configuration-delete:" + booking.BookingID,
 		Result:             map[string]any{"booking_id": booking.BookingID, "deleted": true},
 	})
 }
@@ -299,7 +295,6 @@ func reconcileRoomWindowCapacity(
 	ctx context.Context,
 	tx BookingTxStore,
 	operatorAccountID string,
-	configurationOperationID string,
 	window RoomWeeklyWindow,
 ) error {
 	serviceDate, relevant := currentWeekDateForWeekday(window.Weekday)
@@ -334,7 +329,7 @@ func reconcileRoomWindowCapacity(
 		return fmt.Errorf("%w: started bookings block capacity reduction", ErrInvalidState)
 	}
 	for index := int64(0); index < excess; index++ {
-		if err := deleteBookingForConfiguration(ctx, tx, operatorAccountID, configurationOperationID, confirmed[index]); err != nil {
+		if err := deleteBookingForConfiguration(ctx, tx, operatorAccountID, confirmed[index]); err != nil {
 			return err
 		}
 	}

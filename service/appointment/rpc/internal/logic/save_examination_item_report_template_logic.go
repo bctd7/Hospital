@@ -26,9 +26,6 @@ func (l *SaveExaminationItemReportTemplateLogic) SaveExaminationItemReportTempla
 	if err != nil {
 		return nil, err
 	}
-	if in == nil {
-		return nil, projectRPCError(common.ErrInvalid)
-	}
 	item, err := l.svcCtx.StaffManager.SaveProjectReportTemplate(l.ctx, principal, staffinput.SaveReportTemplate{
 		ItemID: in.GetItemId(), Template: reportContent(in.GetContent()),
 		ExpectedTemplateVersion: in.GetExpectedTemplateVersion(),

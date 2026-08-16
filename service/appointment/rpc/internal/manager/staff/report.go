@@ -11,6 +11,7 @@ import (
 
 	"hospital/common/authn"
 	contractauthz "hospital/contracts/authz"
+	"hospital/service/appointment/rpc/internal/manager/common"
 	staffinput "hospital/service/appointment/rpc/internal/manager/staff/input"
 	staffsupport "hospital/service/appointment/rpc/internal/manager/staff/support"
 )
@@ -115,13 +116,12 @@ func (m *Manager) SaveExaminationReportDraft(ctx context.Context, operator authn
 	if err != nil {
 		return ExaminationReport{}, err
 	}
-	fingerprint := staffsupport.Fingerprint(bookingActionSaveReportDraft, struct {
+	fingerprint := common.RequestFingerprint(struct {
 		BookingID             string
 		Content               ReportContent
 		ExpectedReportVersion int64
 		ActorDisplayName      string
-		OperationID           string
-	}{command.BookingID, command.Content, command.ExpectedReportVersion, command.ActorDisplayName, command.OperationID})
+	}{command.BookingID, command.Content, command.ExpectedReportVersion, command.ActorDisplayName})
 	var result ExaminationReport
 	err = m.reports.WithinReportTransaction(ctx, func(tx ReportTxStore) error {
 		if replayed, replayErr := replayReportOperation(ctx, tx, operator, command.OperationID, command.BookingID, bookingActionSaveReportDraft, fingerprint, &result); replayed || replayErr != nil {
@@ -213,7 +213,7 @@ func (m *Manager) CompleteAndPublishExaminationReport(ctx context.Context, opera
 	if err != nil {
 		return ExaminationReport{}, err
 	}
-	fingerprint := staffsupport.Fingerprint(bookingActionCompleteReport, struct {
+	fingerprint := common.RequestFingerprint(struct {
 		BookingID              string
 		Content                ReportContent
 		ExpectedBookingVersion int64
@@ -221,9 +221,8 @@ func (m *Manager) CompleteAndPublishExaminationReport(ctx context.Context, opera
 		ActorDisplayName       string
 		DepartmentName         string
 		CampusName             string
-		OperationID            string
 	}{command.BookingID, command.Content, command.ExpectedBookingVersion, command.ExpectedReportVersion,
-		command.ActorDisplayName, command.DepartmentName, command.CampusName, command.OperationID})
+		command.ActorDisplayName, command.DepartmentName, command.CampusName})
 	var result ExaminationReport
 	err = m.reports.WithinReportTransaction(ctx, func(tx ReportTxStore) error {
 		if replayed, replayErr := replayReportOperation(ctx, tx, operator, command.OperationID, command.BookingID, bookingActionCompleteReport, fingerprint, &result); replayed || replayErr != nil {
@@ -333,14 +332,13 @@ func (m *Manager) CorrectExaminationReport(ctx context.Context, operator authn.P
 	if err != nil {
 		return ExaminationReport{}, err
 	}
-	fingerprint := staffsupport.Fingerprint(bookingActionCorrectReport, struct {
+	fingerprint := common.RequestFingerprint(struct {
 		ReportID              string
 		Content               ReportContent
 		CorrectionReason      string
 		ExpectedReportVersion int64
 		ActorDisplayName      string
-		OperationID           string
-	}{command.ReportID, command.Content, command.CorrectionReason, command.ExpectedReportVersion, command.ActorDisplayName, command.OperationID})
+	}{command.ReportID, command.Content, command.CorrectionReason, command.ExpectedReportVersion, command.ActorDisplayName})
 	var result ExaminationReport
 	err = m.reports.WithinReportTransaction(ctx, func(tx ReportTxStore) error {
 		operation, found, findErr := tx.FindBookingOperation(ctx, command.OperationID)

@@ -2,8 +2,6 @@ package mysqlstore
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"time"
@@ -119,8 +117,7 @@ LIMIT ? FOR UPDATE SKIP LOCKED`, before.Format("2006-01-02"), before.Format("200
 		if err := txStore.MarkBookingNoShow(ctx, booking, booking.Version-1); err != nil {
 			return rollback(err)
 		}
-		fingerprint := sha256.Sum256([]byte("mark_no_show:" + bookingID))
-		if err := txStore.RecordBookingOperation(ctx, appointmentmanager.BookingOperationChange{OperationID: uuid.NewString(), OperatorAccountID: cleanupOperatorAccountID, BookingID: bookingID, Action: "mark_no_show", RequestFingerprint: hex.EncodeToString(fingerprint[:]), Result: booking}); err != nil {
+		if err := txStore.RecordBookingOperation(ctx, appointmentmanager.BookingOperationChange{OperationID: uuid.NewString(), OperatorAccountID: cleanupOperatorAccountID, BookingID: bookingID, Action: "mark_no_show", RequestFingerprint: "mark-no-show:" + bookingID, Result: booking}); err != nil {
 			return rollback(err)
 		}
 		result.MarkedNoShow++

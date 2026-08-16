@@ -15,7 +15,7 @@ type Store interface {
 type TxStore interface {
 	FindAccountOperation(ctx context.Context, operationID string) (Operation, bool, error)
 	GetAccountForUpdate(ctx context.Context, accountID string) (Account, error)
-	PromoteDoctor(ctx context.Context, accountID, departmentID string, profile DoctorProfileInput, expectedVersion int64, verifyPhone bool) error
+	PromoteDoctor(ctx context.Context, accountID, departmentID string, profile DoctorProfileInput, expectedVersion int64) error
 	UpdateDoctor(ctx context.Context, accountID string, profile OptionalDoctorProfileInput, expectedVersion int64) error
 	ChangeDoctorDepartment(ctx context.Context, accountID, departmentID string, expectedVersion int64) error
 	RevokeDoctor(ctx context.Context, accountID string, expectedVersion int64) error
