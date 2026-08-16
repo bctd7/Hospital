@@ -6042,7 +6042,7 @@ const file_appointment_v1_appointment_proto_rawDesc = "" +
 	"created_at\x18\n" +
 	" \x01(\tR\tcreatedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\v \x01(\tR\tupdatedAt2\x98-\n" +
+	"updated_at\x18\v \x01(\tR\tupdatedAt2\x95.\n" +
 	"\x12AppointmentService\x12x\n" +
 	"\x15CreateExaminationItem\x125.hospital.appointment.v1.CreateExaminationItemRequest\x1a(.hospital.appointment.v1.ExaminationItem\x12r\n" +
 	"\x12GetExaminationItem\x122.hospital.appointment.v1.GetExaminationItemRequest\x1a(.hospital.appointment.v1.ExaminationItem\x12\x83\x01\n" +
@@ -6095,7 +6095,8 @@ const file_appointment_v1_appointment_proto_rawDesc = "" +
 	"\x16ListExaminationReports\x126.hospital.appointment.v1.ListExaminationReportsRequest\x1a7.hospital.appointment.v1.ListExaminationReportsResponse\x12\x9e\x01\n" +
 	"\x1dListExaminationReportVersions\x12=.hospital.appointment.v1.ListExaminationReportVersionsRequest\x1a>.hospital.appointment.v1.ListExaminationReportVersionsResponse\x12z\n" +
 	"\x16GetMyExaminationReport\x124.hospital.appointment.v1.GetExaminationReportRequest\x1a*.hospital.appointment.v1.ExaminationReport\x12\x8d\x01\n" +
-	"\x18ListMyExaminationReports\x128.hospital.appointment.v1.ListMyExaminationReportsRequest\x1a7.hospital.appointment.v1.ListExaminationReportsResponseB5Z3hospital/contracts/gen/appointment/v1;appointmentv1b\x06proto3"
+	"\x18ListMyExaminationReports\x128.hospital.appointment.v1.ListMyExaminationReportsRequest\x1a7.hospital.appointment.v1.ListExaminationReportsResponse\x12{\n" +
+	"\x1bGetExaminationItemReference\x122.hospital.appointment.v1.GetExaminationItemRequest\x1a(.hospital.appointment.v1.ExaminationItemB5Z3hospital/contracts/gen/appointment/v1;appointmentv1b\x06proto3"
 
 var (
 	file_appointment_v1_appointment_proto_rawDescOnce sync.Once
@@ -6243,56 +6244,58 @@ var file_appointment_v1_appointment_proto_depIdxs = []int32{
 	55, // 64: hospital.appointment.v1.AppointmentService.ListExaminationReportVersions:input_type -> hospital.appointment.v1.ListExaminationReportVersionsRequest
 	53, // 65: hospital.appointment.v1.AppointmentService.GetMyExaminationReport:input_type -> hospital.appointment.v1.GetExaminationReportRequest
 	56, // 66: hospital.appointment.v1.AppointmentService.ListMyExaminationReports:input_type -> hospital.appointment.v1.ListMyExaminationReportsRequest
-	7,  // 67: hospital.appointment.v1.AppointmentService.CreateExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
-	7,  // 68: hospital.appointment.v1.AppointmentService.GetExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
-	4,  // 69: hospital.appointment.v1.AppointmentService.ListExaminationItems:output_type -> hospital.appointment.v1.ListExaminationItemsResponse
-	7,  // 70: hospital.appointment.v1.AppointmentService.UpdateExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
-	7,  // 71: hospital.appointment.v1.AppointmentService.DisableExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
-	7,  // 72: hospital.appointment.v1.AppointmentService.EnableExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
-	8,  // 73: hospital.appointment.v1.AppointmentService.GetExaminationItemReportTemplate:output_type -> hospital.appointment.v1.ExaminationItemReportTemplate
-	8,  // 74: hospital.appointment.v1.AppointmentService.SaveExaminationItemReportTemplate:output_type -> hospital.appointment.v1.ExaminationItemReportTemplate
-	17, // 75: hospital.appointment.v1.AppointmentService.CreateRoom:output_type -> hospital.appointment.v1.Room
-	17, // 76: hospital.appointment.v1.AppointmentService.GetRoom:output_type -> hospital.appointment.v1.Room
-	13, // 77: hospital.appointment.v1.AppointmentService.ListRooms:output_type -> hospital.appointment.v1.ListRoomsResponse
-	17, // 78: hospital.appointment.v1.AppointmentService.UpdateRoom:output_type -> hospital.appointment.v1.Room
-	17, // 79: hospital.appointment.v1.AppointmentService.RetireRoom:output_type -> hospital.appointment.v1.Room
-	22, // 80: hospital.appointment.v1.AppointmentService.AddRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
-	22, // 81: hospital.appointment.v1.AppointmentService.DisableRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
-	22, // 82: hospital.appointment.v1.AppointmentService.EnableRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
-	21, // 83: hospital.appointment.v1.AppointmentService.ListRoomExaminationItems:output_type -> hospital.appointment.v1.ListRoomExaminationItemsResponse
-	21, // 84: hospital.appointment.v1.AppointmentService.ListAvailableRoomsByExaminationItem:output_type -> hospital.appointment.v1.ListRoomExaminationItemsResponse
-	61, // 85: hospital.appointment.v1.AppointmentService.SetRoomWeeklyWindow:output_type -> hospital.appointment.v1.RoomWeeklyWindow
-	61, // 86: hospital.appointment.v1.AppointmentService.DisableRoomWeeklyWindow:output_type -> hospital.appointment.v1.RoomWeeklyWindow
-	26, // 87: hospital.appointment.v1.AppointmentService.ListRoomWeeklyWindows:output_type -> hospital.appointment.v1.ListRoomWeeklyWindowsResponse
-	62, // 88: hospital.appointment.v1.AppointmentService.SetItemWeeklyWindow:output_type -> hospital.appointment.v1.ItemWeeklyWindow
-	62, // 89: hospital.appointment.v1.AppointmentService.DisableItemWeeklyWindow:output_type -> hospital.appointment.v1.ItemWeeklyWindow
-	27, // 90: hospital.appointment.v1.AppointmentService.ListItemWeeklyWindows:output_type -> hospital.appointment.v1.ListItemWeeklyWindowsResponse
-	30, // 91: hospital.appointment.v1.AppointmentService.ListBookingOptions:output_type -> hospital.appointment.v1.ListBookingOptionsResponse
-	41, // 92: hospital.appointment.v1.AppointmentService.CreateBooking:output_type -> hospital.appointment.v1.Booking
-	41, // 93: hospital.appointment.v1.AppointmentService.CheckInBooking:output_type -> hospital.appointment.v1.Booking
-	41, // 94: hospital.appointment.v1.AppointmentService.GetMyBooking:output_type -> hospital.appointment.v1.Booking
-	42, // 95: hospital.appointment.v1.AppointmentService.ListMyBookings:output_type -> hospital.appointment.v1.ListBookingsResponse
-	36, // 96: hospital.appointment.v1.AppointmentService.DeleteMyBooking:output_type -> hospital.appointment.v1.DeleteBookingResponse
-	48, // 97: hospital.appointment.v1.AppointmentService.ListMyMessages:output_type -> hospital.appointment.v1.ListMessagesResponse
-	46, // 98: hospital.appointment.v1.AppointmentService.MarkMyMessageRead:output_type -> hospital.appointment.v1.Message
-	41, // 99: hospital.appointment.v1.AppointmentService.GetBooking:output_type -> hospital.appointment.v1.Booking
-	42, // 100: hospital.appointment.v1.AppointmentService.ListBookings:output_type -> hospital.appointment.v1.ListBookingsResponse
-	41, // 101: hospital.appointment.v1.AppointmentService.StartExamination:output_type -> hospital.appointment.v1.Booking
-	41, // 102: hospital.appointment.v1.AppointmentService.CallNextBooking:output_type -> hospital.appointment.v1.Booking
-	41, // 103: hospital.appointment.v1.AppointmentService.EndExamination:output_type -> hospital.appointment.v1.Booking
-	36, // 104: hospital.appointment.v1.AppointmentService.DeleteBooking:output_type -> hospital.appointment.v1.DeleteBookingResponse
-	48, // 105: hospital.appointment.v1.AppointmentService.ListMessages:output_type -> hospital.appointment.v1.ListMessagesResponse
-	46, // 106: hospital.appointment.v1.AppointmentService.MarkMessageRead:output_type -> hospital.appointment.v1.Message
-	58, // 107: hospital.appointment.v1.AppointmentService.SaveExaminationReportDraft:output_type -> hospital.appointment.v1.ExaminationReport
-	58, // 108: hospital.appointment.v1.AppointmentService.CompleteAndPublishExaminationReport:output_type -> hospital.appointment.v1.ExaminationReport
-	58, // 109: hospital.appointment.v1.AppointmentService.CorrectExaminationReport:output_type -> hospital.appointment.v1.ExaminationReport
-	58, // 110: hospital.appointment.v1.AppointmentService.GetExaminationReport:output_type -> hospital.appointment.v1.ExaminationReport
-	60, // 111: hospital.appointment.v1.AppointmentService.ListExaminationReports:output_type -> hospital.appointment.v1.ListExaminationReportsResponse
-	59, // 112: hospital.appointment.v1.AppointmentService.ListExaminationReportVersions:output_type -> hospital.appointment.v1.ListExaminationReportVersionsResponse
-	58, // 113: hospital.appointment.v1.AppointmentService.GetMyExaminationReport:output_type -> hospital.appointment.v1.ExaminationReport
-	60, // 114: hospital.appointment.v1.AppointmentService.ListMyExaminationReports:output_type -> hospital.appointment.v1.ListExaminationReportsResponse
-	67, // [67:115] is the sub-list for method output_type
-	19, // [19:67] is the sub-list for method input_type
+	2,  // 67: hospital.appointment.v1.AppointmentService.GetExaminationItemReference:input_type -> hospital.appointment.v1.GetExaminationItemRequest
+	7,  // 68: hospital.appointment.v1.AppointmentService.CreateExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
+	7,  // 69: hospital.appointment.v1.AppointmentService.GetExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
+	4,  // 70: hospital.appointment.v1.AppointmentService.ListExaminationItems:output_type -> hospital.appointment.v1.ListExaminationItemsResponse
+	7,  // 71: hospital.appointment.v1.AppointmentService.UpdateExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
+	7,  // 72: hospital.appointment.v1.AppointmentService.DisableExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
+	7,  // 73: hospital.appointment.v1.AppointmentService.EnableExaminationItem:output_type -> hospital.appointment.v1.ExaminationItem
+	8,  // 74: hospital.appointment.v1.AppointmentService.GetExaminationItemReportTemplate:output_type -> hospital.appointment.v1.ExaminationItemReportTemplate
+	8,  // 75: hospital.appointment.v1.AppointmentService.SaveExaminationItemReportTemplate:output_type -> hospital.appointment.v1.ExaminationItemReportTemplate
+	17, // 76: hospital.appointment.v1.AppointmentService.CreateRoom:output_type -> hospital.appointment.v1.Room
+	17, // 77: hospital.appointment.v1.AppointmentService.GetRoom:output_type -> hospital.appointment.v1.Room
+	13, // 78: hospital.appointment.v1.AppointmentService.ListRooms:output_type -> hospital.appointment.v1.ListRoomsResponse
+	17, // 79: hospital.appointment.v1.AppointmentService.UpdateRoom:output_type -> hospital.appointment.v1.Room
+	17, // 80: hospital.appointment.v1.AppointmentService.RetireRoom:output_type -> hospital.appointment.v1.Room
+	22, // 81: hospital.appointment.v1.AppointmentService.AddRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
+	22, // 82: hospital.appointment.v1.AppointmentService.DisableRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
+	22, // 83: hospital.appointment.v1.AppointmentService.EnableRoomExaminationItem:output_type -> hospital.appointment.v1.RoomExaminationItem
+	21, // 84: hospital.appointment.v1.AppointmentService.ListRoomExaminationItems:output_type -> hospital.appointment.v1.ListRoomExaminationItemsResponse
+	21, // 85: hospital.appointment.v1.AppointmentService.ListAvailableRoomsByExaminationItem:output_type -> hospital.appointment.v1.ListRoomExaminationItemsResponse
+	61, // 86: hospital.appointment.v1.AppointmentService.SetRoomWeeklyWindow:output_type -> hospital.appointment.v1.RoomWeeklyWindow
+	61, // 87: hospital.appointment.v1.AppointmentService.DisableRoomWeeklyWindow:output_type -> hospital.appointment.v1.RoomWeeklyWindow
+	26, // 88: hospital.appointment.v1.AppointmentService.ListRoomWeeklyWindows:output_type -> hospital.appointment.v1.ListRoomWeeklyWindowsResponse
+	62, // 89: hospital.appointment.v1.AppointmentService.SetItemWeeklyWindow:output_type -> hospital.appointment.v1.ItemWeeklyWindow
+	62, // 90: hospital.appointment.v1.AppointmentService.DisableItemWeeklyWindow:output_type -> hospital.appointment.v1.ItemWeeklyWindow
+	27, // 91: hospital.appointment.v1.AppointmentService.ListItemWeeklyWindows:output_type -> hospital.appointment.v1.ListItemWeeklyWindowsResponse
+	30, // 92: hospital.appointment.v1.AppointmentService.ListBookingOptions:output_type -> hospital.appointment.v1.ListBookingOptionsResponse
+	41, // 93: hospital.appointment.v1.AppointmentService.CreateBooking:output_type -> hospital.appointment.v1.Booking
+	41, // 94: hospital.appointment.v1.AppointmentService.CheckInBooking:output_type -> hospital.appointment.v1.Booking
+	41, // 95: hospital.appointment.v1.AppointmentService.GetMyBooking:output_type -> hospital.appointment.v1.Booking
+	42, // 96: hospital.appointment.v1.AppointmentService.ListMyBookings:output_type -> hospital.appointment.v1.ListBookingsResponse
+	36, // 97: hospital.appointment.v1.AppointmentService.DeleteMyBooking:output_type -> hospital.appointment.v1.DeleteBookingResponse
+	48, // 98: hospital.appointment.v1.AppointmentService.ListMyMessages:output_type -> hospital.appointment.v1.ListMessagesResponse
+	46, // 99: hospital.appointment.v1.AppointmentService.MarkMyMessageRead:output_type -> hospital.appointment.v1.Message
+	41, // 100: hospital.appointment.v1.AppointmentService.GetBooking:output_type -> hospital.appointment.v1.Booking
+	42, // 101: hospital.appointment.v1.AppointmentService.ListBookings:output_type -> hospital.appointment.v1.ListBookingsResponse
+	41, // 102: hospital.appointment.v1.AppointmentService.StartExamination:output_type -> hospital.appointment.v1.Booking
+	41, // 103: hospital.appointment.v1.AppointmentService.CallNextBooking:output_type -> hospital.appointment.v1.Booking
+	41, // 104: hospital.appointment.v1.AppointmentService.EndExamination:output_type -> hospital.appointment.v1.Booking
+	36, // 105: hospital.appointment.v1.AppointmentService.DeleteBooking:output_type -> hospital.appointment.v1.DeleteBookingResponse
+	48, // 106: hospital.appointment.v1.AppointmentService.ListMessages:output_type -> hospital.appointment.v1.ListMessagesResponse
+	46, // 107: hospital.appointment.v1.AppointmentService.MarkMessageRead:output_type -> hospital.appointment.v1.Message
+	58, // 108: hospital.appointment.v1.AppointmentService.SaveExaminationReportDraft:output_type -> hospital.appointment.v1.ExaminationReport
+	58, // 109: hospital.appointment.v1.AppointmentService.CompleteAndPublishExaminationReport:output_type -> hospital.appointment.v1.ExaminationReport
+	58, // 110: hospital.appointment.v1.AppointmentService.CorrectExaminationReport:output_type -> hospital.appointment.v1.ExaminationReport
+	58, // 111: hospital.appointment.v1.AppointmentService.GetExaminationReport:output_type -> hospital.appointment.v1.ExaminationReport
+	60, // 112: hospital.appointment.v1.AppointmentService.ListExaminationReports:output_type -> hospital.appointment.v1.ListExaminationReportsResponse
+	59, // 113: hospital.appointment.v1.AppointmentService.ListExaminationReportVersions:output_type -> hospital.appointment.v1.ListExaminationReportVersionsResponse
+	58, // 114: hospital.appointment.v1.AppointmentService.GetMyExaminationReport:output_type -> hospital.appointment.v1.ExaminationReport
+	60, // 115: hospital.appointment.v1.AppointmentService.ListMyExaminationReports:output_type -> hospital.appointment.v1.ListExaminationReportsResponse
+	7,  // 116: hospital.appointment.v1.AppointmentService.GetExaminationItemReference:output_type -> hospital.appointment.v1.ExaminationItem
+	68, // [68:117] is the sub-list for method output_type
+	19, // [19:68] is the sub-list for method input_type
 	19, // [19:19] is the sub-list for extension type_name
 	19, // [19:19] is the sub-list for extension extendee
 	0,  // [0:19] is the sub-list for field type_name

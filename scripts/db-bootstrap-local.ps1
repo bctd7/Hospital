@@ -20,6 +20,8 @@ $identityUser = Get-RequiredEnvironmentValue -Name "IDENTITY_MYSQL_USER"
 $identityPassword = Get-RequiredEnvironmentValue -Name "IDENTITY_MYSQL_PASSWORD"
 $appointmentUser = Get-RequiredEnvironmentValue -Name "APPOINTMENT_MYSQL_USER"
 $appointmentPassword = Get-RequiredEnvironmentValue -Name "APPOINTMENT_MYSQL_PASSWORD"
+$guidanceUser = Get-RequiredEnvironmentValue -Name "GUIDANCE_MYSQL_USER"
+$guidancePassword = Get-RequiredEnvironmentValue -Name "GUIDANCE_MYSQL_PASSWORD"
 if ($identityUser -notmatch "^[A-Za-z0-9_]+$") {
     throw "IDENTITY_MYSQL_USER contains unsupported characters."
 }
@@ -31,6 +33,12 @@ if ($appointmentUser -notmatch "^[A-Za-z0-9_]+$") {
 }
 if ($appointmentPassword -notmatch "^[A-Za-z0-9_.@%+=:-]+$") {
     throw "For local bootstrap, APPOINTMENT_MYSQL_PASSWORD may only contain letters, numbers, and ._@%+=:- characters."
+}
+if ($guidanceUser -notmatch "^[A-Za-z0-9_]+$") {
+    throw "GUIDANCE_MYSQL_USER contains unsupported characters."
+}
+if ($guidancePassword -notmatch "^[A-Za-z0-9_.@%+=:-]+$") {
+    throw "For local bootstrap, GUIDANCE_MYSQL_PASSWORD may only contain letters, numbers, and ._@%+=:- characters."
 }
 
 $composeArguments = @(
@@ -72,6 +80,12 @@ CREATE DATABASE IF NOT EXISTS hospital_appointment
 CREATE USER IF NOT EXISTS '$appointmentUser'@'%'
     IDENTIFIED BY '$appointmentPassword';
 GRANT ALL PRIVILEGES ON hospital_appointment.* TO '$appointmentUser'@'%';
+CREATE DATABASE IF NOT EXISTS hospital_guidance
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_0900_ai_ci;
+CREATE USER IF NOT EXISTS '$guidanceUser'@'%'
+    IDENTIFIED BY '$guidancePassword';
+GRANT ALL PRIVILEGES ON hospital_guidance.* TO '$guidanceUser'@'%';
 FLUSH PRIVILEGES;
 "@
 
@@ -90,7 +104,12 @@ FLUSH PRIVILEGES;
         throw "Appointment migration failed after local database bootstrap."
     }
 
-    Write-Host "Local Identity and Appointment databases are ready."
+    & (Join-Path $PSScriptRoot "migrate.ps1") -Service guidance -Direction up
+    if ($LASTEXITCODE -ne 0) {
+        throw "Guidance migration failed after local database bootstrap."
+    }
+
+    Write-Host "Local Identity, Appointment, and Guidance databases are ready."
 }
 finally {
     Pop-Location

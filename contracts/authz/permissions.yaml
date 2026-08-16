@@ -77,17 +77,17 @@ permissions:
     name: 批量导出报告
 
   - code: rule.read
-    service: planning
+    service: guidance
     name: 查看检查规则
 
   - code: rule.edit
-    service: planning
+    service: guidance
     name: 编辑检查规则
 
   - code: rule.review
-    service: planning
+    service: guidance
     name: 审核检查规则
 
   - code: rule.publish
-    service: planning
+    service: guidance
     name: 发布检查规则

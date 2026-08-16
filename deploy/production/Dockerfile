@@ -14,6 +14,8 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -trimpath -ldflags="-s -w" -o /out/appointment-rpc ./service/appointment/rpc && \
     CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
+    go build -trimpath -ldflags="-s -w" -o /out/guidance-rpc ./service/guidance/rpc && \
+    CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -trimpath -ldflags="-s -w" -o /out/app-api ./service/app/api && \
     CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -trimpath -ldflags="-s -w" -o /out/db-migrate ./tools/db-migrate && \
@@ -62,3 +64,12 @@ COPY deploy/production/config/app-api.yaml /etc/hospital/app-api.yaml
 
 USER 65532:65532
 ENTRYPOINT ["/usr/local/bin/app-api", "-f", "/etc/hospital/app-api.yaml"]
+
+FROM alpine:3.22 AS guidance-rpc
+
+RUN apk add --no-cache ca-certificates tzdata
+COPY --from=builder /out/guidance-rpc /usr/local/bin/guidance-rpc
+COPY deploy/production/config/guidance-rpc.yaml /etc/hospital/guidance-rpc.yaml
+
+USER 65532:65532
+ENTRYPOINT ["/usr/local/bin/guidance-rpc", "-f", "/etc/hospital/guidance-rpc.yaml"]

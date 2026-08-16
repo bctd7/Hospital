@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package hospital.guidance.v1;
+
+option go_package = "hospital/contracts/gen/guidance/v1;guidancev1";
+
+service GuidanceService {
+  rpc CreatePrecedenceRule(CreatePrecedenceRuleRequest) returns (PrecedenceRule);
+  rpc UpdatePrecedenceRule(UpdatePrecedenceRuleRequest) returns (PrecedenceRule);
+  rpc DeletePrecedenceRule(DeletePrecedenceRuleRequest) returns (DeletePrecedenceRuleResponse);
+  rpc ListPrecedenceRules(ListPrecedenceRulesRequest) returns (ListPrecedenceRulesResponse);
+}
+
+message CreatePrecedenceRuleRequest {
+  string predecessor_item_id = 1;
+  string successor_item_id = 2;
+  string staff_reason = 3;
+  string patient_message = 4;
+  string operation_id = 5;
+  string request_id = 6;
+}
+
+message UpdatePrecedenceRuleRequest {
+  string rule_id = 1;
+  string staff_reason = 2;
+  string patient_message = 3;
+  int64 expected_version = 4;
+  string operation_id = 5;
+  string request_id = 6;
+}
+
+message DeletePrecedenceRuleRequest {
+  string rule_id = 1;
+  int64 expected_version = 2;
+  string operation_id = 3;
+  string request_id = 4;
+}
+
+message DeletePrecedenceRuleResponse {
+  string rule_id = 1;
+  bool deleted = 2;
+}
+
+message ListPrecedenceRulesRequest {
+  string item_id = 1;
+  string direction = 2;
+  bool include_inferred = 3;
+  string request_id = 4;
+}
+
+message PrecedenceRule {
+  string rule_id = 1;
+  string predecessor_item_id = 2;
+  string predecessor_department_id = 3;
+  string predecessor_item_name = 4;
+  string successor_item_id = 5;
+  string successor_department_id = 6;
+  string successor_item_name = 7;
+  string staff_reason = 8;
+  string patient_message = 9;
+  bool direct = 10;
+  int32 path_length = 11;
+  int64 version = 12;
+  string created_by = 13;
+  string created_at = 14;
+  string updated_at = 15;
+}
+
+message ListPrecedenceRulesResponse {
+  repeated PrecedenceRule rules = 1;
+}

@@ -27,6 +27,11 @@ AppointmentRPC:
     - appointment-rpc:8081
   NonBlock: true
 
+GuidanceRPC:
+  Endpoints:
+    - guidance-rpc:8082
+  NonBlock: true
+
 AuthorizationRedis:
   Addr: ${REDIS_HOST}:${REDIS_PORT}
   Password: ${REDIS_PASSWORD}

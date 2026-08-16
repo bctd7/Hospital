@@ -1,6 +1,6 @@
 param(
     [Parameter(Mandatory = $true)]
-    [ValidateSet("identity", "appointment")]
+    [ValidateSet("identity", "appointment", "guidance")]
     [string]$Service,
 
     [Parameter(Mandatory = $true)]
@@ -34,6 +34,12 @@ $serviceConfiguration = switch ($Service) {
         @{
             Migrations = Join-Path $repositoryRoot "migrations/appointment"
             DsnEnvironment = "APPOINTMENT_MYSQL_DSN"
+        }
+    }
+    "guidance" {
+        @{
+            Migrations = Join-Path $repositoryRoot "migrations/guidance"
+            DsnEnvironment = "GUIDANCE_MYSQL_DSN"
         }
     }
 }

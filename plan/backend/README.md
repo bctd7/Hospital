@@ -11,6 +11,7 @@
 - [Identity 当前范围归档](./modules/implemented/01-identity-service.md)；
 - [Appointment 已实现归档](./modules/implemented/02-appointment-service.md)；
 - [Appointment 组织只读副本提案](./modules/proposals/01-appointment-organization-read-model.md)；
+- [Guidance 智能导诊业务逻辑](./modules/proposals/02-guidance-service.md)；
 
 ## 固定分层
 

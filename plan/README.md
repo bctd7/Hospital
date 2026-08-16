@@ -9,6 +9,7 @@ Plan 中重复维护，分别以 `contracts/api/`、`contracts/proto/` 和 `cont
 |---|---|---|
 | Identity | 当前范围已完成 | 手机号认证、会话、授权版本、组织、账号与医生管理已经形成闭环 |
 | Appointment | 当前范围已完成 | 检查资源、预约、报到、候检叫号、检查、报告与消息已经形成闭环 |
+| Guidance | 第一阶段已实现 | 独立服务；已实现检查项目先后关系，地图、方案生成和预约后导航继续规划 |
 | 小程序 | 已接入上述真实接口 | 患者端与工作人员端共用登录身份，但使用不同页面与权限范围 |
 | 就诊人、缴费、医保、票据等 | 未规划或仅保留入口 | 不把展示入口误写成后端已实现能力 |
 
@@ -25,7 +26,8 @@ Identity 与 Appointment 当前没有仍待收尾的实施阶段。归档末尾�
 - [前端规划](./frontend/README.md)：小程序页面事实、身份版本和剩余边界；
 - [Identity 当前范围归档](./backend/modules/implemented/01-identity-service.md)；
 - [Appointment 已实现归档](./backend/modules/implemented/02-appointment-service.md)；
-- [智能导诊与检查导航产品方案](./frontend/06-intelligent-guidance-and-navigation.md)。
+- [智能导诊与检查导航页面方案](./frontend/06-intelligent-guidance-and-navigation.md)；
+- [Guidance 智能导诊业务逻辑](./backend/modules/proposals/02-guidance-service.md)。
 
 ## 文档边界
 

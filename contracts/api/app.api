@@ -6,6 +6,7 @@ import "identity-organization.api"
 import "appointment-catalog.api"
 import "appointment-resources.api"
 import "appointment-bookings.api"
+import "guidance-rules.api"
 
 info (
 	title:                       "Hospital App API"
@@ -20,6 +21,7 @@ type HealthResponse {
 	Service string `json:"service"`
 	Version string `json:"version"`
 }
+
 @server (
 	prefix: /api/v1
 	group:  system

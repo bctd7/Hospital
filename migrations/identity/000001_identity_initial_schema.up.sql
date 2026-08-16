@@ -205,10 +205,10 @@ INSERT INTO identity_permissions (id, code, service, name) VALUES
     (17, 'report.correct', 'report', '更正报告'),
     (18, 'report.download', 'report', '下载报告'),
     (19, 'report.export', 'report', '批量导出报告'),
-    (20, 'rule.read', 'planning', '查看检查规则'),
-    (21, 'rule.edit', 'planning', '编辑检查规则'),
-    (22, 'rule.review', 'planning', '审核检查规则'),
-    (23, 'rule.publish', 'planning', '发布检查规则');
+    (20, 'rule.read', 'guidance', '查看检查规则'),
+    (21, 'rule.edit', 'guidance', '编辑检查规则'),
+    (22, 'rule.review', 'guidance', '审核检查规则'),
+    (23, 'rule.publish', 'guidance', '发布检查规则');
 
 INSERT INTO identity_role_permissions (role_id, permission_id)
 SELECT 1, id FROM identity_permissions;

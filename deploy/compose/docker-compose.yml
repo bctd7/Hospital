@@ -13,6 +13,8 @@ services:
       IDENTITY_MYSQL_PASSWORD: ${IDENTITY_MYSQL_PASSWORD:-hospital_identity_dev}
       APPOINTMENT_MYSQL_USER: ${APPOINTMENT_MYSQL_USER:-hospital_appointment}
       APPOINTMENT_MYSQL_PASSWORD: ${APPOINTMENT_MYSQL_PASSWORD:-hospital_appointment_dev}
+      GUIDANCE_MYSQL_USER: ${GUIDANCE_MYSQL_USER:-hospital_guidance}
+      GUIDANCE_MYSQL_PASSWORD: ${GUIDANCE_MYSQL_PASSWORD:-hospital_guidance_dev}
       TZ: UTC
     command:
       - --character-set-server=utf8mb4

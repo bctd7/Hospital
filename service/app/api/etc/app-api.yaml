@@ -27,6 +27,11 @@ AppointmentRPC:
     - 127.0.0.1:8081
   NonBlock: true
 
+GuidanceRPC:
+  Endpoints:
+    - 127.0.0.1:8082
+  NonBlock: true
+
 
 AuthorizationRedis:
   Addr: ${REDIS_HOST}:${REDIS_PORT}

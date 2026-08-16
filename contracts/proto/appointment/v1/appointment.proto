@@ -58,6 +58,10 @@ service AppointmentService {
   rpc ListExaminationReportVersions(ListExaminationReportVersionsRequest) returns (ListExaminationReportVersionsResponse);
   rpc GetMyExaminationReport(GetExaminationReportRequest) returns (ExaminationReport);
   rpc ListMyExaminationReports(ListMyExaminationReportsRequest) returns (ListExaminationReportsResponse);
+
+  // Guidance 等内部服务只通过该窄用途接口确认项目归属和状态。
+  // 返回复用 ExaminationItem，避免为了只读投影引入重复消息结构。
+  rpc GetExaminationItemReference(GetExaminationItemRequest) returns (ExaminationItem);
 }
 
 // ExaminationItemInput contains only fields controlled by the caller when

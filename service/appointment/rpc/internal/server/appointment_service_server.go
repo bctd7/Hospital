@@ -33,6 +33,11 @@ func (s *AppointmentServiceServer) GetExaminationItem(ctx context.Context, in *v
 	return l.GetExaminationItem(in)
 }
 
+func (s *AppointmentServiceServer) GetExaminationItemReference(ctx context.Context, in *v1_appointmentv1.GetExaminationItemRequest) (*v1_appointmentv1.ExaminationItem, error) {
+	l := logic.NewGetExaminationItemReferenceLogic(ctx, s.svcCtx)
+	return l.GetExaminationItemReference(in)
+}
+
 func (s *AppointmentServiceServer) ListExaminationItems(ctx context.Context, in *v1_appointmentv1.ListExaminationItemsRequest) (*v1_appointmentv1.ListExaminationItemsResponse, error) {
 	l := logic.NewListExaminationItemsLogic(ctx, s.svcCtx)
 	return l.ListExaminationItems(in)
@@ -153,6 +158,11 @@ func (s *AppointmentServiceServer) CreateBooking(ctx context.Context, in *v1_app
 	return l.CreateBooking(in)
 }
 
+func (s *AppointmentServiceServer) CheckInBooking(ctx context.Context, in *v1_appointmentv1.CheckInBookingRequest) (*v1_appointmentv1.Booking, error) {
+	l := logic.NewCheckInBookingLogic(ctx, s.svcCtx)
+	return l.CheckInBooking(in)
+}
+
 func (s *AppointmentServiceServer) GetMyBooking(ctx context.Context, in *v1_appointmentv1.GetBookingRequest) (*v1_appointmentv1.Booking, error) {
 	l := logic.NewGetMyBookingLogic(ctx, s.svcCtx)
 	return l.GetMyBooking(in)
@@ -191,11 +201,6 @@ func (s *AppointmentServiceServer) ListBookings(ctx context.Context, in *v1_appo
 func (s *AppointmentServiceServer) StartExamination(ctx context.Context, in *v1_appointmentv1.StartExaminationRequest) (*v1_appointmentv1.Booking, error) {
 	l := logic.NewStartExaminationLogic(ctx, s.svcCtx)
 	return l.StartExamination(in)
-}
-
-func (s *AppointmentServiceServer) CheckInBooking(ctx context.Context, in *v1_appointmentv1.CheckInBookingRequest) (*v1_appointmentv1.Booking, error) {
-	l := logic.NewCheckInBookingLogic(ctx, s.svcCtx)
-	return l.CheckInBooking(in)
 }
 
 func (s *AppointmentServiceServer) CallNextBooking(ctx context.Context, in *v1_appointmentv1.CallNextBookingRequest) (*v1_appointmentv1.Booking, error) {

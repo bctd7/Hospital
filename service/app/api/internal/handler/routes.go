@@ -10,6 +10,7 @@ import (
 	appointmentcatalog "hospital/service/app/api/internal/handler/appointmentcatalog"
 	appointmentresources "hospital/service/app/api/internal/handler/appointmentresources"
 	auth "hospital/service/app/api/internal/handler/auth"
+	guidancerules "hospital/service/app/api/internal/handler/guidancerules"
 	identityadmin "hospital/service/app/api/internal/handler/identityadmin"
 	identityprofile "hospital/service/app/api/internal/handler/identityprofile"
 	organizationadmin "hospital/service/app/api/internal/handler/organizationadmin"
@@ -345,6 +346,35 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Route{
 				{
 					Method:  http.MethodGet,
+					Path:    "/admin/guidance/precedence-rules",
+					Handler: guidancerules.ListPrecedenceRulesHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/guidance/precedence-rules",
+					Handler: guidancerules.CreatePrecedenceRuleHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPut,
+					Path:    "/admin/guidance/precedence-rules/:ruleId",
+					Handler: guidancerules.UpdatePrecedenceRuleHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodDelete,
+					Path:    "/admin/guidance/precedence-rules/:ruleId",
+					Handler: guidancerules.DeletePrecedenceRuleHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AccessToken},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
 					Path:    "/admin/identity/accounts",
 					Handler: identityadmin.ListAdminAccountsHandler(serverCtx),
 				},
@@ -455,8 +485,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodGet,
-				Path:    "/directory/departments/:departmentId/doctors",
-				Handler: organizationdirectory.ListDoctorsHandler(serverCtx),
+				Path:    "/directory/departments",
+				Handler: organizationdirectory.ListDepartmentsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/directory/organization-context",
+				Handler: organizationdirectory.GetOrganizationContextHandler(serverCtx),
 			},
 		},
 		rest.WithPrefix("/api/v1"),
@@ -466,13 +501,8 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodGet,
-				Path:    "/directory/departments",
-				Handler: organizationdirectory.ListDepartmentsHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/directory/organization-context",
-				Handler: organizationdirectory.GetOrganizationContextHandler(serverCtx),
+				Path:    "/directory/departments/:departmentId/doctors",
+				Handler: organizationdirectory.ListDoctorsHandler(serverCtx),
 			},
 		},
 		rest.WithPrefix("/api/v1"),

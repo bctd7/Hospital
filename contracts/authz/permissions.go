@@ -56,8 +56,8 @@ var AllPermissions = []Permission{
 	{Code: PermissionReportCorrect, Service: "report"},
 	{Code: PermissionReportDownload, Service: "report"},
 	{Code: PermissionReportExport, Service: "report"},
-	{Code: PermissionRuleRead, Service: "planning"},
-	{Code: PermissionRuleEdit, Service: "planning"},
-	{Code: PermissionRuleReview, Service: "planning"},
-	{Code: PermissionRulePublish, Service: "planning"},
+	{Code: PermissionRuleRead, Service: "guidance"},
+	{Code: PermissionRuleEdit, Service: "guidance"},
+	{Code: PermissionRuleReview, Service: "guidance"},
+	{Code: PermissionRulePublish, Service: "guidance"},
 }

@@ -67,6 +67,7 @@ const (
 	AppointmentService_ListExaminationReportVersions_FullMethodName       = "/hospital.appointment.v1.AppointmentService/ListExaminationReportVersions"
 	AppointmentService_GetMyExaminationReport_FullMethodName              = "/hospital.appointment.v1.AppointmentService/GetMyExaminationReport"
 	AppointmentService_ListMyExaminationReports_FullMethodName            = "/hospital.appointment.v1.AppointmentService/ListMyExaminationReports"
+	AppointmentService_GetExaminationItemReference_FullMethodName         = "/hospital.appointment.v1.AppointmentService/GetExaminationItemReference"
 )
 
 // AppointmentServiceClient is the client API for AppointmentService service.
@@ -121,6 +122,9 @@ type AppointmentServiceClient interface {
 	ListExaminationReportVersions(ctx context.Context, in *ListExaminationReportVersionsRequest, opts ...grpc.CallOption) (*ListExaminationReportVersionsResponse, error)
 	GetMyExaminationReport(ctx context.Context, in *GetExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
 	ListMyExaminationReports(ctx context.Context, in *ListMyExaminationReportsRequest, opts ...grpc.CallOption) (*ListExaminationReportsResponse, error)
+	// Guidance 等内部服务只通过该窄用途接口确认项目归属和状态。
+	// 返回复用 ExaminationItem，避免为了只读投影引入重复消息结构。
+	GetExaminationItemReference(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 }
 
 type appointmentServiceClient struct {
@@ -611,6 +615,16 @@ func (c *appointmentServiceClient) ListMyExaminationReports(ctx context.Context,
 	return out, nil
 }
 
+func (c *appointmentServiceClient) GetExaminationItemReference(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExaminationItem)
+	err := c.cc.Invoke(ctx, AppointmentService_GetExaminationItemReference_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AppointmentServiceServer is the server API for AppointmentService service.
 // All implementations must embed UnimplementedAppointmentServiceServer
 // for forward compatibility.
@@ -663,6 +677,9 @@ type AppointmentServiceServer interface {
 	ListExaminationReportVersions(context.Context, *ListExaminationReportVersionsRequest) (*ListExaminationReportVersionsResponse, error)
 	GetMyExaminationReport(context.Context, *GetExaminationReportRequest) (*ExaminationReport, error)
 	ListMyExaminationReports(context.Context, *ListMyExaminationReportsRequest) (*ListExaminationReportsResponse, error)
+	// Guidance 等内部服务只通过该窄用途接口确认项目归属和状态。
+	// 返回复用 ExaminationItem，避免为了只读投影引入重复消息结构。
+	GetExaminationItemReference(context.Context, *GetExaminationItemRequest) (*ExaminationItem, error)
 	mustEmbedUnimplementedAppointmentServiceServer()
 }
 
@@ -816,6 +833,9 @@ func (UnimplementedAppointmentServiceServer) GetMyExaminationReport(context.Cont
 }
 func (UnimplementedAppointmentServiceServer) ListMyExaminationReports(context.Context, *ListMyExaminationReportsRequest) (*ListExaminationReportsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListMyExaminationReports not implemented")
+}
+func (UnimplementedAppointmentServiceServer) GetExaminationItemReference(context.Context, *GetExaminationItemRequest) (*ExaminationItem, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetExaminationItemReference not implemented")
 }
 func (UnimplementedAppointmentServiceServer) mustEmbedUnimplementedAppointmentServiceServer() {}
 func (UnimplementedAppointmentServiceServer) testEmbeddedByValue()                            {}
@@ -1702,6 +1722,24 @@ func _AppointmentService_ListMyExaminationReports_Handler(srv interface{}, ctx c
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AppointmentService_GetExaminationItemReference_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetExaminationItemRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).GetExaminationItemReference(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_GetExaminationItemReference_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).GetExaminationItemReference(ctx, req.(*GetExaminationItemRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AppointmentService_ServiceDesc is the grpc.ServiceDesc for AppointmentService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1900,6 +1938,10 @@ var AppointmentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListMyExaminationReports",
 			Handler:    _AppointmentService_ListMyExaminationReports_Handler,
+		},
+		{
+			MethodName: "GetExaminationItemReference",
+			Handler:    _AppointmentService_GetExaminationItemReference_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -278,6 +278,14 @@ type CreateOrganizationUnitRequest struct {
 	OperationID string `json:"operation_id"`
 }
 
+type CreatePrecedenceRuleRequest struct {
+	PredecessorItemID string `json:"predecessor_item_id"`
+	SuccessorItemID   string `json:"successor_item_id"`
+	StaffReason       string `json:"staff_reason"`
+	PatientMessage    string `json:"patient_message,optional"`
+	OperationID       string `json:"operation_id"`
+}
+
 type CurrentIdentityResponse struct {
 	AccountID            string   `json:"account_id"`
 	AccountType          string   `json:"account_type"`
@@ -297,6 +305,17 @@ type DeleteBookingAPIRequest struct {
 type DeleteBookingAPIResponse struct {
 	BookingID string `json:"booking_id"`
 	Deleted   bool   `json:"deleted"`
+}
+
+type DeletePrecedenceRuleRequest struct {
+	RuleID          string `path:"ruleId"`
+	ExpectedVersion int64  `form:"expected_version"`
+	OperationID     string `form:"operation_id"`
+}
+
+type DeletePrecedenceRuleResponse struct {
+	RuleID  string `json:"rule_id"`
+	Deleted bool   `json:"deleted"`
 }
 
 type DepartmentSummaryResponse struct {
@@ -557,6 +576,16 @@ type ListOrganizationUnitsResponse struct {
 	Items []AdminOrganizationUnitResponse `json:"items"`
 }
 
+type ListPrecedenceRulesRequest struct {
+	ItemID          string `form:"item_id"`
+	Direction       string `form:"direction,default=all"`
+	IncludeInferred bool   `form:"include_inferred,default=true"`
+}
+
+type ListPrecedenceRulesResponse struct {
+	Rules []PrecedenceRuleResponse `json:"rules"`
+}
+
 type ListReportVersionsAPIResponse struct {
 	Versions []ReportVersionResponse `json:"versions"`
 }
@@ -624,6 +653,27 @@ type PhoneBindingResponse struct {
 type PhoneLoginRequest struct {
 	Phone            string `json:"phone"`
 	VerificationCode string `json:"verification_code"`
+}
+
+type PrecedenceRulePathRequest struct {
+	RuleID string `path:"ruleId"`
+}
+
+type PrecedenceRuleResponse struct {
+	RuleID                  string `json:"rule_id"`
+	PredecessorItemID       string `json:"predecessor_item_id"`
+	PredecessorDepartmentID string `json:"predecessor_department_id"`
+	PredecessorItemName     string `json:"predecessor_item_name"`
+	SuccessorItemID         string `json:"successor_item_id"`
+	SuccessorDepartmentID   string `json:"successor_department_id"`
+	SuccessorItemName       string `json:"successor_item_name"`
+	StaffReason             string `json:"staff_reason"`
+	PatientMessage          string `json:"patient_message"`
+	Direct                  bool   `json:"direct"`
+	PathLength              int32  `json:"path_length"`
+	Version                 int64  `json:"version"`
+	CreatedAt               string `json:"created_at"`
+	UpdatedAt               string `json:"updated_at"`
 }
 
 type PromoteDoctorRequest struct {
@@ -804,6 +854,14 @@ type UpdateOrganizationUnitRequest struct {
 	ParentID    *string `json:"parent_id,optional"`
 	Version     int64   `json:"version"`
 	OperationID string  `json:"operation_id"`
+}
+
+type UpdatePrecedenceRuleRequest struct {
+	RuleID          string `path:"ruleId"`
+	StaffReason     string `json:"staff_reason"`
+	PatientMessage  string `json:"patient_message,optional"`
+	ExpectedVersion int64  `json:"expected_version"`
+	OperationID     string `json:"operation_id"`
 }
 
 type WeeklyWindowsPathRequest struct {

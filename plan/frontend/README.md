@@ -10,7 +10,7 @@
 - [检查资源与预约](./03-appointment-resources-and-booking.md)；
 - [检查执行与报告](./04-examination-reports.md)；
 - [预约消息](./05-appointment-messages.md)；
-- [智能导诊与检查导航产品方案](./06-intelligent-guidance-and-navigation.md)。
+- [智能导诊与检查导航页面方案](./06-intelligent-guidance-and-navigation.md)。
 
 路径和字段以 `contracts/api/` 为准。页面文档只记录入口、身份差异、交互规则和验收边界，不维护第二份接口
 清单。

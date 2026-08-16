@@ -20,6 +20,7 @@ import (
 	identityv1 "hospital/contracts/gen/identity/v1"
 	"hospital/service/app/api/internal/config"
 	"hospital/service/app/api/internal/middleware"
+	"hospital/service/guidance/rpc/guidanceservice"
 	"hospital/service/identity/rpc/identityservice"
 
 	redis "github.com/redis/go-redis/v9"
@@ -31,6 +32,7 @@ type ServiceContext struct {
 	Config      config.Config
 	Identity    identityservice.IdentityService
 	Appointment appointmentservice.AppointmentService
+	Guidance    guidanceservice.GuidanceService
 	AccessToken func(next http.HandlerFunc) http.HandlerFunc
 	redisClient *redis.Client
 }
@@ -85,6 +87,9 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		),
 		Appointment: appointmentservice.NewAppointmentService(
 			zrpc.MustNewClient(c.AppointmentRPC),
+		),
+		Guidance: guidanceservice.NewGuidanceService(
+			zrpc.MustNewClient(c.GuidanceRPC),
 		),
 		AccessToken: accessToken.Handle,
 		redisClient: redisClient,

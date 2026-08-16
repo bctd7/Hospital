@@ -17,10 +17,10 @@ type (
 	AddRoomExaminationItemRequest              = v1_appointmentv1.AddRoomExaminationItemRequest
 	Booking                                    = v1_appointmentv1.Booking
 	BookingOption                              = v1_appointmentv1.BookingOption
+	CallNextBookingRequest                     = v1_appointmentv1.CallNextBookingRequest
 	ChangeExaminationItemStatusRequest         = v1_appointmentv1.ChangeExaminationItemStatusRequest
 	ChangeResourceStatusRequest                = v1_appointmentv1.ChangeResourceStatusRequest
 	CheckInBookingRequest                      = v1_appointmentv1.CheckInBookingRequest
-	CallNextBookingRequest                     = v1_appointmentv1.CallNextBookingRequest
 	CompleteAndPublishExaminationReportRequest = v1_appointmentv1.CompleteAndPublishExaminationReportRequest
 	CorrectExaminationReportRequest            = v1_appointmentv1.CorrectExaminationReportRequest
 	CreateBookingRequest                       = v1_appointmentv1.CreateBookingRequest
@@ -28,8 +28,8 @@ type (
 	CreateRoomRequest                          = v1_appointmentv1.CreateRoomRequest
 	DeleteBookingRequest                       = v1_appointmentv1.DeleteBookingRequest
 	DeleteBookingResponse                      = v1_appointmentv1.DeleteBookingResponse
-	EndExaminationRequest                      = v1_appointmentv1.EndExaminationRequest
 	DepartmentUnreadCount                      = v1_appointmentv1.DepartmentUnreadCount
+	EndExaminationRequest                      = v1_appointmentv1.EndExaminationRequest
 	ExaminationItem                            = v1_appointmentv1.ExaminationItem
 	ExaminationItemInput                       = v1_appointmentv1.ExaminationItemInput
 	ExaminationItemReportTemplate              = v1_appointmentv1.ExaminationItemReportTemplate
@@ -81,6 +81,7 @@ type (
 	AppointmentService interface {
 		CreateExaminationItem(ctx context.Context, in *CreateExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 		GetExaminationItem(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
+		GetExaminationItemReference(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 		ListExaminationItems(ctx context.Context, in *ListExaminationItemsRequest, opts ...grpc.CallOption) (*ListExaminationItemsResponse, error)
 		UpdateExaminationItem(ctx context.Context, in *UpdateExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 		DisableExaminationItem(ctx context.Context, in *ChangeExaminationItemStatusRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
@@ -148,6 +149,11 @@ func (m *defaultAppointmentService) CreateExaminationItem(ctx context.Context, i
 func (m *defaultAppointmentService) GetExaminationItem(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error) {
 	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.GetExaminationItem(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) GetExaminationItemReference(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.GetExaminationItemReference(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) ListExaminationItems(ctx context.Context, in *ListExaminationItemsRequest, opts ...grpc.CallOption) (*ListExaminationItemsResponse, error) {

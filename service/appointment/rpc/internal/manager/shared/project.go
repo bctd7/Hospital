@@ -49,6 +49,20 @@ func (m *Manager) GetStaffProject(ctx context.Context, operator authn.Principal,
 	return item, nil
 }
 
+// GetProjectReference 返回 Guidance 等后端能力需要的项目公开引用。
+// 项目名称和所属科室本来就是患者目录可见信息，因此工作人员可以跨科室读取；
+// 这里不返回报告模板、周窗口或其他管理字段。
+func (m *Manager) GetProjectReference(ctx context.Context, operator authn.Principal, itemID string) (common.ItemSummary, error) {
+	if err := requireStaffRead(operator); err != nil {
+		return common.ItemSummary{}, err
+	}
+	itemID, err := requiredUUID(itemID, "item_id")
+	if err != nil {
+		return common.ItemSummary{}, err
+	}
+	return m.store.GetItemSummary(ctx, itemID)
+}
+
 // ListStaffProjects 返回工作人员权限范围内的管理目录，可按状态筛选。
 func (m *Manager) ListStaffProjects(ctx context.Context, operator authn.Principal, query ListProjectsQuery) (ListProjectsResult, error) {
 	if err := requireStaffRead(operator); err != nil {
