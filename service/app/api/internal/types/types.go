@@ -787,6 +787,16 @@ type SaveReportDraftAPIRequest struct {
 	OperationID           string `json:"operation_id"`
 }
 
+type SearchGuidancePlacesRequest struct {
+	Keyword string `form:"keyword"`
+	City    string `form:"city,optional"`
+	Limit   int32  `form:"limit,default=10"`
+}
+
+type SearchGuidancePlacesResponse struct {
+	Places []GuidanceLocationPoint `json:"places"`
+}
+
 type SendPhoneLoginCodeRequest struct {
 	Phone string `json:"phone"`
 }

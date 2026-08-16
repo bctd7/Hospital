@@ -23,6 +23,8 @@ type (
 	LocationPoint                = v1_guidancev1.LocationPoint
 	PrecedenceRule               = v1_guidancev1.PrecedenceRule
 	RoutePoint                   = v1_guidancev1.RoutePoint
+	SearchPlacesRequest          = v1_guidancev1.SearchPlacesRequest
+	SearchPlacesResponse         = v1_guidancev1.SearchPlacesResponse
 	UpdatePrecedenceRuleRequest  = v1_guidancev1.UpdatePrecedenceRuleRequest
 	WalkingRoute                 = v1_guidancev1.WalkingRoute
 	WalkingRouteStep             = v1_guidancev1.WalkingRouteStep
@@ -32,6 +34,7 @@ type (
 		UpdatePrecedenceRule(ctx context.Context, in *UpdatePrecedenceRuleRequest, opts ...grpc.CallOption) (*PrecedenceRule, error)
 		DeletePrecedenceRule(ctx context.Context, in *DeletePrecedenceRuleRequest, opts ...grpc.CallOption) (*DeletePrecedenceRuleResponse, error)
 		ListPrecedenceRules(ctx context.Context, in *ListPrecedenceRulesRequest, opts ...grpc.CallOption) (*ListPrecedenceRulesResponse, error)
+		SearchPlaces(ctx context.Context, in *SearchPlacesRequest, opts ...grpc.CallOption) (*SearchPlacesResponse, error)
 		CalculateWalkingRoute(ctx context.Context, in *CalculateWalkingRouteRequest, opts ...grpc.CallOption) (*WalkingRoute, error)
 	}
 
@@ -64,6 +67,11 @@ func (m *defaultGuidanceService) DeletePrecedenceRule(ctx context.Context, in *D
 func (m *defaultGuidanceService) ListPrecedenceRules(ctx context.Context, in *ListPrecedenceRulesRequest, opts ...grpc.CallOption) (*ListPrecedenceRulesResponse, error) {
 	client := v1_guidancev1.NewGuidanceServiceClient(m.cli.Conn())
 	return client.ListPrecedenceRules(ctx, in, opts...)
+}
+
+func (m *defaultGuidanceService) SearchPlaces(ctx context.Context, in *SearchPlacesRequest, opts ...grpc.CallOption) (*SearchPlacesResponse, error) {
+	client := v1_guidancev1.NewGuidanceServiceClient(m.cli.Conn())
+	return client.SearchPlaces(ctx, in, opts...)
 }
 
 func (m *defaultGuidanceService) CalculateWalkingRoute(ctx context.Context, in *CalculateWalkingRouteRequest, opts ...grpc.CallOption) (*WalkingRoute, error) {

@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+const sameLocationThresholdMeters = 5
+
 type Provider interface {
 	CalculateWalkingRoute(context.Context, LocationPoint, LocationPoint) (WalkingRoute, error)
 }
@@ -28,7 +30,33 @@ func (c *Calculator) CalculateWalkingRoute(ctx context.Context, origin, destinat
 	if !validLocation(origin) || !validLocation(destination) {
 		return WalkingRoute{}, ErrInvalid
 	}
+	if distanceMeters(origin, destination) <= sameLocationThresholdMeters {
+		return WalkingRoute{
+			Origin: origin, Destination: destination,
+			Polyline: []RoutePoint{
+				{Latitude: origin.Latitude, Longitude: origin.Longitude},
+				{Latitude: destination.Latitude, Longitude: destination.Longitude},
+			},
+			Provider: "local",
+		}, nil
+	}
 	return c.provider.CalculateWalkingRoute(ctx, origin, destination)
+}
+
+func distanceMeters(origin, destination LocationPoint) float64 {
+	const earthRadiusMeters = 6371000
+	latitudeDelta := degreesToRadians(destination.Latitude - origin.Latitude)
+	longitudeDelta := degreesToRadians(destination.Longitude - origin.Longitude)
+	originLatitude := degreesToRadians(origin.Latitude)
+	destinationLatitude := degreesToRadians(destination.Latitude)
+	a := math.Sin(latitudeDelta/2)*math.Sin(latitudeDelta/2) +
+		math.Cos(originLatitude)*math.Cos(destinationLatitude)*
+			math.Sin(longitudeDelta/2)*math.Sin(longitudeDelta/2)
+	return earthRadiusMeters * 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
+}
+
+func degreesToRadians(value float64) float64 {
+	return value * math.Pi / 180
 }
 
 func normalizeLocation(point LocationPoint) LocationPoint {

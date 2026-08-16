@@ -17,7 +17,7 @@ describe("guidance HTTP adapter", () => {
       duration_seconds: 640,
       polyline: [],
       steps: [],
-      provider: "baidu",
+      provider: "amap",
     });
     const { guidanceApi } = await import("@/api/guidance");
     const input = {
@@ -26,12 +26,30 @@ describe("guidance HTTP adapter", () => {
     };
 
     await expect(guidanceApi.calculateWalkingRoute(input)).resolves.toMatchObject({
-      provider: "baidu",
+      provider: "amap",
       distance_meters: 820,
     });
     expect(requestMock).toHaveBeenCalledWith({
       path: "/api/v1/guidance/routes/walking",
       method: "POST",
+      data: input,
+      authenticated: true,
+    });
+  });
+
+  it("searches AMap places through the authenticated Guidance endpoint", async () => {
+    requestMock.mockResolvedValueOnce({
+      places: [{ name: "123号楼", address: "上海市宝山区", latitude: 31.4, longitude: 121.48, provider_place_id: "B001" }],
+    });
+    const { guidanceApi } = await import("@/api/guidance");
+    const input = { keyword: "123号楼", city: "上海市", limit: 15 };
+
+    await expect(guidanceApi.searchPlaces(input)).resolves.toMatchObject({
+      places: [{ provider_place_id: "B001" }],
+    });
+    expect(requestMock).toHaveBeenCalledWith({
+      path: "/api/v1/guidance/places/search",
+      method: "GET",
       data: input,
       authenticated: true,
     });

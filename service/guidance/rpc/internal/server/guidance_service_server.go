@@ -43,6 +43,11 @@ func (s *GuidanceServiceServer) ListPrecedenceRules(ctx context.Context, in *v1_
 	return l.ListPrecedenceRules(in)
 }
 
+func (s *GuidanceServiceServer) SearchPlaces(ctx context.Context, in *v1_guidancev1.SearchPlacesRequest) (*v1_guidancev1.SearchPlacesResponse, error) {
+	l := logic.NewSearchPlacesLogic(ctx, s.svcCtx)
+	return l.SearchPlaces(in)
+}
+
 func (s *GuidanceServiceServer) CalculateWalkingRoute(ctx context.Context, in *v1_guidancev1.CalculateWalkingRouteRequest) (*v1_guidancev1.WalkingRoute, error) {
 	l := logic.NewCalculateWalkingRouteLogic(ctx, s.svcCtx)
 	return l.CalculateWalkingRoute(in)

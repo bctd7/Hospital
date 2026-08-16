@@ -9,6 +9,7 @@ service GuidanceService {
   rpc UpdatePrecedenceRule(UpdatePrecedenceRuleRequest) returns (PrecedenceRule);
   rpc DeletePrecedenceRule(DeletePrecedenceRuleRequest) returns (DeletePrecedenceRuleResponse);
   rpc ListPrecedenceRules(ListPrecedenceRulesRequest) returns (ListPrecedenceRulesResponse);
+  rpc SearchPlaces(SearchPlacesRequest) returns (SearchPlacesResponse);
   rpc CalculateWalkingRoute(CalculateWalkingRouteRequest) returns (WalkingRoute);
 }
 
@@ -77,6 +78,17 @@ message LocationPoint {
   double latitude = 3;
   double longitude = 4;
   string provider_place_id = 5;
+}
+
+message SearchPlacesRequest {
+  string keyword = 1;
+  string city = 2;
+  int32 limit = 3;
+  string request_id = 4;
+}
+
+message SearchPlacesResponse {
+  repeated LocationPoint places = 1;
 }
 
 message RoutePoint {

@@ -32,3 +32,13 @@ export interface CalculateWalkingRouteInput {
   origin: GuidanceLocationPoint;
   destination: GuidanceLocationPoint;
 }
+
+export interface SearchGuidancePlacesInput {
+  keyword: string;
+  city?: string;
+  limit?: number;
+}
+
+export interface SearchGuidancePlacesResult {
+  places: GuidanceLocationPoint[];
+}

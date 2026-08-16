@@ -1,20 +1,24 @@
 # Go 服务
 
-当前有三个可独立构建和运行的服务：
+当前有四个可独立构建和运行的服务：
 
 | 服务 | 入口 | 端口 | 职责 |
 |---|---|---:|---|
 | App API | `service/app/api/app.go` | 8888 | 小程序 HTTP、Token 中间件、协议转换与页面聚合 |
 | Identity RPC | `service/identity/rpc/identity.go` | 8080 | 登录、会话、账号、权限、组织和医生 |
 | Appointment RPC | `service/appointment/rpc/appointment.go` | 8081 | 检查资源、预约、容量、报到、候检叫号、检查、报告和消息 |
+| Guidance RPC | `service/guidance/rpc/guidance.go` | 8082 | 检查项目先后规则、地点检索和两点步行路线；后续承载智能预约与当日路线 |
 
 ```text
 Miniapp -> App API -> Identity RPC
                    -> Appointment RPC
+                   -> Guidance RPC -> Appointment RPC（只读项目事实）
+                                   -> 高德 Web 服务
 ```
 
-App API 不拥有业务数据库。需要 Identity 或 Appointment 数据时调用对应 RPC；两个 RPC 服务分别拥有
-`hospital_identity` 和 `hospital_appointment`，不得跨库查询。
+App API 不拥有业务数据库。需要业务数据时调用对应 RPC；Identity、Appointment 和 Guidance 分别拥有
+`hospital_identity`、`hospital_appointment` 和 `hospital_guidance`，不得跨库查询。Guidance 需要检查项目事实时
+调用 Appointment RPC，不通过前端传递，也不直接读取 Appointment 数据库。
 
 ## 服务内部约束
 
@@ -33,12 +37,14 @@ server -> logic -> manager -> store -> repository
 - [Identity](./identity/README.md)；
 - [Identity 内部结构](./identity/rpc/internal/README.md)；
 - [Appointment](./appointment/README.md)；
-- [Appointment 内部结构](./appointment/rpc/internal/README.md)。
+- [Appointment 内部结构](./appointment/rpc/internal/README.md)；
+- [Guidance](./guidance/README.md)。
 
 ## 契约与生成
 
 - HTTP：`contracts/api/app.api`；
-- RPC：`contracts/proto/identity/v1/identity.proto`、`contracts/proto/appointment/v1/appointment.proto`；
+- RPC：`contracts/proto/identity/v1/identity.proto`、`contracts/proto/appointment/v1/appointment.proto`、
+  `contracts/proto/guidance/v1/guidance.proto`；
 - 生成代码：`contracts/gen/`、各 RPC Client、Handler、Types 和 Server 骨架。
 
 ```powershell

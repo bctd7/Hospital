@@ -23,6 +23,7 @@ const (
 	GuidanceService_UpdatePrecedenceRule_FullMethodName  = "/hospital.guidance.v1.GuidanceService/UpdatePrecedenceRule"
 	GuidanceService_DeletePrecedenceRule_FullMethodName  = "/hospital.guidance.v1.GuidanceService/DeletePrecedenceRule"
 	GuidanceService_ListPrecedenceRules_FullMethodName   = "/hospital.guidance.v1.GuidanceService/ListPrecedenceRules"
+	GuidanceService_SearchPlaces_FullMethodName          = "/hospital.guidance.v1.GuidanceService/SearchPlaces"
 	GuidanceService_CalculateWalkingRoute_FullMethodName = "/hospital.guidance.v1.GuidanceService/CalculateWalkingRoute"
 )
 
@@ -34,6 +35,7 @@ type GuidanceServiceClient interface {
 	UpdatePrecedenceRule(ctx context.Context, in *UpdatePrecedenceRuleRequest, opts ...grpc.CallOption) (*PrecedenceRule, error)
 	DeletePrecedenceRule(ctx context.Context, in *DeletePrecedenceRuleRequest, opts ...grpc.CallOption) (*DeletePrecedenceRuleResponse, error)
 	ListPrecedenceRules(ctx context.Context, in *ListPrecedenceRulesRequest, opts ...grpc.CallOption) (*ListPrecedenceRulesResponse, error)
+	SearchPlaces(ctx context.Context, in *SearchPlacesRequest, opts ...grpc.CallOption) (*SearchPlacesResponse, error)
 	CalculateWalkingRoute(ctx context.Context, in *CalculateWalkingRouteRequest, opts ...grpc.CallOption) (*WalkingRoute, error)
 }
 
@@ -85,6 +87,16 @@ func (c *guidanceServiceClient) ListPrecedenceRules(ctx context.Context, in *Lis
 	return out, nil
 }
 
+func (c *guidanceServiceClient) SearchPlaces(ctx context.Context, in *SearchPlacesRequest, opts ...grpc.CallOption) (*SearchPlacesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SearchPlacesResponse)
+	err := c.cc.Invoke(ctx, GuidanceService_SearchPlaces_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *guidanceServiceClient) CalculateWalkingRoute(ctx context.Context, in *CalculateWalkingRouteRequest, opts ...grpc.CallOption) (*WalkingRoute, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(WalkingRoute)
@@ -103,6 +115,7 @@ type GuidanceServiceServer interface {
 	UpdatePrecedenceRule(context.Context, *UpdatePrecedenceRuleRequest) (*PrecedenceRule, error)
 	DeletePrecedenceRule(context.Context, *DeletePrecedenceRuleRequest) (*DeletePrecedenceRuleResponse, error)
 	ListPrecedenceRules(context.Context, *ListPrecedenceRulesRequest) (*ListPrecedenceRulesResponse, error)
+	SearchPlaces(context.Context, *SearchPlacesRequest) (*SearchPlacesResponse, error)
 	CalculateWalkingRoute(context.Context, *CalculateWalkingRouteRequest) (*WalkingRoute, error)
 	mustEmbedUnimplementedGuidanceServiceServer()
 }
@@ -125,6 +138,9 @@ func (UnimplementedGuidanceServiceServer) DeletePrecedenceRule(context.Context, 
 }
 func (UnimplementedGuidanceServiceServer) ListPrecedenceRules(context.Context, *ListPrecedenceRulesRequest) (*ListPrecedenceRulesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListPrecedenceRules not implemented")
+}
+func (UnimplementedGuidanceServiceServer) SearchPlaces(context.Context, *SearchPlacesRequest) (*SearchPlacesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchPlaces not implemented")
 }
 func (UnimplementedGuidanceServiceServer) CalculateWalkingRoute(context.Context, *CalculateWalkingRouteRequest) (*WalkingRoute, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CalculateWalkingRoute not implemented")
@@ -222,6 +238,24 @@ func _GuidanceService_ListPrecedenceRules_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GuidanceService_SearchPlaces_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchPlacesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GuidanceServiceServer).SearchPlaces(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GuidanceService_SearchPlaces_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GuidanceServiceServer).SearchPlaces(ctx, req.(*SearchPlacesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _GuidanceService_CalculateWalkingRoute_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CalculateWalkingRouteRequest)
 	if err := dec(in); err != nil {
@@ -262,6 +296,10 @@ var GuidanceService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListPrecedenceRules",
 			Handler:    _GuidanceService_ListPrecedenceRules_Handler,
+		},
+		{
+			MethodName: "SearchPlaces",
+			Handler:    _GuidanceService_SearchPlaces_Handler,
 		},
 		{
 			MethodName: "CalculateWalkingRoute",

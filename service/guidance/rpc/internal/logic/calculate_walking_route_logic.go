@@ -32,13 +32,13 @@ func (l *CalculateWalkingRouteLogic) CalculateWalkingRoute(in *v1_guidancev1.Cal
 		return nil, err
 	}
 	if in == nil || in.Origin == nil || in.Destination == nil {
-		return nil, routeRPCError(routing.ErrInvalid)
+		return nil, mapRPCError(routing.ErrInvalid)
 	}
 	origin := routeLocation(in.Origin)
 	destination := routeLocation(in.Destination)
 	result, err := l.svcCtx.RouteCalculator.CalculateWalkingRoute(l.ctx, origin, destination)
 	if err != nil {
-		return nil, routeRPCError(err)
+		return nil, mapRPCError(err)
 	}
 	return walkingRouteResponse(result), nil
 }
@@ -79,15 +79,15 @@ func routeLocationResponse(point routing.LocationPoint) *v1_guidancev1.LocationP
 	}
 }
 
-func routeRPCError(err error) error {
+func mapRPCError(err error) error {
 	switch {
 	case errors.Is(err, routing.ErrInvalid):
-		return status.Error(codes.InvalidArgument, "invalid walking route request")
+		return status.Error(codes.InvalidArgument, "invalid map request")
 	case errors.Is(err, routing.ErrNoRoute):
 		return status.Error(codes.NotFound, "walking route not found")
 	case errors.Is(err, routing.ErrUnavailable), errors.Is(err, context.DeadlineExceeded), errors.Is(err, context.Canceled):
-		return status.Error(codes.Unavailable, "walking route service unavailable")
+		return status.Error(codes.Unavailable, "map service unavailable")
 	default:
-		return status.Error(codes.Internal, "walking route calculation failed")
+		return status.Error(codes.Internal, "map provider failed")
 	}
 }

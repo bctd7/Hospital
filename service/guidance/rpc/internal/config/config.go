@@ -21,10 +21,10 @@ type Config struct {
 		AccessTTLSeconds      int64 `json:",default=900"`
 	}
 	AppointmentRPC zrpc.RpcClientConf
-	BaiduMap       struct {
-		Endpoint            string `json:",default=https://api.map.baidu.com/direction/v2/walking"`
-		AccessKey           string `json:",optional"`
-		SecurityKey         string `json:",optional"`
+	AMap           struct {
+		PlaceSearchEndpoint string `json:",default=https://restapi.amap.com/v3/place/text"`
+		WalkingEndpoint     string `json:",default=https://restapi.amap.com/v3/direction/walking"`
+		WebServiceKey       string `json:",optional"`
 		TimeoutMilliseconds int64  `json:",default=5000"`
 	}
 }

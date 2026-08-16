@@ -16,8 +16,8 @@ import (
 	"hospital/common/authz/version/redisstore"
 	"hospital/service/appointment/rpc/appointmentservice"
 	"hospital/service/guidance/rpc/internal/config"
+	"hospital/service/guidance/rpc/internal/integration/amap"
 	"hospital/service/guidance/rpc/internal/integration/appointmentcatalog"
-	"hospital/service/guidance/rpc/internal/integration/baidumap"
 	"hospital/service/guidance/rpc/internal/repository/mysqlstore"
 	"hospital/service/guidance/rpc/internal/routing"
 	precedencemanager "hospital/service/guidance/rpc/internal/rules/precedence/manager"
@@ -26,6 +26,7 @@ import (
 type ServiceContext struct {
 	Config                        config.Config
 	PrecedenceManager             *precedencemanager.Manager
+	PlaceFinder                   *routing.PlaceFinder
 	RouteCalculator               *routing.Calculator
 	TokenManager                  *authn.TokenManager
 	AuthorizationVersionValidator *authversion.Validator
@@ -87,16 +88,21 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 	if err != nil {
 		return nil, err
 	}
-	routeCalculator, err := routing.NewCalculator(baidumap.New(baidumap.Config{
-		Endpoint: c.BaiduMap.Endpoint, AccessKey: c.BaiduMap.AccessKey, SecurityKey: c.BaiduMap.SecurityKey,
-		Timeout: time.Duration(c.BaiduMap.TimeoutMilliseconds) * time.Millisecond,
-	}))
+	mapClient := amap.New(amap.Config{
+		PlaceSearchEndpoint: c.AMap.PlaceSearchEndpoint, WalkingEndpoint: c.AMap.WalkingEndpoint,
+		WebServiceKey: c.AMap.WebServiceKey, Timeout: time.Duration(c.AMap.TimeoutMilliseconds) * time.Millisecond,
+	})
+	placeFinder, err := routing.NewPlaceFinder(mapClient)
+	if err != nil {
+		return nil, fmt.Errorf("create guidance place finder: %w", err)
+	}
+	routeCalculator, err := routing.NewCalculator(mapClient)
 	if err != nil {
 		return nil, fmt.Errorf("create guidance route calculator: %w", err)
 	}
 	assembled = true
 	return &ServiceContext{
-		Config: c, PrecedenceManager: manager, RouteCalculator: routeCalculator,
+		Config: c, PrecedenceManager: manager, PlaceFinder: placeFinder, RouteCalculator: routeCalculator,
 		TokenManager: tokenManager, AuthorizationVersionValidator: validator,
 		store: store, authorizationRedis: authorizationRedis,
 	}, nil

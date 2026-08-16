@@ -23,8 +23,8 @@ AppointmentRPC:
   Endpoints:
     - appointment-rpc:8081
   NonBlock: true
-BaiduMap:
-  Endpoint: https://api.map.baidu.com/direction/v2/walking
-  AccessKey: ${BAIDU_MAP_SERVER_AK}
-  SecurityKey: ${BAIDU_MAP_SERVER_SK}
+AMap:
+  PlaceSearchEndpoint: https://restapi.amap.com/v3/place/text
+  WalkingEndpoint: https://restapi.amap.com/v3/direction/walking
+  WebServiceKey: ${AMAP_WEB_SERVICE_KEY}
   TimeoutMilliseconds: 5000

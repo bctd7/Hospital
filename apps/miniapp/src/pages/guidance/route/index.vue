@@ -3,6 +3,7 @@ import { computed, nextTick, ref } from "vue";
 
 import { ApiError } from "@/api/client";
 import { guidanceApi } from "@/api/guidance";
+import PlaceSearchSheet from "@/components/guidance/PlaceSearchSheet.vue";
 import type { GuidanceLocationPoint, WalkingRoute } from "@/types/guidance";
 
 interface MapMarker {
@@ -29,6 +30,7 @@ const destination = ref<GuidanceLocationPoint>();
 const route = ref<WalkingRoute>();
 const loading = ref(false);
 const error = ref("");
+const searchTarget = ref<"origin" | "destination">();
 
 const canCalculate = computed(() => Boolean(origin.value && destination.value && !loading.value));
 const mapCenter = computed(() => {
@@ -60,9 +62,11 @@ const distanceText = computed(() => {
 });
 const durationText = computed(() => {
   const seconds = route.value?.duration_seconds ?? 0;
+  if (seconds <= 0) return "少于 1 分钟";
   const minutes = Math.max(1, Math.ceil(seconds / 60));
   return minutes >= 60 ? `${Math.floor(minutes / 60)} 小时 ${minutes % 60} 分钟` : `${minutes} 分钟`;
 });
+const providerText = computed(() => route.value?.provider === "local" ? "起点和终点位于同一位置" : "高德地图路线");
 
 function marker(id: number, point: GuidanceLocationPoint, content: string): MapMarker {
   return {
@@ -83,30 +87,16 @@ function marker(id: number, point: GuidanceLocationPoint, content: string): MapM
   };
 }
 
-async function choosePoint(target: "origin" | "destination") {
-  try {
-    const selected = await new Promise<GuidanceLocationPoint | undefined>((resolve, reject) => {
-      uni.chooseLocation({
-        success: (result) => resolve({
-          name: result.name?.trim() || (target === "origin" ? "已选起点" : "已选终点"),
-          address: result.address?.trim() || "",
-          latitude: result.latitude,
-          longitude: result.longitude,
-        }),
-        fail: (failure) => {
-          if (failure.errMsg?.includes("cancel")) resolve(undefined);
-          else reject(new Error("地图选点失败，请检查微信定位权限"));
-        },
-      });
-    });
-    if (!selected) return;
-    if (target === "origin") origin.value = selected;
-    else destination.value = selected;
-    route.value = undefined;
-    error.value = "";
-  } catch (cause) {
-    uni.showToast({ title: cause instanceof Error ? cause.message : "地图选点失败", icon: "none" });
-  }
+function choosePoint(target: "origin" | "destination") {
+  searchTarget.value = target;
+}
+
+function selectPlace(place: GuidanceLocationPoint) {
+  if (searchTarget.value === "origin") origin.value = place;
+  else if (searchTarget.value === "destination") destination.value = place;
+  searchTarget.value = undefined;
+  route.value = undefined;
+  error.value = "";
 }
 
 function swapPoints() {
@@ -193,7 +183,7 @@ async function calculateRoute() {
           <text class="route-summary__label">路线距离</text>
           <text class="route-summary__value">{{ distanceText }}</text>
         </view>
-        <text class="route-summary__provider">百度地图路线</text>
+        <text class="route-summary__provider">{{ providerText }}</text>
       </view>
 
       <map
@@ -223,6 +213,13 @@ async function calculateRoute() {
       <text class="empty-state__title">路线将在这里展示</text>
       <text class="empty-state__description">选择起点和终点并计算后，即可查看完整步行路线。</text>
     </view>
+
+    <PlaceSearchSheet
+      :visible="Boolean(searchTarget)"
+      :title="searchTarget === 'destination' ? '选择终点' : '选择起点'"
+      @close="searchTarget = undefined"
+      @select="selectPlace"
+    />
   </view>
 </template>
 
