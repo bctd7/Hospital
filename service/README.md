@@ -6,7 +6,7 @@
 |---|---|---:|---|
 | App API | `service/app/api/app.go` | 8888 | 小程序 HTTP、Token 中间件、协议转换与页面聚合 |
 | Identity RPC | `service/identity/rpc/identity.go` | 8080 | 登录、会话、账号、权限、组织和医生 |
-| Appointment RPC | `service/appointment/rpc/appointment.go` | 8081 | 检查资源、预约、容量、检查、报告和消息 |
+| Appointment RPC | `service/appointment/rpc/appointment.go` | 8081 | 检查资源、预约、容量、报到、候检叫号、检查、报告和消息 |
 
 ```text
 Miniapp -> App API -> Identity RPC

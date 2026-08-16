@@ -8,7 +8,7 @@
 - [架构与数据边界](./01-architecture-and-data-boundaries.md)；
 - [交付与质量基线](./02-delivery-and-quality.md)；
 - [模块索引](./modules/README.md)；
-- [Identity 已实现归档](./modules/implemented/01-identity-service.md)；
+- [Identity 当前范围归档](./modules/implemented/01-identity-service.md)；
 - [Appointment 已实现归档](./modules/implemented/02-appointment-service.md)；
 - [Appointment 组织只读副本提案](./modules/proposals/01-appointment-organization-read-model.md)；
 

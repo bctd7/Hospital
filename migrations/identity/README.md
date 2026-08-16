@@ -1,6 +1,6 @@
 # Identity 数据库
 
-`hospital_identity` 是 Identity 的业务事实库。当前尚未发布且没有需要保留的正式业务数据，迁移已压平为单一最新初始版本 `000001`，共包含 12 张表；账号、登录、
+`hospital_identity` 是 Identity 的业务事实库。当前尚未正式上线且没有需要保留的正式业务数据，迁移已压平为单一最新初始版本 `000001`，共包含 12 张表；账号、登录、
 组织、RBAC、审计和 Outbox 分开保存，但只有 `identity_accounts` 是账号主表。
 
 ## 当前表

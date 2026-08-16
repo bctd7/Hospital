@@ -2,7 +2,7 @@
 
 ## 已实现
 
-- [Identity 首期](./implemented/01-identity-service.md)：认证、会话、授权版本、组织、账号和医生管理；
+- [Identity 当前范围](./implemented/01-identity-service.md)：认证、会话、授权版本、组织、账号和医生管理；
 - [Appointment 当前范围](./implemented/02-appointment-service.md)：检查资源、预约、患者报到、房间候检叫号、检查、报告与消息。
 
 ## 后续提案

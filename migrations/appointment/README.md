@@ -2,7 +2,7 @@
 
 `hospital_appointment` 是 Appointment 服务独占的业务数据库。Identity 的科室、院区和账号 ID 只作为跨服务稳定标识保存，不建立跨数据库外键。
 
-当前尚未发布且没有需要保留的业务数据，因此 Appointment 迁移已压平为一份最新初始 Schema：
+当前尚未正式上线且没有需要保留的正式业务数据，因此 Appointment 迁移已压平为一份最新初始 Schema：
 
 - `appointment_examination_items`：检查项目及其所属科室；
 - `appointment_examination_item_operations`、`appointment_examination_item_audit`：项目操作的幂等结果和审计；

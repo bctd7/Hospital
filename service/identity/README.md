@@ -1,6 +1,6 @@
 # Identity 身份服务
 
-Identity Service 是账号、登录会话、角色权限、医院组织和医生档案的数据拥有者。首期 Identity 开发已经结束，
+Identity Service 是账号、登录会话、角色权限、医院组织和医生档案的数据拥有者。当前规划范围已经完成，
 后续业务服务通过 Access Token、Identity RPC 和授权事件使用这些能力，不得直接访问 Identity 数据表。
 
 ## 已实现能力
@@ -91,20 +91,6 @@ service/identity/rpc/
 - `unit_read.go` / `unit_write.go`：组织单元读写操作；
 - `profile.go`：本人资料；
 - `validation.go`：输入和领域约束。
-
-## HTTP 能力
-
-HTTP 接口由 `app-api` 暴露，完整字段见 `contracts/api/identity-*.api`。
-
-| 范围 | 主要路径 |
-|---|---|
-| 登录 | `/api/v1/auth/phone/*`、`/api/v1/auth/token/*`、`/api/v1/auth/me` |
-| 公共目录 | `/api/v1/directory/organization-context`、`/departments`、`/departments/:id/doctors` |
-| 组织管理 | `/api/v1/admin/identity/organization-units/*` |
-| 账号管理 | `/api/v1/admin/identity/accounts/*` |
-| 医生管理 | `/api/v1/admin/identity/doctors/*` |
-
-停用、恢复和撤销统一使用动作型 `POST /:id/disable|enable|revoke`。这些操作改变状态，不是物理删除。
 
 ## 本地运行
 

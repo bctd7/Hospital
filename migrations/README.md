@@ -10,10 +10,10 @@ migrations/
     └── 000001_name.down.sql
 ```
 
-当前 Identity 与 Appointment 各自拥有独立数据库，并均已在首次发布前压平为单一最新初始版本：
+当前 Identity 与 Appointment 各自拥有独立数据库，并均已在首次体验环境发布前压平为单一最新初始版本：
 
 - `identity/000001_identity_initial_schema`：12 张业务表；
-- `appointment/000001_appointment_initial_schema`：17 张业务表。
+- `appointment/000001_appointment_initial_schema`：20 张业务表。
 
 `schema_migrations` 由迁移工具维护，不属于业务模型。仓库中已经不存在需要按顺序回放的旧业务迁移。
 
@@ -45,4 +45,4 @@ migrations/
 - 生产迁移前备份，迁移失败时不得启动不兼容服务；
 - 新服务拥有独立迁移目录、数据库账号和 CI 空库验证。
 
-Identity 当前表说明见 [identity/README.md](./identity/README.md)。
+当前表说明分别见 [Identity 数据库](./identity/README.md)和 [Appointment 数据库](./appointment/README.md)。
