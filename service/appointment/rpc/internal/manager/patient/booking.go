@@ -2,8 +2,6 @@ package patient
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -20,7 +18,7 @@ const (
 	bookingActionDeleteByPatient = "delete_by_patient"
 	bookingDateLayout            = "2006-01-02"
 	bookingOptionsTTL            = 20 * time.Second
-	patientWeeklyBookingLimit    = int64(10)
+	patientWeeklyBookingLimit    = 10
 )
 
 var hospitalLocation = func() *time.Location {
@@ -100,15 +98,14 @@ func (m *Manager) CreateBooking(ctx context.Context, patient authn.Principal, co
 	if err := validateCurrentWeekDate(now, serviceDate); err != nil {
 		return Booking{}, err
 	}
-	fingerprint := bookingFingerprint(bookingActionCreate, struct {
+	fingerprint := common.RequestFingerprint(struct {
 		ItemID             string
 		RoomID             string
 		ServiceDate        string
 		Session            Session
 		PatientDisplayName string
 		PatientPhoneMasked string
-		OperationID        string
-	}{command.ItemID, command.RoomID, command.ServiceDate, command.Session, command.PatientDisplayName, command.PatientPhoneMasked, command.OperationID})
+	}{command.ItemID, command.RoomID, command.ServiceDate, command.Session, command.PatientDisplayName, command.PatientPhoneMasked})
 	bookingID := uuid.NewString()
 	var result Booking
 	err = m.bookings.WithinBookingTransaction(ctx, func(tx BookingTxStore) error {
@@ -255,11 +252,10 @@ func (m *Manager) DeleteMyBooking(ctx context.Context, patient authn.Principal, 
 	if err != nil {
 		return "", err
 	}
-	fingerprint := bookingFingerprint(bookingActionDeleteByPatient, struct {
-		BookingID   string
-		OperationID string
-		Reason      string
-	}{command.BookingID, command.OperationID, command.Reason})
+	fingerprint := common.RequestFingerprint(struct {
+		BookingID string
+		Reason    string
+	}{command.BookingID, command.Reason})
 	var deletedID, departmentID string
 	err = m.bookings.WithinBookingTransaction(ctx, func(tx BookingTxStore) error {
 		operation, found, findErr := tx.FindBookingOperation(ctx, command.OperationID)
@@ -429,18 +425,6 @@ func normalizeBookingPage(page, pageSize int64) (int64, int64, int64, error) {
 		return 0, 0, 0, fmt.Errorf("%w: invalid page or page_size", ErrInvalid)
 	}
 	return page, pageSize, (page - 1) * pageSize, nil
-}
-
-func bookingFingerprint(action string, payload any) string {
-	data, err := json.Marshal(struct {
-		Action  string `json:"action"`
-		Payload any    `json:"payload"`
-	}{Action: action, Payload: payload})
-	if err != nil {
-		panic(err)
-	}
-	sum := sha256.Sum256(data)
-	return hex.EncodeToString(sum[:])
 }
 
 func (m *Manager) invalidateBookingReads(ctx context.Context, departmentID string) {

@@ -18,7 +18,7 @@ SELECT r.id, r.booking_id, r.patient_account_id, r.patient_display_name_snapshot
        r.item_id, r.item_name_snapshot, r.room_id, r.campus_id_snapshot, r.campus_name_snapshot,
        r.building_snapshot, r.floor_number_snapshot, r.room_number_snapshot,
        r.status, COALESCE(r.performed_by, ''), COALESCE(r.performed_by_display_name_snapshot, ''), r.examination_started_at,
-       r.examination_completed_at, COALESCE(r.current_version_id, ''),
+	       r.examination_completed_at, r.current_version_id,
        r.version, r.created_at, r.updated_at,
        v.id, v.version_no, v.version_kind, v.status,
        v.objective_findings, v.impression, v.recommendation, v.notes,
@@ -83,7 +83,7 @@ func (s *Store) ListReports(ctx context.Context, filter appointmentmanager.Repor
 	if err := s.db.QueryRowContext(ctx, countQuery, args...).Scan(&total); err != nil {
 		return nil, 0, fmt.Errorf("count examination reports: %w", err)
 	}
-	queryArgs := append(append([]any(nil), args...), filter.Limit, filter.Offset)
+	queryArgs := append(args, filter.Limit, filter.Offset)
 	rows, err := s.db.QueryContext(ctx, reportSelect+where+" ORDER BY r.updated_at DESC, r.id DESC LIMIT ? OFFSET ?", queryArgs...)
 	if err != nil {
 		return nil, 0, fmt.Errorf("list examination reports: %w", err)
@@ -124,9 +124,6 @@ func (s *Store) ListReportVersions(ctx context.Context, reportID string) ([]appo
 }
 
 func (s *Store) WithinReportTransaction(ctx context.Context, fn func(appointmentmanager.ReportTxStore) error) error {
-	if fn == nil {
-		return errors.New("report transaction callback is required")
-	}
 	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 	if err != nil {
 		return fmt.Errorf("begin report transaction: %w", err)

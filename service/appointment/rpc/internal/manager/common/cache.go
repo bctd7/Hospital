@@ -2,10 +2,9 @@ package common
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"math/rand/v2"
 	"sync"
 	"time"
 
@@ -89,12 +88,8 @@ func JitteredTTL(base time.Duration) time.Duration {
 	if base <= 0 {
 		return base
 	}
-	var raw [8]byte
-	if _, err := rand.Read(raw[:]); err != nil {
-		return base
-	}
 	// 增加 0%～20% 的随机抖动，避免大量缓存同时过期。
-	return base + time.Duration(binary.LittleEndian.Uint64(raw[:])%uint64(base/5+1))
+	return base + time.Duration(rand.Int64N(int64(base/5+1)))
 }
 
 type flightCall struct {

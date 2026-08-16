@@ -13,8 +13,8 @@ type CreateProject struct {
 	Name                     string
 	Description              string
 	EstimatedDurationMinutes int32
-	OperationID              string
-	RequestID                string
+	OperationID              string `json:"-"`
+	RequestID                string `json:"-"`
 }
 
 // UpdateProject 是修改检查项目基本信息时允许提交的字段。
@@ -25,16 +25,16 @@ type UpdateProject struct {
 	Description              *string
 	EstimatedDurationMinutes *int32
 	ExpectedVersion          int64
-	OperationID              string
-	RequestID                string
+	OperationID              string `json:"-"`
+	RequestID                string `json:"-"`
 }
 
 // ChangeProjectStatus 是启用或停用检查项目时允许提交的字段。
 type ChangeProjectStatus struct {
 	ItemID          string
 	ExpectedVersion int64
-	OperationID     string
-	RequestID       string
+	OperationID     string `json:"-"`
+	RequestID       string `json:"-"`
 }
 
 // SetItemWindow 是设置项目预约时间时允许提交的字段。

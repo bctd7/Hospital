@@ -69,3 +69,24 @@ func TestNormalizeUpdateProjectRequiresAChange(t *testing.T) {
 		t.Fatalf("error = %v, want ErrInvalid", err)
 	}
 }
+
+func TestOperationMetadataDoesNotChangeRequestFingerprint(t *testing.T) {
+	first := CreateRoom{
+		DepartmentID: validationDepartmentID,
+		CampusID:     validationItemID,
+		Building:     "门诊楼",
+		FloorNumber:  2,
+		RoomNumber:   "201",
+		Operation:    Operation{OperationID: validationOperationID, RequestID: "request-a"},
+	}
+	second := first
+	second.Operation = Operation{OperationID: "00000000-0000-0000-0000-000000000099", RequestID: "request-b"}
+
+	if common.RequestFingerprint(first) != common.RequestFingerprint(second) {
+		t.Fatal("transport metadata must not be part of the business request fingerprint")
+	}
+	second.RoomNumber = "202"
+	if common.RequestFingerprint(first) == common.RequestFingerprint(second) {
+		t.Fatal("business changes must produce a different request fingerprint")
+	}
+}

@@ -31,15 +31,13 @@ func (l *ListExaminationItemsLogic) ListExaminationItems(in *appointmentv1.ListE
 	if err != nil {
 		return nil, err
 	}
-	if in == nil {
+	audience := in.GetAudience()
+	if audience != "" && audience != "patient" && audience != "staff" {
 		return nil, projectRPCError(common.ErrInvalid)
 	}
-	if in.Audience != "" && in.Audience != "patient" && in.Audience != "staff" {
-		return nil, projectRPCError(common.ErrInvalid)
-	}
-	patientAudience := in.Audience == "patient" || (in.Audience == "" && principal.AccountType == authn.AccountTypePatient)
+	patientAudience := audience == "patient" || (audience == "" && principal.AccountType == authn.AccountTypePatient)
 	if patientAudience {
-		result, err := l.svcCtx.SharedManager.ListPatientProjects(l.ctx, principal, in.OwnerDepartmentId, in.Page, in.PageSize)
+		result, err := l.svcCtx.SharedManager.ListPatientProjects(l.ctx, principal, in.GetOwnerDepartmentId(), in.GetPage(), in.GetPageSize())
 		if err != nil {
 			return nil, projectRPCError(err)
 		}
@@ -50,10 +48,10 @@ func (l *ListExaminationItemsLogic) ListExaminationItems(in *appointmentv1.ListE
 		return &appointmentv1.ListExaminationItemsResponse{Items: items, Page: result.Page, PageSize: result.PageSize, Total: result.Total}, nil
 	}
 	result, err := l.svcCtx.SharedManager.ListStaffProjects(l.ctx, principal, sharedmanager.ListProjectsQuery{
-		OwnerDepartmentID: in.OwnerDepartmentId,
-		Status:            common.Status(in.Status),
-		Page:              in.Page,
-		PageSize:          in.PageSize,
+		OwnerDepartmentID: in.GetOwnerDepartmentId(),
+		Status:            common.Status(in.GetStatus()),
+		Page:              in.GetPage(),
+		PageSize:          in.GetPageSize(),
 	})
 	if err != nil {
 		return nil, projectRPCError(err)

@@ -151,7 +151,7 @@ func (m *Manager) Revoke(ctx context.Context, rawRefresh string) error {
 
 // activePrincipal 阻止空账号或已停用账号创建、刷新登录凭证。
 func activePrincipal(principal authn.Principal) (authn.Principal, error) {
-	if principal.AccountID == "" || principal.Status != authn.AccountStatusActive {
+	if principal.Status != authn.AccountStatusActive {
 		return authn.Principal{}, authn.ErrInactiveAccount
 	}
 	return principal, nil

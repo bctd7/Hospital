@@ -62,9 +62,9 @@ func examinationItemResponse(item common.ExaminationItem) *appointmentv1.Examina
 
 func changeStatusInput(in *appointmentv1.ChangeExaminationItemStatusRequest) staffinput.ChangeProjectStatus {
 	return staffinput.ChangeProjectStatus{
-		ItemID:          in.ItemId,
-		ExpectedVersion: in.ExpectedVersion,
-		OperationID:     in.OperationId,
-		RequestID:       in.RequestId,
+		ItemID:          in.GetItemId(),
+		ExpectedVersion: in.GetExpectedVersion(),
+		OperationID:     in.GetOperationId(),
+		RequestID:       in.GetRequestId(),
 	}
 }

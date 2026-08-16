@@ -4,8 +4,8 @@ import staffsupport "hospital/service/appointment/rpc/internal/manager/staff/sup
 
 // Operation 携带一次写操作的幂等编号和链路请求编号。
 type Operation struct {
-	OperationID string
-	RequestID   string
+	OperationID string `json:"-"`
+	RequestID   string `json:"-"`
 }
 
 // NormalizeOperation 规范化业务输入携带的幂等编号和请求编号。

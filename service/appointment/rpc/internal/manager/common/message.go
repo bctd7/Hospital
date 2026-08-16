@@ -168,7 +168,9 @@ func DepartmentMessages(bookings []Booking, now time.Time) []Message {
 
 func noShowOccurredAt(booking Booking) (time.Time, error) {
 	clock := booking.BookingCutoffTime
-	if booking.CallAttempts > 0 { clock = booking.ItemEndTime }
+	if booking.CallAttempts > 0 {
+		clock = booking.ItemEndTime
+	}
 	return messageDateTime(booking.ServiceDate, clock)
 }
 

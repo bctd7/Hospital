@@ -48,8 +48,5 @@ func hashRefreshToken(raw string) string {
 
 // tokenHashMatches 使用常量时间比较，降低通过比较耗时推测 Token 哈希的风险。
 func tokenHashMatches(expected, actual string) bool {
-	if len(expected) != len(actual) || len(expected) == 0 {
-		return false
-	}
-	return subtle.ConstantTimeCompare([]byte(expected), []byte(actual)) == 1
+	return expected != "" && subtle.ConstantTimeCompare([]byte(expected), []byte(actual)) == 1
 }

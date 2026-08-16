@@ -2,7 +2,6 @@ package sms
 
 import (
 	"context"
-	"crypto/subtle"
 	"fmt"
 	"strings"
 	"unicode"
@@ -30,7 +29,7 @@ func (*LocalVerifier) SendLoginCode(context.Context, string) error {
 
 func (p *LocalVerifier) VerifyLoginCode(_ context.Context, _ string, code string) error {
 	code = strings.TrimSpace(code)
-	if subtle.ConstantTimeCompare([]byte(code), []byte(p.code)) != 1 {
+	if code != p.code {
 		return ErrInvalidCode
 	}
 	return nil

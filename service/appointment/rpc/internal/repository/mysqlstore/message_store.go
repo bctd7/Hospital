@@ -73,15 +73,12 @@ ORDER BY v.published_at DESC, v.id DESC`, patientAccountID)
 	values := make([]appointmentmanager.MessageReportFact, 0)
 	for rows.Next() {
 		var value appointmentmanager.MessageReportFact
-		var publishedAt sql.NullTime
+		var publishedAt time.Time
 		booking, scanErr := scanMessageReportBooking(rows, &value, &publishedAt)
 		if scanErr != nil {
 			return nil, fmt.Errorf("scan patient message report fact: %w", scanErr)
 		}
-		if !publishedAt.Valid {
-			continue
-		}
-		value.Booking, value.PublishedAt = booking, publishedAt.Time
+		value.Booking, value.PublishedAt = booking, publishedAt
 		values = append(values, value)
 	}
 	if err := rows.Err(); err != nil {
@@ -116,11 +113,7 @@ ORDER BY e.occurred_at DESC, e.id DESC`, patientAccountID)
 		if err := rows.Scan(&value.EventID, &value.EventType, &value.CallSequence, &value.OccurredAt, &bookingID); err != nil {
 			return nil, fmt.Errorf("scan patient queue message fact: %w", err)
 		}
-		booking, ok := byID[bookingID]
-		if !ok {
-			continue
-		}
-		value.Booking = booking
+		value.Booking = byID[bookingID]
 		values = append(values, value)
 	}
 	if err := rows.Err(); err != nil {
@@ -129,7 +122,7 @@ ORDER BY e.occurred_at DESC, e.id DESC`, patientAccountID)
 	return values, nil
 }
 
-func scanMessageReportBooking(scanner bookingScanner, fact *appointmentmanager.MessageReportFact, publishedAt *sql.NullTime) (appointmentmanager.Booking, error) {
+func scanMessageReportBooking(scanner bookingScanner, fact *appointmentmanager.MessageReportFact, publishedAt *time.Time) (appointmentmanager.Booking, error) {
 	var value appointmentmanager.Booking
 	var startedAt, completedAt sql.NullTime
 	var building, roomNumber string

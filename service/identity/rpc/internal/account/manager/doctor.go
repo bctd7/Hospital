@@ -48,7 +48,7 @@ func (m *Manager) PromoteDoctor(
 			if before.AccountStatus != authn.AccountStatusActive || before.IdentityType() != account.IdentityTypePatient {
 				return fmt.Errorf("%w: only active patient accounts can be promoted", account.ErrInvalidState)
 			}
-			return tx.PromoteDoctor(ctx, before.ID, departmentID, profile, expectedVersion, true)
+			return tx.PromoteDoctor(ctx, before.ID, departmentID, profile, expectedVersion)
 		})
 }
 

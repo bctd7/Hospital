@@ -131,9 +131,6 @@ func (s *Store) ListItemWindows(ctx context.Context, itemID string, activeOnly b
 }
 
 func (s *Store) WithinConfigurationTransaction(ctx context.Context, fn func(appointmentmanager.ConfigurationTxStore) error) error {
-	if fn == nil {
-		return errors.New("room and project configuration transaction callback is required")
-	}
 	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 	if err != nil {
 		return fmt.Errorf("begin room and project configuration transaction: %w", err)

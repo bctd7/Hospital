@@ -84,7 +84,7 @@ func (s *Store) ListItems(ctx context.Context, filter appointmentmanager.Project
 		return nil, 0, fmt.Errorf("count examination items: %w", err)
 	}
 
-	queryArgs := append(append([]any(nil), args...), filter.Limit, filter.Offset)
+	queryArgs := append(args, filter.Limit, filter.Offset)
 	rows, err := s.db.QueryContext(ctx,
 		examinationItemSelect+where+" ORDER BY name, id LIMIT ? OFFSET ?",
 		queryArgs...,
@@ -109,9 +109,6 @@ func (s *Store) ListItems(ctx context.Context, filter appointmentmanager.Project
 }
 
 func (s *Store) WithinProjectTransaction(ctx context.Context, fn func(appointmentmanager.ProjectTxStore) error) error {
-	if fn == nil {
-		return errors.New("project transaction callback is required")
-	}
 	tx, err := s.db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 	if err != nil {
 		return fmt.Errorf("begin project transaction: %w", err)

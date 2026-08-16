@@ -98,7 +98,7 @@ LEFT JOIN identity_roles r ON r.id = ar.role_id` + whereSQL
 		return account.AccountPage{}, fmt.Errorf("count managed accounts: %w", err)
 	}
 
-	queryArgs := append(append([]any{}, args...), filter.PageSize, (filter.Page-1)*filter.PageSize)
+	queryArgs := append(args, filter.PageSize, (filter.Page-1)*filter.PageSize)
 	rows, err := s.db.QueryContext(ctx, managedAccountSelect+whereSQL+`
 ORDER BY COALESCE(NULLIF(sp.display_name, ''), NULLIF(ap.nickname, ''), a.id), a.id
 LIMIT ? OFFSET ?`, queryArgs...)

@@ -61,34 +61,20 @@ func (s *mysqlAccountTxStore) PromoteDoctor(
 	accountID, departmentID string,
 	profile account.DoctorProfileInput,
 	expectedVersion int64,
-	verifyPhone bool,
 ) error {
 	if err := s.requireActiveDepartment(ctx, departmentID); err != nil {
 		return err
 	}
-	var phoneStatus string
-	err := s.tx.QueryRowContext(ctx, `
-SELECT verification_status
-FROM identity_account_phones
-WHERE account_id = ?
-FOR UPDATE`, accountID).Scan(&phoneStatus)
-	if errors.Is(err, sql.ErrNoRows) {
-		return fmt.Errorf("%w: account phone", account.ErrNotFound)
-	}
-	if err != nil {
-		return fmt.Errorf("lock promoted doctor phone: %w", err)
-	}
-	if phoneStatus != "verified" && !verifyPhone {
-		return fmt.Errorf("%w: verified phone is required", account.ErrInvalidState)
-	}
-	if verifyPhone {
-		if _, err := s.tx.ExecContext(ctx, `
+	phone, err := s.tx.ExecContext(ctx, `
 UPDATE identity_account_phones
 SET verification_status = 'verified', verification_source = 'admin',
     verified_at = CURRENT_TIMESTAMP(3), updated_at = CURRENT_TIMESTAMP(3)
-WHERE account_id = ?`, accountID); err != nil {
-			return fmt.Errorf("verify promoted doctor phone: %w", err)
-		}
+	WHERE account_id = ?`, accountID)
+	if err != nil {
+		return fmt.Errorf("verify promoted doctor phone: %w", err)
+	}
+	if err := requireAccountAffected(phone, "account phone"); err != nil {
+		return err
 	}
 	if err := s.bumpManagedAccount(ctx, accountID, expectedVersion, true, "'staff'"); err != nil {
 		return err
