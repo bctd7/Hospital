@@ -6,25 +6,53 @@ import (
 	"strings"
 )
 
-const sameLocationThresholdMeters = 5
+const (
+	defaultPlaceLimit           = 10
+	maximumPlaceLimit           = 20
+	sameLocationThresholdMeters = 5
+)
 
+type PlaceSearchInput struct {
+	Keyword string
+	City    string
+	Limit   int32
+}
+
+// Provider 定义路线业务需要的地图能力，当前由高德实现。
 type Provider interface {
+	SearchPlaces(context.Context, PlaceSearchInput) ([]LocationPoint, error)
 	CalculateWalkingRoute(context.Context, LocationPoint, LocationPoint) (WalkingRoute, error)
 }
 
-// Calculator 只负责校验统一地点契约并调用道路路线供应商，不参与检查项目排序。
-type Calculator struct {
+// Manager 是地点搜索与步行路线计算的统一业务入口。
+// 它负责参数规范化和通用业务校验，供应商包只处理外部 API 协议。
+type Manager struct {
 	provider Provider
 }
 
-func NewCalculator(provider Provider) (*Calculator, error) {
+func NewManager(provider Provider) (*Manager, error) {
 	if provider == nil {
 		return nil, ErrInvalid
 	}
-	return &Calculator{provider: provider}, nil
+	return &Manager{provider: provider}, nil
 }
 
-func (c *Calculator) CalculateWalkingRoute(ctx context.Context, origin, destination LocationPoint) (WalkingRoute, error) {
+func (m *Manager) SearchPlaces(ctx context.Context, input PlaceSearchInput) ([]LocationPoint, error) {
+	input.Keyword = strings.TrimSpace(input.Keyword)
+	input.City = strings.TrimSpace(input.City)
+	if input.Keyword == "" || len([]rune(input.Keyword)) > 80 || len([]rune(input.City)) > 40 {
+		return nil, ErrInvalid
+	}
+	if input.Limit == 0 {
+		input.Limit = defaultPlaceLimit
+	}
+	if input.Limit < 1 || input.Limit > maximumPlaceLimit {
+		return nil, ErrInvalid
+	}
+	return m.provider.SearchPlaces(ctx, input)
+}
+
+func (m *Manager) CalculateWalkingRoute(ctx context.Context, origin, destination LocationPoint) (WalkingRoute, error) {
 	origin = normalizeLocation(origin)
 	destination = normalizeLocation(destination)
 	if !validLocation(origin) || !validLocation(destination) {
@@ -40,7 +68,7 @@ func (c *Calculator) CalculateWalkingRoute(ctx context.Context, origin, destinat
 			Provider: "local",
 		}, nil
 	}
-	return c.provider.CalculateWalkingRoute(ctx, origin, destination)
+	return m.provider.CalculateWalkingRoute(ctx, origin, destination)
 }
 
 func distanceMeters(origin, destination LocationPoint) float64 {

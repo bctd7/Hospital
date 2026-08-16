@@ -22,7 +22,8 @@ type Config struct {
 	}
 	AppointmentRPC zrpc.RpcClientConf
 	AMap           struct {
-		PlaceSearchEndpoint string `json:",default=https://restapi.amap.com/v3/place/text"`
+		PlaceSearchEndpoint string `json:",default=https://restapi.amap.com/v5/place/text"`
+		GeocodeEndpoint     string `json:",default=https://restapi.amap.com/v3/geocode/geo"`
 		WalkingEndpoint     string `json:",default=https://restapi.amap.com/v3/direction/walking"`
 		WebServiceKey       string `json:",optional"`
 		TimeoutMilliseconds int64  `json:",default=5000"`

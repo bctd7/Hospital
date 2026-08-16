@@ -27,7 +27,7 @@ func (l *SearchPlacesLogic) SearchPlaces(in *guidancev1.SearchPlacesRequest) (*g
 	if in == nil {
 		return nil, mapRPCError(routing.ErrInvalid)
 	}
-	places, err := l.svcCtx.PlaceFinder.Search(l.ctx, routing.PlaceSearchInput{
+	places, err := l.svcCtx.RoutingManager.SearchPlaces(l.ctx, routing.PlaceSearchInput{
 		Keyword: in.Keyword, City: in.City, Limit: in.Limit,
 	})
 	if err != nil {

@@ -24,7 +24,8 @@ AppointmentRPC:
     - 127.0.0.1:8081
   NonBlock: true
 AMap:
-  PlaceSearchEndpoint: https://restapi.amap.com/v3/place/text
+  PlaceSearchEndpoint: https://restapi.amap.com/v5/place/text
+  GeocodeEndpoint: https://restapi.amap.com/v3/geocode/geo
   WalkingEndpoint: https://restapi.amap.com/v3/direction/walking
   WebServiceKey: ${AMAP_WEB_SERVICE_KEY}
   TimeoutMilliseconds: 5000

@@ -15,12 +15,14 @@ import (
 )
 
 const (
-	defaultPlaceSearchEndpoint = "https://restapi.amap.com/v3/place/text"
+	defaultPlaceSearchEndpoint = "https://restapi.amap.com/v5/place/text"
+	defaultGeocodeEndpoint     = "https://restapi.amap.com/v3/geocode/geo"
 	defaultWalkingEndpoint     = "https://restapi.amap.com/v3/direction/walking"
 )
 
 type Config struct {
 	PlaceSearchEndpoint string
+	GeocodeEndpoint     string
 	WalkingEndpoint     string
 	WebServiceKey       string
 	Timeout             time.Duration
@@ -28,6 +30,7 @@ type Config struct {
 
 type Client struct {
 	placeSearchEndpoint string
+	geocodeEndpoint     string
 	walkingEndpoint     string
 	webServiceKey       string
 	httpClient          *http.Client
@@ -40,6 +43,7 @@ func New(config Config) *Client {
 	}
 	return &Client{
 		placeSearchEndpoint: endpointOrDefault(config.PlaceSearchEndpoint, defaultPlaceSearchEndpoint),
+		geocodeEndpoint:     endpointOrDefault(config.GeocodeEndpoint, defaultGeocodeEndpoint),
 		walkingEndpoint:     endpointOrDefault(config.WalkingEndpoint, defaultWalkingEndpoint),
 		webServiceKey:       strings.TrimSpace(config.WebServiceKey),
 		httpClient:          &http.Client{Timeout: timeout},

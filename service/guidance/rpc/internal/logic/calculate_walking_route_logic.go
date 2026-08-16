@@ -36,7 +36,7 @@ func (l *CalculateWalkingRouteLogic) CalculateWalkingRoute(in *v1_guidancev1.Cal
 	}
 	origin := routeLocation(in.Origin)
 	destination := routeLocation(in.Destination)
-	result, err := l.svcCtx.RouteCalculator.CalculateWalkingRoute(l.ctx, origin, destination)
+	result, err := l.svcCtx.RoutingManager.CalculateWalkingRoute(l.ctx, origin, destination)
 	if err != nil {
 		return nil, mapRPCError(err)
 	}

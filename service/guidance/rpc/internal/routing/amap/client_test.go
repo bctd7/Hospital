@@ -19,7 +19,8 @@ func TestClientSearchesPlacesAndCalculatesWalkingRoute(t *testing.T) {
 		}
 		switch request.URL.Path {
 		case "/place":
-			if query.Get("keywords") != "123号楼" || query.Get("city") != "上海市" || query.Get("citylimit") != "true" {
+			if query.Get("keywords") != "123号楼" || query.Get("region") != "上海市" || query.Get("city_limit") != "true" ||
+				query.Get("page_size") != "10" || query.Get("show_fields") != "navi" {
 				t.Fatalf("unexpected place query: %s", request.URL.RawQuery)
 			}
 			_, _ = writer.Write([]byte(`{
@@ -69,6 +70,45 @@ func TestClientSearchesPlacesAndCalculatesWalkingRoute(t *testing.T) {
 	}
 	if route.Steps[1].RoadName != "" {
 		t.Fatalf("array-valued empty road must be normalized, got %q", route.Steps[1].RoadName)
+	}
+}
+
+func TestClientPrependsGeocodedBuildingWhenPlaceSearchHasNoExactMatch(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		query := request.URL.Query()
+		switch request.URL.Path {
+		case "/place":
+			_, _ = writer.Write([]byte(`{
+                  "status":"1","info":"OK","infocode":"10000",
+                  "pois":[{"id":"HOSPITAL","name":"上海市第二人民医院总部","address":"普育东路58号","pname":"上海市","cityname":"上海市","adname":"黄浦区","location":"121.494904,31.209460"}]
+                }`))
+		case "/geocode":
+			if query.Get("address") != "上海第二人民医院3号楼" || query.Get("city") != "上海市" {
+				t.Fatalf("unexpected geocode query: %s", request.URL.RawQuery)
+			}
+			_, _ = writer.Write([]byte(`{
+                  "status":"1","info":"OK","infocode":"10000","count":"1",
+                  "geocodes":[{"formatted_address":"上海市黄浦区上海第二人民医院3号楼","location":"121.494095,31.209788","level":"兴趣点"}]
+                }`))
+		default:
+			http.NotFound(writer, request)
+		}
+	}))
+	defer server.Close()
+
+	client := New(Config{
+		PlaceSearchEndpoint: server.URL + "/place", GeocodeEndpoint: server.URL + "/geocode",
+		WebServiceKey: "test-key", Timeout: time.Second,
+	})
+	places, err := client.SearchPlaces(context.Background(), routing.PlaceSearchInput{
+		Keyword: "上海第二人民医院3号楼", City: "上海市", Limit: 10,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(places) != 2 || places[0].Name != "上海第二人民医院3号楼" ||
+		places[0].Longitude != 121.494095 || places[0].Latitude != 31.209788 || places[0].ProviderPlaceID != "" {
+		t.Fatalf("unexpected places: %#v", places)
 	}
 }
 
