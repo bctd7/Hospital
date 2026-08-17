@@ -1,10 +1,9 @@
-package manager
+package precedence
 
 import (
 	"context"
 
 	"hospital/common/authn"
-	"hospital/service/guidance/rpc/internal/rules/precedence"
 )
 
 type UpdateInput struct {
@@ -15,27 +14,27 @@ type UpdateInput struct {
 	OperationID     string
 }
 
-func (m *Manager) Update(ctx context.Context, operator authn.Principal, input UpdateInput) (precedence.Rule, error) {
+func (m *Manager) Update(ctx context.Context, operator authn.Principal, input UpdateInput) (Rule, error) {
 	if err := requireEdit(operator); err != nil {
-		return precedence.Rule{}, err
+		return Rule{}, err
 	}
 	ruleID, err := normalizeUUID(input.RuleID)
 	if err != nil || input.ExpectedVersion < 1 {
-		return precedence.Rule{}, precedence.ErrInvalid
+		return Rule{}, ErrInvalid
 	}
 	if _, err = normalizeUUID(input.OperationID); err != nil {
-		return precedence.Rule{}, err
+		return Rule{}, err
 	}
 	staffReason, err := normalizeRequiredText(input.StaffReason, 512)
 	if err != nil {
-		return precedence.Rule{}, err
+		return Rule{}, err
 	}
 	patientMessage, err := normalizeOptionalText(input.PatientMessage, 512)
 	if err != nil {
-		return precedence.Rule{}, err
+		return Rule{}, err
 	}
-	var updated precedence.Rule
-	err = m.store.WithinWriteTransaction(ctx, func(tx precedence.TxStore) error {
+	var updated Rule
+	err = m.store.WithinWriteTransaction(ctx, func(tx TxStore) error {
 		rule, getErr := tx.GetByIDForUpdate(ctx, ruleID)
 		if getErr != nil {
 			return getErr

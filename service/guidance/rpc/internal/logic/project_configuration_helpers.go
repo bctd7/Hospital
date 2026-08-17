@@ -6,8 +6,8 @@ import (
 	"hospital/common/authn"
 	guidancev1 "hospital/contracts/gen/guidance/v1"
 	"hospital/service/guidance/rpc/internal/projectconfiguration"
+	descriptionrules "hospital/service/guidance/rpc/internal/rules/description"
 	"hospital/service/guidance/rpc/internal/rules/precedence"
-	"hospital/service/guidance/rpc/internal/rules/preparation"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -59,14 +59,14 @@ func precedenceInputs(values []*guidancev1.ConfiguredPrecedenceRule) []precedenc
 	return result
 }
 
-func preparationInputs(values []*guidancev1.PreparationRule) []preparation.Rule {
-	result := make([]preparation.Rule, 0, len(values))
+func preparationInputs(values []*guidancev1.PreparationRule) []descriptionrules.Rule {
+	result := make([]descriptionrules.Rule, 0, len(values))
 	for _, value := range values {
 		if value == nil {
 			continue
 		}
-		result = append(result, preparation.Rule{
-			RuleType: preparation.RuleType(value.GetRuleType()), StartMode: preparation.StartMode(value.GetStartMode()),
+		result = append(result, descriptionrules.Rule{
+			RuleType: descriptionrules.RuleType(value.GetRuleType()), StartMode: descriptionrules.StartMode(value.GetStartMode()),
 			MinAdvanceMinutes: value.GetMinAdvanceMinutes(), RecommendedAdvanceMinutes: value.GetRecommendedAdvanceMinutes(),
 			MaxAdvanceMinutes: value.GetMaxAdvanceMinutes(), PreviousDayTime: value.GetPreviousDayTime(), ReadinessHint: value.GetReadinessHint(),
 		})
@@ -74,11 +74,11 @@ func preparationInputs(values []*guidancev1.PreparationRule) []preparation.Rule 
 	return result
 }
 
-func reminderInputs(values []*guidancev1.PatientReminder) []preparation.Reminder {
-	result := make([]preparation.Reminder, 0, len(values))
+func reminderInputs(values []*guidancev1.PatientReminder) []descriptionrules.Reminder {
+	result := make([]descriptionrules.Reminder, 0, len(values))
 	for _, value := range values {
 		if value != nil {
-			result = append(result, preparation.Reminder{Text: value.GetText(), AdvanceMinutes: value.GetAdvanceMinutes()})
+			result = append(result, descriptionrules.Reminder{Text: value.GetText(), AdvanceMinutes: value.GetAdvanceMinutes()})
 		}
 	}
 	return result
@@ -105,7 +105,7 @@ func configuredPrecedenceResponses(values []precedence.Rule) []*guidancev1.Confi
 	return result
 }
 
-func preparationResponses(values []preparation.Rule) []*guidancev1.PreparationRule {
+func preparationResponses(values []descriptionrules.Rule) []*guidancev1.PreparationRule {
 	result := make([]*guidancev1.PreparationRule, 0, len(values))
 	for _, value := range values {
 		result = append(result, &guidancev1.PreparationRule{
@@ -117,7 +117,7 @@ func preparationResponses(values []preparation.Rule) []*guidancev1.PreparationRu
 	return result
 }
 
-func reminderResponses(values []preparation.Reminder) []*guidancev1.PatientReminder {
+func reminderResponses(values []descriptionrules.Reminder) []*guidancev1.PatientReminder {
 	result := make([]*guidancev1.PatientReminder, 0, len(values))
 	for _, value := range values {
 		result = append(result, &guidancev1.PatientReminder{Text: value.Text, AdvanceMinutes: value.AdvanceMinutes})

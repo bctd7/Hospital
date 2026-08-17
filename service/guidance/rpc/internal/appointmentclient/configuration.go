@@ -1,45 +1,39 @@
-package projectconfiguration
+package appointmentclient
 
 import (
 	"context"
 	"fmt"
 
 	"hospital/service/appointment/rpc/appointmentservice"
+	"hospital/service/guidance/rpc/internal/projectconfiguration"
 
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
 
-// AppointmentGateway 是 Guidance 访问 Appointment 的唯一窄适配器。
-// 它只负责项目事实查询和配置事务的 Try/Confirm/Cancel，不持有 Appointment 数据。
-type AppointmentGateway struct {
+// Configuration 负责完整项目配置流程所需的 Appointment 操作。
+// Appointment 是项目基础事实的所有者，因此项目查询和 TCC Try/Confirm/Cancel
+// 都必须经由这个适配器完成。
+type Configuration struct {
 	client appointmentservice.AppointmentService
 }
 
-func NewAppointmentGateway(client appointmentservice.AppointmentService) (*AppointmentGateway, error) {
+func NewConfiguration(client appointmentservice.AppointmentService) (*Configuration, error) {
 	if client == nil {
 		return nil, fmt.Errorf("appointment client is required")
 	}
-	return &AppointmentGateway{client: client}, nil
+	return &Configuration{client: client}, nil
 }
 
-func outgoingContext(ctx context.Context) context.Context {
-	if incoming, ok := metadata.FromIncomingContext(ctx); ok {
-		return metadata.NewOutgoingContext(ctx, incoming.Copy())
-	}
-	return ctx
-}
-
-func (g *AppointmentGateway) ResolveProject(ctx context.Context, itemID string) (Project, error) {
+func (g *Configuration) ResolveProject(ctx context.Context, itemID string) (projectconfiguration.Project, error) {
 	item, err := g.client.GetExaminationItemReference(outgoingContext(ctx), &appointmentservice.GetExaminationItemRequest{ItemId: itemID})
 	if err != nil {
-		return Project{}, mapAppointmentError("resolve project", err)
+		return projectconfiguration.Project{}, mapConfigurationError("resolve project", err)
 	}
-	return projectFromRPC(item), nil
+	return configurationProject(item), nil
 }
 
-func (g *AppointmentGateway) Prepare(ctx context.Context, transactionID string, command Command) error {
+func (g *Configuration) Prepare(ctx context.Context, transactionID string, command projectconfiguration.Command) error {
 	_, err := g.client.PrepareExaminationItemConfiguration(outgoingContext(ctx), &appointmentservice.PrepareExaminationItemConfigurationRequest{
 		TransactionId:            transactionID,
 		Action:                   command.Action,
@@ -53,54 +47,54 @@ func (g *AppointmentGateway) Prepare(ctx context.Context, transactionID string, 
 		RequestId:                command.RequestID,
 	})
 	if err != nil {
-		return mapAppointmentError("prepare project configuration", err)
+		return mapConfigurationError("prepare project configuration", err)
 	}
 	return nil
 }
 
-func (g *AppointmentGateway) Confirm(ctx context.Context, transactionID string) (Project, error) {
+func (g *Configuration) Confirm(ctx context.Context, transactionID string) (projectconfiguration.Project, error) {
 	item, err := g.client.ConfirmExaminationItemConfiguration(outgoingContext(ctx), &appointmentservice.ExaminationItemConfigurationTransactionRequest{
 		TransactionId: transactionID,
 	})
 	if err != nil {
-		return Project{}, mapAppointmentError("confirm project configuration", err)
+		return projectconfiguration.Project{}, mapConfigurationError("confirm project configuration", err)
 	}
-	return projectFromRPC(item), nil
+	return configurationProject(item), nil
 }
 
-func (g *AppointmentGateway) Cancel(ctx context.Context, transactionID string) error {
+func (g *Configuration) Cancel(ctx context.Context, transactionID string) error {
 	_, err := g.client.CancelExaminationItemConfiguration(outgoingContext(ctx), &appointmentservice.ExaminationItemConfigurationTransactionRequest{
 		TransactionId: transactionID,
 	})
 	if err != nil {
-		return mapAppointmentError("cancel project configuration", err)
+		return mapConfigurationError("cancel project configuration", err)
 	}
 	return nil
 }
 
-func projectFromRPC(item *appointmentservice.ExaminationItem) Project {
-	return Project{
+func configurationProject(item *appointmentservice.ExaminationItem) projectconfiguration.Project {
+	return projectconfiguration.Project{
 		ItemID: item.GetItemId(), OwnerDepartmentID: item.GetOwnerDepartmentId(), Name: item.GetName(),
 		Status: item.GetStatus(), Version: item.GetVersion(), EstimatedDurationMinutes: item.GetEstimatedDurationMinutes(),
 	}
 }
 
-func mapAppointmentError(action string, err error) error {
+func mapConfigurationError(action string, err error) error {
 	switch status.Code(err) {
 	case codes.InvalidArgument:
-		return ErrInvalid
+		return projectconfiguration.ErrInvalid
 	case codes.NotFound:
-		return ErrNotFound
+		return projectconfiguration.ErrNotFound
 	case codes.Unauthenticated, codes.PermissionDenied:
-		return ErrForbidden
+		return projectconfiguration.ErrForbidden
 	case codes.AlreadyExists, codes.FailedPrecondition:
-		return ErrConflict
+		return projectconfiguration.ErrConflict
 	case codes.Aborted:
-		return ErrVersionConflict
+		return projectconfiguration.ErrVersionConflict
 	default:
 		return fmt.Errorf("%s: %w", action, err)
 	}
 }
 
-var _ AppointmentParticipant = (*AppointmentGateway)(nil)
-var _ ProjectDirectory = (*AppointmentGateway)(nil)
+var _ projectconfiguration.AppointmentParticipant = (*Configuration)(nil)
+var _ projectconfiguration.ProjectDirectory = (*Configuration)(nil)

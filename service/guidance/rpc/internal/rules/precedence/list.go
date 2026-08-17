@@ -1,20 +1,19 @@
-package manager
+package precedence
 
 import (
 	"context"
 	"sort"
 
 	"hospital/common/authn"
-	"hospital/service/guidance/rpc/internal/rules/precedence"
 )
 
 type ListInput struct {
 	ItemID          string
-	Direction       precedence.Direction
+	Direction       Direction
 	IncludeInferred bool
 }
 
-func (m *Manager) List(ctx context.Context, operator authn.Principal, input ListInput) ([]precedence.Relation, error) {
+func (m *Manager) List(ctx context.Context, operator authn.Principal, input ListInput) ([]Relation, error) {
 	if err := requireRead(operator); err != nil {
 		return nil, err
 	}
@@ -50,7 +49,7 @@ func (m *Manager) List(ctx context.Context, operator authn.Principal, input List
 	return result, nil
 }
 
-func reachable(rules []precedence.Rule, start, target string) bool {
+func reachable(rules []Rule, start, target string) bool {
 	if start == target {
 		return true
 	}
@@ -76,21 +75,21 @@ func reachable(rules []precedence.Rule, start, target string) bool {
 	return false
 }
 
-func relationsForItem(rules []precedence.Rule, itemID string, direction precedence.Direction, includeInferred bool) []precedence.Relation {
-	direct := make(map[string]precedence.Relation)
-	projects := make(map[string]precedence.ProjectReference)
+func relationsForItem(rules []Rule, itemID string, direction Direction, includeInferred bool) []Relation {
+	direct := make(map[string]Relation)
+	projects := make(map[string]ProjectReference)
 	for _, rule := range rules {
-		projects[rule.PredecessorItemID] = precedence.ProjectReference{ItemID: rule.PredecessorItemID, DepartmentID: rule.PredecessorDepartmentID, Name: rule.PredecessorItemName}
-		projects[rule.SuccessorItemID] = precedence.ProjectReference{ItemID: rule.SuccessorItemID, DepartmentID: rule.SuccessorDepartmentID, Name: rule.SuccessorItemName}
-		if (direction == precedence.DirectionAll || direction == precedence.DirectionPredecessors) && rule.SuccessorItemID == itemID {
-			direct[rule.PredecessorItemID+">"+itemID] = precedence.Relation{Rule: rule, Direct: true, PathLength: 1}
+		projects[rule.PredecessorItemID] = ProjectReference{ItemID: rule.PredecessorItemID, DepartmentID: rule.PredecessorDepartmentID, Name: rule.PredecessorItemName}
+		projects[rule.SuccessorItemID] = ProjectReference{ItemID: rule.SuccessorItemID, DepartmentID: rule.SuccessorDepartmentID, Name: rule.SuccessorItemName}
+		if (direction == DirectionAll || direction == DirectionPredecessors) && rule.SuccessorItemID == itemID {
+			direct[rule.PredecessorItemID+">"+itemID] = Relation{Rule: rule, Direct: true, PathLength: 1}
 		}
-		if (direction == precedence.DirectionAll || direction == precedence.DirectionSuccessors) && rule.PredecessorItemID == itemID {
-			direct[itemID+">"+rule.SuccessorItemID] = precedence.Relation{Rule: rule, Direct: true, PathLength: 1}
+		if (direction == DirectionAll || direction == DirectionSuccessors) && rule.PredecessorItemID == itemID {
+			direct[itemID+">"+rule.SuccessorItemID] = Relation{Rule: rule, Direct: true, PathLength: 1}
 		}
 	}
 	if includeInferred {
-		if direction == precedence.DirectionAll || direction == precedence.DirectionPredecessors {
+		if direction == DirectionAll || direction == DirectionPredecessors {
 			for node, distance := range shortestDistances(rules, itemID, true) {
 				if distance < 2 {
 					continue
@@ -99,7 +98,7 @@ func relationsForItem(rules []precedence.Rule, itemID string, direction preceden
 				direct[node+">"+itemID] = inferredRelation(from, to, distance)
 			}
 		}
-		if direction == precedence.DirectionAll || direction == precedence.DirectionSuccessors {
+		if direction == DirectionAll || direction == DirectionSuccessors {
 			for node, distance := range shortestDistances(rules, itemID, false) {
 				if distance < 2 {
 					continue
@@ -109,14 +108,14 @@ func relationsForItem(rules []precedence.Rule, itemID string, direction preceden
 			}
 		}
 	}
-	result := make([]precedence.Relation, 0, len(direct))
+	result := make([]Relation, 0, len(direct))
 	for _, relation := range direct {
 		result = append(result, relation)
 	}
 	return result
 }
 
-func shortestDistances(rules []precedence.Rule, start string, reverse bool) map[string]int {
+func shortestDistances(rules []Rule, start string, reverse bool) map[string]int {
 	adjacency := make(map[string][]string)
 	for _, rule := range rules {
 		from, to := rule.PredecessorItemID, rule.SuccessorItemID
@@ -142,8 +141,8 @@ func shortestDistances(rules []precedence.Rule, start string, reverse bool) map[
 	return distances
 }
 
-func inferredRelation(from, to precedence.ProjectReference, distance int) precedence.Relation {
-	return precedence.Relation{Rule: precedence.Rule{
+func inferredRelation(from, to ProjectReference, distance int) Relation {
+	return Relation{Rule: Rule{
 		PredecessorItemID: from.ItemID, PredecessorDepartmentID: from.DepartmentID, PredecessorItemName: from.Name,
 		SuccessorItemID: to.ItemID, SuccessorDepartmentID: to.DepartmentID, SuccessorItemName: to.Name,
 	}, Direct: false, PathLength: distance}

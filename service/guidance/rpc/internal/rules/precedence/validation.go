@@ -1,4 +1,4 @@
-package manager
+package precedence
 
 import (
 	"fmt"
@@ -10,15 +10,14 @@ import (
 	"hospital/common/authn"
 	commonauthz "hospital/common/authz"
 	contractauthz "hospital/contracts/authz"
-	"hospital/service/guidance/rpc/internal/rules/precedence"
 )
 
 func requirePermission(operator authn.Principal, permission string) error {
 	if err := commonauthz.RequirePermission(operator, permission); err != nil {
-		return fmt.Errorf("%w: %v", precedence.ErrForbidden, err)
+		return fmt.Errorf("%w: %v", ErrForbidden, err)
 	}
 	if _, err := uuid.Parse(strings.TrimSpace(operator.AccountID)); err != nil {
-		return precedence.ErrForbidden
+		return ErrForbidden
 	}
 	return nil
 }
@@ -36,7 +35,7 @@ func requireDepartmentScope(operator authn.Principal, departmentID string) error
 		return nil
 	}
 	if !operator.HasRole(authn.RoleDepartmentDoctor) || strings.TrimSpace(operator.DepartmentID) != departmentID {
-		return precedence.ErrForbidden
+		return ErrForbidden
 	}
 	return nil
 }
@@ -44,7 +43,7 @@ func requireDepartmentScope(operator authn.Principal, departmentID string) error
 func normalizeUUID(value string) (string, error) {
 	parsed, err := uuid.Parse(strings.TrimSpace(value))
 	if err != nil {
-		return "", precedence.ErrInvalid
+		return "", ErrInvalid
 	}
 	return parsed.String(), nil
 }
@@ -52,7 +51,7 @@ func normalizeUUID(value string) (string, error) {
 func normalizeRequiredText(value string, max int) (string, error) {
 	value = strings.TrimSpace(value)
 	if value == "" || !utf8.ValidString(value) || utf8.RuneCountInString(value) > max {
-		return "", precedence.ErrInvalid
+		return "", ErrInvalid
 	}
 	return value, nil
 }
@@ -60,17 +59,17 @@ func normalizeRequiredText(value string, max int) (string, error) {
 func normalizeOptionalText(value string, max int) (string, error) {
 	value = strings.TrimSpace(value)
 	if !utf8.ValidString(value) || utf8.RuneCountInString(value) > max {
-		return "", precedence.ErrInvalid
+		return "", ErrInvalid
 	}
 	return value, nil
 }
 
-func normalizeDirection(value precedence.Direction) (precedence.Direction, error) {
+func normalizeDirection(value Direction) (Direction, error) {
 	if value == "" {
-		return precedence.DirectionAll, nil
+		return DirectionAll, nil
 	}
 	if !value.Valid() {
-		return "", precedence.ErrInvalid
+		return "", ErrInvalid
 	}
 	return value, nil
 }

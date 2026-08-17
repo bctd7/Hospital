@@ -1,10 +1,9 @@
-package manager
+package precedence
 
 import (
 	"context"
 
 	"hospital/common/authn"
-	"hospital/service/guidance/rpc/internal/rules/precedence"
 )
 
 type DeleteInput struct {
@@ -19,12 +18,12 @@ func (m *Manager) Delete(ctx context.Context, operator authn.Principal, input De
 	}
 	ruleID, err := normalizeUUID(input.RuleID)
 	if err != nil || input.ExpectedVersion < 1 {
-		return precedence.ErrInvalid
+		return ErrInvalid
 	}
 	if _, err = normalizeUUID(input.OperationID); err != nil {
 		return err
 	}
-	return m.store.WithinWriteTransaction(ctx, func(tx precedence.TxStore) error {
+	return m.store.WithinWriteTransaction(ctx, func(tx TxStore) error {
 		if lockErr := tx.LockGraph(ctx); lockErr != nil {
 			return lockErr
 		}

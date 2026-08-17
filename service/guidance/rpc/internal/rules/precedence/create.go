@@ -1,4 +1,4 @@
-package manager
+package precedence
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 
 	"hospital/common/authn"
-	"hospital/service/guidance/rpc/internal/rules/precedence"
 )
 
 type CreateInput struct {
@@ -18,44 +17,44 @@ type CreateInput struct {
 	OperationID       string
 }
 
-func (m *Manager) Create(ctx context.Context, operator authn.Principal, input CreateInput) (precedence.Rule, error) {
+func (m *Manager) Create(ctx context.Context, operator authn.Principal, input CreateInput) (Rule, error) {
 	if err := requireEdit(operator); err != nil {
-		return precedence.Rule{}, err
+		return Rule{}, err
 	}
 	predecessorID, err := normalizeUUID(input.PredecessorItemID)
 	if err != nil {
-		return precedence.Rule{}, err
+		return Rule{}, err
 	}
 	successorID, err := normalizeUUID(input.SuccessorItemID)
 	if err != nil || predecessorID == successorID {
-		return precedence.Rule{}, precedence.ErrInvalid
+		return Rule{}, ErrInvalid
 	}
 	operationID, err := normalizeUUID(input.OperationID)
 	if err != nil {
-		return precedence.Rule{}, err
+		return Rule{}, err
 	}
 	staffReason, err := normalizeRequiredText(input.StaffReason, 512)
 	if err != nil {
-		return precedence.Rule{}, err
+		return Rule{}, err
 	}
 	patientMessage, err := normalizeOptionalText(input.PatientMessage, 512)
 	if err != nil {
-		return precedence.Rule{}, err
+		return Rule{}, err
 	}
 
 	predecessor, err := m.projects.ResolveProject(ctx, predecessorID)
 	if err != nil {
-		return precedence.Rule{}, err
+		return Rule{}, err
 	}
 	successor, err := m.projects.ResolveProject(ctx, successorID)
 	if err != nil {
-		return precedence.Rule{}, err
+		return Rule{}, err
 	}
 	if err := requireDepartmentScope(operator, successor.DepartmentID); err != nil {
-		return precedence.Rule{}, err
+		return Rule{}, err
 	}
 
-	rule := precedence.Rule{
+	rule := Rule{
 		RuleID: uuid.NewString(), OwnerItemID: successor.ItemID,
 		PredecessorItemID: predecessor.ItemID, PredecessorDepartmentID: predecessor.DepartmentID,
 		PredecessorItemName: predecessor.Name,
@@ -64,25 +63,25 @@ func (m *Manager) Create(ctx context.Context, operator authn.Principal, input Cr
 		StaffReason:       staffReason, PatientMessage: patientMessage,
 		CreatedBy: operator.AccountID, CreateOperationID: operationID,
 	}
-	var created precedence.Rule
-	err = m.store.WithinWriteTransaction(ctx, func(tx precedence.TxStore) error {
+	var created Rule
+	err = m.store.WithinWriteTransaction(ctx, func(tx TxStore) error {
 		if err := tx.LockGraph(ctx); err != nil {
 			return err
 		}
 		existing, findErr := tx.GetByCreateOperationID(ctx, operationID)
 		if findErr == nil {
 			if existing.PredecessorItemID != predecessorID || existing.SuccessorItemID != successorID {
-				return precedence.ErrConflict
+				return ErrConflict
 			}
 			created = existing
 			return nil
 		}
-		if !errors.Is(findErr, precedence.ErrNotFound) {
+		if !errors.Is(findErr, ErrNotFound) {
 			return findErr
 		}
 		if _, findErr = tx.GetByPair(ctx, predecessorID, successorID); findErr == nil {
-			return precedence.ErrConflict
-		} else if !errors.Is(findErr, precedence.ErrNotFound) {
+			return ErrConflict
+		} else if !errors.Is(findErr, ErrNotFound) {
 			return findErr
 		}
 		rules, listErr := tx.ListAll(ctx)
@@ -90,7 +89,7 @@ func (m *Manager) Create(ctx context.Context, operator authn.Principal, input Cr
 			return listErr
 		}
 		if reachable(rules, successorID, predecessorID) {
-			return precedence.ErrCycle
+			return ErrCycle
 		}
 		created, listErr = tx.Insert(ctx, rule)
 		return listErr

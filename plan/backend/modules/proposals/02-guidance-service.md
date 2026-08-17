@@ -231,11 +231,11 @@ service/guidance/rpc/internal/
 ├─ planning/              智能预约方案、整组确认和当日顺序
 ├─ rules/
 │  ├─ precedence/         直接先后关系和循环校验
-│  └─ preparation/        固定准备状态、提醒和自然语言解析
+│  └─ description/        检查说明解析、固定状态转换和患者提醒
 └─ routing/amap/          高德地点与步行路线适配
 ```
 
-`rules` 是规则分类目录，`precedence` 与 `preparation` 分别表达先后关系和准备状态；`planning` 只负责消费这些
+`rules` 是规则分类目录，`precedence` 表达项目先后关系，`description` 表达检查说明的解析与结构化转换；`planning` 只负责消费这些
 规则生成方案，不反向拥有项目或预约事实。所有目录均对应已经实现的业务，不保留空包。
 
 ### 准备规则

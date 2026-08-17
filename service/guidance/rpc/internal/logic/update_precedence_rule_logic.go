@@ -5,7 +5,6 @@ import (
 
 	v1_guidancev1 "hospital/contracts/gen/guidance/v1"
 	"hospital/service/guidance/rpc/internal/rules/precedence"
-	precedencemanager "hospital/service/guidance/rpc/internal/rules/precedence/manager"
 	"hospital/service/guidance/rpc/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/logx"
@@ -33,7 +32,7 @@ func (l *UpdatePrecedenceRuleLogic) UpdatePrecedenceRule(in *v1_guidancev1.Updat
 	if in == nil {
 		return nil, precedenceRPCError(precedence.ErrInvalid)
 	}
-	rule, err := l.svcCtx.PrecedenceManager.Update(l.ctx, principal, precedencemanager.UpdateInput{
+	rule, err := l.svcCtx.PrecedenceManager.Update(l.ctx, principal, precedence.UpdateInput{
 		RuleID: in.RuleId, StaffReason: in.StaffReason, PatientMessage: in.PatientMessage,
 		ExpectedVersion: in.ExpectedVersion, OperationID: in.OperationId,
 	})

@@ -36,13 +36,23 @@ Guidance 是独立的智能导诊服务，负责检查项目之间的规划规�
 
 ```text
 rpc/internal/
-├─ projectconfiguration/      完整项目配置、版本校验及 TCC 协调
-├─ planning/                  智能预约方案、整组确认和当日顺序
+├─ appointmentclient/         所有调用 Appointment RPC 的出站适配器
+│  ├─ configuration.go        项目查询与配置 TCC Try/Confirm/Cancel
+│  ├─ planning.go             窗口、预约查询与原子批量预约
+│  └─ precedence.go           先后规则校验所需的只读项目目录
+├─ projectconfiguration/      完整三步项目配置
+│  ├─ read.go                 配置读取和检查说明解析预览
+│  ├─ configure.go            一次配置的主流程
+│  ├─ transaction.go          TCC 确认、补偿和 Guidance 本地事务
+│  └─ validation.go           输入、权限、项目引用和循环校验
+├─ planning/                  患者方案编排
+│  ├─ generate.go             智能预约方案生成
+│  ├─ confirm.go              整组预约确认
+│  ├─ today.go                当日检查顺序
+│  └─ ordering.go             先后关系和说明规则排序
 ├─ rules/
-│  ├─ precedence/             检查项目直接先后关系及循环校验
-│  │  ├─ manager/             规则维护、查询和图校验
-│  │  └─ appointmentcatalog/  规则写入时读取 Appointment 项目事实
-│  └─ preparation/            固定准备状态、提醒和自然语言解析
+│  ├─ precedence/             项目之间的直接先后关系、维护和图校验
+│  └─ description/            检查说明的解析、结构化转换和患者提醒
 ├─ routing/                   地点搜索与两点路线的稳定领域契约
 │  └─ amap/                   高德地点搜索、地理编码和步行路线适配
 ├─ repository/mysqlstore/     Guidance 自有规则持久化
@@ -50,9 +60,14 @@ rpc/internal/
 └─ svc/                       依赖装配
 ```
 
-`projectconfiguration`、`planning`、`rules` 和 `routing` 分别表达完整配置、方案编排、规则事实与地图能力；
-`routing.Manager` 只编排稳定的地点和路线操作，供应商细节收在 `routing/amap`，不建立含义宽泛的顶层
-`integration`。所有目录都对应已实现业务，不保留空包。
+`projectconfiguration`、`planning`、`rules` 和 `routing` 是四个业务边界。`appointmentclient` 不是第五种业务，
+它只是把前三个业务需要的 Appointment RPC 调用集中隔离，避免外部服务适配器散落在规则目录或 Manager 文件中。
+
+`rules` 只有两块：`precedence` 表达“哪个项目建议先做”；`description` 把医生填写的项目说明转换为禁食、禁水、
+喝水三种封闭状态以及非强制患者提醒。当前 `description` 使用确定性解析器，不调用大语言模型。
+
+阅读一条请求时按以下顺序即可：`server → logic → 对应业务包 Manager → repository/appointmentclient`。
+`logic` 只是 go-zero 的协议适配层；真正的业务判断位于四个业务包。`svc` 只在启动时组装依赖，不参与业务流程。
 
 ## 配置与验证
 

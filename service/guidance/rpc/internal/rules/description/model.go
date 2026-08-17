@@ -1,5 +1,5 @@
-// Package preparation 定义项目准备状态的封闭业务模型和确定性解析。
-package preparation
+// Package description 将医生填写的检查说明转换成规划器可使用的封闭规则和患者提醒。
+package description
 
 type RuleType string
 

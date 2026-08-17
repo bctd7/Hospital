@@ -1,4 +1,4 @@
-package manager
+package precedence_test
 
 import (
 	"context"
@@ -25,7 +25,7 @@ func TestCreateRejectsIndirectCycle(t *testing.T) {
 		rule(itemB, itemC, deptA, deptB),
 	}}
 	manager := newTestManager(t, store)
-	_, err := manager.Create(context.Background(), superAdmin(), CreateInput{
+	_, err := manager.Create(context.Background(), superAdmin(), precedence.CreateInput{
 		PredecessorItemID: itemC,
 		SuccessorItemID:   itemA,
 		StaffReason:       "构成循环的测试关系",
@@ -45,7 +45,7 @@ func TestListDerivesTransitiveRelationWithoutPersistingIt(t *testing.T) {
 		rule(itemB, itemC, deptA, deptB),
 	}}
 	manager := newTestManager(t, store)
-	values, err := manager.List(context.Background(), superAdmin(), ListInput{
+	values, err := manager.List(context.Background(), superAdmin(), precedence.ListInput{
 		ItemID: itemC, Direction: precedence.DirectionPredecessors, IncludeInferred: true,
 	})
 	if err != nil {
@@ -79,7 +79,7 @@ func TestDepartmentDoctorMayOnlyMaintainOwnedSuccessor(t *testing.T) {
 		Roles: []string{authn.RoleDepartmentDoctor}, DepartmentID: deptA,
 		Permissions: []string{contractauthz.PermissionRuleEdit},
 	}
-	_, err := manager.Create(context.Background(), doctor, CreateInput{
+	_, err := manager.Create(context.Background(), doctor, precedence.CreateInput{
 		PredecessorItemID: itemA, SuccessorItemID: itemC,
 		StaffReason: "后置项目属于其他科室", OperationID: "40000000-0000-4000-8000-000000000002",
 	})
@@ -91,7 +91,7 @@ func TestDepartmentDoctorMayOnlyMaintainOwnedSuccessor(t *testing.T) {
 func TestCreateAllowsMultipleDirectPredecessors(t *testing.T) {
 	store := &fakeStore{rules: []precedence.Rule{rule(itemA, itemC, deptA, deptB)}}
 	manager := newTestManager(t, store)
-	created, err := manager.Create(context.Background(), superAdmin(), CreateInput{
+	created, err := manager.Create(context.Background(), superAdmin(), precedence.CreateInput{
 		PredecessorItemID: itemB, SuccessorItemID: itemC,
 		StaffReason: "第二个独立前置项目", OperationID: "40000000-0000-4000-8000-000000000003",
 	})
@@ -109,13 +109,13 @@ func TestDeleteDirectRuleRemovesDerivedRelation(t *testing.T) {
 	store := &fakeStore{rules: []precedence.Rule{first, second}}
 	manager := newTestManager(t, store)
 
-	if err := manager.Delete(context.Background(), superAdmin(), DeleteInput{
+	if err := manager.Delete(context.Background(), superAdmin(), precedence.DeleteInput{
 		RuleID: first.RuleID, ExpectedVersion: 1,
 		OperationID: "40000000-0000-4000-8000-000000000004",
 	}); err != nil {
 		t.Fatal(err)
 	}
-	values, err := manager.List(context.Background(), superAdmin(), ListInput{
+	values, err := manager.List(context.Background(), superAdmin(), precedence.ListInput{
 		ItemID: itemC, Direction: precedence.DirectionPredecessors, IncludeInferred: true,
 	})
 	if err != nil {
@@ -131,7 +131,7 @@ func TestUpdateRequiresCurrentVersion(t *testing.T) {
 	store := &fakeStore{rules: []precedence.Rule{existing}}
 	manager := newTestManager(t, store)
 
-	updated, err := manager.Update(context.Background(), superAdmin(), UpdateInput{
+	updated, err := manager.Update(context.Background(), superAdmin(), precedence.UpdateInput{
 		RuleID: existing.RuleID, StaffReason: "更新后的专业原因", PatientMessage: "请先完成项目A",
 		ExpectedVersion: 1, OperationID: "40000000-0000-4000-8000-000000000005",
 	})
@@ -141,7 +141,7 @@ func TestUpdateRequiresCurrentVersion(t *testing.T) {
 	if updated.Version != 2 || updated.StaffReason != "更新后的专业原因" {
 		t.Fatalf("unexpected updated rule: %#v", updated)
 	}
-	_, err = manager.Update(context.Background(), superAdmin(), UpdateInput{
+	_, err = manager.Update(context.Background(), superAdmin(), precedence.UpdateInput{
 		RuleID: existing.RuleID, StaffReason: "使用旧版本再次修改",
 		ExpectedVersion: 1, OperationID: "40000000-0000-4000-8000-000000000006",
 	})
@@ -150,14 +150,14 @@ func TestUpdateRequiresCurrentVersion(t *testing.T) {
 	}
 }
 
-func newTestManager(t *testing.T, store *fakeStore) *Manager {
+func newTestManager(t *testing.T, store *fakeStore) *precedence.Manager {
 	t.Helper()
 	directory := fakeDirectory{projects: map[string]precedence.ProjectReference{
 		itemA: {ItemID: itemA, DepartmentID: deptA, Name: "项目A"},
 		itemB: {ItemID: itemB, DepartmentID: deptA, Name: "项目B"},
 		itemC: {ItemID: itemC, DepartmentID: deptB, Name: "项目C"},
 	}}
-	manager, err := New(store, directory)
+	manager, err := precedence.New(store, directory)
 	if err != nil {
 		t.Fatal(err)
 	}

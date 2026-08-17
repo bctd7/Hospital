@@ -9,8 +9,8 @@ import (
 
 	"hospital/common/authn"
 	"hospital/service/guidance/rpc/internal/projectconfiguration"
+	descriptionrules "hospital/service/guidance/rpc/internal/rules/description"
 	"hospital/service/guidance/rpc/internal/rules/precedence"
-	"hospital/service/guidance/rpc/internal/rules/preparation"
 )
 
 type planningStoreStub struct {
@@ -82,8 +82,8 @@ func TestGeneratePreservesDirectOrderAcrossActualBookingSlots(t *testing.T) {
 	first, second := uuid.NewString(), uuid.NewString()
 	store := &planningStoreStub{
 		configurations: map[string]projectconfiguration.Configuration{
-			first:  {ItemID: first, PreparationRules: []preparation.Rule{{RuleType: preparation.RuleTypeNoWater}}},
-			second: {ItemID: second, PreparationRules: []preparation.Rule{{RuleType: preparation.RuleTypeDrinkWater}}},
+			first:  {ItemID: first, PreparationRules: []descriptionrules.Rule{{RuleType: descriptionrules.RuleTypeNoWater}}},
+			second: {ItemID: second, PreparationRules: []descriptionrules.Rule{{RuleType: descriptionrules.RuleTypeDrinkWater}}},
 		},
 		rules: []precedence.Rule{{PredecessorItemID: first, SuccessorItemID: second}}, plans: map[string]Plan{},
 	}
