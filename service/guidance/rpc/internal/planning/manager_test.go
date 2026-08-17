@@ -99,7 +99,7 @@ func TestGeneratePreservesDirectOrderAcrossActualBookingSlots(t *testing.T) {
 			},
 		}, bookings: map[string][]Booking{},
 	}
-	manager, err := NewManager(store, appointment)
+	manager, err := NewManager(store, appointment, nil)
 	if err != nil {
 		t.Fatalf("NewManager() error = %v", err)
 	}
@@ -132,7 +132,7 @@ func TestGenerateAcceptsMorningOnFirstCandidateDate(t *testing.T) {
 		}}},
 		bookings: map[string][]Booking{},
 	}
-	manager, _ := NewManager(store, appointment)
+	manager, _ := NewManager(store, appointment, nil)
 	plans, err := manager.Generate(context.Background(), patientPrincipal(), GenerateCommand{ItemIDs: []string{itemID}, CandidateDates: []string{"2026-08-18"}})
 	if err != nil || len(plans) != 1 {
 		t.Fatalf("expected a plan on the first candidate morning, plans=%#v err=%v", plans, err)
@@ -149,7 +149,7 @@ func TestGenerateHonorsPerDateSessionSelection(t *testing.T) {
 			{ItemID: itemID, RoomID: uuid.NewString(), ServiceDate: "2026-08-18", Session: "afternoon", RemainingCapacity: 1},
 		}}, bookings: map[string][]Booking{},
 	}
-	manager, _ := NewManager(store, appointment)
+	manager, _ := NewManager(store, appointment, nil)
 	plans, err := manager.Generate(context.Background(), patientPrincipal(), GenerateCommand{ItemIDs: []string{itemID}, CandidateAvailability: []CandidateAvailability{{ServiceDate: "2026-08-18", Sessions: []string{"afternoon"}}}})
 	if err != nil || len(plans) != 1 || plans[0].Items[0].Session != "afternoon" {
 		t.Fatalf("expected afternoon-only plan, plans=%#v err=%v", plans, err)
@@ -164,7 +164,7 @@ func TestGenerateRejectsDuplicateActiveBookingForSameItemAndSession(t *testing.T
 		options:  map[string][]Option{itemID: {{ItemID: itemID, RoomID: uuid.NewString(), ServiceDate: "2026-08-18", Session: "morning", RemainingCapacity: 2}}},
 		bookings: map[string][]Booking{"active": {{ItemID: itemID, ServiceDate: "2026-08-18", Session: "morning"}}},
 	}
-	manager, _ := NewManager(store, appointment)
+	manager, _ := NewManager(store, appointment, nil)
 	_, err := manager.Generate(context.Background(), patientPrincipal(), GenerateCommand{ItemIDs: []string{itemID}, CandidateAvailability: []CandidateAvailability{{ServiceDate: "2026-08-18", Sessions: []string{"morning"}}}})
 	if err != ErrNoPlan {
 		t.Fatalf("expected ErrNoPlan for an existing active booking in the same item/date/session, got %v", err)
@@ -188,7 +188,7 @@ func TestGenerateDoesNotOverbookSharedRoomCapacity(t *testing.T) {
 		},
 		bookings: map[string][]Booking{},
 	}
-	manager, _ := NewManager(store, appointment)
+	manager, _ := NewManager(store, appointment, nil)
 	if _, err := manager.Generate(context.Background(), patientPrincipal(), GenerateCommand{ItemIDs: []string{first, second}, CandidateDates: []string{"2026-08-18"}}); err != ErrNoPlan {
 		t.Fatalf("expected ErrNoPlan when two projects share one remaining capacity, got %v", err)
 	}
@@ -201,7 +201,7 @@ func TestConfirmReturnsStoredBookingsWithoutCreatingTwice(t *testing.T) {
 		planID: {PlanID: planID, PatientAccountID: patient.AccountID, ExpiresAt: time.Now().Add(time.Hour), Items: []PlanItem{{ItemID: uuid.NewString()}}},
 	}}
 	appointment := &planningAppointmentStub{projects: map[string]projectconfiguration.Project{}, options: map[string][]Option{}, bookings: map[string][]Booking{}, batchResult: []string{bookingID}}
-	manager, _ := NewManager(store, appointment)
+	manager, _ := NewManager(store, appointment, nil)
 	command := ConfirmCommand{PlanID: planID, OperationID: operationID}
 	first, err := manager.Confirm(context.Background(), patient, command)
 	if err != nil {

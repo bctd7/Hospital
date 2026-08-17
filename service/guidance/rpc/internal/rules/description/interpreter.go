@@ -135,5 +135,6 @@ const interpretationPrompt = `你是医院检查准备说明的结构化解析�
 原文明确给出“提前8至12小时”等相对时长时，必须使用 advance_range 和分钟数，不得改成固定钟点。
 只有原文没有给出时长且明确要求空腹、禁食或禁水时，才可使用 previous_day_time="20:00"。
 空腹同时生成 fasting 和 no_water。提前用药、泻药、怀孕、月经等内容只能放入 reminders。
+同一检查项目不得同时生成 no_water 和 drink_water。
 无法可靠归类的原文片段放入 unresolved_fragments。
-输出结构：{"rules":[{"rule_type":"fasting","start_mode":"advance_range","min_advance_minutes":480,"recommended_advance_minutes":480,"max_advance_minutes":720,"previous_day_time":"","readiness_hint":"","source":"model"}],"reminders":[{"text":"...","advance_minutes":0}],"unresolved_fragments":[]}`
+空腹示例结构：{"rules":[{"rule_type":"fasting","start_mode":"advance_range","min_advance_minutes":480,"recommended_advance_minutes":480,"max_advance_minutes":720,"previous_day_time":"","readiness_hint":"","source":"model"},{"rule_type":"no_water","start_mode":"advance_range","min_advance_minutes":480,"recommended_advance_minutes":480,"max_advance_minutes":720,"previous_day_time":"","readiness_hint":"","source":"model"}],"reminders":[{"text":"...","advance_minutes":0}],"unresolved_fragments":[]}`

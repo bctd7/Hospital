@@ -21,3 +21,8 @@ type Appointment interface {
 	ListMyBookings(ctx context.Context, view string) ([]Booking, error)
 	CreateBookingBatch(ctx context.Context, command ConfirmCommand, items []PlanItem) ([]string, error)
 }
+
+// TravelEstimator 只提供智能预约所需的楼栋间步行分钟数，规划器不依赖地图供应商协议。
+type TravelEstimator interface {
+	EstimateWalkingMinutes(ctx context.Context, city, originKeyword, destinationKeyword string) (int32, error)
+}

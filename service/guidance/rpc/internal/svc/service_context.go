@@ -108,10 +108,6 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 	if err != nil {
 		return nil, err
 	}
-	planningManager, err := planning.NewManager(store, planningClient)
-	if err != nil {
-		return nil, fmt.Errorf("create guidance planning manager: %w", err)
-	}
 	mapClient := amap.New(amap.Config{
 		PlaceSearchEndpoint: c.AMap.PlaceSearchEndpoint, GeocodeEndpoint: c.AMap.GeocodeEndpoint,
 		WalkingEndpoint: c.AMap.WalkingEndpoint,
@@ -121,6 +117,10 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 	routingManager, err := routing.NewManager(mapClient)
 	if err != nil {
 		return nil, fmt.Errorf("create guidance routing manager: %w", err)
+	}
+	planningManager, err := planning.NewManager(store, planningClient, routingManager)
+	if err != nil {
+		return nil, fmt.Errorf("create guidance planning manager: %w", err)
 	}
 	assembled = true
 	return &ServiceContext{

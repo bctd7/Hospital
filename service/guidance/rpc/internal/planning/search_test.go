@@ -248,6 +248,136 @@ func TestGenerateRejectsCyclicPrecedence(t *testing.T) {
 	}
 }
 
+func TestSearchUsesExactWindowIntersectionAndEstimatedDuration(t *testing.T) {
+	option := searchOption(searchItemA, searchRoomA, "1号楼", "2026-08-18", "morning", 1)
+	option.RoomOpenTime, option.RoomCloseTime = "08:00:00", "11:00:00"
+	option.ItemStartTime, option.ItemEndTime = "08:30:00", "10:00:00"
+	option.EstimatedDurationMinutes = 60
+
+	plans := searchBestPlans([]string{searchItemA}, map[string][]Option{searchItemA: {option}}, nil, map[string]projectconfiguration.Configuration{searchItemA: {ItemID: searchItemA}})
+	if len(plans) != 1 {
+		t.Fatalf("expected an executable plan, got %d", len(plans))
+	}
+	if got := plans[0].choices[0]; got.plannedStartMinutes != 8*60+30 || got.plannedEndMinutes != 9*60+30 {
+		t.Fatalf("planned interval = %s-%s, want 08:30-09:30", independentClock(got.plannedStartMinutes), independentClock(got.plannedEndMinutes))
+	}
+}
+
+func TestSearchRejectsDurationsThatCannotFitSameWindow(t *testing.T) {
+	itemIDs := []string{searchItemA, searchItemB, searchItemC}
+	options := map[string][]Option{}
+	configurations := map[string]projectconfiguration.Configuration{}
+	for index, itemID := range itemIDs {
+		option := searchOption(itemID, []string{searchRoomA, searchRoomB, searchRoomC}[index], "1号楼", "2026-08-18", "morning", 3)
+		option.EstimatedDurationMinutes = []int32{90, 60, 60}[index]
+		option.ItemStartTime, option.ItemEndTime = "09:00", "12:00"
+		options[itemID] = []Option{option}
+		configurations[itemID] = projectconfiguration.Configuration{ItemID: itemID}
+	}
+	if plans := searchBestPlans(itemIDs, options, nil, configurations); len(plans) != 0 {
+		t.Fatalf("210 minutes of examinations plus movement cannot fit in a 180-minute window")
+	}
+}
+
+func TestSearchStartsDrinkPreparationAfterLastNoWaterExamination(t *testing.T) {
+	noWater := searchOption(searchItemA, searchRoomA, "1号楼", "2026-08-18", "morning", 2)
+	noWater.ItemStartTime, noWater.ItemEndTime, noWater.EstimatedDurationMinutes = "09:00", "13:00", 60
+	drink := searchOption(searchItemB, searchRoomA, "1号楼", "2026-08-18", "morning", 2)
+	drink.ItemStartTime, drink.ItemEndTime, drink.EstimatedDurationMinutes = "09:00", "13:00", 30
+	configurations := map[string]projectconfiguration.Configuration{
+		searchItemA: {ItemID: searchItemA, PreparationRules: []descriptionrules.Rule{{RuleType: descriptionrules.RuleTypeNoWater}}},
+		searchItemB: {ItemID: searchItemB, PreparationRules: []descriptionrules.Rule{{RuleType: descriptionrules.RuleTypeDrinkWater, StartMode: descriptionrules.StartModeAdvanceRange, MinAdvanceMinutes: 120, RecommendedAdvanceMinutes: 180, MaxAdvanceMinutes: 240}}},
+	}
+	rules := []precedence.Rule{{PredecessorItemID: searchItemA, SuccessorItemID: searchItemB}}
+	plans := searchBestPlans([]string{searchItemA, searchItemB}, map[string][]Option{searchItemA: {noWater}, searchItemB: {drink}}, rules, configurations)
+	if len(plans) == 0 {
+		t.Fatal("expected drink project to become ready two hours after no-water project finishes")
+	}
+	if got := plans[0].choices[1]; got.plannedStartMinutes != 12*60 || got.plannedEndMinutes != 12*60+30 {
+		t.Fatalf("drink project interval = %s-%s, want 12:00-12:30", independentClock(got.plannedStartMinutes), independentClock(got.plannedEndMinutes))
+	}
+
+	drink.ItemEndTime = "12:00"
+	if plans := searchBestPlans([]string{searchItemA, searchItemB}, map[string][]Option{searchItemA: {noWater}, searchItemB: {drink}}, rules, configurations); len(plans) != 0 {
+		t.Fatal("readiness plus examination duration does not fit before 12:00")
+	}
+}
+
+func TestSearchTreatsDrinkMaximumAsSoftPreference(t *testing.T) {
+	noWater := searchOption(searchItemA, searchRoomA, "1号楼", "2026-08-18", "morning", 2)
+	noWater.ItemStartTime, noWater.ItemEndTime, noWater.EstimatedDurationMinutes = "09:00", "10:00", 30
+	drink := searchOption(searchItemB, searchRoomA, "1号楼", "2026-08-18", "afternoon", 2)
+	drink.ItemStartTime, drink.ItemEndTime, drink.EstimatedDurationMinutes = "14:00", "15:00", 15
+	configurations := map[string]projectconfiguration.Configuration{
+		searchItemA: {ItemID: searchItemA, PreparationRules: []descriptionrules.Rule{{RuleType: descriptionrules.RuleTypeNoWater}}},
+		searchItemB: {ItemID: searchItemB, PreparationRules: []descriptionrules.Rule{{RuleType: descriptionrules.RuleTypeDrinkWater, StartMode: descriptionrules.StartModeAdvanceRange, MinAdvanceMinutes: 120, RecommendedAdvanceMinutes: 180, MaxAdvanceMinutes: 240}}},
+	}
+	plans := searchBestPlans([]string{searchItemA, searchItemB}, map[string][]Option{searchItemA: {noWater}, searchItemB: {drink}}, []precedence.Rule{{PredecessorItemID: searchItemA, SuccessorItemID: searchItemB}}, configurations)
+	if len(plans) == 0 {
+		t.Fatal("exceeding the recommended maximum remains feasible")
+	}
+}
+
+func TestSearchIncludesMovementInWindowFeasibility(t *testing.T) {
+	first := searchOption(searchItemA, searchRoomA, "1号楼", "2026-08-18", "morning", 2)
+	first.ItemStartTime, first.ItemEndTime, first.EstimatedDurationMinutes = "11:00", "12:00", 50
+	second := searchOption(searchItemB, searchRoomB, "2号楼", "2026-08-18", "morning", 2)
+	second.ItemStartTime, second.ItemEndTime, second.EstimatedDurationMinutes = "11:00", "12:00", 10
+	configurations := map[string]projectconfiguration.Configuration{searchItemA: {ItemID: searchItemA}, searchItemB: {ItemID: searchItemB}}
+	rules := []precedence.Rule{{PredecessorItemID: searchItemA, SuccessorItemID: searchItemB}}
+	if plans := searchBestPlans([]string{searchItemA, searchItemB}, map[string][]Option{searchItemA: {first}, searchItemB: {second}}, rules, configurations); len(plans) != 0 {
+		t.Fatal("cross-building fallback travel makes the second examination miss its window")
+	}
+
+	second.RoomID, second.Building = searchRoomA, "1号楼"
+	plans := searchBestPlans([]string{searchItemA, searchItemB}, map[string][]Option{searchItemA: {first}, searchItemB: {second}}, rules, configurations)
+	if len(plans) == 0 || plans[0].choices[1].travelMinutes != 0 || plans[0].choices[1].plannedEndMinutes != 12*60 {
+		t.Fatalf("same room should require no movement and finish at 12:00: %#v", plans)
+	}
+}
+
+type travelEstimatorStub struct {
+	minutes int32
+	err     error
+	calls   int
+}
+
+func (s *travelEstimatorStub) EstimateWalkingMinutes(context.Context, string, string, string) (int32, error) {
+	s.calls++
+	return s.minutes, s.err
+}
+
+func TestEstimateBuildingTravelUsesProviderAndConservativeFallback(t *testing.T) {
+	options := map[string][]Option{
+		searchItemA: {searchOption(searchItemA, searchRoomA, "1号楼", "2026-08-18", "morning", 1)},
+		searchItemB: {searchOption(searchItemB, searchRoomB, "2号楼", "2026-08-18", "morning", 1)},
+	}
+	provider := &travelEstimatorStub{minutes: 7}
+	got := estimateBuildingTravel(context.Background(), provider, options)[travelPairKey("1号楼", "2号楼")]
+	if provider.calls != 1 || got.minutes != 10 || got.estimated {
+		t.Fatalf("provider estimate = %#v, calls=%d, want 10 exact minutes", got, provider.calls)
+	}
+	provider = &travelEstimatorStub{err: errors.New("map unavailable")}
+	got = estimateBuildingTravel(context.Background(), provider, options)[travelPairKey("1号楼", "2号楼")]
+	if got.minutes != 15 || !got.estimated {
+		t.Fatalf("fallback estimate = %#v, want 15 estimated minutes", got)
+	}
+}
+
+func TestManagerCachesBuildingTravelAcrossPlanRequests(t *testing.T) {
+	options := map[string][]Option{
+		searchItemA: {searchOption(searchItemA, searchRoomA, "1号楼", "2026-08-18", "morning", 1)},
+		searchItemB: {searchOption(searchItemB, searchRoomB, "2号楼", "2026-08-18", "morning", 1)},
+	}
+	provider := &travelEstimatorStub{minutes: 8}
+	manager := &Manager{travel: provider, travelCache: map[string]cachedTravelEstimate{}}
+	manager.estimateBuildingTravel(context.Background(), options)
+	manager.estimateBuildingTravel(context.Background(), options)
+	if provider.calls != 1 {
+		t.Fatalf("same building pair should be fetched once while cached, calls=%d", provider.calls)
+	}
+}
+
 func TestGeneratePrefersFewerServiceDays(t *testing.T) {
 	manager := newSearchTestManager(
 		[]string{searchItemA, searchItemB},
@@ -427,7 +557,7 @@ func TestSearchMatchesRandomizedExhaustiveOracle(t *testing.T) {
 			t.Fatalf("case %d: search missed a feasible plan", testCase)
 		}
 		if actual := oracleScoreForChoices(got[0].choices, configurations); actual != want {
-			t.Fatalf("case %d: score=%v, exhaustive optimum=%v, choices=%#v", testCase, actual, want, got[0].choices)
+			t.Fatalf("case %d: score=%v, internal=%+v, exhaustive optimum=%v, choices=%#v", testCase, actual, got[0].score, want, got[0].choices)
 		}
 		for candidateIndex, candidate := range got {
 			if !independentlyExecutable(candidate.choices, configurations) || !respectsPrecedence(candidate.choices, rules) {
@@ -438,8 +568,9 @@ func TestSearchMatchesRandomizedExhaustiveOracle(t *testing.T) {
 }
 
 type independentScore struct {
-	preparationInversions, preparationTransitions, serviceDays, campusChanges, buildingChanges int
-	completionSlot                                                                             string
+	preparationInversions, preparationTransitions, preparationTimingDeviation int
+	serviceDays, campusChanges, buildingChanges, travelMinutes                int
+	completionSlot                                                            string
 }
 
 func exhaustiveConfigurations(itemIDs []string, rankCode int) map[string]projectconfiguration.Configuration {
@@ -495,69 +626,158 @@ func exhaustiveOracle(itemIDs []string, options map[string][]Option, rules []pre
 }
 
 func independentlyExecutable(choices []searchChoice, configurations map[string]projectconfiguration.Configuration) bool {
+	_, feasible := simulateChoices(choices, configurations)
+	return feasible
+}
+
+// simulateChoices 是独立于正式搜索器的顺序执行判定器，用于反复核对 DFS 的可行性和最优性。
+func simulateChoices(choices []searchChoice, configurations map[string]projectconfiguration.Configuration) (independentScore, bool) {
+	result := independentScore{}
 	reserved, capacity := map[string]int64{}, map[string]int64{}
-	lastSlot, lastDate, drankToday := "", "", false
+	lastDate, lastRoom, lastCampus, lastBuilding := "", "", "", ""
+	cursor, lastNoWaterEnd := int32(0), int32(0)
+	lastRank := -1
+	dayRankCounts := [3]int{}
+	drankToday := false
 	for _, choice := range choices {
-		slot := optionSlot(choice.option)
-		if lastSlot != "" && slot < lastSlot {
-			return false
+		option := choice.option
+		if lastDate != "" && option.ServiceDate < lastDate {
+			return independentScore{}, false
 		}
-		if choice.option.ServiceDate != lastDate {
+		sameDate := option.ServiceDate == lastDate
+		if !sameDate {
+			result.serviceDays++
+			cursor, lastNoWaterEnd, lastRank = 0, 0, -1
+			dayRankCounts = [3]int{}
 			drankToday = false
 		}
 		rank := descriptionRuleRank(configurations[choice.itemID])
 		if drankToday && rank == 0 {
-			return false
+			return independentScore{}, false
+		}
+		start, endWindow := independentWindow(option)
+		travel := int32(0)
+		if sameDate && lastRoom != "" && lastRoom != option.RoomID {
+			if lastBuilding == option.Building {
+				travel = 5
+			} else {
+				travel = 15
+			}
+		}
+		if sameDate && cursor+travel > start {
+			start = cursor + travel
+		}
+		if rule, ok := independentRule(configurations[choice.itemID], descriptionrules.RuleTypeDrinkWater); ok && lastNoWaterEnd > 0 {
+			if ready := lastNoWaterEnd + rule.MinAdvanceMinutes; ready > start {
+				start = ready
+			}
+			result.preparationTimingDeviation += absoluteInt(int(start - lastNoWaterEnd - rule.RecommendedAdvanceMinutes))
+		}
+		duration := option.EstimatedDurationMinutes
+		if duration <= 0 {
+			duration = 5
+		}
+		end := start + duration
+		if end > endWindow {
+			return independentScore{}, false
+		}
+		if sameDate {
+			for previousRank := rank + 1; previousRank < 3; previousRank++ {
+				result.preparationInversions += dayRankCounts[previousRank]
+			}
+			if lastRank >= 0 && lastRank != rank {
+				result.preparationTransitions++
+			}
+			if lastCampus != "" && lastCampus != option.CampusID {
+				result.campusChanges++
+			}
+			if lastBuilding != "" && lastBuilding != option.Building {
+				result.buildingChanges++
+			}
+		}
+		dayRankCounts[rank]++
+		if rank == 0 {
+			lastNoWaterEnd = end
 		}
 		if rank == 2 {
 			drankToday = true
 		}
-		key := optionCapacityKey(choice.option)
+		result.travelMinutes += int(travel)
+		result.completionSlot = option.ServiceDate + ":" + independentClock(end)
+		key := optionCapacityKey(option)
 		reserved[key]++
-		if current, ok := capacity[key]; !ok || choice.option.RemainingCapacity < current {
-			capacity[key] = choice.option.RemainingCapacity
+		if current, ok := capacity[key]; !ok || option.RemainingCapacity < current {
+			capacity[key] = option.RemainingCapacity
 		}
 		if reserved[key] > capacity[key] {
-			return false
+			return independentScore{}, false
 		}
-		lastSlot, lastDate = slot, choice.option.ServiceDate
+		cursor, lastDate, lastRoom, lastCampus, lastBuilding, lastRank = end, option.ServiceDate, option.RoomID, option.CampusID, option.Building, rank
 	}
-	return true
+	return result, true
+}
+
+func independentWindow(option Option) (int32, int32) {
+	defaultStart, defaultEnd := int32(9*60), int32(12*60)
+	if option.Session == "afternoon" {
+		defaultStart, defaultEnd = 13*60, 18*60
+	}
+	start, end := int32(0), int32(24*60)
+	hasStart, hasEnd := false, false
+	for _, value := range []string{option.RoomOpenTime, option.ItemStartTime} {
+		if parsed, ok := independentParseClock(value); ok {
+			if !hasStart || parsed > start {
+				start = parsed
+			}
+			hasStart = true
+		}
+	}
+	for _, value := range []string{option.RoomCloseTime, option.ItemEndTime} {
+		if parsed, ok := independentParseClock(value); ok {
+			if !hasEnd || parsed < end {
+				end = parsed
+			}
+			hasEnd = true
+		}
+	}
+	if !hasStart {
+		start = defaultStart
+	}
+	if !hasEnd {
+		end = defaultEnd
+	}
+	return start, end
+}
+
+func independentParseClock(value string) (int32, bool) {
+	var hour, minute int
+	if _, err := fmt.Sscanf(value, "%d:%d", &hour, &minute); err != nil || hour < 0 || hour > 23 || minute < 0 || minute > 59 {
+		return 0, false
+	}
+	return int32(hour*60 + minute), true
+}
+
+func independentClock(value int32) string {
+	return fmt.Sprintf("%02d:%02d", value/60, value%60)
+}
+
+func independentRule(configuration projectconfiguration.Configuration, ruleType descriptionrules.RuleType) (descriptionrules.Rule, bool) {
+	for _, rule := range configuration.PreparationRules {
+		if rule.RuleType == ruleType {
+			return rule, true
+		}
+	}
+	return descriptionrules.Rule{}, false
 }
 
 func oracleScoreForChoices(choices []searchChoice, configurations map[string]projectconfiguration.Configuration) independentScore {
-	result := independentScore{}
-	for index, choice := range choices {
-		if index == 0 || choice.option.ServiceDate != choices[index-1].option.ServiceDate {
-			result.serviceDays++
-			continue
-		}
-		currentRank := descriptionRuleRank(configurations[choice.itemID])
-		previousRank := descriptionRuleRank(configurations[choices[index-1].itemID])
-		if currentRank != previousRank {
-			result.preparationTransitions++
-		}
-		for previous := 0; previous < index; previous++ {
-			if choices[previous].option.ServiceDate == choice.option.ServiceDate && descriptionRuleRank(configurations[choices[previous].itemID]) > currentRank {
-				result.preparationInversions++
-			}
-		}
-		if choices[index-1].option.CampusID != choice.option.CampusID {
-			result.campusChanges++
-		}
-		if choices[index-1].option.Building != choice.option.Building {
-			result.buildingChanges++
-		}
-	}
-	if len(choices) > 0 {
-		result.completionSlot = optionSlot(choices[len(choices)-1].option)
-	}
+	result, _ := simulateChoices(choices, configurations)
 	return result
 }
 
 func compareIndependentScore(left, right independentScore) int {
-	leftValues := []int{left.preparationInversions, left.preparationTransitions, left.serviceDays, left.campusChanges, left.buildingChanges}
-	rightValues := []int{right.preparationInversions, right.preparationTransitions, right.serviceDays, right.campusChanges, right.buildingChanges}
+	leftValues := []int{left.preparationInversions, left.preparationTransitions, left.preparationTimingDeviation, left.serviceDays, left.campusChanges, left.buildingChanges, left.travelMinutes}
+	rightValues := []int{right.preparationInversions, right.preparationTransitions, right.preparationTimingDeviation, right.serviceDays, right.campusChanges, right.buildingChanges, right.travelMinutes}
 	for index := range leftValues {
 		if leftValues[index] < rightValues[index] {
 			return -1
@@ -648,7 +868,7 @@ func newSearchTestManager(itemIDs []string, preparation map[string][]description
 	}
 	store := &planningStoreStub{configurations: configurations, rules: rules, plans: map[string]Plan{}}
 	appointment := &planningAppointmentStub{projects: projects, options: options, bookings: map[string][]Booking{}}
-	manager, err := NewManager(store, appointment)
+	manager, err := NewManager(store, appointment, nil)
 	if err != nil {
 		panic(err)
 	}

@@ -952,6 +952,10 @@ type SmartAppointmentPlanItem struct {
 	Session                  string `json:"session"`
 	EstimatedDurationMinutes int32  `json:"estimated_duration_minutes"`
 	Reason                   string `json:"reason"`
+	PlannedStartTime         string `json:"planned_start_time"`
+	PlannedEndTime           string `json:"planned_end_time"`
+	TravelMinutes            int32  `json:"travel_minutes"`
+	TravelTimeEstimated      bool   `json:"travel_time_estimated"`
 }
 
 type SmartAppointmentPlansResponse struct {

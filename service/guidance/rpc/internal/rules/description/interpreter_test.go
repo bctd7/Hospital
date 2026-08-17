@@ -16,10 +16,10 @@ func (s interpreterStub) Interpret(context.Context, string) (Preview, error) {
 }
 
 func TestParserAcceptsValidatedModelCandidate(t *testing.T) {
-	parser := NewParser(interpreterStub{preview: Preview{Rules: []Rule{{
-		RuleType: RuleTypeFasting, StartMode: StartModeAdvanceRange,
-		MinAdvanceMinutes: 480, RecommendedAdvanceMinutes: 480, MaxAdvanceMinutes: 720,
-	}}}})
+	parser := NewParser(interpreterStub{preview: Preview{Rules: []Rule{
+		{RuleType: RuleTypeFasting, StartMode: StartModeAdvanceRange, MinAdvanceMinutes: 480, RecommendedAdvanceMinutes: 480, MaxAdvanceMinutes: 720},
+		{RuleType: RuleTypeNoWater, StartMode: StartModeAdvanceRange, MinAdvanceMinutes: 480, RecommendedAdvanceMinutes: 480, MaxAdvanceMinutes: 720},
+	}}})
 	preview, err := parser.Parse(context.Background(), "空腹8至12小时")
 	if err != nil || preview.ParserMode != "llm" || preview.Rules[0].Source != "model" {
 		t.Fatalf("validated model candidate was not used: %#v, %v", preview, err)

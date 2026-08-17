@@ -82,7 +82,8 @@ func (m *Manager) Generate(ctx context.Context, patient authn.Principal, command
 		projects[itemID], configurations[itemID], options[itemID] = project, configuration, filtered
 	}
 
-	candidates := searchBestPlans(itemIDs, options, rules, configurations)
+	travelEstimates := m.estimateBuildingTravel(ctx, options)
+	candidates := searchBestPlansWithTravel(itemIDs, options, rules, configurations, travelEstimates)
 	if len(candidates) == 0 {
 		return nil, ErrNoPlan
 	}
@@ -92,7 +93,7 @@ func (m *Manager) Generate(ctx context.Context, patient authn.Principal, command
 		items := make([]PlanItem, 0, len(candidate.choices))
 		for _, selected := range candidate.choices {
 			itemID, choice := selected.itemID, selected.option
-			items = append(items, PlanItem{ItemID: itemID, ItemName: projects[itemID].Name, RoomID: choice.RoomID, RoomDisplayName: choice.RoomDisplayName, CampusID: choice.CampusID, Building: choice.Building, FloorNumber: choice.FloorNumber, RoomNumber: choice.RoomNumber, ServiceDate: choice.ServiceDate, Session: choice.Session, EstimatedDurationMinutes: choice.EstimatedDurationMinutes, Reason: planReason(itemID, configurations[itemID], rules, items)})
+			items = append(items, PlanItem{ItemID: itemID, ItemName: projects[itemID].Name, RoomID: choice.RoomID, RoomDisplayName: choice.RoomDisplayName, CampusID: choice.CampusID, Building: choice.Building, FloorNumber: choice.FloorNumber, RoomNumber: choice.RoomNumber, ServiceDate: choice.ServiceDate, Session: choice.Session, EstimatedDurationMinutes: choice.EstimatedDurationMinutes, PlannedStartTime: formatClockMinutes(selected.plannedStartMinutes), PlannedEndTime: formatClockMinutes(selected.plannedEndMinutes), TravelMinutes: selected.travelMinutes, TravelTimeEstimated: selected.travelEstimated, Reason: planReason(itemID, configurations[itemID], rules, items)})
 		}
 		plan := Plan{PlanID: uuid.NewString(), PatientAccountID: patient.AccountID, Title: planTitle(variant), Summary: planSummary(items), Items: items, ExpiresAt: time.Now().UTC().Add(30 * time.Minute)}
 		if err := m.store.SavePlan(ctx, plan, requestFingerprint); err != nil {

@@ -7,6 +7,7 @@ type Option struct {
 	ItemID, RoomID, RoomDisplayName, CampusID, Building, RoomNumber string
 	FloorNumber, EstimatedDurationMinutes                           int32
 	ServiceDate, Session                                            string
+	RoomOpenTime, RoomCloseTime, ItemStartTime, ItemEndTime         string
 	RemainingCapacity                                               int64
 }
 
@@ -28,6 +29,10 @@ type PlanItem struct {
 	EstimatedDurationMinutes int32  `json:"estimated_duration_minutes"`
 	ServiceDate              string `json:"service_date"`
 	Session                  string `json:"session"`
+	PlannedStartTime         string `json:"planned_start_time,omitempty"`
+	PlannedEndTime           string `json:"planned_end_time,omitempty"`
+	TravelMinutes            int32  `json:"travel_minutes,omitempty"`
+	TravelTimeEstimated      bool   `json:"travel_time_estimated,omitempty"`
 	Reason                   string `json:"reason"`
 }
 

@@ -71,12 +71,32 @@ func TestParseVagueFastingUsesHospitalDefault(t *testing.T) {
 }
 
 func TestValidateAllowsManuallyAdjustedPreviousDayTime(t *testing.T) {
-	rules := []Rule{{RuleType: RuleTypeFasting, StartMode: StartModePreviousDayTime, PreviousDayTime: "19:30", Source: "manual"}}
+	rules := []Rule{
+		{RuleType: RuleTypeFasting, StartMode: StartModePreviousDayTime, PreviousDayTime: "19:30", Source: "manual"},
+		{RuleType: RuleTypeNoWater, StartMode: StartModePreviousDayTime, PreviousDayTime: "19:30", Source: "manual"},
+	}
 	if err := Validate(rules, nil); err != nil {
 		t.Fatalf("a valid manually selected previous-day time must be accepted: %v", err)
 	}
 	rules[0].PreviousDayTime = "25:00"
 	if err := Validate(rules, nil); err == nil {
 		t.Fatal("invalid clock time must be rejected")
+	}
+}
+
+func TestValidateRequiresNoWaterForFasting(t *testing.T) {
+	rules := []Rule{{RuleType: RuleTypeFasting, StartMode: StartModePreviousDayTime, PreviousDayTime: "20:00"}}
+	if err := Validate(rules, nil); err == nil {
+		t.Fatal("fasting without no-water is an incomplete preparation state")
+	}
+}
+
+func TestValidateRejectsNoWaterAndDrinkWaterOnSameProject(t *testing.T) {
+	rules := []Rule{
+		{RuleType: RuleTypeNoWater, StartMode: StartModeAdvanceRange, MinAdvanceMinutes: 60, RecommendedAdvanceMinutes: 60, MaxAdvanceMinutes: 120},
+		{RuleType: RuleTypeDrinkWater, StartMode: StartModeAdvanceRange, MinAdvanceMinutes: 120, RecommendedAdvanceMinutes: 180, MaxAdvanceMinutes: 240},
+	}
+	if err := Validate(rules, nil); err == nil {
+		t.Fatal("one project cannot require no-water and drink-water preparation simultaneously")
 	}
 }

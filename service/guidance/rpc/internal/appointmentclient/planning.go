@@ -40,7 +40,13 @@ func (g *Planning) ListOptions(ctx context.Context, itemID string) ([]planning.O
 	}
 	result := make([]planning.Option, 0, len(response.GetOptions()))
 	for _, value := range response.GetOptions() {
-		result = append(result, planning.Option{ItemID: value.GetItemId(), RoomID: value.GetRoomId(), RoomDisplayName: value.GetRoomDisplayName(), CampusID: value.GetCampusId(), Building: value.GetBuilding(), FloorNumber: value.GetFloorNumber(), RoomNumber: value.GetRoomNumber(), ServiceDate: value.GetServiceDate(), Session: value.GetSession(), RemainingCapacity: value.GetRemainingCapacity(), EstimatedDurationMinutes: value.GetEstimatedDurationMinutes()})
+		result = append(result, planning.Option{
+			ItemID: value.GetItemId(), RoomID: value.GetRoomId(), RoomDisplayName: value.GetRoomDisplayName(),
+			CampusID: value.GetCampusId(), Building: value.GetBuilding(), FloorNumber: value.GetFloorNumber(), RoomNumber: value.GetRoomNumber(),
+			ServiceDate: value.GetServiceDate(), Session: value.GetSession(), RoomOpenTime: value.GetRoomOpenTime(), RoomCloseTime: value.GetRoomCloseTime(),
+			ItemStartTime: value.GetItemStartTime(), ItemEndTime: value.GetItemEndTime(), RemainingCapacity: value.GetRemainingCapacity(),
+			EstimatedDurationMinutes: value.GetEstimatedDurationMinutes(),
+		})
 	}
 	return result, nil
 }

@@ -49,5 +49,5 @@ func smartPlanResponse(value planning.Plan) *guidancev1.SmartAppointmentPlan {
 }
 
 func planItemResponse(value planning.PlanItem) *guidancev1.SmartAppointmentPlanItem {
-	return &guidancev1.SmartAppointmentPlanItem{ItemId: value.ItemID, ItemName: value.ItemName, RoomId: value.RoomID, RoomDisplayName: value.RoomDisplayName, CampusId: value.CampusID, Building: value.Building, FloorNumber: value.FloorNumber, RoomNumber: value.RoomNumber, ServiceDate: value.ServiceDate, Session: value.Session, EstimatedDurationMinutes: value.EstimatedDurationMinutes, Reason: value.Reason}
+	return &guidancev1.SmartAppointmentPlanItem{ItemId: value.ItemID, ItemName: value.ItemName, RoomId: value.RoomID, RoomDisplayName: value.RoomDisplayName, CampusId: value.CampusID, Building: value.Building, FloorNumber: value.FloorNumber, RoomNumber: value.RoomNumber, ServiceDate: value.ServiceDate, Session: value.Session, EstimatedDurationMinutes: value.EstimatedDurationMinutes, Reason: value.Reason, PlannedStartTime: value.PlannedStartTime, PlannedEndTime: value.PlannedEndTime, TravelMinutes: value.TravelMinutes, TravelTimeEstimated: value.TravelTimeEstimated}
 }

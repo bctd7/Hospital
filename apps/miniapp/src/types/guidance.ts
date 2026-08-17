@@ -125,6 +125,10 @@ export interface SmartAppointmentPlanItem {
   session: "morning" | "afternoon";
   estimated_duration_minutes: number;
   reason: string;
+  planned_start_time: string;
+  planned_end_time: string;
+  travel_minutes: number;
+  travel_time_estimated: boolean;
 }
 
 export interface SmartAppointmentPlan {

@@ -79,6 +79,28 @@ func (m *Manager) CalculateWalkingRoute(ctx context.Context, origin, destination
 	return m.CalculateRoute(ctx, RouteModeWalking, origin, destination)
 }
 
+// EstimateWalkingMinutes 把两个地点关键词解析为坐标并返回向上取整到 5 分钟的步行时间。
+// 智能预约只消费分钟数；地点候选和供应商细节仍封装在 routing 内。
+func (m *Manager) EstimateWalkingMinutes(ctx context.Context, city, originKeyword, destinationKeyword string) (int32, error) {
+	origins, err := m.SearchPlaces(ctx, PlaceSearchInput{Keyword: originKeyword, City: city, Limit: 5})
+	if err != nil || len(origins) == 0 {
+		return 0, ErrUnavailable
+	}
+	destinations, err := m.SearchPlaces(ctx, PlaceSearchInput{Keyword: destinationKeyword, City: city, Limit: 5})
+	if err != nil || len(destinations) == 0 {
+		return 0, ErrUnavailable
+	}
+	route, err := m.CalculateWalkingRoute(ctx, origins[0], destinations[0])
+	if err != nil {
+		return 0, err
+	}
+	minutes := int32(math.Ceil(float64(route.DurationSeconds)/300.0) * 5)
+	if minutes < 5 {
+		minutes = 5
+	}
+	return minutes, nil
+}
+
 func distanceMeters(origin, destination LocationPoint) float64 {
 	const earthRadiusMeters = 6371000
 	latitudeDelta := degreesToRadians(destination.Latitude - origin.Latitude)

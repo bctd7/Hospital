@@ -1391,6 +1391,10 @@ type SmartAppointmentPlanItem struct {
 	Session                  string                 `protobuf:"bytes,10,opt,name=session,proto3" json:"session,omitempty"`
 	EstimatedDurationMinutes int32                  `protobuf:"varint,11,opt,name=estimated_duration_minutes,json=estimatedDurationMinutes,proto3" json:"estimated_duration_minutes,omitempty"`
 	Reason                   string                 `protobuf:"bytes,12,opt,name=reason,proto3" json:"reason,omitempty"`
+	PlannedStartTime         string                 `protobuf:"bytes,13,opt,name=planned_start_time,json=plannedStartTime,proto3" json:"planned_start_time,omitempty"`
+	PlannedEndTime           string                 `protobuf:"bytes,14,opt,name=planned_end_time,json=plannedEndTime,proto3" json:"planned_end_time,omitempty"`
+	TravelMinutes            int32                  `protobuf:"varint,15,opt,name=travel_minutes,json=travelMinutes,proto3" json:"travel_minutes,omitempty"`
+	TravelTimeEstimated      bool                   `protobuf:"varint,16,opt,name=travel_time_estimated,json=travelTimeEstimated,proto3" json:"travel_time_estimated,omitempty"`
 	unknownFields            protoimpl.UnknownFields
 	sizeCache                protoimpl.SizeCache
 }
@@ -1507,6 +1511,34 @@ func (x *SmartAppointmentPlanItem) GetReason() string {
 		return x.Reason
 	}
 	return ""
+}
+
+func (x *SmartAppointmentPlanItem) GetPlannedStartTime() string {
+	if x != nil {
+		return x.PlannedStartTime
+	}
+	return ""
+}
+
+func (x *SmartAppointmentPlanItem) GetPlannedEndTime() string {
+	if x != nil {
+		return x.PlannedEndTime
+	}
+	return ""
+}
+
+func (x *SmartAppointmentPlanItem) GetTravelMinutes() int32 {
+	if x != nil {
+		return x.TravelMinutes
+	}
+	return 0
+}
+
+func (x *SmartAppointmentPlanItem) GetTravelTimeEstimated() bool {
+	if x != nil {
+		return x.TravelTimeEstimated
+	}
+	return false
 }
 
 type SmartAppointmentPlan struct {
@@ -2545,7 +2577,7 @@ const file_contracts_proto_guidance_v1_guidance_proto_rawDesc = "" +
 	"\x16candidate_availability\x18\x04 \x03(\v2+.hospital.guidance.v1.CandidateAvailabilityR\x15candidateAvailability\"V\n" +
 	"\x15CandidateAvailability\x12!\n" +
 	"\fservice_date\x18\x01 \x01(\tR\vserviceDate\x12\x1a\n" +
-	"\bsessions\x18\x02 \x03(\tR\bsessions\"\xa5\x03\n" +
+	"\bsessions\x18\x02 \x03(\tR\bsessions\"\xd8\x04\n" +
 	"\x18SmartAppointmentPlanItem\x12\x17\n" +
 	"\aitem_id\x18\x01 \x01(\tR\x06itemId\x12\x1b\n" +
 	"\titem_name\x18\x02 \x01(\tR\bitemName\x12\x17\n" +
@@ -2560,7 +2592,11 @@ const file_contracts_proto_guidance_v1_guidance_proto_rawDesc = "" +
 	"\asession\x18\n" +
 	" \x01(\tR\asession\x12<\n" +
 	"\x1aestimated_duration_minutes\x18\v \x01(\x05R\x18estimatedDurationMinutes\x12\x16\n" +
-	"\x06reason\x18\f \x01(\tR\x06reason\"\xc4\x01\n" +
+	"\x06reason\x18\f \x01(\tR\x06reason\x12,\n" +
+	"\x12planned_start_time\x18\r \x01(\tR\x10plannedStartTime\x12(\n" +
+	"\x10planned_end_time\x18\x0e \x01(\tR\x0eplannedEndTime\x12%\n" +
+	"\x0etravel_minutes\x18\x0f \x01(\x05R\rtravelMinutes\x122\n" +
+	"\x15travel_time_estimated\x18\x10 \x01(\bR\x13travelTimeEstimated\"\xc4\x01\n" +
 	"\x14SmartAppointmentPlan\x12\x17\n" +
 	"\aplan_id\x18\x01 \x01(\tR\x06planId\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12\x18\n" +

@@ -125,6 +125,15 @@ func Validate(rules []Rule, reminders []Reminder) error {
 			return fmt.Errorf("invalid patient reminder")
 		}
 	}
+	_, fasting := seen[RuleTypeFasting]
+	_, noWater := seen[RuleTypeNoWater]
+	_, drinkWater := seen[RuleTypeDrinkWater]
+	if fasting && !noWater {
+		return fmt.Errorf("fasting must include no-water preparation")
+	}
+	if drinkWater && (fasting || noWater) {
+		return fmt.Errorf("restricted and drink-water rules cannot coexist")
+	}
 	return nil
 }
 

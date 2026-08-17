@@ -176,6 +176,10 @@ message SmartAppointmentPlanItem {
   string session = 10;
   int32 estimated_duration_minutes = 11;
   string reason = 12;
+  string planned_start_time = 13;
+  string planned_end_time = 14;
+  int32 travel_minutes = 15;
+  bool travel_time_estimated = 16;
 }
 
 message SmartAppointmentPlan {

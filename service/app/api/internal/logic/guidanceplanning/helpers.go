@@ -63,5 +63,6 @@ func smartPlanItemResponse(item *guidancev1.SmartAppointmentPlanItem) types.Smar
 		ItemID: item.GetItemId(), ItemName: item.GetItemName(), RoomID: item.GetRoomId(), RoomDisplayName: item.GetRoomDisplayName(),
 		CampusID: item.GetCampusId(), Building: item.GetBuilding(), FloorNumber: item.GetFloorNumber(), RoomNumber: item.GetRoomNumber(),
 		ServiceDate: item.GetServiceDate(), Session: item.GetSession(), EstimatedDurationMinutes: item.GetEstimatedDurationMinutes(), Reason: item.GetReason(),
+		PlannedStartTime: item.GetPlannedStartTime(), PlannedEndTime: item.GetPlannedEndTime(), TravelMinutes: item.GetTravelMinutes(), TravelTimeEstimated: item.GetTravelTimeEstimated(),
 	}
 }
