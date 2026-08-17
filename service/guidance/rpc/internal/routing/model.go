@@ -21,6 +21,15 @@ type Step struct {
 	DurationSeconds int32
 }
 
+// RouteMode 只允许患者选择系统明确支持的三种院外出行方式。
+type RouteMode string
+
+const (
+	RouteModeWalking RouteMode = "walking"
+	RouteModeTransit RouteMode = "transit"
+	RouteModeDriving RouteMode = "driving"
+)
+
 type WalkingRoute struct {
 	Origin          LocationPoint
 	Destination     LocationPoint
@@ -29,4 +38,5 @@ type WalkingRoute struct {
 	Polyline        []RoutePoint
 	Steps           []Step
 	Provider        string
+	Mode            RouteMode
 }

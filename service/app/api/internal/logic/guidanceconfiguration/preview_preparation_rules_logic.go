@@ -42,5 +42,6 @@ func (l *PreviewPreparationRulesLogic) PreviewPreparationRules(req *types.Previe
 	return &types.PreparationRulePreviewResponse{
 		Description: value.GetDescription(), PreparationRules: preparationRuleResponses(value.GetPreparationRules()),
 		Reminders: reminderResponses(value.GetReminders()), UnresolvedFragments: value.GetUnresolvedFragments(),
+		ParserMode: value.GetParserMode(), Warning: value.GetWarning(),
 	}, nil
 }

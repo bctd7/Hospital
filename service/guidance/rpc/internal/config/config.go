@@ -25,7 +25,15 @@ type Config struct {
 		PlaceSearchEndpoint string `json:",default=https://restapi.amap.com/v5/place/text"`
 		GeocodeEndpoint     string `json:",default=https://restapi.amap.com/v3/geocode/geo"`
 		WalkingEndpoint     string `json:",default=https://restapi.amap.com/v3/direction/walking"`
+		DrivingEndpoint     string `json:",default=https://restapi.amap.com/v3/direction/driving"`
+		TransitEndpoint     string `json:",default=https://restapi.amap.com/v3/direction/transit/integrated"`
 		WebServiceKey       string `json:",optional"`
 		TimeoutMilliseconds int64  `json:",default=5000"`
+	}
+	LLM struct {
+		Endpoint            string `json:",optional"`
+		APIKey              string `json:",optional"`
+		Model               string `json:",optional"`
+		TimeoutMilliseconds int64  `json:",default=10000"`
 	}
 }

@@ -1,6 +1,8 @@
 import type { SmartAppointmentPlanItem } from "@/types/guidance";
+import type { GuidanceLocationPoint, GuidanceTravelMode } from "@/types/guidance";
+import { sessionState } from "@/stores/session";
 
-const STORAGE_KEY = "hospital:guidance:route-itinerary:v1";
+const STORAGE_KEY = "hospital:guidance:route-itinerary:v2";
 
 export interface GuidanceRouteStop {
   itemId: string;
@@ -12,8 +14,12 @@ export interface GuidanceRouteStop {
 }
 
 export interface GuidanceRouteItinerary {
+  accountId: string;
   serviceDate: string;
   importedAt: string;
+  expiresAt: string;
+  transportMode: GuidanceTravelMode;
+  initialOrigin?: GuidanceLocationPoint;
   stops: GuidanceRouteStop[];
 }
 
@@ -24,11 +30,16 @@ export function saveGuidanceRouteItinerary(serviceDate: string, items: SmartAppo
     building: item.building,
     roomDisplayName: item.room_display_name,
     roomNumber: item.room_number,
-    searchKeyword: `${item.building} ${item.room_display_name}`.trim(),
+    searchKeyword: item.building.includes("上海市第二人民医院")
+      ? item.building
+      : `上海市第二人民医院${item.building}`,
   }));
   const itinerary: GuidanceRouteItinerary = {
+    accountId: sessionState.principal?.account_id ?? "",
     serviceDate,
     importedAt: new Date().toISOString(),
+    expiresAt: `${serviceDate}T23:59:59+08:00`,
+    transportMode: "walking",
     stops,
   };
   uni.setStorageSync(STORAGE_KEY, itinerary);
@@ -36,5 +47,16 @@ export function saveGuidanceRouteItinerary(serviceDate: string, items: SmartAppo
 
 export function loadGuidanceRouteItinerary(): GuidanceRouteItinerary | undefined {
   const value = uni.getStorageSync(STORAGE_KEY) as GuidanceRouteItinerary | undefined;
-  return value && Array.isArray(value.stops) && value.stops.length ? value : undefined;
+  if (!value || !Array.isArray(value.stops) || !value.stops.length) return undefined;
+  if (value.accountId !== (sessionState.principal?.account_id ?? "") || Date.parse(value.expiresAt) < Date.now()) {
+    uni.removeStorageSync(STORAGE_KEY);
+    return undefined;
+  }
+  return value;
+}
+
+export function updateGuidanceRouteItinerary(patch: Partial<Pick<GuidanceRouteItinerary, "transportMode" | "initialOrigin">>) {
+  const current = loadGuidanceRouteItinerary();
+  if (!current) return;
+  uni.setStorageSync(STORAGE_KEY, { ...current, ...patch });
 }

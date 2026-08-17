@@ -80,8 +80,8 @@ $previousHospitalCode = [Environment]::GetEnvironmentVariable("IDENTITY_BOOTSTRA
 $previousHospitalName = [Environment]::GetEnvironmentVariable("IDENTITY_BOOTSTRAP_HOSPITAL_NAME", "Process")
 $previousAdminPhones = [Environment]::GetEnvironmentVariable("IDENTITY_BOOTSTRAP_ADMIN_PHONES", "Process")
 try {
-    [Environment]::SetEnvironmentVariable("IDENTITY_BOOTSTRAP_HOSPITAL_CODE", "RH-HOSPITAL", "Process")
-    [Environment]::SetEnvironmentVariable("IDENTITY_BOOTSTRAP_HOSPITAL_NAME", "仁和医院", "Process")
+    [Environment]::SetEnvironmentVariable("IDENTITY_BOOTSTRAP_HOSPITAL_CODE", "SH-SECOND-PEOPLES-HOSPITAL", "Process")
+    [Environment]::SetEnvironmentVariable("IDENTITY_BOOTSTRAP_HOSPITAL_NAME", "上海市第二人民医院", "Process")
     [Environment]::SetEnvironmentVariable("IDENTITY_BOOTSTRAP_ADMIN_PHONES", "13482154556,15363658538", "Process")
     Push-Location $repositoryRoot
     try {
@@ -137,7 +137,7 @@ SELECT IF(
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings) = 31
   AND (SELECT COUNT(DISTINCT status) FROM hospital_appointment.appointment_bookings) = 8
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_items
-       WHERE estimated_duration_minutes BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes, 5) = 0) = 10
+       WHERE estimated_duration_minutes BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes, 5) = 0) = 11
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings
        WHERE estimated_duration_minutes_snapshot BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes_snapshot, 5) = 0) = 31
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings WHERE status = 'canceled') >= 1
@@ -162,7 +162,7 @@ SELECT IF(
        JOIN hospital_appointment.appointment_examination_reports report ON report.patient_account_id = p.account_id
        WHERE p.phone_fingerprint = @phone_patient_1 AND report.status = 'published') >= 4
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_message_reads) >= 1
-  AND (SELECT COUNT(*) FROM hospital_guidance.guidance_item_configurations) = 10
+  AND (SELECT COUNT(*) FROM hospital_guidance.guidance_item_configurations) = 11
   AND (SELECT COUNT(*) FROM hospital_guidance.guidance_precedence_rules
        WHERE predecessor_department_id <> successor_department_id) >= 1,
   'ready', 'incomplete');
@@ -180,4 +180,4 @@ Write-Output "Ultrasound doctor: 13800000002"
 Write-Output "Report patient (also a super administrator): 15363658538"
 Write-Output "Login-capable patients: 13900000002 through 13900000004"
 Write-Output "Display-only patients: 张伟、刘洋、陈静、孙磊、周婷、吴昊、林悦"
-Write-Output "Coverage: 31 bookings, 8 statuses, 5 room queues, 8 reports"
+Write-Output "Coverage: 11 examination items across 1/2/3号楼, 31 bookings, 8 statuses, 5 room queues, 8 reports"

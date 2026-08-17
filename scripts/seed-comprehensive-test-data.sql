@@ -33,8 +33,8 @@ SET @account_patient_10 = '21000000-0000-4000-8000-000000000010';
 SET @account_patient_11 = '21000000-0000-4000-8000-000000000011';
 
 INSERT INTO identity_organization_units (id, parent_id, unit_type, code, name, status, version) VALUES
-(@campus_main, @hospital, 'campus', 'MAIN', '总院区', 'active', 1),
-(@campus_east, @hospital, 'campus', 'EAST', '东院区', 'active', 1),
+(@campus_main, @hospital, 'campus', 'MAIN', '上海市第二人民医院本部', 'active', 1),
+(@campus_east, @hospital, 'campus', 'EAST', '上海市第二人民医院体检院区', 'active', 1),
 (@dept_radiology_main, @campus_main, 'department', 'RAD-MAIN', '放射科', 'active', 1),
 (@dept_ultrasound_main, @campus_main, 'department', 'US-MAIN', '超声科', 'active', 1),
 (@dept_radiology_east, @campus_east, 'department', 'RAD-EAST', '放射科', 'active', 1),
@@ -168,6 +168,7 @@ SET @item_blood = '30000000-0000-4000-8000-000000000007';
 SET @item_cta = '30000000-0000-4000-8000-000000000008';
 SET @item_thyroid_ultrasound = '30000000-0000-4000-8000-000000000009';
 SET @item_liver_function = '30000000-0000-4000-8000-000000000010';
+SET @item_urinary_ultrasound = '30000000-0000-4000-8000-000000000011';
 
 INSERT INTO appointment_examination_items
     (id, owner_department_id, name, description, estimated_duration_minutes,
@@ -184,7 +185,8 @@ VALUES
 (@item_blood, @dept_laboratory_east, '血常规', '静脉血常规检查。', 10, '白细胞：\n红细胞：\n血小板：', '血常规检查结论：', '', '', 1, 'active', 1, @now, @now),
 (@item_cta, @dept_radiology_main, '冠状动脉CTA', '冠状动脉CT血管成像，检查前请遵医嘱完成相关准备。', 45, '冠状动脉起源及走行：\n管腔与斑块情况：', '冠状动脉CTA检查结论：', '请结合临床及相关检查综合评估。', '', 1, 'active', 1, @now, @now),
 (@item_thyroid_ultrasound, @dept_ultrasound_main, '甲状腺彩超', '甲状腺及颈部相关区域超声检查。', 20, '甲状腺大小、形态及回声：\n颈部淋巴结：', '甲状腺超声检查结论：', '', '', 1, 'active', 1, @now, @now),
-(@item_liver_function, @dept_laboratory_east, '肝功能检查', '通过静脉采血检测常用肝功能指标，是否空腹请以医嘱为准。', 15, '主要检测指标：', '肝功能检查结论：', '请结合临床及其他检查结果。', '', 1, 'active', 1, @now, @now);
+(@item_liver_function, @dept_laboratory_east, '肝功能检查', '检查前需空腹 8～12 小时，以保证检验结果准确。', 15, '主要检测指标：', '肝功能检查结论：', '请结合临床及其他检查结果。', '', 1, 'active', 1, @now, @now),
+(@item_urinary_ultrasound, @dept_ultrasound_main, '泌尿系彩超', '检查前 2～4 小时适量饮水并憋尿，出现明显尿意即可前往检查。', 20, '双肾、输尿管及膀胱超声所见：', '泌尿系超声检查结论：', '', '', 1, 'active', 1, @now, @now);
 
 -- Guidance 是检查说明与导诊规则的事实来源；Appointment 中的 description 是患者目录发布快照。
 USE hospital_guidance;
@@ -206,10 +208,13 @@ VALUES
     JSON_OBJECT('text', '请按检查说明和医嘱提前用药。')
 ), 1, @account_doctor_1, @now, @now),
 (@item_thyroid_ultrasound, '甲状腺及颈部相关区域超声检查。', JSON_ARRAY(), JSON_ARRAY(), 1, @account_doctor_2, @now, @now),
-(@item_liver_function, '肝功能检查需空腹，前一天20:00后禁食禁水。', JSON_ARRAY(
-    JSON_OBJECT('rule_type', 'fasting', 'start_mode', 'previous_day_time', 'previous_day_time', '20:00'),
-    JSON_OBJECT('rule_type', 'no_water', 'start_mode', 'previous_day_time', 'previous_day_time', '20:00')
-), JSON_ARRAY(), 1, @account_doctor_4, @now, @now);
+(@item_liver_function, '肝功能检查前需空腹 8～12 小时。', JSON_ARRAY(
+    JSON_OBJECT('rule_type', 'fasting', 'start_mode', 'advance_range', 'min_advance_minutes', 480, 'recommended_advance_minutes', 480, 'max_advance_minutes', 720, 'source', 'explicit'),
+    JSON_OBJECT('rule_type', 'no_water', 'start_mode', 'advance_range', 'min_advance_minutes', 480, 'recommended_advance_minutes', 480, 'max_advance_minutes', 720, 'source', 'explicit')
+), JSON_ARRAY(), 1, @account_doctor_4, @now, @now),
+(@item_urinary_ultrasound, '检查前 2～4 小时适量饮水并憋尿，出现明显尿意即可前往检查。', JSON_ARRAY(
+    JSON_OBJECT('rule_type', 'drink_water', 'start_mode', 'advance_range', 'min_advance_minutes', 120, 'recommended_advance_minutes', 180, 'max_advance_minutes', 240, 'readiness_hint', '出现明显尿意即可前往检查。', 'source', 'explicit')
+), JSON_ARRAY(), 1, @account_doctor_2, @now, @now);
 
 INSERT INTO guidance_precedence_rules
     (id, owner_item_id, predecessor_item_id, predecessor_department_id, predecessor_item_name,
@@ -233,12 +238,12 @@ SET @room_lab201 = '31000000-0000-4000-8000-000000000006';
 INSERT INTO appointment_rooms
     (id, department_id, campus_id, building, floor_number, room_number, version, created_at, updated_at)
 VALUES
-(@room_ct201, @dept_radiology_main, @campus_main, '影像楼', 2, 'CT201', 1, @now, @now),
-(@room_ct202, @dept_radiology_main, @campus_main, '影像楼', 2, 'CT202', 1, @now, @now),
-(@room_dr101, @dept_radiology_main, @campus_main, '影像楼', 1, 'DR101', 1, @now, @now),
-(@room_us301, @dept_ultrasound_main, @campus_main, '门诊楼', 3, 'US301', 1, @now, @now),
-(@room_east_ct105, @dept_radiology_east, @campus_east, '医技楼', 1, 'CT105', 1, @now, @now),
-(@room_lab201, @dept_laboratory_east, @campus_east, '医技楼', 2, 'LAB201', 1, @now, @now);
+(@room_ct201, @dept_radiology_main, @campus_main, '1号楼', 2, 'CT201', 1, @now, @now),
+(@room_ct202, @dept_radiology_main, @campus_main, '1号楼', 2, 'CT202', 1, @now, @now),
+(@room_dr101, @dept_radiology_main, @campus_main, '1号楼', 1, 'DR101', 1, @now, @now),
+(@room_us301, @dept_ultrasound_main, @campus_main, '2号楼', 3, 'US301', 1, @now, @now),
+(@room_east_ct105, @dept_radiology_east, @campus_east, '2号楼', 1, 'CT105', 1, @now, @now),
+(@room_lab201, @dept_laboratory_east, @campus_east, '3号楼', 2, 'LAB201', 1, @now, @now);
 
 INSERT INTO appointment_room_examination_items
     (id, room_id, item_id, status, version, created_at, updated_at)
@@ -254,7 +259,8 @@ VALUES
 ('32000000-0000-4000-8000-000000000009', @room_ct201, @item_cta, 'active', 1, @now, @now),
 ('32000000-0000-4000-8000-000000000010', @room_ct202, @item_cta, 'active', 1, @now, @now),
 ('32000000-0000-4000-8000-000000000011', @room_us301, @item_thyroid_ultrasound, 'active', 1, @now, @now),
-('32000000-0000-4000-8000-000000000012', @room_lab201, @item_liver_function, 'active', 1, @now, @now);
+('32000000-0000-4000-8000-000000000012', @room_lab201, @item_liver_function, 'active', 1, @now, @now),
+('32000000-0000-4000-8000-000000000013', @room_us301, @item_urinary_ultrasound, 'active', 1, @now, @now);
 
 INSERT INTO appointment_room_weekly_windows
     (id, room_id, weekday, session, open_time, close_time, active_capacity, status, version, created_at, updated_at)
@@ -559,14 +565,14 @@ INSERT INTO appointment_examination_reports
      examination_started_at, examination_completed_at, current_version_id,
      version, created_at, updated_at)
 VALUES
-(@report_draft, @booking_in_progress, @account_patient_4, '赵强', '139****0004', @dept_radiology_main, '放射科', @item_urgent_ct, '当日急诊CT', @room_ct201, @campus_main, '总院区', '影像楼', 2, 'CT201', 'draft', @account_doctor_1, '陈医生', IF(TIMESTAMPDIFF(SECOND, @current_session_started_at_utc, DATE_SUB(@now, INTERVAL 20 MINUTE)) > 0, DATE_SUB(@now, INTERVAL 20 MINUTE), CAST(@current_session_started_at_utc AS DATETIME)), NULL, NULL, 1, IF(TIMESTAMPDIFF(SECOND, @current_session_started_at_utc, DATE_SUB(@now, INTERVAL 20 MINUTE)) > 0, DATE_SUB(@now, INTERVAL 20 MINUTE), CAST(@current_session_started_at_utc AS DATETIME)), @now),
-(@report_published, @booking_completed, @account_patient_1, '体验管理员', @phone_patient_1_masked, @dept_ultrasound_main, '超声科', @item_ultrasound, '腹部彩超', @room_us301, @campus_main, '总院区', '门诊楼', 3, 'US301', 'published', @account_doctor_2, '周医生', CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@yesterday, '09:40:00'), '+08:00', '+00:00'), NULL, 1, CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), @now),
-(@report_corrected, @booking_corrected, @account_patient_1, '体验管理员', @phone_patient_1_masked, @dept_radiology_main, '放射科', @item_xray, '胸部X线正侧位', @room_dr101, @campus_main, '总院区', '影像楼', 1, 'DR101', 'published', @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:20:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:50:00'), '+08:00', '+00:00'), NULL, 2, CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:20:00'), '+08:00', '+00:00'), @now),
-(@report_admin_liver, @booking_admin_liver_completed, @account_patient_1, '体验管理员', @phone_patient_1_masked, @dept_laboratory_east, '检验科', @item_liver_function, '肝功能检查', @room_lab201, @campus_east, '东院区', '医技楼', 2, 'LAB201', 'published', @account_doctor_4, '孙医生', CONVERT_TZ(TIMESTAMP(@three_days_ago, '09:05:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@three_days_ago, '09:20:00'), '+08:00', '+00:00'), NULL, 1, CONVERT_TZ(TIMESTAMP(@three_days_ago, '09:05:00'), '+08:00', '+00:00'), @now),
-(@report_admin_ct, @booking_admin_ct_completed, @account_patient_1, '体验管理员', @phone_patient_1_masked, @dept_radiology_main, '放射科', @item_ct, '胸部CT平扫', @room_ct202, @campus_main, '总院区', '影像楼', 2, 'CT202', 'published', @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@five_days_ago, '09:30:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@five_days_ago, '09:50:00'), '+08:00', '+00:00'), NULL, 1, CONVERT_TZ(TIMESTAMP(@five_days_ago, '09:30:00'), '+08:00', '+00:00'), @now),
-(@report_east, @booking_east_completed, @account_patient_7, '陈静', '139****0107', @dept_radiology_east, '放射科', @item_east_ct, '胸部CT平扫', @room_east_ct105, @campus_east, '东院区', '医技楼', 1, 'CT105', 'published', @account_doctor_3, '刘医生', CONVERT_TZ(TIMESTAMP(@two_days_ago, '14:15:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@two_days_ago, '14:35:00'), '+08:00', '+00:00'), NULL, 1, CONVERT_TZ(TIMESTAMP(@two_days_ago, '14:15:00'), '+08:00', '+00:00'), @now),
-(@report_lab_draft, @booking_lab_report_pending, @account_patient_6, '刘洋', '139****0106', @dept_laboratory_east, '检验科', @item_liver_function, '肝功能检查', @room_lab201, @campus_east, '东院区', '医技楼', 2, 'LAB201', 'draft', @account_doctor_4, '孙医生', CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@yesterday, '09:25:00'), '+08:00', '+00:00'), NULL, 1, CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), @now),
-(@report_ct_other, @booking_ct_completed_other, @account_patient_9, '周婷', '139****0109', @dept_radiology_main, '放射科', @item_ct, '胸部CT平扫', @room_ct201, @campus_main, '总院区', '影像楼', 2, 'CT201', 'published', @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@yesterday, '14:20:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@yesterday, '14:40:00'), '+08:00', '+00:00'), NULL, 1, CONVERT_TZ(TIMESTAMP(@yesterday, '14:20:00'), '+08:00', '+00:00'), @now);
+(@report_draft, @booking_in_progress, @account_patient_4, '赵强', '139****0004', @dept_radiology_main, '放射科', @item_urgent_ct, '当日急诊CT', @room_ct201, @campus_main, '上海市第二人民医院本部', '1号楼', 2, 'CT201', 'draft', @account_doctor_1, '陈医生', IF(TIMESTAMPDIFF(SECOND, @current_session_started_at_utc, DATE_SUB(@now, INTERVAL 20 MINUTE)) > 0, DATE_SUB(@now, INTERVAL 20 MINUTE), CAST(@current_session_started_at_utc AS DATETIME)), NULL, NULL, 1, IF(TIMESTAMPDIFF(SECOND, @current_session_started_at_utc, DATE_SUB(@now, INTERVAL 20 MINUTE)) > 0, DATE_SUB(@now, INTERVAL 20 MINUTE), CAST(@current_session_started_at_utc AS DATETIME)), @now),
+(@report_published, @booking_completed, @account_patient_1, '体验管理员', @phone_patient_1_masked, @dept_ultrasound_main, '超声科', @item_ultrasound, '腹部彩超', @room_us301, @campus_main, '上海市第二人民医院本部', '2号楼', 3, 'US301', 'published', @account_doctor_2, '周医生', CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@yesterday, '09:40:00'), '+08:00', '+00:00'), NULL, 1, CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), @now),
+(@report_corrected, @booking_corrected, @account_patient_1, '体验管理员', @phone_patient_1_masked, @dept_radiology_main, '放射科', @item_xray, '胸部X线正侧位', @room_dr101, @campus_main, '上海市第二人民医院本部', '1号楼', 1, 'DR101', 'published', @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:20:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:50:00'), '+08:00', '+00:00'), NULL, 2, CONVERT_TZ(TIMESTAMP(@two_days_ago, '09:20:00'), '+08:00', '+00:00'), @now),
+(@report_admin_liver, @booking_admin_liver_completed, @account_patient_1, '体验管理员', @phone_patient_1_masked, @dept_laboratory_east, '检验科', @item_liver_function, '肝功能检查', @room_lab201, @campus_east, '上海市第二人民医院体检院区', '3号楼', 2, 'LAB201', 'published', @account_doctor_4, '孙医生', CONVERT_TZ(TIMESTAMP(@three_days_ago, '09:05:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@three_days_ago, '09:20:00'), '+08:00', '+00:00'), NULL, 1, CONVERT_TZ(TIMESTAMP(@three_days_ago, '09:05:00'), '+08:00', '+00:00'), @now),
+(@report_admin_ct, @booking_admin_ct_completed, @account_patient_1, '体验管理员', @phone_patient_1_masked, @dept_radiology_main, '放射科', @item_ct, '胸部CT平扫', @room_ct202, @campus_main, '上海市第二人民医院本部', '1号楼', 2, 'CT202', 'published', @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@five_days_ago, '09:30:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@five_days_ago, '09:50:00'), '+08:00', '+00:00'), NULL, 1, CONVERT_TZ(TIMESTAMP(@five_days_ago, '09:30:00'), '+08:00', '+00:00'), @now),
+(@report_east, @booking_east_completed, @account_patient_7, '陈静', '139****0107', @dept_radiology_east, '放射科', @item_east_ct, '胸部CT平扫', @room_east_ct105, @campus_east, '上海市第二人民医院体检院区', '2号楼', 1, 'CT105', 'published', @account_doctor_3, '刘医生', CONVERT_TZ(TIMESTAMP(@two_days_ago, '14:15:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@two_days_ago, '14:35:00'), '+08:00', '+00:00'), NULL, 1, CONVERT_TZ(TIMESTAMP(@two_days_ago, '14:15:00'), '+08:00', '+00:00'), @now),
+(@report_lab_draft, @booking_lab_report_pending, @account_patient_6, '刘洋', '139****0106', @dept_laboratory_east, '检验科', @item_liver_function, '肝功能检查', @room_lab201, @campus_east, '上海市第二人民医院体检院区', '3号楼', 2, 'LAB201', 'draft', @account_doctor_4, '孙医生', CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@yesterday, '09:25:00'), '+08:00', '+00:00'), NULL, 1, CONVERT_TZ(TIMESTAMP(@yesterday, '09:10:00'), '+08:00', '+00:00'), @now),
+(@report_ct_other, @booking_ct_completed_other, @account_patient_9, '周婷', '139****0109', @dept_radiology_main, '放射科', @item_ct, '胸部CT平扫', @room_ct201, @campus_main, '上海市第二人民医院本部', '1号楼', 2, 'CT201', 'published', @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@yesterday, '14:20:00'), '+08:00', '+00:00'), CONVERT_TZ(TIMESTAMP(@yesterday, '14:40:00'), '+08:00', '+00:00'), NULL, 1, CONVERT_TZ(TIMESTAMP(@yesterday, '14:20:00'), '+08:00', '+00:00'), @now);
 
 INSERT INTO appointment_examination_report_versions
     (id, report_id, version_no, version_kind, status, objective_findings, impression,

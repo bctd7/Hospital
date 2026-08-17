@@ -29,7 +29,13 @@ func (l *GenerateSmartAppointmentPlansLogic) GenerateSmartAppointmentPlans(in *v
 	if err != nil {
 		return nil, err
 	}
-	plans, err := l.svcCtx.PlanningManager.Generate(l.ctx, principal, planning.GenerateCommand{ItemIDs: in.GetItemIds(), CandidateDates: in.GetCandidateDates()})
+	availability := make([]planning.CandidateAvailability, 0, len(in.GetCandidateAvailability()))
+	for _, value := range in.GetCandidateAvailability() {
+		availability = append(availability, planning.CandidateAvailability{ServiceDate: value.GetServiceDate(), Sessions: value.GetSessions()})
+	}
+	plans, err := l.svcCtx.PlanningManager.Generate(l.ctx, principal, planning.GenerateCommand{
+		ItemIDs: in.GetItemIds(), CandidateDates: in.GetCandidateDates(), CandidateAvailability: availability,
+	})
 	if err != nil {
 		return nil, planningRPCError(err)
 	}

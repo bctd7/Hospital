@@ -54,14 +54,6 @@ function patientHome(): HomeWorkbenchView {
             target: { type: "navigate", url: "/pages/profile/patients/index" },
           },
           {
-            id: "today-guidance",
-            title: "当日检查顺序",
-            description: "查看今天的推荐检查阶段",
-            symbol: "序",
-            tone: "cyan",
-            target: { type: "navigate", url: "/pages/guidance/today/index" },
-          },
-          {
             id: "walking-route",
             title: "检查导航",
             description: "选择起终点查看步行路线",

@@ -2,8 +2,13 @@ syntax = "v1"
 
 type (
 	GenerateSmartAppointmentPlansRequest {
-		ItemIDs        []string `json:"item_ids"`
-		CandidateDates []string `json:"candidate_dates"`
+		ItemIDs               []string                `json:"item_ids"`
+		CandidateAvailability []CandidateAvailability `json:"candidate_availability"`
+	}
+
+	CandidateAvailability {
+		ServiceDate string   `json:"service_date"`
+		Sessions    []string `json:"sessions"`
 	}
 
 	SmartAppointmentPlanItem {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"sort"
+	"strconv"
 	"time"
 
 	"hospital/common/authn"
@@ -17,7 +18,7 @@ func (m *Manager) Generate(ctx context.Context, patient authn.Principal, command
 	if err := requirePatient(patient); err != nil {
 		return nil, err
 	}
-	itemIDs, dates, err := normalizeGenerate(command)
+	itemIDs, availability, err := normalizeGenerate(command)
 	if err != nil {
 		return nil, err
 	}
@@ -28,9 +29,22 @@ func (m *Manager) Generate(ctx context.Context, patient authn.Principal, command
 	projects := make(map[string]projectconfiguration.Project, len(itemIDs))
 	configurations := make(map[string]projectconfiguration.Configuration, len(itemIDs))
 	options := make(map[string][]Option, len(itemIDs))
-	dateSet := make(map[string]struct{}, len(dates))
-	for _, date := range dates {
-		dateSet[date] = struct{}{}
+	allowedSlots := make(map[string]struct{}, len(availability)*2)
+	startingSlots := make([]string, 0, len(availability)*2)
+	for _, value := range availability {
+		for _, session := range value.Sessions {
+			slot := value.ServiceDate + ":" + session
+			allowedSlots[slot] = struct{}{}
+			startingSlots = append(startingSlots, value.ServiceDate+":"+strconv.Itoa(sessionRank(session)))
+		}
+	}
+	activeBookings, err := m.appointment.ListMyBookings(ctx, "active")
+	if err != nil {
+		return nil, err
+	}
+	occupied := make(map[string]struct{}, len(activeBookings))
+	for _, booking := range activeBookings {
+		occupied[booking.ItemID+":"+booking.ServiceDate+":"+booking.Session] = struct{}{}
 	}
 	for _, itemID := range itemIDs {
 		project, loadErr := m.appointment.ResolveProject(ctx, itemID)
@@ -47,7 +61,9 @@ func (m *Manager) Generate(ctx context.Context, patient authn.Principal, command
 		}
 		filtered := available[:0]
 		for _, option := range available {
-			if _, ok := dateSet[option.ServiceDate]; ok && option.RemainingCapacity > 0 {
+			_, allowed := allowedSlots[option.ServiceDate+":"+option.Session]
+			_, duplicate := occupied[itemID+":"+option.ServiceDate+":"+option.Session]
+			if allowed && !duplicate && option.RemainingCapacity > 0 {
 				filtered = append(filtered, option)
 			}
 		}
@@ -61,9 +77,9 @@ func (m *Manager) Generate(ctx context.Context, patient authn.Principal, command
 	requestFingerprint := fingerprint(command)
 	plans := make([]Plan, 0, 3)
 	seen := make(map[string]struct{})
-	for variant := 0; variant < 3 && variant < len(dates); variant++ {
+	for variant := 0; variant < 3 && variant < len(startingSlots); variant++ {
 		items := make([]PlanItem, 0, len(ordered))
-		minimumSlot := dates[variant] + ":0"
+		minimumSlot := startingSlots[variant]
 		reservedCapacity := make(map[string]int64)
 		valid := true
 		for _, itemID := range ordered {

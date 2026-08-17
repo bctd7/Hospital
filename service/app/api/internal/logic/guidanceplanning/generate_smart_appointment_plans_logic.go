@@ -33,8 +33,15 @@ func (l *GenerateSmartAppointmentPlansLogic) GenerateSmartAppointmentPlans(req *
 	if err != nil {
 		return nil, err
 	}
+	availability := make([]*guidancev1.CandidateAvailability, 0, len(req.CandidateAvailability))
+	for _, candidate := range req.CandidateAvailability {
+		availability = append(availability, &guidancev1.CandidateAvailability{
+			ServiceDate: candidate.ServiceDate,
+			Sessions:    candidate.Sessions,
+		})
+	}
 	value, err := l.svcCtx.Guidance.GenerateSmartAppointmentPlans(rpcCtx, &guidancev1.GenerateSmartAppointmentPlansRequest{
-		ItemIds: req.ItemIDs, CandidateDates: req.CandidateDates, RequestId: logging.RequestIDFromContext(l.ctx),
+		ItemIds: req.ItemIDs, CandidateAvailability: availability, RequestId: logging.RequestIDFromContext(l.ctx),
 	})
 	if err != nil {
 		return nil, err

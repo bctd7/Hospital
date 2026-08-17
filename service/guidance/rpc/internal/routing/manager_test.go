@@ -18,10 +18,10 @@ func (p *providerStub) SearchPlaces(_ context.Context, input PlaceSearchInput) (
 	return []LocationPoint{{Name: "123号楼", Latitude: 31.1, Longitude: 121.1}}, nil
 }
 
-func (p *providerStub) CalculateWalkingRoute(_ context.Context, origin, destination LocationPoint) (WalkingRoute, error) {
+func (p *providerStub) CalculateRoute(_ context.Context, mode RouteMode, origin, destination LocationPoint) (WalkingRoute, error) {
 	p.routeCalls++
 	p.origin, p.destination = origin, destination
-	return WalkingRoute{Origin: origin, Destination: destination, Provider: "stub"}, nil
+	return WalkingRoute{Origin: origin, Destination: destination, Provider: "stub", Mode: mode}, nil
 }
 
 func TestManagerNormalizesPlaceSearch(t *testing.T) {

@@ -52,7 +52,14 @@ type TodayRecommendation struct {
 }
 
 type GenerateCommand struct {
-	ItemIDs, CandidateDates []string
+	ItemIDs               []string
+	CandidateDates        []string
+	CandidateAvailability []CandidateAvailability
+}
+
+type CandidateAvailability struct {
+	ServiceDate string
+	Sessions    []string
 }
 
 type ConfirmCommand struct {

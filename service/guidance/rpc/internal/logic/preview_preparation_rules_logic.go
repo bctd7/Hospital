@@ -33,12 +33,13 @@ func (l *PreviewPreparationRulesLogic) PreviewPreparationRules(in *v1_guidancev1
 	if err := requireGuidanceStaff(principal); err != nil {
 		return nil, err
 	}
-	preview, err := l.svcCtx.ProjectConfigurationManager.Preview(in.GetDescription())
+	preview, err := l.svcCtx.ProjectConfigurationManager.Preview(l.ctx, in.GetDescription())
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid preparation description")
 	}
 	return &v1_guidancev1.PreparationRulePreview{
 		Description: preview.Description, PreparationRules: preparationResponses(preview.Rules),
 		Reminders: reminderResponses(preview.Reminders), UnresolvedFragments: preview.UnresolvedFragments,
+		ParserMode: preview.ParserMode, Warning: preview.Warning,
 	}, nil
 }

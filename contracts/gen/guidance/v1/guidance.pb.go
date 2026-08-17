@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v7.34.1
-// source: guidance/v1/guidance.proto
+// source: contracts/proto/guidance/v1/guidance.proto
 
 package guidancev1
 
@@ -35,7 +35,7 @@ type CreatePrecedenceRuleRequest struct {
 
 func (x *CreatePrecedenceRuleRequest) Reset() {
 	*x = CreatePrecedenceRuleRequest{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[0]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -47,7 +47,7 @@ func (x *CreatePrecedenceRuleRequest) String() string {
 func (*CreatePrecedenceRuleRequest) ProtoMessage() {}
 
 func (x *CreatePrecedenceRuleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[0]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -60,7 +60,7 @@ func (x *CreatePrecedenceRuleRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePrecedenceRuleRequest.ProtoReflect.Descriptor instead.
 func (*CreatePrecedenceRuleRequest) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{0}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *CreatePrecedenceRuleRequest) GetPredecessorItemId() string {
@@ -119,7 +119,7 @@ type UpdatePrecedenceRuleRequest struct {
 
 func (x *UpdatePrecedenceRuleRequest) Reset() {
 	*x = UpdatePrecedenceRuleRequest{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[1]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -131,7 +131,7 @@ func (x *UpdatePrecedenceRuleRequest) String() string {
 func (*UpdatePrecedenceRuleRequest) ProtoMessage() {}
 
 func (x *UpdatePrecedenceRuleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[1]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -144,7 +144,7 @@ func (x *UpdatePrecedenceRuleRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdatePrecedenceRuleRequest.ProtoReflect.Descriptor instead.
 func (*UpdatePrecedenceRuleRequest) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{1}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UpdatePrecedenceRuleRequest) GetRuleId() string {
@@ -201,7 +201,7 @@ type DeletePrecedenceRuleRequest struct {
 
 func (x *DeletePrecedenceRuleRequest) Reset() {
 	*x = DeletePrecedenceRuleRequest{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[2]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -213,7 +213,7 @@ func (x *DeletePrecedenceRuleRequest) String() string {
 func (*DeletePrecedenceRuleRequest) ProtoMessage() {}
 
 func (x *DeletePrecedenceRuleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[2]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -226,7 +226,7 @@ func (x *DeletePrecedenceRuleRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeletePrecedenceRuleRequest.ProtoReflect.Descriptor instead.
 func (*DeletePrecedenceRuleRequest) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{2}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *DeletePrecedenceRuleRequest) GetRuleId() string {
@@ -267,7 +267,7 @@ type DeletePrecedenceRuleResponse struct {
 
 func (x *DeletePrecedenceRuleResponse) Reset() {
 	*x = DeletePrecedenceRuleResponse{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[3]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -279,7 +279,7 @@ func (x *DeletePrecedenceRuleResponse) String() string {
 func (*DeletePrecedenceRuleResponse) ProtoMessage() {}
 
 func (x *DeletePrecedenceRuleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[3]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -292,7 +292,7 @@ func (x *DeletePrecedenceRuleResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeletePrecedenceRuleResponse.ProtoReflect.Descriptor instead.
 func (*DeletePrecedenceRuleResponse) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{3}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *DeletePrecedenceRuleResponse) GetRuleId() string {
@@ -321,7 +321,7 @@ type ListPrecedenceRulesRequest struct {
 
 func (x *ListPrecedenceRulesRequest) Reset() {
 	*x = ListPrecedenceRulesRequest{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[4]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -333,7 +333,7 @@ func (x *ListPrecedenceRulesRequest) String() string {
 func (*ListPrecedenceRulesRequest) ProtoMessage() {}
 
 func (x *ListPrecedenceRulesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[4]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -346,7 +346,7 @@ func (x *ListPrecedenceRulesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPrecedenceRulesRequest.ProtoReflect.Descriptor instead.
 func (*ListPrecedenceRulesRequest) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{4}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ListPrecedenceRulesRequest) GetItemId() string {
@@ -400,7 +400,7 @@ type PrecedenceRule struct {
 
 func (x *PrecedenceRule) Reset() {
 	*x = PrecedenceRule{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[5]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -412,7 +412,7 @@ func (x *PrecedenceRule) String() string {
 func (*PrecedenceRule) ProtoMessage() {}
 
 func (x *PrecedenceRule) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[5]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -425,7 +425,7 @@ func (x *PrecedenceRule) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PrecedenceRule.ProtoReflect.Descriptor instead.
 func (*PrecedenceRule) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{5}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *PrecedenceRule) GetRuleId() string {
@@ -542,7 +542,7 @@ type ListPrecedenceRulesResponse struct {
 
 func (x *ListPrecedenceRulesResponse) Reset() {
 	*x = ListPrecedenceRulesResponse{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[6]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -554,7 +554,7 @@ func (x *ListPrecedenceRulesResponse) String() string {
 func (*ListPrecedenceRulesResponse) ProtoMessage() {}
 
 func (x *ListPrecedenceRulesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[6]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -567,7 +567,7 @@ func (x *ListPrecedenceRulesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPrecedenceRulesResponse.ProtoReflect.Descriptor instead.
 func (*ListPrecedenceRulesResponse) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{6}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ListPrecedenceRulesResponse) GetRules() []*PrecedenceRule {
@@ -586,13 +586,14 @@ type PreparationRule struct {
 	MaxAdvanceMinutes         int32                  `protobuf:"varint,5,opt,name=max_advance_minutes,json=maxAdvanceMinutes,proto3" json:"max_advance_minutes,omitempty"`
 	PreviousDayTime           string                 `protobuf:"bytes,6,opt,name=previous_day_time,json=previousDayTime,proto3" json:"previous_day_time,omitempty"`
 	ReadinessHint             string                 `protobuf:"bytes,7,opt,name=readiness_hint,json=readinessHint,proto3" json:"readiness_hint,omitempty"`
+	Source                    string                 `protobuf:"bytes,8,opt,name=source,proto3" json:"source,omitempty"`
 	unknownFields             protoimpl.UnknownFields
 	sizeCache                 protoimpl.SizeCache
 }
 
 func (x *PreparationRule) Reset() {
 	*x = PreparationRule{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[7]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -604,7 +605,7 @@ func (x *PreparationRule) String() string {
 func (*PreparationRule) ProtoMessage() {}
 
 func (x *PreparationRule) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[7]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -617,7 +618,7 @@ func (x *PreparationRule) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PreparationRule.ProtoReflect.Descriptor instead.
 func (*PreparationRule) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{7}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *PreparationRule) GetRuleType() string {
@@ -669,6 +670,13 @@ func (x *PreparationRule) GetReadinessHint() string {
 	return ""
 }
 
+func (x *PreparationRule) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
 type PatientReminder struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	Text           string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
@@ -679,7 +687,7 @@ type PatientReminder struct {
 
 func (x *PatientReminder) Reset() {
 	*x = PatientReminder{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[8]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -691,7 +699,7 @@ func (x *PatientReminder) String() string {
 func (*PatientReminder) ProtoMessage() {}
 
 func (x *PatientReminder) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[8]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -704,7 +712,7 @@ func (x *PatientReminder) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PatientReminder.ProtoReflect.Descriptor instead.
 func (*PatientReminder) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{8}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *PatientReminder) GetText() string {
@@ -727,13 +735,15 @@ type PreparationRulePreview struct {
 	PreparationRules    []*PreparationRule     `protobuf:"bytes,2,rep,name=preparation_rules,json=preparationRules,proto3" json:"preparation_rules,omitempty"`
 	Reminders           []*PatientReminder     `protobuf:"bytes,3,rep,name=reminders,proto3" json:"reminders,omitempty"`
 	UnresolvedFragments []string               `protobuf:"bytes,4,rep,name=unresolved_fragments,json=unresolvedFragments,proto3" json:"unresolved_fragments,omitempty"`
+	ParserMode          string                 `protobuf:"bytes,5,opt,name=parser_mode,json=parserMode,proto3" json:"parser_mode,omitempty"`
+	Warning             string                 `protobuf:"bytes,6,opt,name=warning,proto3" json:"warning,omitempty"`
 	unknownFields       protoimpl.UnknownFields
 	sizeCache           protoimpl.SizeCache
 }
 
 func (x *PreparationRulePreview) Reset() {
 	*x = PreparationRulePreview{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[9]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -745,7 +755,7 @@ func (x *PreparationRulePreview) String() string {
 func (*PreparationRulePreview) ProtoMessage() {}
 
 func (x *PreparationRulePreview) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[9]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -758,7 +768,7 @@ func (x *PreparationRulePreview) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PreparationRulePreview.ProtoReflect.Descriptor instead.
 func (*PreparationRulePreview) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{9}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *PreparationRulePreview) GetDescription() string {
@@ -789,6 +799,20 @@ func (x *PreparationRulePreview) GetUnresolvedFragments() []string {
 	return nil
 }
 
+func (x *PreparationRulePreview) GetParserMode() string {
+	if x != nil {
+		return x.ParserMode
+	}
+	return ""
+}
+
+func (x *PreparationRulePreview) GetWarning() string {
+	if x != nil {
+		return x.Warning
+	}
+	return ""
+}
+
 type PreviewPreparationRulesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Description   string                 `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
@@ -799,7 +823,7 @@ type PreviewPreparationRulesRequest struct {
 
 func (x *PreviewPreparationRulesRequest) Reset() {
 	*x = PreviewPreparationRulesRequest{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[10]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -811,7 +835,7 @@ func (x *PreviewPreparationRulesRequest) String() string {
 func (*PreviewPreparationRulesRequest) ProtoMessage() {}
 
 func (x *PreviewPreparationRulesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[10]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -824,7 +848,7 @@ func (x *PreviewPreparationRulesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PreviewPreparationRulesRequest.ProtoReflect.Descriptor instead.
 func (*PreviewPreparationRulesRequest) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{10}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *PreviewPreparationRulesRequest) GetDescription() string {
@@ -853,7 +877,7 @@ type ConfiguredPrecedenceRule struct {
 
 func (x *ConfiguredPrecedenceRule) Reset() {
 	*x = ConfiguredPrecedenceRule{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[11]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -865,7 +889,7 @@ func (x *ConfiguredPrecedenceRule) String() string {
 func (*ConfiguredPrecedenceRule) ProtoMessage() {}
 
 func (x *ConfiguredPrecedenceRule) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[11]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -878,7 +902,7 @@ func (x *ConfiguredPrecedenceRule) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfiguredPrecedenceRule.ProtoReflect.Descriptor instead.
 func (*ConfiguredPrecedenceRule) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{11}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ConfiguredPrecedenceRule) GetPredecessorItemId() string {
@@ -929,7 +953,7 @@ type ExaminationItemConfiguration struct {
 
 func (x *ExaminationItemConfiguration) Reset() {
 	*x = ExaminationItemConfiguration{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[12]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -941,7 +965,7 @@ func (x *ExaminationItemConfiguration) String() string {
 func (*ExaminationItemConfiguration) ProtoMessage() {}
 
 func (x *ExaminationItemConfiguration) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[12]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -954,7 +978,7 @@ func (x *ExaminationItemConfiguration) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExaminationItemConfiguration.ProtoReflect.Descriptor instead.
 func (*ExaminationItemConfiguration) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{12}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ExaminationItemConfiguration) GetItemId() string {
@@ -1051,7 +1075,7 @@ type GetExaminationItemConfigurationRequest struct {
 
 func (x *GetExaminationItemConfigurationRequest) Reset() {
 	*x = GetExaminationItemConfigurationRequest{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[13]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1063,7 +1087,7 @@ func (x *GetExaminationItemConfigurationRequest) String() string {
 func (*GetExaminationItemConfigurationRequest) ProtoMessage() {}
 
 func (x *GetExaminationItemConfigurationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[13]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1076,7 +1100,7 @@ func (x *GetExaminationItemConfigurationRequest) ProtoReflect() protoreflect.Mes
 
 // Deprecated: Use GetExaminationItemConfigurationRequest.ProtoReflect.Descriptor instead.
 func (*GetExaminationItemConfigurationRequest) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{13}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *GetExaminationItemConfigurationRequest) GetItemId() string {
@@ -1114,7 +1138,7 @@ type ConfigureExaminationItemRequest struct {
 
 func (x *ConfigureExaminationItemRequest) Reset() {
 	*x = ConfigureExaminationItemRequest{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[14]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1126,7 +1150,7 @@ func (x *ConfigureExaminationItemRequest) String() string {
 func (*ConfigureExaminationItemRequest) ProtoMessage() {}
 
 func (x *ConfigureExaminationItemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[14]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1139,7 +1163,7 @@ func (x *ConfigureExaminationItemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfigureExaminationItemRequest.ProtoReflect.Descriptor instead.
 func (*ConfigureExaminationItemRequest) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{14}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ConfigureExaminationItemRequest) GetAction() string {
@@ -1234,17 +1258,18 @@ func (x *ConfigureExaminationItemRequest) GetRequestId() string {
 }
 
 type GenerateSmartAppointmentPlansRequest struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	ItemIds        []string               `protobuf:"bytes,1,rep,name=item_ids,json=itemIds,proto3" json:"item_ids,omitempty"`
-	CandidateDates []string               `protobuf:"bytes,2,rep,name=candidate_dates,json=candidateDates,proto3" json:"candidate_dates,omitempty"`
-	RequestId      string                 `protobuf:"bytes,3,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state                 protoimpl.MessageState   `protogen:"open.v1"`
+	ItemIds               []string                 `protobuf:"bytes,1,rep,name=item_ids,json=itemIds,proto3" json:"item_ids,omitempty"`
+	CandidateDates        []string                 `protobuf:"bytes,2,rep,name=candidate_dates,json=candidateDates,proto3" json:"candidate_dates,omitempty"`
+	RequestId             string                   `protobuf:"bytes,3,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	CandidateAvailability []*CandidateAvailability `protobuf:"bytes,4,rep,name=candidate_availability,json=candidateAvailability,proto3" json:"candidate_availability,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *GenerateSmartAppointmentPlansRequest) Reset() {
 	*x = GenerateSmartAppointmentPlansRequest{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[15]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1256,7 +1281,7 @@ func (x *GenerateSmartAppointmentPlansRequest) String() string {
 func (*GenerateSmartAppointmentPlansRequest) ProtoMessage() {}
 
 func (x *GenerateSmartAppointmentPlansRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[15]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1269,7 +1294,7 @@ func (x *GenerateSmartAppointmentPlansRequest) ProtoReflect() protoreflect.Messa
 
 // Deprecated: Use GenerateSmartAppointmentPlansRequest.ProtoReflect.Descriptor instead.
 func (*GenerateSmartAppointmentPlansRequest) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{15}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GenerateSmartAppointmentPlansRequest) GetItemIds() []string {
@@ -1293,6 +1318,65 @@ func (x *GenerateSmartAppointmentPlansRequest) GetRequestId() string {
 	return ""
 }
 
+func (x *GenerateSmartAppointmentPlansRequest) GetCandidateAvailability() []*CandidateAvailability {
+	if x != nil {
+		return x.CandidateAvailability
+	}
+	return nil
+}
+
+type CandidateAvailability struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ServiceDate   string                 `protobuf:"bytes,1,opt,name=service_date,json=serviceDate,proto3" json:"service_date,omitempty"`
+	Sessions      []string               `protobuf:"bytes,2,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CandidateAvailability) Reset() {
+	*x = CandidateAvailability{}
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CandidateAvailability) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CandidateAvailability) ProtoMessage() {}
+
+func (x *CandidateAvailability) ProtoReflect() protoreflect.Message {
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CandidateAvailability.ProtoReflect.Descriptor instead.
+func (*CandidateAvailability) Descriptor() ([]byte, []int) {
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *CandidateAvailability) GetServiceDate() string {
+	if x != nil {
+		return x.ServiceDate
+	}
+	return ""
+}
+
+func (x *CandidateAvailability) GetSessions() []string {
+	if x != nil {
+		return x.Sessions
+	}
+	return nil
+}
+
 type SmartAppointmentPlanItem struct {
 	state                    protoimpl.MessageState `protogen:"open.v1"`
 	ItemId                   string                 `protobuf:"bytes,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
@@ -1313,7 +1397,7 @@ type SmartAppointmentPlanItem struct {
 
 func (x *SmartAppointmentPlanItem) Reset() {
 	*x = SmartAppointmentPlanItem{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[16]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1325,7 +1409,7 @@ func (x *SmartAppointmentPlanItem) String() string {
 func (*SmartAppointmentPlanItem) ProtoMessage() {}
 
 func (x *SmartAppointmentPlanItem) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[16]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1338,7 +1422,7 @@ func (x *SmartAppointmentPlanItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SmartAppointmentPlanItem.ProtoReflect.Descriptor instead.
 func (*SmartAppointmentPlanItem) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{16}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *SmartAppointmentPlanItem) GetItemId() string {
@@ -1438,7 +1522,7 @@ type SmartAppointmentPlan struct {
 
 func (x *SmartAppointmentPlan) Reset() {
 	*x = SmartAppointmentPlan{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[17]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1450,7 +1534,7 @@ func (x *SmartAppointmentPlan) String() string {
 func (*SmartAppointmentPlan) ProtoMessage() {}
 
 func (x *SmartAppointmentPlan) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[17]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1463,7 +1547,7 @@ func (x *SmartAppointmentPlan) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SmartAppointmentPlan.ProtoReflect.Descriptor instead.
 func (*SmartAppointmentPlan) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{17}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *SmartAppointmentPlan) GetPlanId() string {
@@ -1510,7 +1594,7 @@ type SmartAppointmentPlansResponse struct {
 
 func (x *SmartAppointmentPlansResponse) Reset() {
 	*x = SmartAppointmentPlansResponse{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[18]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1522,7 +1606,7 @@ func (x *SmartAppointmentPlansResponse) String() string {
 func (*SmartAppointmentPlansResponse) ProtoMessage() {}
 
 func (x *SmartAppointmentPlansResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[18]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1535,7 +1619,7 @@ func (x *SmartAppointmentPlansResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SmartAppointmentPlansResponse.ProtoReflect.Descriptor instead.
 func (*SmartAppointmentPlansResponse) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{18}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *SmartAppointmentPlansResponse) GetPlans() []*SmartAppointmentPlan {
@@ -1558,7 +1642,7 @@ type ConfirmSmartAppointmentPlanRequest struct {
 
 func (x *ConfirmSmartAppointmentPlanRequest) Reset() {
 	*x = ConfirmSmartAppointmentPlanRequest{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[19]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1570,7 +1654,7 @@ func (x *ConfirmSmartAppointmentPlanRequest) String() string {
 func (*ConfirmSmartAppointmentPlanRequest) ProtoMessage() {}
 
 func (x *ConfirmSmartAppointmentPlanRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[19]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1583,7 +1667,7 @@ func (x *ConfirmSmartAppointmentPlanRequest) ProtoReflect() protoreflect.Message
 
 // Deprecated: Use ConfirmSmartAppointmentPlanRequest.ProtoReflect.Descriptor instead.
 func (*ConfirmSmartAppointmentPlanRequest) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{19}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ConfirmSmartAppointmentPlanRequest) GetPlanId() string {
@@ -1631,7 +1715,7 @@ type ConfirmedSmartAppointmentPlan struct {
 
 func (x *ConfirmedSmartAppointmentPlan) Reset() {
 	*x = ConfirmedSmartAppointmentPlan{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[20]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1643,7 +1727,7 @@ func (x *ConfirmedSmartAppointmentPlan) String() string {
 func (*ConfirmedSmartAppointmentPlan) ProtoMessage() {}
 
 func (x *ConfirmedSmartAppointmentPlan) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[20]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1656,7 +1740,7 @@ func (x *ConfirmedSmartAppointmentPlan) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfirmedSmartAppointmentPlan.ProtoReflect.Descriptor instead.
 func (*ConfirmedSmartAppointmentPlan) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{20}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ConfirmedSmartAppointmentPlan) GetPlanId() string {
@@ -1682,7 +1766,7 @@ type GetTodayExaminationRecommendationRequest struct {
 
 func (x *GetTodayExaminationRecommendationRequest) Reset() {
 	*x = GetTodayExaminationRecommendationRequest{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[21]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1694,7 +1778,7 @@ func (x *GetTodayExaminationRecommendationRequest) String() string {
 func (*GetTodayExaminationRecommendationRequest) ProtoMessage() {}
 
 func (x *GetTodayExaminationRecommendationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[21]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1707,7 +1791,7 @@ func (x *GetTodayExaminationRecommendationRequest) ProtoReflect() protoreflect.M
 
 // Deprecated: Use GetTodayExaminationRecommendationRequest.ProtoReflect.Descriptor instead.
 func (*GetTodayExaminationRecommendationRequest) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{21}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *GetTodayExaminationRecommendationRequest) GetRequestId() string {
@@ -1730,7 +1814,7 @@ type TodayRecommendationStage struct {
 
 func (x *TodayRecommendationStage) Reset() {
 	*x = TodayRecommendationStage{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[22]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1742,7 +1826,7 @@ func (x *TodayRecommendationStage) String() string {
 func (*TodayRecommendationStage) ProtoMessage() {}
 
 func (x *TodayRecommendationStage) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[22]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1755,7 +1839,7 @@ func (x *TodayRecommendationStage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TodayRecommendationStage.ProtoReflect.Descriptor instead.
 func (*TodayRecommendationStage) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{22}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *TodayRecommendationStage) GetStageNo() int32 {
@@ -1804,7 +1888,7 @@ type TodayExaminationRecommendation struct {
 
 func (x *TodayExaminationRecommendation) Reset() {
 	*x = TodayExaminationRecommendation{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[23]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1816,7 +1900,7 @@ func (x *TodayExaminationRecommendation) String() string {
 func (*TodayExaminationRecommendation) ProtoMessage() {}
 
 func (x *TodayExaminationRecommendation) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[23]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1829,7 +1913,7 @@ func (x *TodayExaminationRecommendation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TodayExaminationRecommendation.ProtoReflect.Descriptor instead.
 func (*TodayExaminationRecommendation) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{23}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *TodayExaminationRecommendation) GetServiceDate() string {
@@ -1866,7 +1950,7 @@ type LocationPoint struct {
 
 func (x *LocationPoint) Reset() {
 	*x = LocationPoint{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[24]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1878,7 +1962,7 @@ func (x *LocationPoint) String() string {
 func (*LocationPoint) ProtoMessage() {}
 
 func (x *LocationPoint) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[24]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1891,7 +1975,7 @@ func (x *LocationPoint) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LocationPoint.ProtoReflect.Descriptor instead.
 func (*LocationPoint) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{24}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *LocationPoint) GetName() string {
@@ -1941,7 +2025,7 @@ type SearchPlacesRequest struct {
 
 func (x *SearchPlacesRequest) Reset() {
 	*x = SearchPlacesRequest{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[25]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1953,7 +2037,7 @@ func (x *SearchPlacesRequest) String() string {
 func (*SearchPlacesRequest) ProtoMessage() {}
 
 func (x *SearchPlacesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[25]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1966,7 +2050,7 @@ func (x *SearchPlacesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchPlacesRequest.ProtoReflect.Descriptor instead.
 func (*SearchPlacesRequest) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{25}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *SearchPlacesRequest) GetKeyword() string {
@@ -2006,7 +2090,7 @@ type SearchPlacesResponse struct {
 
 func (x *SearchPlacesResponse) Reset() {
 	*x = SearchPlacesResponse{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[26]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2018,7 +2102,7 @@ func (x *SearchPlacesResponse) String() string {
 func (*SearchPlacesResponse) ProtoMessage() {}
 
 func (x *SearchPlacesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[26]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2031,7 +2115,7 @@ func (x *SearchPlacesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchPlacesResponse.ProtoReflect.Descriptor instead.
 func (*SearchPlacesResponse) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{26}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *SearchPlacesResponse) GetPlaces() []*LocationPoint {
@@ -2051,7 +2135,7 @@ type RoutePoint struct {
 
 func (x *RoutePoint) Reset() {
 	*x = RoutePoint{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[27]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2063,7 +2147,7 @@ func (x *RoutePoint) String() string {
 func (*RoutePoint) ProtoMessage() {}
 
 func (x *RoutePoint) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[27]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2076,7 +2160,7 @@ func (x *RoutePoint) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoutePoint.ProtoReflect.Descriptor instead.
 func (*RoutePoint) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{27}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *RoutePoint) GetLatitude() float64 {
@@ -2105,7 +2189,7 @@ type WalkingRouteStep struct {
 
 func (x *WalkingRouteStep) Reset() {
 	*x = WalkingRouteStep{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[28]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2117,7 +2201,7 @@ func (x *WalkingRouteStep) String() string {
 func (*WalkingRouteStep) ProtoMessage() {}
 
 func (x *WalkingRouteStep) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[28]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2130,7 +2214,7 @@ func (x *WalkingRouteStep) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WalkingRouteStep.ProtoReflect.Descriptor instead.
 func (*WalkingRouteStep) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{28}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *WalkingRouteStep) GetInstruction() string {
@@ -2166,13 +2250,14 @@ type CalculateWalkingRouteRequest struct {
 	Origin        *LocationPoint         `protobuf:"bytes,1,opt,name=origin,proto3" json:"origin,omitempty"`
 	Destination   *LocationPoint         `protobuf:"bytes,2,opt,name=destination,proto3" json:"destination,omitempty"`
 	RequestId     string                 `protobuf:"bytes,3,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	Mode          string                 `protobuf:"bytes,4,opt,name=mode,proto3" json:"mode,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CalculateWalkingRouteRequest) Reset() {
 	*x = CalculateWalkingRouteRequest{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[29]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2184,7 +2269,7 @@ func (x *CalculateWalkingRouteRequest) String() string {
 func (*CalculateWalkingRouteRequest) ProtoMessage() {}
 
 func (x *CalculateWalkingRouteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[29]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2197,7 +2282,7 @@ func (x *CalculateWalkingRouteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CalculateWalkingRouteRequest.ProtoReflect.Descriptor instead.
 func (*CalculateWalkingRouteRequest) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{29}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *CalculateWalkingRouteRequest) GetOrigin() *LocationPoint {
@@ -2221,6 +2306,13 @@ func (x *CalculateWalkingRouteRequest) GetRequestId() string {
 	return ""
 }
 
+func (x *CalculateWalkingRouteRequest) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
+}
+
 type WalkingRoute struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Origin          *LocationPoint         `protobuf:"bytes,1,opt,name=origin,proto3" json:"origin,omitempty"`
@@ -2230,13 +2322,14 @@ type WalkingRoute struct {
 	Polyline        []*RoutePoint          `protobuf:"bytes,5,rep,name=polyline,proto3" json:"polyline,omitempty"`
 	Steps           []*WalkingRouteStep    `protobuf:"bytes,6,rep,name=steps,proto3" json:"steps,omitempty"`
 	Provider        string                 `protobuf:"bytes,7,opt,name=provider,proto3" json:"provider,omitempty"`
+	Mode            string                 `protobuf:"bytes,8,opt,name=mode,proto3" json:"mode,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
 
 func (x *WalkingRoute) Reset() {
 	*x = WalkingRoute{}
-	mi := &file_guidance_v1_guidance_proto_msgTypes[30]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2248,7 +2341,7 @@ func (x *WalkingRoute) String() string {
 func (*WalkingRoute) ProtoMessage() {}
 
 func (x *WalkingRoute) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_guidance_proto_msgTypes[30]
+	mi := &file_contracts_proto_guidance_v1_guidance_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2261,7 +2354,7 @@ func (x *WalkingRoute) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WalkingRoute.ProtoReflect.Descriptor instead.
 func (*WalkingRoute) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_guidance_proto_rawDescGZIP(), []int{30}
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *WalkingRoute) GetOrigin() *LocationPoint {
@@ -2313,11 +2406,18 @@ func (x *WalkingRoute) GetProvider() string {
 	return ""
 }
 
-var File_guidance_v1_guidance_proto protoreflect.FileDescriptor
+func (x *WalkingRoute) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
+}
 
-const file_guidance_v1_guidance_proto_rawDesc = "" +
+var File_contracts_proto_guidance_v1_guidance_proto protoreflect.FileDescriptor
+
+const file_contracts_proto_guidance_v1_guidance_proto_rawDesc = "" +
 	"\n" +
-	"\x1aguidance/v1/guidance.proto\x12\x14hospital.guidance.v1\"\x87\x02\n" +
+	"*contracts/proto/guidance/v1/guidance.proto\x12\x14hospital.guidance.v1\"\x87\x02\n" +
 	"\x1bCreatePrecedenceRuleRequest\x12.\n" +
 	"\x13predecessor_item_id\x18\x01 \x01(\tR\x11predecessorItemId\x12*\n" +
 	"\x11successor_item_id\x18\x02 \x01(\tR\x0fsuccessorItemId\x12!\n" +
@@ -2371,7 +2471,7 @@ const file_guidance_v1_guidance_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\x0f \x01(\tR\tupdatedAt\"Y\n" +
 	"\x1bListPrecedenceRulesResponse\x12:\n" +
-	"\x05rules\x18\x01 \x03(\v2$.hospital.guidance.v1.PrecedenceRuleR\x05rules\"\xc0\x02\n" +
+	"\x05rules\x18\x01 \x03(\v2$.hospital.guidance.v1.PrecedenceRuleR\x05rules\"\xd8\x02\n" +
 	"\x0fPreparationRule\x12\x1b\n" +
 	"\trule_type\x18\x01 \x01(\tR\bruleType\x12\x1d\n" +
 	"\n" +
@@ -2380,15 +2480,19 @@ const file_guidance_v1_guidance_proto_rawDesc = "" +
 	"\x1brecommended_advance_minutes\x18\x04 \x01(\x05R\x19recommendedAdvanceMinutes\x12.\n" +
 	"\x13max_advance_minutes\x18\x05 \x01(\x05R\x11maxAdvanceMinutes\x12*\n" +
 	"\x11previous_day_time\x18\x06 \x01(\tR\x0fpreviousDayTime\x12%\n" +
-	"\x0ereadiness_hint\x18\a \x01(\tR\rreadinessHint\"N\n" +
+	"\x0ereadiness_hint\x18\a \x01(\tR\rreadinessHint\x12\x16\n" +
+	"\x06source\x18\b \x01(\tR\x06source\"N\n" +
 	"\x0fPatientReminder\x12\x12\n" +
 	"\x04text\x18\x01 \x01(\tR\x04text\x12'\n" +
-	"\x0fadvance_minutes\x18\x02 \x01(\x05R\x0eadvanceMinutes\"\x86\x02\n" +
+	"\x0fadvance_minutes\x18\x02 \x01(\x05R\x0eadvanceMinutes\"\xc1\x02\n" +
 	"\x16PreparationRulePreview\x12 \n" +
 	"\vdescription\x18\x01 \x01(\tR\vdescription\x12R\n" +
 	"\x11preparation_rules\x18\x02 \x03(\v2%.hospital.guidance.v1.PreparationRuleR\x10preparationRules\x12C\n" +
 	"\treminders\x18\x03 \x03(\v2%.hospital.guidance.v1.PatientReminderR\treminders\x121\n" +
-	"\x14unresolved_fragments\x18\x04 \x03(\tR\x13unresolvedFragments\"a\n" +
+	"\x14unresolved_fragments\x18\x04 \x03(\tR\x13unresolvedFragments\x12\x1f\n" +
+	"\vparser_mode\x18\x05 \x01(\tR\n" +
+	"parserMode\x12\x18\n" +
+	"\awarning\x18\x06 \x01(\tR\awarning\"a\n" +
 	"\x1ePreviewPreparationRulesRequest\x12 \n" +
 	"\vdescription\x18\x01 \x01(\tR\vdescription\x12\x1d\n" +
 	"\n" +
@@ -2432,12 +2536,16 @@ const file_guidance_v1_guidance_proto_rawDesc = "" +
 	"\x1eexpected_configuration_version\x18\v \x01(\x03R\x1cexpectedConfigurationVersion\x12!\n" +
 	"\foperation_id\x18\f \x01(\tR\voperationId\x12\x1d\n" +
 	"\n" +
-	"request_id\x18\r \x01(\tR\trequestId\"\x89\x01\n" +
+	"request_id\x18\r \x01(\tR\trequestId\"\xed\x01\n" +
 	"$GenerateSmartAppointmentPlansRequest\x12\x19\n" +
 	"\bitem_ids\x18\x01 \x03(\tR\aitemIds\x12'\n" +
 	"\x0fcandidate_dates\x18\x02 \x03(\tR\x0ecandidateDates\x12\x1d\n" +
 	"\n" +
-	"request_id\x18\x03 \x01(\tR\trequestId\"\xa5\x03\n" +
+	"request_id\x18\x03 \x01(\tR\trequestId\x12b\n" +
+	"\x16candidate_availability\x18\x04 \x03(\v2+.hospital.guidance.v1.CandidateAvailabilityR\x15candidateAvailability\"V\n" +
+	"\x15CandidateAvailability\x12!\n" +
+	"\fservice_date\x18\x01 \x01(\tR\vserviceDate\x12\x1a\n" +
+	"\bsessions\x18\x02 \x03(\tR\bsessions\"\xa5\x03\n" +
 	"\x18SmartAppointmentPlanItem\x12\x17\n" +
 	"\aitem_id\x18\x01 \x01(\tR\x06itemId\x12\x1b\n" +
 	"\titem_name\x18\x02 \x01(\tR\bitemName\x12\x17\n" +
@@ -2509,12 +2617,13 @@ const file_guidance_v1_guidance_proto_rawDesc = "" +
 	"\vinstruction\x18\x01 \x01(\tR\vinstruction\x12\x1b\n" +
 	"\troad_name\x18\x02 \x01(\tR\broadName\x12'\n" +
 	"\x0fdistance_meters\x18\x03 \x01(\x05R\x0edistanceMeters\x12)\n" +
-	"\x10duration_seconds\x18\x04 \x01(\x05R\x0fdurationSeconds\"\xc1\x01\n" +
+	"\x10duration_seconds\x18\x04 \x01(\x05R\x0fdurationSeconds\"\xd5\x01\n" +
 	"\x1cCalculateWalkingRouteRequest\x12;\n" +
 	"\x06origin\x18\x01 \x01(\v2#.hospital.guidance.v1.LocationPointR\x06origin\x12E\n" +
 	"\vdestination\x18\x02 \x01(\v2#.hospital.guidance.v1.LocationPointR\vdestination\x12\x1d\n" +
 	"\n" +
-	"request_id\x18\x03 \x01(\tR\trequestId\"\xfe\x02\n" +
+	"request_id\x18\x03 \x01(\tR\trequestId\x12\x12\n" +
+	"\x04mode\x18\x04 \x01(\tR\x04mode\"\x92\x03\n" +
 	"\fWalkingRoute\x12;\n" +
 	"\x06origin\x18\x01 \x01(\v2#.hospital.guidance.v1.LocationPointR\x06origin\x12E\n" +
 	"\vdestination\x18\x02 \x01(\v2#.hospital.guidance.v1.LocationPointR\vdestination\x12'\n" +
@@ -2522,7 +2631,8 @@ const file_guidance_v1_guidance_proto_rawDesc = "" +
 	"\x10duration_seconds\x18\x04 \x01(\x05R\x0fdurationSeconds\x12<\n" +
 	"\bpolyline\x18\x05 \x03(\v2 .hospital.guidance.v1.RoutePointR\bpolyline\x12<\n" +
 	"\x05steps\x18\x06 \x03(\v2&.hospital.guidance.v1.WalkingRouteStepR\x05steps\x12\x1a\n" +
-	"\bprovider\x18\a \x01(\tR\bprovider2\xa1\f\n" +
+	"\bprovider\x18\a \x01(\tR\bprovider\x12\x12\n" +
+	"\x04mode\x18\b \x01(\tR\x04mode2\xa1\f\n" +
 	"\x0fGuidanceService\x12o\n" +
 	"\x14CreatePrecedenceRule\x121.hospital.guidance.v1.CreatePrecedenceRuleRequest\x1a$.hospital.guidance.v1.PrecedenceRule\x12o\n" +
 	"\x14UpdatePrecedenceRule\x121.hospital.guidance.v1.UpdatePrecedenceRuleRequest\x1a$.hospital.guidance.v1.PrecedenceRule\x12}\n" +
@@ -2538,19 +2648,19 @@ const file_guidance_v1_guidance_proto_rawDesc = "" +
 	"\x15CalculateWalkingRoute\x122.hospital.guidance.v1.CalculateWalkingRouteRequest\x1a\".hospital.guidance.v1.WalkingRouteB/Z-hospital/contracts/gen/guidance/v1;guidancev1b\x06proto3"
 
 var (
-	file_guidance_v1_guidance_proto_rawDescOnce sync.Once
-	file_guidance_v1_guidance_proto_rawDescData []byte
+	file_contracts_proto_guidance_v1_guidance_proto_rawDescOnce sync.Once
+	file_contracts_proto_guidance_v1_guidance_proto_rawDescData []byte
 )
 
-func file_guidance_v1_guidance_proto_rawDescGZIP() []byte {
-	file_guidance_v1_guidance_proto_rawDescOnce.Do(func() {
-		file_guidance_v1_guidance_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_guidance_v1_guidance_proto_rawDesc), len(file_guidance_v1_guidance_proto_rawDesc)))
+func file_contracts_proto_guidance_v1_guidance_proto_rawDescGZIP() []byte {
+	file_contracts_proto_guidance_v1_guidance_proto_rawDescOnce.Do(func() {
+		file_contracts_proto_guidance_v1_guidance_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_contracts_proto_guidance_v1_guidance_proto_rawDesc), len(file_contracts_proto_guidance_v1_guidance_proto_rawDesc)))
 	})
-	return file_guidance_v1_guidance_proto_rawDescData
+	return file_contracts_proto_guidance_v1_guidance_proto_rawDescData
 }
 
-var file_guidance_v1_guidance_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
-var file_guidance_v1_guidance_proto_goTypes = []any{
+var file_contracts_proto_guidance_v1_guidance_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
+var file_contracts_proto_guidance_v1_guidance_proto_goTypes = []any{
 	(*CreatePrecedenceRuleRequest)(nil),              // 0: hospital.guidance.v1.CreatePrecedenceRuleRequest
 	(*UpdatePrecedenceRuleRequest)(nil),              // 1: hospital.guidance.v1.UpdatePrecedenceRuleRequest
 	(*DeletePrecedenceRuleRequest)(nil),              // 2: hospital.guidance.v1.DeletePrecedenceRuleRequest
@@ -2567,23 +2677,24 @@ var file_guidance_v1_guidance_proto_goTypes = []any{
 	(*GetExaminationItemConfigurationRequest)(nil),   // 13: hospital.guidance.v1.GetExaminationItemConfigurationRequest
 	(*ConfigureExaminationItemRequest)(nil),          // 14: hospital.guidance.v1.ConfigureExaminationItemRequest
 	(*GenerateSmartAppointmentPlansRequest)(nil),     // 15: hospital.guidance.v1.GenerateSmartAppointmentPlansRequest
-	(*SmartAppointmentPlanItem)(nil),                 // 16: hospital.guidance.v1.SmartAppointmentPlanItem
-	(*SmartAppointmentPlan)(nil),                     // 17: hospital.guidance.v1.SmartAppointmentPlan
-	(*SmartAppointmentPlansResponse)(nil),            // 18: hospital.guidance.v1.SmartAppointmentPlansResponse
-	(*ConfirmSmartAppointmentPlanRequest)(nil),       // 19: hospital.guidance.v1.ConfirmSmartAppointmentPlanRequest
-	(*ConfirmedSmartAppointmentPlan)(nil),            // 20: hospital.guidance.v1.ConfirmedSmartAppointmentPlan
-	(*GetTodayExaminationRecommendationRequest)(nil), // 21: hospital.guidance.v1.GetTodayExaminationRecommendationRequest
-	(*TodayRecommendationStage)(nil),                 // 22: hospital.guidance.v1.TodayRecommendationStage
-	(*TodayExaminationRecommendation)(nil),           // 23: hospital.guidance.v1.TodayExaminationRecommendation
-	(*LocationPoint)(nil),                            // 24: hospital.guidance.v1.LocationPoint
-	(*SearchPlacesRequest)(nil),                      // 25: hospital.guidance.v1.SearchPlacesRequest
-	(*SearchPlacesResponse)(nil),                     // 26: hospital.guidance.v1.SearchPlacesResponse
-	(*RoutePoint)(nil),                               // 27: hospital.guidance.v1.RoutePoint
-	(*WalkingRouteStep)(nil),                         // 28: hospital.guidance.v1.WalkingRouteStep
-	(*CalculateWalkingRouteRequest)(nil),             // 29: hospital.guidance.v1.CalculateWalkingRouteRequest
-	(*WalkingRoute)(nil),                             // 30: hospital.guidance.v1.WalkingRoute
+	(*CandidateAvailability)(nil),                    // 16: hospital.guidance.v1.CandidateAvailability
+	(*SmartAppointmentPlanItem)(nil),                 // 17: hospital.guidance.v1.SmartAppointmentPlanItem
+	(*SmartAppointmentPlan)(nil),                     // 18: hospital.guidance.v1.SmartAppointmentPlan
+	(*SmartAppointmentPlansResponse)(nil),            // 19: hospital.guidance.v1.SmartAppointmentPlansResponse
+	(*ConfirmSmartAppointmentPlanRequest)(nil),       // 20: hospital.guidance.v1.ConfirmSmartAppointmentPlanRequest
+	(*ConfirmedSmartAppointmentPlan)(nil),            // 21: hospital.guidance.v1.ConfirmedSmartAppointmentPlan
+	(*GetTodayExaminationRecommendationRequest)(nil), // 22: hospital.guidance.v1.GetTodayExaminationRecommendationRequest
+	(*TodayRecommendationStage)(nil),                 // 23: hospital.guidance.v1.TodayRecommendationStage
+	(*TodayExaminationRecommendation)(nil),           // 24: hospital.guidance.v1.TodayExaminationRecommendation
+	(*LocationPoint)(nil),                            // 25: hospital.guidance.v1.LocationPoint
+	(*SearchPlacesRequest)(nil),                      // 26: hospital.guidance.v1.SearchPlacesRequest
+	(*SearchPlacesResponse)(nil),                     // 27: hospital.guidance.v1.SearchPlacesResponse
+	(*RoutePoint)(nil),                               // 28: hospital.guidance.v1.RoutePoint
+	(*WalkingRouteStep)(nil),                         // 29: hospital.guidance.v1.WalkingRouteStep
+	(*CalculateWalkingRouteRequest)(nil),             // 30: hospital.guidance.v1.CalculateWalkingRouteRequest
+	(*WalkingRoute)(nil),                             // 31: hospital.guidance.v1.WalkingRoute
 }
-var file_guidance_v1_guidance_proto_depIdxs = []int32{
+var file_contracts_proto_guidance_v1_guidance_proto_depIdxs = []int32{
 	5,  // 0: hospital.guidance.v1.ListPrecedenceRulesResponse.rules:type_name -> hospital.guidance.v1.PrecedenceRule
 	7,  // 1: hospital.guidance.v1.PreparationRulePreview.preparation_rules:type_name -> hospital.guidance.v1.PreparationRule
 	8,  // 2: hospital.guidance.v1.PreparationRulePreview.reminders:type_name -> hospital.guidance.v1.PatientReminder
@@ -2593,68 +2704,69 @@ var file_guidance_v1_guidance_proto_depIdxs = []int32{
 	11, // 6: hospital.guidance.v1.ConfigureExaminationItemRequest.precedence_rules:type_name -> hospital.guidance.v1.ConfiguredPrecedenceRule
 	7,  // 7: hospital.guidance.v1.ConfigureExaminationItemRequest.preparation_rules:type_name -> hospital.guidance.v1.PreparationRule
 	8,  // 8: hospital.guidance.v1.ConfigureExaminationItemRequest.reminders:type_name -> hospital.guidance.v1.PatientReminder
-	16, // 9: hospital.guidance.v1.SmartAppointmentPlan.items:type_name -> hospital.guidance.v1.SmartAppointmentPlanItem
-	17, // 10: hospital.guidance.v1.SmartAppointmentPlansResponse.plans:type_name -> hospital.guidance.v1.SmartAppointmentPlan
-	16, // 11: hospital.guidance.v1.TodayRecommendationStage.items:type_name -> hospital.guidance.v1.SmartAppointmentPlanItem
-	22, // 12: hospital.guidance.v1.TodayExaminationRecommendation.stages:type_name -> hospital.guidance.v1.TodayRecommendationStage
-	24, // 13: hospital.guidance.v1.SearchPlacesResponse.places:type_name -> hospital.guidance.v1.LocationPoint
-	24, // 14: hospital.guidance.v1.CalculateWalkingRouteRequest.origin:type_name -> hospital.guidance.v1.LocationPoint
-	24, // 15: hospital.guidance.v1.CalculateWalkingRouteRequest.destination:type_name -> hospital.guidance.v1.LocationPoint
-	24, // 16: hospital.guidance.v1.WalkingRoute.origin:type_name -> hospital.guidance.v1.LocationPoint
-	24, // 17: hospital.guidance.v1.WalkingRoute.destination:type_name -> hospital.guidance.v1.LocationPoint
-	27, // 18: hospital.guidance.v1.WalkingRoute.polyline:type_name -> hospital.guidance.v1.RoutePoint
-	28, // 19: hospital.guidance.v1.WalkingRoute.steps:type_name -> hospital.guidance.v1.WalkingRouteStep
-	0,  // 20: hospital.guidance.v1.GuidanceService.CreatePrecedenceRule:input_type -> hospital.guidance.v1.CreatePrecedenceRuleRequest
-	1,  // 21: hospital.guidance.v1.GuidanceService.UpdatePrecedenceRule:input_type -> hospital.guidance.v1.UpdatePrecedenceRuleRequest
-	2,  // 22: hospital.guidance.v1.GuidanceService.DeletePrecedenceRule:input_type -> hospital.guidance.v1.DeletePrecedenceRuleRequest
-	4,  // 23: hospital.guidance.v1.GuidanceService.ListPrecedenceRules:input_type -> hospital.guidance.v1.ListPrecedenceRulesRequest
-	10, // 24: hospital.guidance.v1.GuidanceService.PreviewPreparationRules:input_type -> hospital.guidance.v1.PreviewPreparationRulesRequest
-	13, // 25: hospital.guidance.v1.GuidanceService.GetExaminationItemConfiguration:input_type -> hospital.guidance.v1.GetExaminationItemConfigurationRequest
-	14, // 26: hospital.guidance.v1.GuidanceService.ConfigureExaminationItem:input_type -> hospital.guidance.v1.ConfigureExaminationItemRequest
-	15, // 27: hospital.guidance.v1.GuidanceService.GenerateSmartAppointmentPlans:input_type -> hospital.guidance.v1.GenerateSmartAppointmentPlansRequest
-	19, // 28: hospital.guidance.v1.GuidanceService.ConfirmSmartAppointmentPlan:input_type -> hospital.guidance.v1.ConfirmSmartAppointmentPlanRequest
-	21, // 29: hospital.guidance.v1.GuidanceService.GetTodayExaminationRecommendation:input_type -> hospital.guidance.v1.GetTodayExaminationRecommendationRequest
-	25, // 30: hospital.guidance.v1.GuidanceService.SearchPlaces:input_type -> hospital.guidance.v1.SearchPlacesRequest
-	29, // 31: hospital.guidance.v1.GuidanceService.CalculateWalkingRoute:input_type -> hospital.guidance.v1.CalculateWalkingRouteRequest
-	5,  // 32: hospital.guidance.v1.GuidanceService.CreatePrecedenceRule:output_type -> hospital.guidance.v1.PrecedenceRule
-	5,  // 33: hospital.guidance.v1.GuidanceService.UpdatePrecedenceRule:output_type -> hospital.guidance.v1.PrecedenceRule
-	3,  // 34: hospital.guidance.v1.GuidanceService.DeletePrecedenceRule:output_type -> hospital.guidance.v1.DeletePrecedenceRuleResponse
-	6,  // 35: hospital.guidance.v1.GuidanceService.ListPrecedenceRules:output_type -> hospital.guidance.v1.ListPrecedenceRulesResponse
-	9,  // 36: hospital.guidance.v1.GuidanceService.PreviewPreparationRules:output_type -> hospital.guidance.v1.PreparationRulePreview
-	12, // 37: hospital.guidance.v1.GuidanceService.GetExaminationItemConfiguration:output_type -> hospital.guidance.v1.ExaminationItemConfiguration
-	12, // 38: hospital.guidance.v1.GuidanceService.ConfigureExaminationItem:output_type -> hospital.guidance.v1.ExaminationItemConfiguration
-	18, // 39: hospital.guidance.v1.GuidanceService.GenerateSmartAppointmentPlans:output_type -> hospital.guidance.v1.SmartAppointmentPlansResponse
-	20, // 40: hospital.guidance.v1.GuidanceService.ConfirmSmartAppointmentPlan:output_type -> hospital.guidance.v1.ConfirmedSmartAppointmentPlan
-	23, // 41: hospital.guidance.v1.GuidanceService.GetTodayExaminationRecommendation:output_type -> hospital.guidance.v1.TodayExaminationRecommendation
-	26, // 42: hospital.guidance.v1.GuidanceService.SearchPlaces:output_type -> hospital.guidance.v1.SearchPlacesResponse
-	30, // 43: hospital.guidance.v1.GuidanceService.CalculateWalkingRoute:output_type -> hospital.guidance.v1.WalkingRoute
-	32, // [32:44] is the sub-list for method output_type
-	20, // [20:32] is the sub-list for method input_type
-	20, // [20:20] is the sub-list for extension type_name
-	20, // [20:20] is the sub-list for extension extendee
-	0,  // [0:20] is the sub-list for field type_name
+	16, // 9: hospital.guidance.v1.GenerateSmartAppointmentPlansRequest.candidate_availability:type_name -> hospital.guidance.v1.CandidateAvailability
+	17, // 10: hospital.guidance.v1.SmartAppointmentPlan.items:type_name -> hospital.guidance.v1.SmartAppointmentPlanItem
+	18, // 11: hospital.guidance.v1.SmartAppointmentPlansResponse.plans:type_name -> hospital.guidance.v1.SmartAppointmentPlan
+	17, // 12: hospital.guidance.v1.TodayRecommendationStage.items:type_name -> hospital.guidance.v1.SmartAppointmentPlanItem
+	23, // 13: hospital.guidance.v1.TodayExaminationRecommendation.stages:type_name -> hospital.guidance.v1.TodayRecommendationStage
+	25, // 14: hospital.guidance.v1.SearchPlacesResponse.places:type_name -> hospital.guidance.v1.LocationPoint
+	25, // 15: hospital.guidance.v1.CalculateWalkingRouteRequest.origin:type_name -> hospital.guidance.v1.LocationPoint
+	25, // 16: hospital.guidance.v1.CalculateWalkingRouteRequest.destination:type_name -> hospital.guidance.v1.LocationPoint
+	25, // 17: hospital.guidance.v1.WalkingRoute.origin:type_name -> hospital.guidance.v1.LocationPoint
+	25, // 18: hospital.guidance.v1.WalkingRoute.destination:type_name -> hospital.guidance.v1.LocationPoint
+	28, // 19: hospital.guidance.v1.WalkingRoute.polyline:type_name -> hospital.guidance.v1.RoutePoint
+	29, // 20: hospital.guidance.v1.WalkingRoute.steps:type_name -> hospital.guidance.v1.WalkingRouteStep
+	0,  // 21: hospital.guidance.v1.GuidanceService.CreatePrecedenceRule:input_type -> hospital.guidance.v1.CreatePrecedenceRuleRequest
+	1,  // 22: hospital.guidance.v1.GuidanceService.UpdatePrecedenceRule:input_type -> hospital.guidance.v1.UpdatePrecedenceRuleRequest
+	2,  // 23: hospital.guidance.v1.GuidanceService.DeletePrecedenceRule:input_type -> hospital.guidance.v1.DeletePrecedenceRuleRequest
+	4,  // 24: hospital.guidance.v1.GuidanceService.ListPrecedenceRules:input_type -> hospital.guidance.v1.ListPrecedenceRulesRequest
+	10, // 25: hospital.guidance.v1.GuidanceService.PreviewPreparationRules:input_type -> hospital.guidance.v1.PreviewPreparationRulesRequest
+	13, // 26: hospital.guidance.v1.GuidanceService.GetExaminationItemConfiguration:input_type -> hospital.guidance.v1.GetExaminationItemConfigurationRequest
+	14, // 27: hospital.guidance.v1.GuidanceService.ConfigureExaminationItem:input_type -> hospital.guidance.v1.ConfigureExaminationItemRequest
+	15, // 28: hospital.guidance.v1.GuidanceService.GenerateSmartAppointmentPlans:input_type -> hospital.guidance.v1.GenerateSmartAppointmentPlansRequest
+	20, // 29: hospital.guidance.v1.GuidanceService.ConfirmSmartAppointmentPlan:input_type -> hospital.guidance.v1.ConfirmSmartAppointmentPlanRequest
+	22, // 30: hospital.guidance.v1.GuidanceService.GetTodayExaminationRecommendation:input_type -> hospital.guidance.v1.GetTodayExaminationRecommendationRequest
+	26, // 31: hospital.guidance.v1.GuidanceService.SearchPlaces:input_type -> hospital.guidance.v1.SearchPlacesRequest
+	30, // 32: hospital.guidance.v1.GuidanceService.CalculateWalkingRoute:input_type -> hospital.guidance.v1.CalculateWalkingRouteRequest
+	5,  // 33: hospital.guidance.v1.GuidanceService.CreatePrecedenceRule:output_type -> hospital.guidance.v1.PrecedenceRule
+	5,  // 34: hospital.guidance.v1.GuidanceService.UpdatePrecedenceRule:output_type -> hospital.guidance.v1.PrecedenceRule
+	3,  // 35: hospital.guidance.v1.GuidanceService.DeletePrecedenceRule:output_type -> hospital.guidance.v1.DeletePrecedenceRuleResponse
+	6,  // 36: hospital.guidance.v1.GuidanceService.ListPrecedenceRules:output_type -> hospital.guidance.v1.ListPrecedenceRulesResponse
+	9,  // 37: hospital.guidance.v1.GuidanceService.PreviewPreparationRules:output_type -> hospital.guidance.v1.PreparationRulePreview
+	12, // 38: hospital.guidance.v1.GuidanceService.GetExaminationItemConfiguration:output_type -> hospital.guidance.v1.ExaminationItemConfiguration
+	12, // 39: hospital.guidance.v1.GuidanceService.ConfigureExaminationItem:output_type -> hospital.guidance.v1.ExaminationItemConfiguration
+	19, // 40: hospital.guidance.v1.GuidanceService.GenerateSmartAppointmentPlans:output_type -> hospital.guidance.v1.SmartAppointmentPlansResponse
+	21, // 41: hospital.guidance.v1.GuidanceService.ConfirmSmartAppointmentPlan:output_type -> hospital.guidance.v1.ConfirmedSmartAppointmentPlan
+	24, // 42: hospital.guidance.v1.GuidanceService.GetTodayExaminationRecommendation:output_type -> hospital.guidance.v1.TodayExaminationRecommendation
+	27, // 43: hospital.guidance.v1.GuidanceService.SearchPlaces:output_type -> hospital.guidance.v1.SearchPlacesResponse
+	31, // 44: hospital.guidance.v1.GuidanceService.CalculateWalkingRoute:output_type -> hospital.guidance.v1.WalkingRoute
+	33, // [33:45] is the sub-list for method output_type
+	21, // [21:33] is the sub-list for method input_type
+	21, // [21:21] is the sub-list for extension type_name
+	21, // [21:21] is the sub-list for extension extendee
+	0,  // [0:21] is the sub-list for field type_name
 }
 
-func init() { file_guidance_v1_guidance_proto_init() }
-func file_guidance_v1_guidance_proto_init() {
-	if File_guidance_v1_guidance_proto != nil {
+func init() { file_contracts_proto_guidance_v1_guidance_proto_init() }
+func file_contracts_proto_guidance_v1_guidance_proto_init() {
+	if File_contracts_proto_guidance_v1_guidance_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_guidance_v1_guidance_proto_rawDesc), len(file_guidance_v1_guidance_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_contracts_proto_guidance_v1_guidance_proto_rawDesc), len(file_contracts_proto_guidance_v1_guidance_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   31,
+			NumMessages:   32,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_guidance_v1_guidance_proto_goTypes,
-		DependencyIndexes: file_guidance_v1_guidance_proto_depIdxs,
-		MessageInfos:      file_guidance_v1_guidance_proto_msgTypes,
+		GoTypes:           file_contracts_proto_guidance_v1_guidance_proto_goTypes,
+		DependencyIndexes: file_contracts_proto_guidance_v1_guidance_proto_depIdxs,
+		MessageInfos:      file_contracts_proto_guidance_v1_guidance_proto_msgTypes,
 	}.Build()
-	File_guidance_v1_guidance_proto = out.File
-	file_guidance_v1_guidance_proto_goTypes = nil
-	file_guidance_v1_guidance_proto_depIdxs = nil
+	File_contracts_proto_guidance_v1_guidance_proto = out.File
+	file_contracts_proto_guidance_v1_guidance_proto_goTypes = nil
+	file_contracts_proto_guidance_v1_guidance_proto_depIdxs = nil
 }

@@ -45,13 +45,7 @@ describe("home workbench", () => {
         url: "/pages/guidance/planning/index",
       },
     });
-    expect(view.serviceGroups[0]?.actions.find((action) => action.id === "today-guidance")).toMatchObject({
-      title: "当日检查顺序",
-      target: {
-        type: "navigate",
-        url: "/pages/guidance/today/index",
-      },
-    });
+    expect(view.serviceGroups[0]?.actions.map((action) => action.id)).not.toContain("today-guidance");
     expect(view.serviceGroups[0]?.actions.find((action) => action.id === "walking-route")).toMatchObject({
       id: "walking-route",
       title: "检查导航",

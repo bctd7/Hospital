@@ -69,6 +69,7 @@ func preparationInputs(values []*guidancev1.PreparationRule) []descriptionrules.
 			RuleType: descriptionrules.RuleType(value.GetRuleType()), StartMode: descriptionrules.StartMode(value.GetStartMode()),
 			MinAdvanceMinutes: value.GetMinAdvanceMinutes(), RecommendedAdvanceMinutes: value.GetRecommendedAdvanceMinutes(),
 			MaxAdvanceMinutes: value.GetMaxAdvanceMinutes(), PreviousDayTime: value.GetPreviousDayTime(), ReadinessHint: value.GetReadinessHint(),
+			Source: value.GetSource(),
 		})
 	}
 	return result
@@ -111,7 +112,7 @@ func preparationResponses(values []descriptionrules.Rule) []*guidancev1.Preparat
 		result = append(result, &guidancev1.PreparationRule{
 			RuleType: string(value.RuleType), StartMode: string(value.StartMode), MinAdvanceMinutes: value.MinAdvanceMinutes,
 			RecommendedAdvanceMinutes: value.RecommendedAdvanceMinutes, MaxAdvanceMinutes: value.MaxAdvanceMinutes,
-			PreviousDayTime: value.PreviousDayTime, ReadinessHint: value.ReadinessHint,
+			PreviousDayTime: value.PreviousDayTime, ReadinessHint: value.ReadinessHint, Source: value.Source,
 		})
 	}
 	return result

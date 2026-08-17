@@ -176,9 +176,10 @@ type BookingResponse struct {
 	ReportVersion                 int64  `json:"report_version,omitempty"`
 }
 
-type CalculateWalkingRouteRequest struct {
+type CalculateGuidanceRouteRequest struct {
 	Origin      GuidanceLocationPoint `json:"origin"`
 	Destination GuidanceLocationPoint `json:"destination"`
+	Mode        string                `json:"mode,options=walking|transit|driving"`
 }
 
 type CallNextBookingAPIRequest struct {
@@ -196,6 +197,11 @@ type CampusSummaryResponse struct {
 	DepartmentCount int64  `json:"department_count"`
 	Status          string `json:"status"`
 	Version         int64  `json:"version"`
+}
+
+type CandidateAvailability struct {
+	ServiceDate string   `json:"service_date"`
+	Sessions    []string `json:"sessions"`
 }
 
 type ChangeAppointmentResourceStatusRequest struct {
@@ -458,8 +464,8 @@ type ExaminationReportResponse struct {
 }
 
 type GenerateSmartAppointmentPlansRequest struct {
-	ItemIDs        []string `json:"item_ids"`
-	CandidateDates []string `json:"candidate_dates"`
+	ItemIDs               []string                `json:"item_ids"`
+	CandidateAvailability []CandidateAvailability `json:"candidate_availability"`
 }
 
 type GuidanceLocationPoint struct {
@@ -483,11 +489,30 @@ type GuidancePreparationRule struct {
 	MaxAdvanceMinutes         int32  `json:"max_advance_minutes"`
 	PreviousDayTime           string `json:"previous_day_time"`
 	ReadinessHint             string `json:"readiness_hint"`
+	Source                    string `json:"source"`
 }
 
 type GuidanceRoutePoint struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
+}
+
+type GuidanceRouteResponse struct {
+	Origin          GuidanceLocationPoint       `json:"origin"`
+	Destination     GuidanceLocationPoint       `json:"destination"`
+	DistanceMeters  int32                       `json:"distance_meters"`
+	DurationSeconds int32                       `json:"duration_seconds"`
+	Polyline        []GuidanceRoutePoint        `json:"polyline"`
+	Steps           []GuidanceRouteStepResponse `json:"steps"`
+	Provider        string                      `json:"provider"`
+	Mode            string                      `json:"mode"`
+}
+
+type GuidanceRouteStepResponse struct {
+	Instruction     string `json:"instruction"`
+	RoadName        string `json:"road_name"`
+	DistanceMeters  int32  `json:"distance_meters"`
+	DurationSeconds int32  `json:"duration_seconds"`
 }
 
 type HealthResponse struct {
@@ -762,6 +787,8 @@ type PreparationRulePreviewResponse struct {
 	PreparationRules    []GuidancePreparationRule `json:"preparation_rules"`
 	Reminders           []GuidancePatientReminder `json:"reminders"`
 	UnresolvedFragments []string                  `json:"unresolved_fragments"`
+	ParserMode          string                    `json:"parser_mode"`
+	Warning             string                    `json:"warning"`
 }
 
 type PreviewPreparationRulesRequest struct {
@@ -996,23 +1023,6 @@ type UpdatePrecedenceRuleRequest struct {
 	PatientMessage  string `json:"patient_message,optional"`
 	ExpectedVersion int64  `json:"expected_version"`
 	OperationID     string `json:"operation_id"`
-}
-
-type WalkingRouteResponse struct {
-	Origin          GuidanceLocationPoint      `json:"origin"`
-	Destination     GuidanceLocationPoint      `json:"destination"`
-	DistanceMeters  int32                      `json:"distance_meters"`
-	DurationSeconds int32                      `json:"duration_seconds"`
-	Polyline        []GuidanceRoutePoint       `json:"polyline"`
-	Steps           []WalkingRouteStepResponse `json:"steps"`
-	Provider        string                     `json:"provider"`
-}
-
-type WalkingRouteStepResponse struct {
-	Instruction     string `json:"instruction"`
-	RoadName        string `json:"road_name"`
-	DistanceMeters  int32  `json:"distance_meters"`
-	DurationSeconds int32  `json:"duration_seconds"`
 }
 
 type WeeklyWindowsPathRequest struct {

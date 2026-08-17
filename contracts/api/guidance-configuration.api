@@ -9,6 +9,7 @@ type (
 		MaxAdvanceMinutes        int32  `json:"max_advance_minutes"`
 		PreviousDayTime          string `json:"previous_day_time"`
 		ReadinessHint            string `json:"readiness_hint"`
+		Source                   string `json:"source"`
 	}
 
 	GuidancePatientReminder {
@@ -25,6 +26,8 @@ type (
 		PreparationRules    []GuidancePreparationRule `json:"preparation_rules"`
 		Reminders           []GuidancePatientReminder `json:"reminders"`
 		UnresolvedFragments []string                  `json:"unresolved_fragments"`
+		ParserMode          string                    `json:"parser_mode"`
+		Warning             string                    `json:"warning"`
 	}
 
 	ConfiguredPrecedenceRuleInput {

@@ -9,7 +9,7 @@ vi.mock("@/api/client", () => ({
 describe("guidance HTTP adapter", () => {
   beforeEach(() => requestMock.mockReset());
 
-  it("posts two unified location points to the authenticated walking route endpoint", async () => {
+  it("posts two unified location points and a travel mode to the authenticated route endpoint", async () => {
     requestMock.mockResolvedValueOnce({
       origin: { name: "A", address: "", latitude: 31.2, longitude: 121.4 },
       destination: { name: "B", address: "", latitude: 31.21, longitude: 121.41 },
@@ -18,19 +18,21 @@ describe("guidance HTTP adapter", () => {
       polyline: [],
       steps: [],
       provider: "amap",
+      mode: "walking",
     });
     const { guidanceApi } = await import("@/api/guidance");
     const input = {
       origin: { name: "A", address: "", latitude: 31.2, longitude: 121.4 },
       destination: { name: "B", address: "", latitude: 31.21, longitude: 121.41 },
+      mode: "walking" as const,
     };
 
-    await expect(guidanceApi.calculateWalkingRoute(input)).resolves.toMatchObject({
+    await expect(guidanceApi.calculateRoute(input)).resolves.toMatchObject({
       provider: "amap",
       distance_meters: 820,
     });
     expect(requestMock).toHaveBeenCalledWith({
-      path: "/api/v1/guidance/routes/walking",
+      path: "/api/v1/guidance/routes",
       method: "POST",
       data: input,
       authenticated: true,
@@ -61,13 +63,17 @@ describe("guidance HTTP adapter", () => {
       .mockResolvedValueOnce({ plan_id: "plan-1", booking_ids: ["booking-1"] });
     const { guidanceApi } = await import("@/api/guidance");
 
-    await guidanceApi.generateSmartAppointmentPlans(["item-1", "item-2"], ["2026-08-18", "2026-08-20"]);
+    const availability = [
+      { service_date: "2026-08-18", sessions: ["morning" as const] },
+      { service_date: "2026-08-20", sessions: ["morning" as const, "afternoon" as const] },
+    ];
+    await guidanceApi.generateSmartAppointmentPlans(["item-1", "item-2"], availability);
     await guidanceApi.confirmSmartAppointmentPlan("plan-1");
 
     expect(requestMock.mock.calls[0]?.[0]).toEqual({
       path: "/api/v1/guidance/smart-appointment/plans",
       method: "POST",
-      data: { item_ids: ["item-1", "item-2"], candidate_dates: ["2026-08-18", "2026-08-20"] },
+      data: { item_ids: ["item-1", "item-2"], candidate_availability: availability },
       authenticated: true,
     });
     expect(requestMock.mock.calls[1]?.[0]).toEqual(expect.objectContaining({

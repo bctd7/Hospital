@@ -8,6 +8,7 @@ import (
 	"hospital/service/guidance/rpc/internal/planning"
 	"hospital/service/guidance/rpc/internal/projectconfiguration"
 
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -73,6 +74,12 @@ func (g *Planning) CreateBookingBatch(ctx context.Context, command planning.Conf
 }
 
 func mapPlanningError(action string, err error) error {
+	value := status.Convert(err)
+	for _, detail := range value.Details() {
+		if info, ok := detail.(*errdetails.ErrorInfo); ok && info.GetReason() == "PATIENT_ITEM_SESSION_OCCUPIED" {
+			return planning.ErrExistingBooking
+		}
+	}
 	switch status.Code(err) {
 	case codes.InvalidArgument:
 		return planning.ErrInvalid

@@ -14,28 +14,28 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
-type CalculateWalkingRouteLogic struct {
+type CalculateGuidanceRouteLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
 }
 
-func NewCalculateWalkingRouteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CalculateWalkingRouteLogic {
-	return &CalculateWalkingRouteLogic{
+func NewCalculateGuidanceRouteLogic(ctx context.Context, svcCtx *svc.ServiceContext) *CalculateGuidanceRouteLogic {
+	return &CalculateGuidanceRouteLogic{
 		Logger: logx.WithContext(ctx),
 		ctx:    ctx,
 		svcCtx: svcCtx,
 	}
 }
 
-func (l *CalculateWalkingRouteLogic) CalculateWalkingRoute(req *types.CalculateWalkingRouteRequest) (resp *types.WalkingRouteResponse, err error) {
+func (l *CalculateGuidanceRouteLogic) CalculateGuidanceRoute(req *types.CalculateGuidanceRouteRequest) (resp *types.GuidanceRouteResponse, err error) {
 	ctx, err := l.svcCtx.AuthenticatedRPCContext(l.ctx)
 	if err != nil {
 		return nil, err
 	}
 	result, err := l.svcCtx.Guidance.CalculateWalkingRoute(ctx, &guidancev1.CalculateWalkingRouteRequest{
 		Origin: routeLocationRequest(req.Origin), Destination: routeLocationRequest(req.Destination),
-		RequestId: logging.RequestIDFromContext(l.ctx),
+		Mode: req.Mode, RequestId: logging.RequestIDFromContext(l.ctx),
 	})
 	if err != nil {
 		return nil, err
@@ -44,21 +44,17 @@ func (l *CalculateWalkingRouteLogic) CalculateWalkingRoute(req *types.CalculateW
 }
 
 func routeLocationRequest(point types.GuidanceLocationPoint) *guidancev1.LocationPoint {
-	return &guidancev1.LocationPoint{
-		Name: point.Name, Address: point.Address, Latitude: point.Latitude,
-		Longitude: point.Longitude, ProviderPlaceId: point.ProviderPlaceID,
-	}
+	return &guidancev1.LocationPoint{Name: point.Name, Address: point.Address, Latitude: point.Latitude, Longitude: point.Longitude, ProviderPlaceId: point.ProviderPlaceID}
 }
 
-func routeResponse(route *guidancev1.WalkingRoute) *types.WalkingRouteResponse {
+func routeResponse(route *guidancev1.WalkingRoute) *types.GuidanceRouteResponse {
 	if route == nil {
-		return &types.WalkingRouteResponse{}
+		return &types.GuidanceRouteResponse{}
 	}
-	response := &types.WalkingRouteResponse{
+	response := &types.GuidanceRouteResponse{
 		Origin: routeLocationResponse(route.Origin), Destination: routeLocationResponse(route.Destination),
-		DistanceMeters: route.DistanceMeters, DurationSeconds: route.DurationSeconds, Provider: route.Provider,
-		Polyline: make([]types.GuidanceRoutePoint, 0, len(route.Polyline)),
-		Steps:    make([]types.WalkingRouteStepResponse, 0, len(route.Steps)),
+		DistanceMeters: route.DistanceMeters, DurationSeconds: route.DurationSeconds, Provider: route.Provider, Mode: route.Mode,
+		Polyline: make([]types.GuidanceRoutePoint, 0, len(route.Polyline)), Steps: make([]types.GuidanceRouteStepResponse, 0, len(route.Steps)),
 	}
 	for _, point := range route.Polyline {
 		if point != nil {
@@ -67,10 +63,7 @@ func routeResponse(route *guidancev1.WalkingRoute) *types.WalkingRouteResponse {
 	}
 	for _, step := range route.Steps {
 		if step != nil {
-			response.Steps = append(response.Steps, types.WalkingRouteStepResponse{
-				Instruction: step.Instruction, RoadName: step.RoadName,
-				DistanceMeters: step.DistanceMeters, DurationSeconds: step.DurationSeconds,
-			})
+			response.Steps = append(response.Steps, types.GuidanceRouteStepResponse{Instruction: step.Instruction, RoadName: step.RoadName, DistanceMeters: step.DistanceMeters, DurationSeconds: step.DurationSeconds})
 		}
 	}
 	return response
@@ -80,8 +73,5 @@ func routeLocationResponse(point *guidancev1.LocationPoint) types.GuidanceLocati
 	if point == nil {
 		return types.GuidanceLocationPoint{}
 	}
-	return types.GuidanceLocationPoint{
-		Name: point.Name, Address: point.Address, Latitude: point.Latitude,
-		Longitude: point.Longitude, ProviderPlaceID: point.ProviderPlaceId,
-	}
+	return types.GuidanceLocationPoint{Name: point.Name, Address: point.Address, Latitude: point.Latitude, Longitude: point.Longitude, ProviderPlaceID: point.ProviderPlaceId}
 }

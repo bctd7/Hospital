@@ -86,6 +86,7 @@ message PreparationRule {
   int32 max_advance_minutes = 5;
   string previous_day_time = 6;
   string readiness_hint = 7;
+  string source = 8;
 }
 
 message PatientReminder {
@@ -98,6 +99,8 @@ message PreparationRulePreview {
   repeated PreparationRule preparation_rules = 2;
   repeated PatientReminder reminders = 3;
   repeated string unresolved_fragments = 4;
+  string parser_mode = 5;
+  string warning = 6;
 }
 
 message PreviewPreparationRulesRequest {
@@ -152,6 +155,12 @@ message GenerateSmartAppointmentPlansRequest {
   repeated string item_ids = 1;
   repeated string candidate_dates = 2;
   string request_id = 3;
+  repeated CandidateAvailability candidate_availability = 4;
+}
+
+message CandidateAvailability {
+  string service_date = 1;
+  repeated string sessions = 2;
 }
 
 message SmartAppointmentPlanItem {
@@ -247,6 +256,7 @@ message CalculateWalkingRouteRequest {
   LocationPoint origin = 1;
   LocationPoint destination = 2;
   string request_id = 3;
+  string mode = 4;
 }
 
 message WalkingRoute {
@@ -257,4 +267,5 @@ message WalkingRoute {
   repeated RoutePoint polyline = 5;
   repeated WalkingRouteStep steps = 6;
   string provider = 7;
+  string mode = 8;
 }

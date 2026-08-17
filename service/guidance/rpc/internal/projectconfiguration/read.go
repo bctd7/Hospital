@@ -9,8 +9,8 @@ import (
 )
 
 // Preview 将医生填写的检查说明转换为待确认的结构化规则和提醒。
-func (m *Manager) Preview(description string) (descriptionrules.Preview, error) {
-	return descriptionrules.Parse(description)
+func (m *Manager) Preview(ctx context.Context, description string) (descriptionrules.Preview, error) {
+	return m.description.Parse(ctx, description)
 }
 
 // Get 返回一个项目的完整配置视图：Appointment 项目事实、说明规则和先后关系。

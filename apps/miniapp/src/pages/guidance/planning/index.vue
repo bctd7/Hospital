@@ -13,7 +13,13 @@ const departments = ref<DepartmentOption[]>([]);
 const activeDepartmentId = ref("");
 const itemsByDepartment = ref<Record<string, ExaminationItem[]>>({});
 const selectedItemIds = ref<string[]>([]);
-const selectedDates = ref<string[]>([]);
+type SessionChoice = "all" | "morning" | "afternoon";
+const sessionChoices: ReadonlyArray<readonly [SessionChoice, string]> = [
+  ["all", "全天"],
+  ["morning", "上午"],
+  ["afternoon", "下午"],
+];
+const selectedAvailability = ref<Record<string, SessionChoice>>({});
 const plans = ref<SmartAppointmentPlan[]>([]);
 const loading = ref(false);
 const loadingItems = ref(false);
@@ -25,6 +31,7 @@ const currentItems = computed(() => itemsByDepartment.value[activeDepartmentId.v
 const currentDepartment = computed(() => departments.value.find((value) => value.department.departmentId === activeDepartmentId.value));
 const selectedItems = computed(() => Object.values(itemsByDepartment.value).flat().filter((item) => selectedItemIds.value.includes(item.itemId)));
 const candidateDates = computed(() => remainingWeekDates());
+const selectedDates = computed(() => Object.keys(selectedAvailability.value).sort());
 const canGenerate = computed(() => selectedItemIds.value.length > 0 && selectedDates.value.length > 0 && !generating.value);
 
 onMounted(async () => {
@@ -62,9 +69,15 @@ function toggleItem(itemId: string) {
 }
 
 function toggleDate(value: string) {
-  selectedDates.value = selectedDates.value.includes(value)
-    ? selectedDates.value.filter((date) => date !== value)
-    : [...selectedDates.value, value];
+  const next = { ...selectedAvailability.value };
+  if (next[value]) delete next[value];
+  else next[value] = "all";
+  selectedAvailability.value = next;
+  plans.value = [];
+}
+
+function chooseSession(date: string, choice: SessionChoice) {
+  selectedAvailability.value = { ...selectedAvailability.value, [date]: choice };
   plans.value = [];
 }
 
@@ -73,13 +86,21 @@ async function generatePlans() {
   generating.value = true;
   errorMessage.value = "";
   try {
-    const result = await guidanceApi.generateSmartAppointmentPlans(selectedItemIds.value, selectedDates.value);
+    const availability = selectedDates.value.map((serviceDate) => ({
+      service_date: serviceDate,
+      sessions: selectedAvailability.value[serviceDate] === "morning"
+        ? ["morning" as const]
+        : selectedAvailability.value[serviceDate] === "afternoon"
+          ? ["afternoon" as const]
+          : ["morning" as const, "afternoon" as const],
+    }));
+    const result = await guidanceApi.generateSmartAppointmentPlans(selectedItemIds.value, availability);
     plans.value = result.plans ?? [];
-    if (!plans.value.length) errorMessage.value = "当前选择无法生成推荐，请重新选择日期范围";
+    if (!plans.value.length) errorMessage.value = "当前选择无法生成预约方案，请检查已有预约，或重新选择日期和时段";
   } catch (error) {
     plans.value = [];
     errorMessage.value = error instanceof ApiError && error.code === "NO_SMART_APPOINTMENT_PLAN"
-      ? "当前选择无法生成推荐，请重新选择日期范围"
+      ? "当前选择无法生成预约方案，请检查已有预约，或重新选择日期和时段"
       : messageOf(error, "方案生成失败，请稍后重试");
   } finally {
     generating.value = false;
@@ -127,6 +148,7 @@ function remainingWeekDates() {
 function localDate(value: Date) {
   return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
 }
+function openTodayGuidance() { void uni.redirectTo({ url: "/pages/guidance/today/index" }); }
 function sessionLabel(value: string) { return value === "morning" ? "上午" : "下午"; }
 function floorLabel(value: number) { return value < 0 ? `地下${Math.abs(value)}层` : `${value}层`; }
 function messageOf(error: unknown, fallback: string) { return error instanceof Error && error.message.trim() ? error.message : fallback; }
@@ -134,6 +156,7 @@ function messageOf(error: unknown, fallback: string) { return error instanceof E
 
 <template>
   <view class="planning-page">
+    <view class="guidance-switch"><button class="active">提前规划</button><button @tap="openTodayGuidance">当日导诊</button></view>
     <view class="intro">
       <text class="intro__eyebrow">智能导诊</text>
       <text class="intro__title">智能预约</text>
@@ -164,6 +187,14 @@ function messageOf(error: unknown, fallback: string) { return error instanceof E
       <view class="date-grid">
         <button v-for="date in candidateDates" :key="date.value" class="date-card" :class="{ selected: selectedDates.includes(date.value) }" @tap="toggleDate(date.value)"><text>{{ date.weekday }}</text><text>{{ date.label }}</text></button>
       </view>
+      <view v-if="selectedDates.length" class="availability-list">
+        <view v-for="date in selectedDates" :key="date" class="availability-row">
+          <text>{{ date.slice(5).replace('-', '/') }}</text>
+          <view class="session-options">
+            <button v-for="choice in sessionChoices" :key="choice[0]" :class="{ selected: selectedAvailability[date] === choice[0] }" @tap="chooseSession(date, choice[0])">{{ choice[1] }}</button>
+          </view>
+        </view>
+      </view>
     </view>
 
     <button class="generate-button" :disabled="!canGenerate" :loading="generating" @tap="generatePlans">{{ generating ? "正在生成" : "生成预约方案" }}</button>
@@ -187,6 +218,7 @@ function messageOf(error: unknown, fallback: string) { return error instanceof E
 <style scoped>
 button::after { display: none; }
 .planning-page { min-height: 100vh; padding: 28rpx 24rpx 80rpx; box-sizing: border-box; background: #f3f6fa; }
+.guidance-switch{display:grid;grid-template-columns:1fr 1fr;margin-bottom:22rpx;padding:6rpx;background:#e7edf3;border-radius:20rpx}.guidance-switch button{margin:0;color:#748196;font-size:22rpx;line-height:62rpx;background:transparent;border-radius:16rpx}.guidance-switch button.active{color:#087fc9;font-weight:700;background:#fff}
 .intro { padding: 6rpx 8rpx 24rpx; }.intro text,.step-heading text,.item-card text,.plan-card text,.selected-summary text,.section-heading text { display: block; }
 .intro__eyebrow { color: #168fe4; font-size: 21rpx; font-weight: 700; }.intro__title { margin-top: 6rpx; color: #172235; font-size: 40rpx; font-weight: 750; }.intro__description { margin-top: 10rpx; color: #7d899a; font-size: 24rpx; line-height: 1.6; }
 .step-card,.plan-card { margin-bottom: 22rpx; padding: 24rpx; background: #fff; border: 1rpx solid #e3e9f0; border-radius: 24rpx; }
@@ -195,6 +227,7 @@ button::after { display: none; }
 .item-list { display: grid; gap: 14rpx; }.item-card { display: flex; align-items: center; width: 100%; margin: 0; padding: 20rpx; color: inherit; text-align: left; background: #fafbfd; border: 2rpx solid #edf1f5; border-radius: 18rpx; }.item-card.selected { background: #f0f8fe; border-color: #8bcdf3; }.item-card__check { display: flex; align-items: center; justify-content: center; width: 38rpx; height: 38rpx; flex: 0 0 auto; color: #fff; font-size: 20rpx; background: #fff; border: 2rpx solid #b7c2ce; border-radius: 10rpx; }.item-card.selected .item-card__check { background: #168fe4; border-color: #168fe4; }.item-card__content { min-width: 0; flex: 1; margin-left: 16rpx; }.item-card__name { color: #29374a; font-size: 25rpx; font-weight: 690; }.item-card__description { margin-top: 5rpx; overflow: hidden; color: #8b96a6; font-size: 20rpx; text-overflow: ellipsis; white-space: nowrap; }.item-card__duration { margin-left: 12rpx; color: #168fe4; font-size: 20rpx; }
 .selected-summary { margin-top: 18rpx; padding: 18rpx; color: #627085; font-size: 21rpx; line-height: 1.55; background: #f4f7fa; border-radius: 16rpx; }.selected-summary text + text { margin-top: 5rpx; color: #344257; }
 .date-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12rpx; margin-top: 22rpx; }.date-card { margin: 0; padding: 15rpx 4rpx; color: #647187; font-size: 21rpx; line-height: 1.45; background: #f4f6f8; border: 2rpx solid transparent; border-radius: 16rpx; }.date-card text { display: block; }.date-card.selected { color: #087fc9; background: #eaf6fd; border-color: #7cc7f1; }
+.availability-list{display:grid;gap:12rpx;margin-top:18rpx}.availability-row{display:flex;align-items:center;justify-content:space-between;gap:16rpx;padding:14rpx 16rpx;background:#f7f9fb;border-radius:16rpx}.availability-row>text{color:#46556a;font-size:21rpx;font-weight:650}.session-options{display:flex;gap:8rpx}.session-options button{width:auto;margin:0;padding:0 18rpx;color:#718095;font-size:19rpx;line-height:50rpx;background:#fff;border:1rpx solid #e1e7ed;border-radius:25rpx}.session-options button.selected{color:#087fc9;background:#e5f4fd;border-color:#78c6f1}
 .generate-button,.confirm-button { width: 100%; color: #fff; font-size: 27rpx; font-weight: 700; background: #168fe4; border-radius: 18rpx; }.generate-button { line-height: 88rpx; }.generate-button[disabled],.confirm-button[disabled] { color: #abb5c0; background: #e5eaf0; }.error-message,.state-text { display: block; padding: 24rpx 8rpx; color: #c25464; font-size: 22rpx; text-align: center; }.state-text { color: #8e99a8; }
 .plans-section { margin-top: 30rpx; }.section-heading { padding: 0 8rpx 18rpx; }.section-heading text:first-child { color: #223147; font-size: 31rpx; font-weight: 730; }.section-heading text:last-child { margin-top: 5rpx; color: #8c97a6; font-size: 21rpx; }.plan-card--primary { border-color: #94d1f4; }.plan-card__heading { display: flex; align-items: flex-start; justify-content: space-between; }.plan-card__title { color: #223147; font-size: 29rpx; font-weight: 730; }.plan-card__summary { margin-top: 5rpx; color: #8b96a5; font-size: 21rpx; }.recommended-tag { padding: 7rpx 14rpx; color: #087fc9; font-size: 19rpx; background: #e6f5fd; border-radius: 18rpx; }
 .plan-item { display: flex; align-items: flex-start; padding: 24rpx 0; border-bottom: 1rpx solid #edf1f5; }.plan-item__index { display: flex !important; align-items: center; justify-content: center; width: 42rpx; height: 42rpx; flex: 0 0 auto; color: #168fe4; font-size: 20rpx; font-weight: 720; background: #e9f5fc; border-radius: 50%; }.plan-item__content { min-width: 0; flex: 1; margin-left: 16rpx; }.plan-item__name { color: #2c394c; font-size: 25rpx; font-weight: 690; }.plan-item__meta,.plan-item__reason { margin-top: 6rpx; color: #7f8b9c; font-size: 20rpx; line-height: 1.5; }.plan-item__reason { color: #4f7794; }.plan-item__duration { margin-left: 10rpx; color: #68758a; font-size: 19rpx; }.confirm-button { margin-top: 22rpx; line-height: 78rpx; }

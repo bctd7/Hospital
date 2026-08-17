@@ -39,6 +39,24 @@ func TestClientSearchesPlacesAndCalculatesWalkingRoute(t *testing.T) {
                     {"instruction":"到达终点","road":[],"distance":"500","duration":"400","polyline":"121.405000,31.205000;121.410000,31.210000"}
                   ]}]}
                 }`))
+		case "/driving":
+			_, _ = writer.Write([]byte(`{
+                  "status":"1","info":"OK","infocode":"10000",
+                  "route":{"paths":[{"distance":"920","duration":"300","steps":[
+                    {"instruction":"沿院区路行驶","road":"院区路","distance":"920","duration":"300","polyline":"121.400000,31.200000;121.410000,31.210000"}
+                  ]}]}
+                }`))
+		case "/transit":
+			if query.Get("city") != "021" || query.Get("cityd") != "021" {
+				t.Fatalf("unexpected transit city query: %s", request.URL.RawQuery)
+			}
+			_, _ = writer.Write([]byte(`{
+                  "status":"1","info":"OK","infocode":"10000",
+                  "route":{"transits":[{"duration":"900","walking_distance":"180","segments":[
+                    {"walking":{"distance":"180","duration":"150","steps":[{"instruction":"步行至车站","road":"院区路","distance":"180","duration":"150","polyline":"121.400000,31.200000;121.402000,31.202000"}]},
+                     "bus":{"buslines":[{"name":"医院专线","distance":"1800","duration":"750","polyline":"121.402000,31.202000;121.410000,31.210000","departure_stop":{"name":"一号楼站"},"arrival_stop":{"name":"二号楼站"}}]}}
+                  ]}]}
+                }`))
 		default:
 			http.NotFound(writer, request)
 		}
@@ -47,6 +65,7 @@ func TestClientSearchesPlacesAndCalculatesWalkingRoute(t *testing.T) {
 
 	client := New(Config{
 		PlaceSearchEndpoint: server.URL + "/place", WalkingEndpoint: server.URL + "/walking",
+		DrivingEndpoint: server.URL + "/driving", TransitEndpoint: server.URL + "/transit",
 		WebServiceKey: "test-key", Timeout: time.Second,
 	})
 	places, err := client.SearchPlaces(context.Background(), routing.PlaceSearchInput{Keyword: "123号楼", City: "上海市", Limit: 10})
@@ -65,11 +84,27 @@ func TestClientSearchesPlacesAndCalculatesWalkingRoute(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if route.Provider != "amap" || route.DistanceMeters != 820 || route.DurationSeconds != 640 || len(route.Polyline) != 3 || len(route.Steps) != 2 {
+	if route.Provider != "amap" || route.Mode != routing.RouteModeWalking || route.DistanceMeters != 820 || route.DurationSeconds != 640 || len(route.Polyline) != 3 || len(route.Steps) != 2 {
 		t.Fatalf("unexpected route: %#v", route)
 	}
 	if route.Steps[1].RoadName != "" {
 		t.Fatalf("array-valued empty road must be normalized, got %q", route.Steps[1].RoadName)
+	}
+
+	driving, err := client.CalculateRoute(context.Background(), routing.RouteModeDriving,
+		routing.LocationPoint{Name: "A", Latitude: 31.2, Longitude: 121.4},
+		routing.LocationPoint{Name: "B", Latitude: 31.21, Longitude: 121.41},
+	)
+	if err != nil || driving.Mode != routing.RouteModeDriving || driving.DistanceMeters != 920 {
+		t.Fatalf("unexpected driving route: %#v, %v", driving, err)
+	}
+
+	transit, err := client.CalculateRoute(context.Background(), routing.RouteModeTransit,
+		routing.LocationPoint{Name: "A", Latitude: 31.2, Longitude: 121.4},
+		routing.LocationPoint{Name: "B", Latitude: 31.21, Longitude: 121.41},
+	)
+	if err != nil || transit.Mode != routing.RouteModeTransit || transit.DistanceMeters != 1980 || len(transit.Steps) != 2 {
+		t.Fatalf("unexpected transit route: %#v, %v", transit, err)
 	}
 }
 

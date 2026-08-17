@@ -21,7 +21,7 @@ type PlaceSearchInput struct {
 // Provider 定义路线业务需要的地图能力，当前由高德实现。
 type Provider interface {
 	SearchPlaces(context.Context, PlaceSearchInput) ([]LocationPoint, error)
-	CalculateWalkingRoute(context.Context, LocationPoint, LocationPoint) (WalkingRoute, error)
+	CalculateRoute(context.Context, RouteMode, LocationPoint, LocationPoint) (WalkingRoute, error)
 }
 
 // Manager 是地点搜索与步行路线计算的统一业务入口。
@@ -52,7 +52,10 @@ func (m *Manager) SearchPlaces(ctx context.Context, input PlaceSearchInput) ([]L
 	return m.provider.SearchPlaces(ctx, input)
 }
 
-func (m *Manager) CalculateWalkingRoute(ctx context.Context, origin, destination LocationPoint) (WalkingRoute, error) {
+func (m *Manager) CalculateRoute(ctx context.Context, mode RouteMode, origin, destination LocationPoint) (WalkingRoute, error) {
+	if mode != RouteModeWalking && mode != RouteModeTransit && mode != RouteModeDriving {
+		return WalkingRoute{}, ErrInvalid
+	}
 	origin = normalizeLocation(origin)
 	destination = normalizeLocation(destination)
 	if !validLocation(origin) || !validLocation(destination) {
@@ -65,10 +68,15 @@ func (m *Manager) CalculateWalkingRoute(ctx context.Context, origin, destination
 				{Latitude: origin.Latitude, Longitude: origin.Longitude},
 				{Latitude: destination.Latitude, Longitude: destination.Longitude},
 			},
-			Provider: "local",
+			Provider: "local", Mode: mode,
 		}, nil
 	}
-	return m.provider.CalculateWalkingRoute(ctx, origin, destination)
+	return m.provider.CalculateRoute(ctx, mode, origin, destination)
+}
+
+// CalculateWalkingRoute 保留为包内兼容入口；新业务统一调用 CalculateRoute。
+func (m *Manager) CalculateWalkingRoute(ctx context.Context, origin, destination LocationPoint) (WalkingRoute, error) {
+	return m.CalculateRoute(ctx, RouteModeWalking, origin, destination)
 }
 
 func distanceMeters(origin, destination LocationPoint) float64 {

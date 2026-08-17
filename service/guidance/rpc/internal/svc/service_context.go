@@ -22,6 +22,7 @@ import (
 	"hospital/service/guidance/rpc/internal/repository/mysqlstore"
 	"hospital/service/guidance/rpc/internal/routing"
 	"hospital/service/guidance/rpc/internal/routing/amap"
+	descriptionrules "hospital/service/guidance/rpc/internal/rules/description"
 	"hospital/service/guidance/rpc/internal/rules/precedence"
 )
 
@@ -95,7 +96,11 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 	if err != nil {
 		return nil, err
 	}
-	configurationManager, err := projectconfiguration.NewManager(store, configurationClient, configurationClient)
+	descriptionParser := descriptionrules.NewParser(descriptionrules.NewLLMInterpreter(descriptionrules.LLMConfig{
+		Endpoint: c.LLM.Endpoint, APIKey: c.LLM.APIKey, Model: c.LLM.Model,
+		Timeout: time.Duration(c.LLM.TimeoutMilliseconds) * time.Millisecond,
+	}))
+	configurationManager, err := projectconfiguration.NewManager(store, configurationClient, configurationClient, descriptionParser)
 	if err != nil {
 		return nil, fmt.Errorf("create guidance project configuration manager: %w", err)
 	}
@@ -110,7 +115,8 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 	mapClient := amap.New(amap.Config{
 		PlaceSearchEndpoint: c.AMap.PlaceSearchEndpoint, GeocodeEndpoint: c.AMap.GeocodeEndpoint,
 		WalkingEndpoint: c.AMap.WalkingEndpoint,
-		WebServiceKey:   c.AMap.WebServiceKey, Timeout: time.Duration(c.AMap.TimeoutMilliseconds) * time.Millisecond,
+		DrivingEndpoint: c.AMap.DrivingEndpoint, TransitEndpoint: c.AMap.TransitEndpoint,
+		WebServiceKey: c.AMap.WebServiceKey, Timeout: time.Duration(c.AMap.TimeoutMilliseconds) * time.Millisecond,
 	})
 	routingManager, err := routing.NewManager(mapClient)
 	if err != nil {

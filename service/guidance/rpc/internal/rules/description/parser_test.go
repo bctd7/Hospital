@@ -42,3 +42,41 @@ func TestParseUnknownTextRemainsVisible(t *testing.T) {
 		t.Fatalf("unexpected preview: %#v", preview)
 	}
 }
+
+func TestParseExplicitFastingRangeOverridesHospitalDefault(t *testing.T) {
+	preview, err := Parse("检查前需空腹 8～12 小时")
+	if err != nil {
+		t.Fatalf("Parse() error = %v", err)
+	}
+	if len(preview.Rules) != 2 {
+		t.Fatalf("rules = %#v, want fasting and no-water", preview.Rules)
+	}
+	for _, rule := range preview.Rules {
+		if rule.StartMode != StartModeAdvanceRange || rule.MinAdvanceMinutes != 480 || rule.MaxAdvanceMinutes != 720 || rule.Source != "explicit" {
+			t.Fatalf("explicit duration must remain relative to the expected examination time: %#v", rule)
+		}
+	}
+}
+
+func TestParseVagueFastingUsesHospitalDefault(t *testing.T) {
+	preview, err := Parse("检查前请空腹")
+	if err != nil {
+		t.Fatalf("Parse() error = %v", err)
+	}
+	for _, rule := range preview.Rules {
+		if rule.StartMode != StartModePreviousDayTime || rule.PreviousDayTime != "20:00" || rule.Source != "default" {
+			t.Fatalf("vague fasting should use the configured hospital default: %#v", rule)
+		}
+	}
+}
+
+func TestValidateAllowsManuallyAdjustedPreviousDayTime(t *testing.T) {
+	rules := []Rule{{RuleType: RuleTypeFasting, StartMode: StartModePreviousDayTime, PreviousDayTime: "19:30", Source: "manual"}}
+	if err := Validate(rules, nil); err != nil {
+		t.Fatalf("a valid manually selected previous-day time must be accepted: %v", err)
+	}
+	rules[0].PreviousDayTime = "25:00"
+	if err := Validate(rules, nil); err == nil {
+		t.Fatal("invalid clock time must be rejected")
+	}
+}

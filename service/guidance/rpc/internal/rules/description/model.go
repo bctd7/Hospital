@@ -24,6 +24,7 @@ type Rule struct {
 	MaxAdvanceMinutes         int32     `json:"max_advance_minutes,omitempty"`
 	PreviousDayTime           string    `json:"previous_day_time,omitempty"`
 	ReadinessHint             string    `json:"readiness_hint,omitempty"`
+	Source                    string    `json:"source,omitempty"`
 }
 
 type Reminder struct {
@@ -32,8 +33,10 @@ type Reminder struct {
 }
 
 type Preview struct {
-	Description         string
-	Rules               []Rule
-	Reminders           []Reminder
-	UnresolvedFragments []string
+	Description         string     `json:"description,omitempty"`
+	Rules               []Rule     `json:"rules"`
+	Reminders           []Reminder `json:"reminders"`
+	UnresolvedFragments []string   `json:"unresolved_fragments"`
+	ParserMode          string     `json:"parser_mode,omitempty"`
+	Warning             string     `json:"warning,omitempty"`
 }

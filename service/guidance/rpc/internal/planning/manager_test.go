@@ -139,6 +139,38 @@ func TestGenerateAcceptsMorningOnFirstCandidateDate(t *testing.T) {
 	}
 }
 
+func TestGenerateHonorsPerDateSessionSelection(t *testing.T) {
+	itemID := uuid.NewString()
+	store := &planningStoreStub{configurations: map[string]projectconfiguration.Configuration{itemID: {ItemID: itemID}}, plans: map[string]Plan{}}
+	appointment := &planningAppointmentStub{
+		projects: map[string]projectconfiguration.Project{itemID: {ItemID: itemID, Name: "可选时段检查", Status: "active"}},
+		options: map[string][]Option{itemID: {
+			{ItemID: itemID, RoomID: uuid.NewString(), ServiceDate: "2026-08-18", Session: "morning", RemainingCapacity: 1},
+			{ItemID: itemID, RoomID: uuid.NewString(), ServiceDate: "2026-08-18", Session: "afternoon", RemainingCapacity: 1},
+		}}, bookings: map[string][]Booking{},
+	}
+	manager, _ := NewManager(store, appointment)
+	plans, err := manager.Generate(context.Background(), patientPrincipal(), GenerateCommand{ItemIDs: []string{itemID}, CandidateAvailability: []CandidateAvailability{{ServiceDate: "2026-08-18", Sessions: []string{"afternoon"}}}})
+	if err != nil || len(plans) != 1 || plans[0].Items[0].Session != "afternoon" {
+		t.Fatalf("expected afternoon-only plan, plans=%#v err=%v", plans, err)
+	}
+}
+
+func TestGenerateRejectsDuplicateActiveBookingForSameItemAndSession(t *testing.T) {
+	itemID := uuid.NewString()
+	store := &planningStoreStub{configurations: map[string]projectconfiguration.Configuration{itemID: {ItemID: itemID}}, plans: map[string]Plan{}}
+	appointment := &planningAppointmentStub{
+		projects: map[string]projectconfiguration.Project{itemID: {ItemID: itemID, Name: "重复检查", Status: "active"}},
+		options:  map[string][]Option{itemID: {{ItemID: itemID, RoomID: uuid.NewString(), ServiceDate: "2026-08-18", Session: "morning", RemainingCapacity: 2}}},
+		bookings: map[string][]Booking{"active": {{ItemID: itemID, ServiceDate: "2026-08-18", Session: "morning"}}},
+	}
+	manager, _ := NewManager(store, appointment)
+	_, err := manager.Generate(context.Background(), patientPrincipal(), GenerateCommand{ItemIDs: []string{itemID}, CandidateAvailability: []CandidateAvailability{{ServiceDate: "2026-08-18", Sessions: []string{"morning"}}}})
+	if err != ErrNoPlan {
+		t.Fatalf("expected ErrNoPlan for an existing active booking in the same item/date/session, got %v", err)
+	}
+}
+
 func TestGenerateDoesNotOverbookSharedRoomCapacity(t *testing.T) {
 	first, second := uuid.NewString(), uuid.NewString()
 	roomID := uuid.NewString()

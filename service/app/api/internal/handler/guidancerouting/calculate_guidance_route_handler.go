@@ -12,16 +12,16 @@ import (
 	"hospital/service/app/api/internal/types"
 )
 
-func CalculateWalkingRouteHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func CalculateGuidanceRouteHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req types.CalculateWalkingRouteRequest
+		var req types.CalculateGuidanceRouteRequest
 		if err := httpx.Parse(r, &req); err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 			return
 		}
 
-		l := guidancerouting.NewCalculateWalkingRouteLogic(r.Context(), svcCtx)
-		resp, err := l.CalculateWalkingRoute(&req)
+		l := guidancerouting.NewCalculateGuidanceRouteLogic(r.Context(), svcCtx)
+		resp, err := l.CalculateGuidanceRoute(&req)
 		if err != nil {
 			httpx.ErrorCtx(r.Context(), w, err)
 		} else {

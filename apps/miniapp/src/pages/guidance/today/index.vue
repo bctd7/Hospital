@@ -52,11 +52,13 @@ function stageTone(status: string) {
 function statusLabel(status: string) {
   return ({ in_progress: "检查中", called: "叫号中", waiting: "待检查", completed: "已结束" } as Record<string, string>)[status] ?? status;
 }
+function openPlanning() { void uni.redirectTo({ url: "/pages/guidance/planning/index" }); }
 function locationText(item: SmartAppointmentPlanItem) { return `${item.building} · ${item.floor_number}层 · ${item.room_number}室`; }
 </script>
 
 <template>
   <view class="today-page">
+    <view class="guidance-switch"><button @tap="openPlanning">提前规划</button><button class="active">当日导诊</button></view>
     <view class="intro"><text class="intro__eyebrow">当日动态建议</text><text class="intro__title">今天怎么检查</text><text class="intro__description">系统按已预约、已完成和当前检查状态静默更新顺序；这是建议，现场安排优先。</text></view>
     <view v-if="loading" class="state-card"><text>正在整理今天的检查顺序…</text></view>
     <view v-else-if="errorMessage" class="state-card state-card--error"><text>{{ errorMessage }}</text><button @tap="loadRecommendation">重新加载</button></view>
@@ -84,6 +86,7 @@ function locationText(item: SmartAppointmentPlanItem) { return `${item.building}
 <style scoped>
 button::after { display: none; }
 .today-page { min-height: 100vh; padding: 28rpx 24rpx 180rpx; box-sizing: border-box; background: #f3f6fa; }.today-page text { display: block; }
+.guidance-switch{display:grid;grid-template-columns:1fr 1fr;margin-bottom:22rpx;padding:6rpx;background:#e7edf3;border-radius:20rpx}.guidance-switch button{margin:0;color:#748196;font-size:22rpx;line-height:62rpx;background:transparent;border-radius:16rpx}.guidance-switch button.active{color:#087fc9;font-weight:700;background:#fff}
 .intro { padding: 6rpx 8rpx 24rpx; }.intro__eyebrow { color: #168fe4; font-size: 21rpx; font-weight: 700; }.intro__title { margin-top: 6rpx; color: #172235; font-size: 40rpx; font-weight: 750; }.intro__description { margin-top: 10rpx; color: #7d899a; font-size: 24rpx; line-height: 1.6; }
 .state-card,.date-card,.stage-card { background: #fff; border: 1rpx solid #e3e9f0; border-radius: 22rpx; }.state-card { padding: 56rpx 28rpx; color: #8792a1; font-size: 23rpx; line-height: 1.6; text-align: center; }.state-card__title { margin-bottom: 8rpx; color: #344257; font-size: 28rpx; font-weight: 700; }.state-card--error { color: #c25464; }.state-card button { width: 220rpx; margin-top: 22rpx; color: #168fe4; font-size: 22rpx; background: #ebf6fd; border-radius: 30rpx; }
 .date-card { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18rpx; padding: 22rpx 24rpx; color: #8591a2; font-size: 20rpx; }.date-card text:nth-child(2) { color: #27364a; font-size: 27rpx; font-weight: 720; }.timeline { display: grid; gap: 18rpx; margin-top: 20rpx; }.stage-card { display: flex; overflow: hidden; }.stage-card__rail { display: flex; align-items: flex-start; justify-content: center; width: 68rpx; flex: 0 0 auto; padding-top: 24rpx; background: #eef6fb; }.stage-card__rail text { display: flex; align-items: center; justify-content: center; width: 38rpx; height: 38rpx; color: #168fe4; font-size: 19rpx; font-weight: 730; background: #fff; border-radius: 50%; }.stage-card--active .stage-card__rail { background: #e6f7f3; }.stage-card--active .stage-card__rail text { color: #159174; }.stage-card--called .stage-card__rail { background: #fff4df; }.stage-card--called .stage-card__rail text { color: #b9780d; }.stage-card--completed { opacity: .72; }.stage-card__body { min-width: 0; flex: 1; padding: 24rpx; }.stage-card__heading { display: flex; align-items: flex-start; justify-content: space-between; }.stage-card__status { color: #168fe4; font-size: 19rpx; font-weight: 720; }.stage-card__title { margin-top: 5rpx; color: #27364a; font-size: 28rpx; font-weight: 730; }.stage-card__count { color: #8995a5; font-size: 20rpx; }.stage-card__focus { margin-top: 12rpx; color: #718094; font-size: 21rpx; line-height: 1.55; }.stage-item { display: flex; align-items: flex-start; justify-content: space-between; gap: 14rpx; margin-top: 18rpx; padding-top: 18rpx; border-top: 1rpx solid #edf1f5; }.stage-item__name { color: #344257; font-size: 24rpx; font-weight: 680; }.stage-item__location { margin-top: 6rpx; color: #8b96a5; font-size: 20rpx; }.stage-item__duration { flex: 0 0 auto; color: #627287; font-size: 19rpx; }

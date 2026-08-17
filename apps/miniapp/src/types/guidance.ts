@@ -11,26 +11,30 @@ export interface GuidanceRoutePoint {
   longitude: number;
 }
 
-export interface WalkingRouteStep {
+export type GuidanceTravelMode = "walking" | "transit" | "driving";
+
+export interface GuidanceRouteStep {
   instruction: string;
   road_name: string;
   distance_meters: number;
   duration_seconds: number;
 }
 
-export interface WalkingRoute {
+export interface GuidanceRoute {
   origin: GuidanceLocationPoint;
   destination: GuidanceLocationPoint;
   distance_meters: number;
   duration_seconds: number;
   polyline: GuidanceRoutePoint[];
-  steps: WalkingRouteStep[];
+  steps: GuidanceRouteStep[];
   provider: string;
+  mode: GuidanceTravelMode;
 }
 
-export interface CalculateWalkingRouteInput {
+export interface CalculateGuidanceRouteInput {
   origin: GuidanceLocationPoint;
   destination: GuidanceLocationPoint;
+  mode: GuidanceTravelMode;
 }
 
 export interface SearchGuidancePlacesInput {
@@ -54,6 +58,7 @@ export interface GuidancePreparationRule {
   max_advance_minutes: number;
   previous_day_time: string;
   readiness_hint: string;
+  source: "explicit" | "default" | "model" | "manual" | "";
 }
 
 export interface GuidancePatientReminder {
@@ -66,6 +71,8 @@ export interface PreparationRulePreview {
   preparation_rules: GuidancePreparationRule[];
   reminders: GuidancePatientReminder[];
   unresolved_fragments: string[];
+  parser_mode: "llm" | "deterministic" | string;
+  warning: string;
 }
 
 export interface ConfiguredPrecedenceRule {

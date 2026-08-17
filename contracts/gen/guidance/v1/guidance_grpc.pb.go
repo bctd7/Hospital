@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v7.34.1
-// source: guidance/v1/guidance.proto
+// source: contracts/proto/guidance/v1/guidance.proto
 
 package guidancev1
 
@@ -535,5 +535,5 @@ var GuidanceService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "guidance/v1/guidance.proto",
+	Metadata: "contracts/proto/guidance/v1/guidance.proto",
 }

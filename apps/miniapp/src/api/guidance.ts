@@ -1,13 +1,13 @@
 import { request } from "@/api/client";
 import { operationId } from "@/api/management/httpShared";
 import type {
-  CalculateWalkingRouteInput,
+  CalculateGuidanceRouteInput,
   ConfigureExaminationItemInput,
   ExaminationItemConfiguration,
   PreparationRulePreview,
   SearchGuidancePlacesInput,
   SearchGuidancePlacesResult,
-  WalkingRoute,
+  GuidanceRoute,
   SmartAppointmentPlan,
   TodayExaminationRecommendation,
 } from "@/types/guidance";
@@ -36,11 +36,11 @@ export const guidanceApi = {
 			authenticated: true,
 		});
 	},
-  generateSmartAppointmentPlans(itemIds: string[], candidateDates: string[]) {
-    return request<{ plans: SmartAppointmentPlan[] }, { item_ids: string[]; candidate_dates: string[] }>({
+  generateSmartAppointmentPlans(itemIds: string[], candidateAvailability: Array<{ service_date: string; sessions: Array<"morning" | "afternoon"> }>) {
+    return request<{ plans: SmartAppointmentPlan[] }, { item_ids: string[]; candidate_availability: Array<{ service_date: string; sessions: Array<"morning" | "afternoon"> }> }>({
       path: "/api/v1/guidance/smart-appointment/plans",
       method: "POST",
-      data: { item_ids: itemIds, candidate_dates: candidateDates },
+      data: { item_ids: itemIds, candidate_availability: candidateAvailability },
       authenticated: true,
     });
   },
@@ -67,9 +67,9 @@ export const guidanceApi = {
       authenticated: true,
     });
   },
-  calculateWalkingRoute(input: CalculateWalkingRouteInput) {
-    return request<WalkingRoute, CalculateWalkingRouteInput>({
-      path: "/api/v1/guidance/routes/walking",
+  calculateRoute(input: CalculateGuidanceRouteInput) {
+    return request<GuidanceRoute, CalculateGuidanceRouteInput>({
+      path: "/api/v1/guidance/routes",
       method: "POST",
       data: input,
       authenticated: true,
