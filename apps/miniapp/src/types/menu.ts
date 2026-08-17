@@ -1,4 +1,4 @@
-export type MenuTone = "blue" | "cyan" | "orange" | "gray";
+export type MenuTone = "blue" | "cyan" | "orange";
 
 export interface MenuEntry {
   id: string;
@@ -7,11 +7,4 @@ export interface MenuEntry {
   symbol: string;
   tone: MenuTone;
   route: string;
-}
-
-export interface InfoRow {
-  id: string;
-  title: string;
-  description?: string;
-  value?: string;
 }

@@ -312,7 +312,6 @@ export interface PatientAppointmentApi {
   getMyBooking(bookingId: string): Promise<PatientBooking>;
   checkIn(booking: PatientBooking): Promise<PatientBooking>;
   deleteMyBooking(bookingId: string, reason?: string): Promise<void>;
-  listMyReports(page?: number, pageSize?: number): Promise<AppointmentPage<ExaminationReport>>;
   getMyReport(bookingId: string): Promise<ExaminationReport>;
 }
 

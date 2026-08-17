@@ -57,12 +57,6 @@
       }
     },
     {
-      "path": "pages/profile/reports/index",
-      "style": {
-        "navigationBarTitleText": "检验报告查询"
-      }
-    },
-    {
       "path": "pages/profile/reports/detail",
       "style": {
         "navigationBarTitleText": "检查报告"
@@ -72,12 +66,6 @@
       "path": "pages/profile/favorites/index",
       "style": {
         "navigationBarTitleText": "我的关注"
-      }
-    },
-    {
-      "path": "pages/profile/settings/index",
-      "style": {
-        "navigationBarTitleText": "设置"
       }
     },
     {

@@ -54,14 +54,18 @@ describe("home workbench", () => {
         url: "/pages/guidance/route/index",
       },
     });
-    expect(view.serviceGroups[2]?.actions.map((action) => action.id)).toEqual([
-      "reports",
-      "invoice",
-      "inpatient-copy",
+    expect(view.serviceGroups[1]?.actions).toEqual([
+      expect.objectContaining({
+        id: "patient-check-records",
+        title: "检查记录",
+        target: {
+          type: "navigate",
+          url: "/pages/profile/appointments/index?view=completed",
+        },
+      }),
     ]);
     expect(view.serviceGroups[0]?.actions.map((action) => action.id)).not.toContain("insurance-profile");
-    expect(view.serviceGroups[1]?.title).toBe("诊中服务（待规划）");
-    expect(view.serviceGroups[2]?.actions[0]?.title).toBe("检验报告查询");
+    expect(view.serviceGroups.map((group) => group.title)).toEqual(["诊前服务", "诊后服务"]);
   });
 
   it("shows examination item management as the staff primary action", () => {
@@ -88,7 +92,7 @@ describe("home workbench", () => {
         url: "/pages/admin/appointment/bookings?department_id=department-1&department_label=%E7%A7%91%E5%AE%A4%E9%A2%84%E7%BA%A6",
       },
     });
-    expect(view.serviceGroups[2]?.actions[0]).toMatchObject({
+    expect(view.serviceGroups[1]?.actions[0]).toMatchObject({
       id: "appointment-history",
       title: "检查记录",
       target: {
@@ -96,11 +100,7 @@ describe("home workbench", () => {
         url: "/pages/admin/appointment/bookings?view=completed&department_id=department-1&department_label=%E6%A3%80%E6%9F%A5%E8%AE%B0%E5%BD%95",
       },
     });
-    expect(view.serviceGroups[2]?.actions.map((action) => action.id)).toEqual([
-      "appointment-history",
-      "invoice",
-      "inpatient-copy",
-    ]);
+    expect(view.serviceGroups[1]?.actions.map((action) => action.id)).toEqual(["appointment-history"]);
     expect(view.serviceGroups[0]?.actions.map((action) => action.id)).not.toContain("walking-route");
     expect(view.serviceGroups[0]?.actions.map((action) => action.id)).not.toContain("today-guidance");
   });
@@ -120,13 +120,8 @@ describe("home workbench", () => {
     });
     expect(view.serviceGroups.map((group) => group.title)).toEqual([
       "诊前服务",
-      "诊中服务（待规划）",
       "诊后服务",
     ]);
-    expect(view.serviceGroups[2]?.actions.map((action) => action.id)).toEqual([
-      "appointment-history",
-      "invoice",
-      "inpatient-copy",
-    ]);
+    expect(view.serviceGroups[1]?.actions.map((action) => action.id)).toEqual(["appointment-history"]);
   });
 });

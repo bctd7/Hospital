@@ -42,14 +42,6 @@ const menuItems: MenuEntry[] = [
     tone: "orange",
     route: "/pages/profile/favorites/index",
   },
-  {
-    id: "settings",
-    title: "设置",
-    description: "清除缓存、联系客服、用户隐私协议、账号注销",
-    symbol: "设",
-    tone: "gray",
-    route: "/pages/profile/settings/index",
-  },
 ];
 
 onShow(() => {

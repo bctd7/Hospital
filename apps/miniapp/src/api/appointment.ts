@@ -754,14 +754,6 @@ export const patientAppointmentApi: PatientAppointmentApi = {
     });
   },
 
-  async listMyReports(currentPage = 1, pageSize = 20) {
-    const value = await request<{ reports: ExaminationReportResponse[] | null; page: number; page_size: number; total: number }>({
-      path: queryPath("/api/v1/appointment/reports", { page: currentPage, page_size: pageSize }),
-      authenticated: true,
-    });
-    return page(arrayOrEmpty(value.reports).map(examinationReport), value);
-  },
-
   async getMyReport(bookingId) {
     return examinationReport(await request<ExaminationReportResponse>({
       path: `/api/v1/appointment/bookings/${encodeURIComponent(bookingId)}/report`,

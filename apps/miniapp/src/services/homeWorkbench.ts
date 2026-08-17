@@ -64,58 +64,16 @@ function patientHome(): HomeWorkbenchView {
         ],
       },
       {
-        id: "during-visit",
-        title: "诊中服务（待规划）",
-        actions: [
-          {
-            id: "payment",
-            title: "在线缴费",
-            description: "查看并支付待缴费用",
-            symbol: "缴",
-            tone: "blue",
-            badge: "建设中",
-            target: { type: "unavailable", message: "在线缴费功能正在建设中" },
-          },
-          {
-            id: "insurance-code",
-            title: "医保电子凭证",
-            description: "出示医保电子凭证",
-            symbol: "保",
-            tone: "cyan",
-            badge: "建设中",
-            target: { type: "unavailable", message: "医保电子凭证功能正在建设中" },
-          },
-        ],
-      },
-      {
         id: "after-visit",
         title: "诊后服务",
         actions: [
           {
-            id: "reports",
-            title: "检验报告查询",
-            description: "查询检验检查报告",
-            symbol: "查",
+            id: "patient-check-records",
+            title: "检查记录",
+            description: "查看已完成和未到场的检查",
+            symbol: "记",
             tone: "blue",
-            target: { type: "navigate", url: "/pages/profile/reports/index" },
-          },
-          {
-            id: "invoice",
-            title: "电子票据",
-            description: "查看医疗电子票据",
-            symbol: "票",
-            tone: "cyan",
-            badge: "建设中",
-            target: { type: "unavailable", message: "电子票据功能正在建设中" },
-          },
-          {
-            id: "inpatient-copy",
-            title: "住院病案复印",
-            description: "申请住院病案材料",
-            symbol: "案",
-            tone: "green",
-            badge: "建设中",
-            target: { type: "unavailable", message: "住院病案复印功能正在建设中" },
+            target: { type: "navigate", url: "/pages/profile/appointments/index?view=completed" },
           },
         ],
       },
@@ -197,10 +155,7 @@ export function buildHomeWorkbench(
         : group.id === "after-visit"
           ? {
               ...group,
-              actions: [
-                departmentHistoryAction,
-                ...group.actions.filter((action) => action.id !== "reports"),
-              ],
+              actions: [departmentHistoryAction],
             }
           : group,
     );

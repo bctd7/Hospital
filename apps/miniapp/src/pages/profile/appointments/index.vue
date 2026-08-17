@@ -114,6 +114,11 @@ function calledCountdown(booking: PatientBooking) {
   return remaining ? `请在 ${remaining} 秒内到达房间` : "叫号时间已到，请等待状态更新";
 }
 
+function openPublishedReport(booking: PatientBooking) {
+  if (!isCompletedView.value || !booking.reportId) return;
+  uni.navigateTo({ url: `/pages/profile/reports/detail?booking_id=${encodeURIComponent(booking.bookingId)}` });
+}
+
 function messageOf(error: unknown, fallback: string) {
 	if (error instanceof ApiError && error.code === "BOOKING_WINDOW_CLOSED") return "当前检查尚未开放报到，或已经超过停止报到时间";
   return error instanceof Error && error.message.trim() ? error.message : fallback;
@@ -131,7 +136,7 @@ function statusLabel(value: PatientBookingStatus) {
     <view v-else-if="errorMessage" class="state-card state-card--error" @tap="loadBookings">{{ errorMessage }}</view>
     <view v-else-if="!bookings.length" class="state-card">{{ isCompletedView ? "暂无检查记录" : "暂无待检查或检查中的预约" }}</view>
     <view v-else class="booking-list">
-      <view v-for="booking in bookings" :key="booking.bookingId" class="booking-card" :class="{ 'booking-card--focused': booking.bookingId === focusedBookingId }">
+      <view v-for="booking in bookings" :key="booking.bookingId" class="booking-card" :class="{ 'booking-card--focused': booking.bookingId === focusedBookingId, 'booking-card--report': isCompletedView && Boolean(booking.reportId) }" @tap="openPublishedReport(booking)">
         <view class="booking-card__heading">
           <text class="booking-card__item">{{ booking.itemName }}</text>
           <text class="booking-card__status" :class="`status--${booking.status}`">{{ statusLabel(booking.status) }}</text>
@@ -139,6 +144,7 @@ function statusLabel(value: PatientBookingStatus) {
         <text class="booking-card__time">{{ booking.serviceDate }} · {{ sessionLabel(booking.session) }} · {{ booking.itemStartTime }}–{{ booking.itemEndTime }}</text>
         <text class="booking-card__room">{{ booking.roomDisplayName }}</text>
         <text class="booking-card__duration">{{ formatEstimatedDuration(booking.estimatedDurationMinutes) }}</text>
+        <text v-if="isCompletedView && booking.reportId" class="booking-card__report-link">查看检查报告 ›</text>
         <view v-if="booking.status === 'queued' || booking.status === 'called'" class="queue-panel" :class="{ 'queue-panel--called': booking.status === 'called' }">
           <text class="queue-panel__number">{{ booking.status === 'called' ? `请 ${booking.queueNumber} 号患者前往检查` : `候检号 ${booking.queueNumber}` }}</text>
           <text v-if="booking.status === 'queued'" class="queue-panel__detail">当前叫到 {{ booking.currentCalledQueueNumber || '—' }} 号 · 前方 {{ booking.peopleAhead }} 人</text>
@@ -157,4 +163,5 @@ function statusLabel(value: PatientBookingStatus) {
 <style scoped>
 button::after{display:none}.state-card,.booking-card{margin-bottom:20rpx;padding:28rpx;color:#718096;font-size:24rpx;background:#fff;border:1rpx solid #e4eaf1;border-radius:18rpx}.state-card{text-align:center}.state-card--error{color:#c34c4c}.booking-card--focused{border-color:#8fc5ea;background:#f8fcff}.booking-card__heading{display:flex;align-items:center;justify-content:space-between}.booking-card__item{color:#263348;font-size:29rpx;font-weight:700}.booking-card__status{padding:6rpx 13rpx;color:#2379da;font-size:19rpx;background:#eaf4ff;border-radius:16rpx}.booking-card__status.status--called{color:#fff;background:#2188c7}.booking-card__status.status--in_progress,.booking-card__status.status--completed,.booking-card__status.status--report_pending{color:#27855f;background:#e9f8f1}.booking-card__status.status--no_show{color:#8a5b35;background:#f8efe6}.booking-card__time,.booking-card__room{display:block;margin-top:15rpx;color:#66758a;font-size:22rpx}.booking-card__room{color:#8793a3}.booking-actions{display:flex;gap:14rpx;margin-top:24rpx}.booking-actions button{flex:1;margin:0;padding:0;font-size:22rpx;line-height:64rpx;border-radius:32rpx}.delete-button{color:#d14e4e;background:#fff4f4;border:1rpx solid #f1cccc}.check-in-button{color:#fff;background:#2188c7}.check-in-button[disabled]{color:#8b98a8;background:#edf1f5}.check-in-hint{display:block;margin-top:18rpx;color:#708096;font-size:21rpx}.queue-panel{margin-top:22rpx;padding:20rpx;background:#edf7fd;border-left:6rpx solid #2188c7;border-radius:12rpx}.queue-panel--called{color:#fff;background:#2188c7}.queue-panel__number,.queue-panel__detail{display:block}.queue-panel__number{font-size:25rpx;font-weight:700}.queue-panel__detail{margin-top:8rpx;font-size:20rpx;opacity:.82}
 .booking-card__duration{display:block;margin-top:15rpx;color:#347ff0;font-size:22rpx}
+.booking-card--report{cursor:pointer}.booking-card__report-link{display:block;margin-top:18rpx;padding-top:16rpx;color:#197fbd;font-size:21rpx;text-align:right;border-top:1rpx solid #e8edf1}
 </style>
