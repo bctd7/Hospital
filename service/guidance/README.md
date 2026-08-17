@@ -47,6 +47,8 @@ rpc/internal/
 │  └─ validation.go           输入、权限、项目引用和循环校验
 ├─ planning/                  患者方案编排
 │  ├─ generate.go             智能预约方案生成
+│  ├─ search.go               DFS、状态记忆化、共享容量与全局方案比较
+│  ├─ existing_bookings.go    已有预约对新方案的先后边界
 │  ├─ confirm.go              整组预约确认
 │  ├─ today.go                当日检查顺序
 │  └─ ordering.go             先后关系和说明规则排序
@@ -64,7 +66,13 @@ rpc/internal/
 它只是把前三个业务需要的 Appointment RPC 调用集中隔离，避免外部服务适配器散落在规则目录或 Manager 文件中。
 
 `rules` 只有两块：`precedence` 表达“哪个项目建议先做”；`description` 把医生填写的项目说明转换为禁食、禁水、
-喝水三种封闭状态以及非强制患者提醒。当前 `description` 使用确定性解析器，不调用大语言模型。
+喝水三种封闭状态以及非强制患者提醒。`description` 优先调用兼容 OpenAI Chat Completions 的外部模型生成候选结构，
+再执行确定性枚举、范围和冲突校验；模型不可用或结果非法时降级到默认解析，最终都必须由工作人员确认。
+
+`planning/search.go` 对项目顺序和 Appointment 可预约选项执行完整 DFS，并以已选集合、最后大窗、准备状态、地点和
+争抢容量构成记忆化状态。它不是逐项贪心：共享容量和楼栋选择会参与全局比较。评分依次考虑准备逆序、准备切换、
+到院天数、跨院区、跨楼栋和完成大窗；候选日期内已有活动/完成预约作为先后关系锚点，`no_show` 不满足前置关系；
+硬约束不会被评分抵消。
 
 阅读一条请求时按以下顺序即可：`server → logic → 对应业务包 Manager → repository/appointmentclient`。
 `logic` 只是 go-zero 的协议适配层；真正的业务判断位于四个业务包。`svc` 只在启动时组装依赖，不参与业务流程。
