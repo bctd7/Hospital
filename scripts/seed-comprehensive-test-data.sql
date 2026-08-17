@@ -21,6 +21,10 @@ SET @account_patient_1 = COALESCE(
     (SELECT account_id FROM identity_account_phones WHERE phone_fingerprint = @phone_patient_1 LIMIT 1),
     @account_patient_1_fallback
 );
+-- 134 开头的真实超级管理员用于智能导诊患者侧联调；复用既有账号，不改变账号类型和角色。
+SET @account_guidance_admin = (
+    SELECT account_id FROM identity_account_phones WHERE phone_fingerprint = @phone_guidance_admin LIMIT 1
+);
 SET @account_patient_2 = '21000000-0000-4000-8000-000000000002';
 SET @account_patient_3 = '21000000-0000-4000-8000-000000000003';
 SET @account_patient_4 = '21000000-0000-4000-8000-000000000004';
@@ -318,6 +322,9 @@ SET @booking_east_completed = '40000000-0000-4000-8000-000000000028';
 SET @booking_lab_canceled = '40000000-0000-4000-8000-000000000029';
 SET @booking_ct_completed_other = '40000000-0000-4000-8000-000000000030';
 SET @booking_called_after_end = '40000000-0000-4000-8000-000000000031';
+SET @booking_guidance_blood = '40000000-0000-4000-8000-000000000032';
+SET @booking_guidance_cta = '40000000-0000-4000-8000-000000000033';
+SET @booking_guidance_urinary = '40000000-0000-4000-8000-000000000034';
 
 INSERT INTO appointment_bookings
     (id, patient_account_id, patient_display_name_snapshot, patient_phone_masked_snapshot,
@@ -370,6 +377,28 @@ VALUES
 (@booking_lab_canceled, @account_patient_8, '孙磊', '139****0108', '0108', @dept_laboratory_east, @item_liver_function, @room_lab201, @tomorrow, 'afternoon', 'canceled', '12:00:00', '18:00:00', '14:00:00', '17:00:00', '16:30:00', 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 2, DATE_SUB(@now, INTERVAL 6 HOUR), DATE_SUB(@now, INTERVAL 4 HOUR)),
 (@booking_ct_completed_other, @account_patient_9, '周婷', '139****0109', '0109', @dept_radiology_main, @item_ct, @room_ct201, @yesterday, 'afternoon', 'completed', '12:00:00', '18:00:00', '14:00:00', '17:00:00', '16:30:00', 20, CONVERT_TZ(TIMESTAMP(@yesterday, '14:20:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@yesterday, '14:40:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', CONVERT_TZ(TIMESTAMP(@yesterday, '15:10:00'), '+08:00', '+00:00'), @account_doctor_1, '陈医生', 4, CONVERT_TZ(TIMESTAMP(@two_days_ago, '17:00:00'), '+08:00', '+00:00'), @now),
 (@booking_called_after_end, @account_patient_11, '林悦', '139****0111', '0111', @dept_radiology_main, @item_xray, @room_dr101, @today, @current_session, 'queued', @current_open_time, @current_close_time, @expired_start_time, @expired_end_time, @expired_cutoff_time, 15, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 4, DATE_SUB(@now, INTERVAL 30 MINUTE), @now);
+
+-- 134 超级管理员切换到患者端后可直接验证当日检查顺序：
+-- 血常规是冠状动脉 CTA 的直接前置项目，泌尿系彩超需要饮水准备，因此应排在两者之后。
+INSERT INTO appointment_bookings
+    (id, patient_account_id, patient_display_name_snapshot, patient_phone_masked_snapshot,
+     patient_phone_last4_snapshot, department_id, item_id, room_id, service_date, session, status,
+     room_open_time_snapshot, room_close_time_snapshot, item_start_time_snapshot,
+     item_end_time_snapshot, item_cutoff_time_snapshot, estimated_duration_minutes_snapshot,
+     version, created_at, updated_at)
+VALUES
+(@booking_guidance_blood, @account_guidance_admin, '导诊体验账号', @phone_guidance_admin_masked, @phone_guidance_admin_last4,
+ @dept_laboratory_east, @item_blood, @room_lab201, @today, @current_session, 'confirmed',
+ @current_open_time, @current_close_time, @current_start_time, @current_end_time, @current_cutoff_time, 10,
+ 1, DATE_SUB(@now, INTERVAL 18 MINUTE), @now),
+(@booking_guidance_cta, @account_guidance_admin, '导诊体验账号', @phone_guidance_admin_masked, @phone_guidance_admin_last4,
+ @dept_radiology_main, @item_cta, @room_ct201, @today, @current_session, 'confirmed',
+ @current_open_time, @current_close_time, @current_start_time, @current_end_time, @current_cutoff_time, 45,
+ 1, DATE_SUB(@now, INTERVAL 17 MINUTE), @now),
+(@booking_guidance_urinary, @account_guidance_admin, '导诊体验账号', @phone_guidance_admin_masked, @phone_guidance_admin_last4,
+ @dept_ultrasound_main, @item_urinary_ultrasound, @room_us301, @today, @current_session, 'confirmed',
+ @current_open_time, @current_close_time, @current_start_time, @current_end_time, @current_cutoff_time, 20,
+ 1, DATE_SUB(@now, INTERVAL 16 MINUTE), @now);
 
 INSERT INTO appointment_check_queues
     (id, room_id, service_date, session, next_ticket_number, call_sequence, current_called_booking_id, version, created_at, updated_at)

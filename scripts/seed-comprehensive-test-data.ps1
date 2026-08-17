@@ -66,6 +66,7 @@ DROP DATABASE IF EXISTS hospital_guidance;
 
 $lookupKey = [Convert]::FromBase64String((Get-RequiredEnvironmentValue -Name "IDENTITY_PHONE_LOOKUP_KEY_BASE64"))
 $phones = [ordered]@{
+    phone_guidance_admin = "+8613482154556"
     phone_doctor_1 = "+8613800000001"
     phone_doctor_2 = "+8613800000002"
     phone_patient_1 = "+8615363658538"
@@ -116,6 +117,8 @@ $variables = foreach ($entry in $phones.GetEnumerator()) {
 
 $seedFile = Join-Path $PSScriptRoot "seed-comprehensive-test-data.sql"
 $patientOneSnapshotVariables = @(
+    "SET @phone_guidance_admin_masked = '134****4556';"
+    "SET @phone_guidance_admin_last4 = '4556';"
     "SET @phone_patient_1_masked = '153****8538';"
     "SET @phone_patient_1_last4 = '8538';"
 )
@@ -127,6 +130,7 @@ if ($LASTEXITCODE -ne 0) {
 
 $verificationSQL = @"
 SET @phone_patient_1 = UNHEX('$($fingerprints.phone_patient_1)');
+SET @phone_guidance_admin = UNHEX('$($fingerprints.phone_guidance_admin)');
 SET @hospital_local_today = DATE(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00'));
 SELECT IF(
   (SELECT COUNT(*) FROM hospital_identity.identity_organization_units WHERE unit_type = 'campus' AND status = 'active') >= 2
@@ -134,12 +138,12 @@ SELECT IF(
   AND (SELECT COUNT(*) FROM hospital_identity.identity_staff_profiles WHERE staff_status = 'active') >= 4
   -- 153 管理员以真实超级管理员账号兼任报告患者，因此 account_type 不伪装成 patient。
   AND (SELECT COUNT(*) FROM hospital_identity.identity_accounts WHERE account_type = 'patient' AND status = 'active') >= 10
-  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings) = 31
+  AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings) = 34
   AND (SELECT COUNT(DISTINCT status) FROM hospital_appointment.appointment_bookings) = 8
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_examination_items
        WHERE estimated_duration_minutes BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes, 5) = 0) = 11
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings
-       WHERE estimated_duration_minutes_snapshot BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes_snapshot, 5) = 0) = 31
+       WHERE estimated_duration_minutes_snapshot BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes_snapshot, 5) = 0) = 34
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings WHERE status = 'canceled') >= 1
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_bookings WHERE status = 'report_pending' AND service_date < @hospital_local_today) >= 1
   AND (SELECT COUNT(DISTINCT department_id) FROM hospital_appointment.appointment_bookings WHERE service_date = @hospital_local_today) = 4
@@ -164,7 +168,18 @@ SELECT IF(
   AND (SELECT COUNT(*) FROM hospital_appointment.appointment_message_reads) >= 1
   AND (SELECT COUNT(*) FROM hospital_guidance.guidance_item_configurations) = 11
   AND (SELECT COUNT(*) FROM hospital_guidance.guidance_precedence_rules
-       WHERE predecessor_department_id <> successor_department_id) >= 1,
+       WHERE predecessor_department_id <> successor_department_id) >= 1
+  AND (SELECT COUNT(*)
+       FROM hospital_identity.identity_account_phones p
+       JOIN hospital_identity.identity_account_roles ar ON ar.account_id = p.account_id
+       JOIN hospital_identity.identity_roles r ON r.id = ar.role_id AND r.code = 'super_admin'
+       WHERE p.phone_fingerprint = @phone_guidance_admin) = 1
+  AND (SELECT COUNT(*)
+       FROM hospital_appointment.appointment_bookings b
+       JOIN hospital_identity.identity_account_phones p ON p.account_id = b.patient_account_id
+       WHERE p.phone_fingerprint = @phone_guidance_admin
+         AND b.service_date = @hospital_local_today
+         AND b.status = 'confirmed') = 3,
   'ready', 'incomplete');
 "@
 $verification = $verificationSQL | & docker compose --env-file $environmentFile -f $composeFile exec -T mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql --protocol=socket -uroot -N'
@@ -180,4 +195,5 @@ Write-Output "Ultrasound doctor: 13800000002"
 Write-Output "Report patient (also a super administrator): 15363658538"
 Write-Output "Login-capable patients: 13900000002 through 13900000004"
 Write-Output "Display-only patients: 张伟、刘洋、陈静、孙磊、周婷、吴昊、林悦"
-Write-Output "Coverage: 11 examination items across 1/2/3号楼, 31 bookings, 8 statuses, 5 room queues, 8 reports"
+Write-Output "Guidance patient: 13482154556 (today: 血常规 -> 冠状动脉CTA -> 泌尿系彩超)"
+Write-Output "Coverage: 11 examination items across 1/2/3号楼, 34 bookings, 8 statuses, 5 room queues, 8 reports"
