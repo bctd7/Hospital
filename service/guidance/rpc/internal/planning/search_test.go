@@ -318,6 +318,64 @@ func TestSearchTreatsDrinkMaximumAsSoftPreference(t *testing.T) {
 	}
 }
 
+func TestSearchFinishesRestrictedProjectsBeforeLongerDrinkPreparation(t *testing.T) {
+	liver := searchOption(searchItemA, searchRoomA, "3号楼", "2026-08-18", "morning", 3)
+	liver.ItemStartTime, liver.ItemEndTime, liver.EstimatedDurationMinutes = "09:00", "12:00", 15
+	abdominalMorning := searchOption(searchItemB, searchRoomB, "2号楼", "2026-08-18", "morning", 3)
+	abdominalMorning.ItemStartTime, abdominalMorning.ItemEndTime, abdominalMorning.EstimatedDurationMinutes = "09:00", "12:00", 25
+	abdominalAfternoon := abdominalMorning
+	abdominalAfternoon.Session, abdominalAfternoon.ItemStartTime, abdominalAfternoon.ItemEndTime = "afternoon", "14:00", "18:00"
+	urinaryMorning := searchOption(searchItemC, searchRoomB, "2号楼", "2026-08-18", "morning", 3)
+	urinaryMorning.ItemStartTime, urinaryMorning.ItemEndTime, urinaryMorning.EstimatedDurationMinutes = "09:00", "12:00", 20
+	urinaryAfternoon := urinaryMorning
+	urinaryAfternoon.Session, urinaryAfternoon.ItemStartTime, urinaryAfternoon.ItemEndTime = "afternoon", "14:00", "18:00"
+	configurations := map[string]projectconfiguration.Configuration{
+		searchItemA: {ItemID: searchItemA, PreparationRules: []descriptionrules.Rule{{RuleType: descriptionrules.RuleTypeFasting}, {RuleType: descriptionrules.RuleTypeNoWater}}},
+		searchItemB: {ItemID: searchItemB, PreparationRules: []descriptionrules.Rule{{RuleType: descriptionrules.RuleTypeFasting}, {RuleType: descriptionrules.RuleTypeNoWater}}},
+		searchItemC: {ItemID: searchItemC, PreparationRules: []descriptionrules.Rule{{RuleType: descriptionrules.RuleTypeDrinkWater, StartMode: descriptionrules.StartModeAdvanceRange, MinAdvanceMinutes: 120, RecommendedAdvanceMinutes: 180, MaxAdvanceMinutes: 240}}},
+	}
+
+	plans := searchBestPlans(
+		[]string{searchItemA, searchItemB, searchItemC},
+		map[string][]Option{
+			searchItemA: {liver},
+			searchItemB: {abdominalMorning, abdominalAfternoon},
+			searchItemC: {urinaryMorning, urinaryAfternoon},
+		},
+		nil,
+		configurations,
+	)
+	if len(plans) == 0 {
+		t.Fatal("expected a plan that completes restricted projects before drinking")
+	}
+	wantItems := []string{searchItemA, searchItemB, searchItemC}
+	wantStarts := []int32{9 * 60, 9*60 + 30, 14 * 60}
+	for index, choice := range plans[0].choices {
+		if choice.itemID != wantItems[index] || choice.plannedStartMinutes != wantStarts[index] {
+			t.Fatalf("choice %d = %s at %s, want %s at %s; plan=%#v", index, choice.itemID, independentClock(choice.plannedStartMinutes), wantItems[index], independentClock(wantStarts[index]), plans[0].choices)
+		}
+	}
+}
+
+func TestPreparationMaturityPenaltyUsesSameSemanticsForAllRuleTypes(t *testing.T) {
+	for _, ruleType := range []descriptionrules.RuleType{
+		descriptionrules.RuleTypeFasting,
+		descriptionrules.RuleTypeNoWater,
+		descriptionrules.RuleTypeDrinkWater,
+	} {
+		rule := descriptionrules.Rule{RuleType: ruleType, MinAdvanceMinutes: 120, RecommendedAdvanceMinutes: 180, MaxAdvanceMinutes: 240}
+		if got := preparationMaturityPenalty(rule, 120); got != 120 {
+			t.Fatalf("%s minimum penalty = %d, want 120", ruleType, got)
+		}
+		if got := preparationMaturityPenalty(rule, 240); got != 0 {
+			t.Fatalf("%s maximum preparation penalty = %d, want 0", ruleType, got)
+		}
+		if got := preparationMaturityPenalty(rule, 255); got != 15 {
+			t.Fatalf("%s soft overrun penalty = %d, want 15", ruleType, got)
+		}
+	}
+}
+
 func TestSearchIncludesMovementInWindowFeasibility(t *testing.T) {
 	first := searchOption(searchItemA, searchRoomA, "1号楼", "2026-08-18", "morning", 2)
 	first.ItemStartTime, first.ItemEndTime, first.EstimatedDurationMinutes = "11:00", "12:00", 50
@@ -568,7 +626,7 @@ func TestSearchMatchesRandomizedExhaustiveOracle(t *testing.T) {
 }
 
 type independentScore struct {
-	preparationInversions, preparationTransitions, preparationTimingDeviation int
+	preparationInversions, preparationTransitions, preparationMaturityPenalty int
 	serviceDays, campusChanges, buildingChanges, travelMinutes                int
 	completionSlot                                                            string
 }
@@ -671,7 +729,7 @@ func simulateChoices(choices []searchChoice, configurations map[string]projectco
 			if ready := lastNoWaterEnd + rule.MinAdvanceMinutes; ready > start {
 				start = ready
 			}
-			result.preparationTimingDeviation += absoluteInt(int(start - lastNoWaterEnd - rule.RecommendedAdvanceMinutes))
+			result.preparationMaturityPenalty += preparationMaturityPenalty(rule, start-lastNoWaterEnd)
 		}
 		duration := option.EstimatedDurationMinutes
 		if duration <= 0 {
@@ -776,8 +834,8 @@ func oracleScoreForChoices(choices []searchChoice, configurations map[string]pro
 }
 
 func compareIndependentScore(left, right independentScore) int {
-	leftValues := []int{left.preparationInversions, left.preparationTransitions, left.preparationTimingDeviation, left.serviceDays, left.campusChanges, left.buildingChanges, left.travelMinutes}
-	rightValues := []int{right.preparationInversions, right.preparationTransitions, right.preparationTimingDeviation, right.serviceDays, right.campusChanges, right.buildingChanges, right.travelMinutes}
+	leftValues := []int{left.preparationInversions, left.preparationTransitions, left.serviceDays}
+	rightValues := []int{right.preparationInversions, right.preparationTransitions, right.serviceDays}
 	for index := range leftValues {
 		if leftValues[index] < rightValues[index] {
 			return -1
@@ -791,6 +849,16 @@ func compareIndependentScore(left, right independentScore) int {
 	}
 	if left.completionSlot > right.completionSlot {
 		return 1
+	}
+	leftValues = []int{left.preparationMaturityPenalty, left.campusChanges, left.buildingChanges, left.travelMinutes}
+	rightValues = []int{right.preparationMaturityPenalty, right.campusChanges, right.buildingChanges, right.travelMinutes}
+	for index := range leftValues {
+		if leftValues[index] < rightValues[index] {
+			return -1
+		}
+		if leftValues[index] > rightValues[index] {
+			return 1
+		}
 	}
 	return 0
 }

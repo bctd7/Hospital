@@ -74,7 +74,9 @@ rpc/internal/
 地点及争抢容量构成记忆化状态。它不是逐项贪心：共享容量、项目预计时长和楼栋移动都会参与全局比较。每个分支
 按可开始的最早时刻排程，完整落在项目窗口与房间窗口交集内才算可执行。跨楼栋步行时间由高德计算并向上取整到
 五分钟；结果按楼栋对缓存一天，高德临时失败时按 15 分钟保守估算并短暂缓存。候选日期内已有活动/完成预约作为
-先后关系锚点，`no_show` 不满足前置关系；硬约束不会被评分抵消。
+先后关系锚点，`no_show` 不满足前置关系；硬约束不会被评分抵消。禁食、禁水和喝水共用同一准备成熟度模型：
+未到最短时长不可执行，合理区间内越充分越好，超过最大建议时长仍可兜底但逐渐降级；整组更早完成仍优先于单纯
+延长准备时间。
 
 阅读一条请求时按以下顺序即可：`server → logic → 对应业务包 Manager → repository/appointmentclient`。
 `logic` 只是 go-zero 的协议适配层；真正的业务判断位于四个业务包。`svc` 只在启动时组装依赖，不参与业务流程。
@@ -89,6 +91,9 @@ AMAP_WEB_SERVICE_KEY=你的高德Web服务Key
 
 本地 `.env` 和生产环境分别填写真实值；`.env.example` 与 `deploy/production/env.example` 只保留变量名或占位值，
 不得提交真实 Key。
+
+外部模型调用允许 10 秒，App API 到 Guidance 的调用链预留 15 秒；模型超时或输出不符合封闭规则时，服务会在
+同一请求中降级到确定性解析，而不是把 `context deadline exceeded` 直接暴露给前端。
 
 ```powershell
 .\scripts\migrate.ps1 -Service guidance -Direction up

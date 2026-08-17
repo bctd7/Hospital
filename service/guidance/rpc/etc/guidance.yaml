@@ -1,5 +1,6 @@
 Name: guidance-rpc
 ListenOn: 0.0.0.0:8082
+Timeout: 15000
 Mode: dev
 Environment: "${APP_ENV}"
 Log:

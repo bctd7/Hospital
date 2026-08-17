@@ -33,7 +33,7 @@ type searchOptionCandidate struct {
 type searchScore struct {
 	preparationInversions      int
 	preparationTransitions     int
-	preparationTimingDeviation int
+	preparationMaturityPenalty int
 	serviceDays                int
 	campusChanges              int
 	buildingChanges            int
@@ -222,14 +222,14 @@ func (s *planSearcher) visit(state searchState) {
 					earliestStart = cursor
 				}
 			}
-			timingDeviation := 0
+			maturityPenalty := 0
 			if drinkRule, ok := preparationRule(configuration, descriptionrules.RuleTypeDrinkWater); ok && lastNoWaterEnd > 0 {
 				readyAt := lastNoWaterEnd + drinkRule.MinAdvanceMinutes
 				if readyAt > earliestStart {
 					earliestStart = readyAt
 				}
 				elapsed := earliestStart - lastNoWaterEnd
-				timingDeviation = absoluteInt(int(elapsed - drinkRule.RecommendedAdvanceMinutes))
+				maturityPenalty = preparationMaturityPenalty(drinkRule, elapsed)
 			}
 			end := earliestStart + candidate.duration
 			if end > candidate.windowEnd {
@@ -271,7 +271,7 @@ func (s *planSearcher) visit(state searchState) {
 			if hasPreparationRule(configuration, descriptionrules.RuleTypeDrinkWater) {
 				next.drinkToday = true
 			}
-			next.score.preparationTimingDeviation += timingDeviation
+			next.score.preparationMaturityPenalty += maturityPenalty
 			next.score.travelMinutes += int(travel.minutes)
 			next.score.completionDate = option.ServiceDate
 			next.score.completionMinutes = end
@@ -292,15 +292,15 @@ func (s *planSearcher) visit(state searchState) {
 	}
 }
 
-// canStillReachTopPlans 使用乐观下界剪枝：所有评分数字只能增加；当数字完全相同时，
-// 当前结束时刻加上剩余项目的最短检查时长，仍晚于第三名才可安全舍弃。
+// canStillReachTopPlans 使用乐观下界剪枝。准备顺序、服务日和累计惩罚均只会增加；
+// 当前结束时刻加上剩余项目最短检查时长，是最终完成时刻的安全下界。
 func (s *planSearcher) canStillReachTopPlans(state searchState) bool {
 	if len(s.results) < maximumGeneratedPlans {
 		return true
 	}
 	third := s.results[maximumGeneratedPlans-1].score
-	partialNumbers := []int{state.score.preparationInversions, state.score.preparationTransitions, state.score.preparationTimingDeviation, state.score.serviceDays, state.score.campusChanges, state.score.buildingChanges, state.score.travelMinutes}
-	thirdNumbers := []int{third.preparationInversions, third.preparationTransitions, third.preparationTimingDeviation, third.serviceDays, third.campusChanges, third.buildingChanges, third.travelMinutes}
+	partialNumbers := []int{state.score.preparationInversions, state.score.preparationTransitions, state.score.serviceDays}
+	thirdNumbers := []int{third.preparationInversions, third.preparationTransitions, third.serviceDays}
 	for index := range partialNumbers {
 		if partialNumbers[index] < thirdNumbers[index] {
 			return true
@@ -336,7 +336,23 @@ func (s *planSearcher) canStillReachTopPlans(state searchState) bool {
 	if lowerBound >= 24*60 {
 		return false
 	}
-	return lowerBound <= third.completionMinutes
+	if lowerBound < third.completionMinutes {
+		return true
+	}
+	if lowerBound > third.completionMinutes {
+		return false
+	}
+	remainingNumbers := []int{state.score.preparationMaturityPenalty, state.score.campusChanges, state.score.buildingChanges, state.score.travelMinutes}
+	thirdRemainingNumbers := []int{third.preparationMaturityPenalty, third.campusChanges, third.buildingChanges, third.travelMinutes}
+	for index := range remainingNumbers {
+		if remainingNumbers[index] < thirdRemainingNumbers[index] {
+			return true
+		}
+		if remainingNumbers[index] > thirdRemainingNumbers[index] {
+			return false
+		}
+	}
+	return true
 }
 
 func (s *planSearcher) acceptState(state searchState) bool {
@@ -439,8 +455,8 @@ func normalizedSearchOptions(values []Option) []Option {
 }
 
 func compareSearchScore(left, right searchScore) int {
-	leftValues := []int{left.preparationInversions, left.preparationTransitions, left.preparationTimingDeviation, left.serviceDays, left.campusChanges, left.buildingChanges, left.travelMinutes}
-	rightValues := []int{right.preparationInversions, right.preparationTransitions, right.preparationTimingDeviation, right.serviceDays, right.campusChanges, right.buildingChanges, right.travelMinutes}
+	leftValues := []int{left.preparationInversions, left.preparationTransitions, left.serviceDays}
+	rightValues := []int{right.preparationInversions, right.preparationTransitions, right.serviceDays}
 	for index := range leftValues {
 		if compared := compareInt(leftValues[index], rightValues[index]); compared != 0 {
 			return compared
@@ -458,7 +474,28 @@ func compareSearchScore(left, right searchScore) int {
 	if left.completionMinutes > right.completionMinutes {
 		return 1
 	}
+	leftValues = []int{left.preparationMaturityPenalty, left.campusChanges, left.buildingChanges, left.travelMinutes}
+	rightValues = []int{right.preparationMaturityPenalty, right.campusChanges, right.buildingChanges, right.travelMinutes}
+	for index := range leftValues {
+		if compared := compareInt(leftValues[index], rightValues[index]); compared != 0 {
+			return compared
+		}
+	}
 	return 0
+}
+
+// preparationMaturityPenalty 统一描述禁食、禁水和饮水等准备规则的成熟度：
+// 最短时长是可执行硬门槛；推荐区间内越接近充分准备上限越好；超过上限仍可执行，
+// 但不会因为无限延长准备时间而得到更高评分。
+func preparationMaturityPenalty(rule descriptionrules.Rule, elapsedMinutes int32) int {
+	target := rule.MaxAdvanceMinutes
+	if target <= 0 {
+		target = rule.RecommendedAdvanceMinutes
+	}
+	if target <= 0 {
+		target = rule.MinAdvanceMinutes
+	}
+	return absoluteInt(int(elapsedMinutes - target))
 }
 
 func hasPreparationRule(configuration projectconfiguration.Configuration, ruleType descriptionrules.RuleType) bool {
