@@ -1,7 +1,7 @@
 Name: guidance-rpc
 ListenOn: 0.0.0.0:8082
 Timeout: 30000
-Mode: production
+Mode: pro
 Environment: production
 Log:
   ServiceName: guidance-rpc
