@@ -22,7 +22,7 @@ Plan 可以用少量目录或流程说明验证方案确实可落地，但不维
 - [Identity 当前范围归档](./modules/implemented/01-identity-service.md)；
 - [Appointment 已实现归档](./modules/implemented/02-appointment-service.md)；
 - [Appointment 组织只读副本提案](./modules/proposals/01-appointment-organization-read-model.md)；
-- [Guidance 智能导诊业务逻辑](./modules/proposals/02-guidance-service.md)；
+- [Guidance 当前范围归档](./modules/implemented/03-guidance-service.md)；
 
 ## 固定分层
 

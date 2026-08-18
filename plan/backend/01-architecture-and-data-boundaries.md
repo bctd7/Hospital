@@ -51,7 +51,7 @@ Guidance 拥有医学顺序规则、准备条件、项目完整配置协调、�
 Appointment 原子创建普通预约，不跨库读取主数据。高德地点检索和两点路线由 Guidance 封装，小程序只使用微信
 原生地图绘制结果。医院楼栋入口资料库、跨院区组合和可靠现场负载重排仍是后续扩展。
 完整功能关系见
-[Guidance 智能导诊业务逻辑](./modules/proposals/02-guidance-service.md)。
+[Guidance 当前范围归档](./modules/implemented/03-guidance-service.md)。
 
 ## 同步与异步
 

@@ -6,7 +6,7 @@
 
 | 组件 | 镜像 | 主机地址 | 用途 |
 |---|---|---|---|
-| MySQL | `mysql:8.4.11` | `127.0.0.1:3306` | 独立的 Identity 与 Appointment 业务数据库和账号 |
+| MySQL | `mysql:8.4.11` | `127.0.0.1:3306` | 独立的 Identity、Appointment 与 Guidance 业务数据库和账号 |
 | Redis | `redis:7.4.10-alpine` | `127.0.0.1:6379` | Refresh Session、授权版本和 Appointment 热点缓存 |
 | Kafka | `apache/kafka:4.2.0` | `127.0.0.1:9092` | 传递 Identity Outbox 授权版本事件 |
 

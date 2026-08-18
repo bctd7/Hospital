@@ -2,7 +2,7 @@
 
 Guidance 是独立的智能导诊服务，负责检查项目之间的规划规则和地图路线能力，不拥有预约、容量、房间严格地址或
 检查状态。完整业务方案见
-[Guidance 智能导诊业务逻辑](../../plan/backend/modules/proposals/02-guidance-service.md)。
+[Guidance 当前范围归档](../../plan/backend/modules/implemented/03-guidance-service.md)。
 
 ## 当前已实现
 
@@ -111,10 +111,10 @@ go test ./service/guidance/...
 .\scripts\quality\verify-repository.ps1
 ```
 
-综合数据中 `13482154556` 复用真实超级管理员账号作为患者侧导诊体验账号，预置今日“血常规 → 冠状动脉 CTA
-→ 泌尿系彩超”三条预约。其中冠状动脉 CTA 使用当前可报到短窗口，并配置“请按检查说明和医嘱提前用药”的患者
+综合数据中 `13482154556` 复用真实超级管理员账号作为患者侧导诊体验账号，预置今日“抽血化验（血常规） → 冠状动脉 CTA
+→ 泌尿系/妇科经腹 B 超”三条预约。其中冠状动脉 CTA 使用当前可报到短窗口，并配置“请按检查说明和医嘱提前用药”的患者
 提醒，可直接验证报到前提醒弹窗；三条预约还可验证先后关系、饮水项目后置和逐站导航。提前规划的完整组合与预期结果见
-[`scripts/database/README.md`](../../scripts/database/README.md#智能导诊联调组合)。
+[`scripts/database/README.md`](../../scripts/database/README.md)。
 
 ## 当前不包含
 
@@ -125,5 +125,5 @@ go test ./service/guidance/...
 - 由地图供应商直接决定检查顺序或预约结果。
 
 后续边界和演进条件以
-[Guidance 智能导诊业务逻辑](../../plan/backend/modules/proposals/02-guidance-service.md) 为准，不能从外部地图接口或
+[Guidance 当前范围归档](../../plan/backend/modules/implemented/03-guidance-service.md) 为准，不能从外部地图接口或
 前端展示直接扩展业务状态。

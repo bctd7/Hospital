@@ -5,5 +5,6 @@
 
 - [Identity 当前范围](./01-identity-service.md)；
 - [Appointment 当前范围](./02-appointment-service.md)。
+- [Guidance 当前范围](./03-guidance-service.md)。
 
 实现发生变化时直接更新对应归档；阶段开发过程和被替代方案通过 Git 历史追溯。

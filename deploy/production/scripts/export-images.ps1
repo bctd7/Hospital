@@ -25,9 +25,11 @@ $images = @(
     "apache/kafka:4.2.0",
     "hospital-production-identity-migrate:latest",
     "hospital-production-appointment-migrate:latest",
+    "hospital-production-guidance-migrate:latest",
     "hospital-production-identity-bootstrap-admin:latest",
     "hospital-production-identity-rpc:latest",
     "hospital-production-appointment-rpc:latest",
+    "hospital-production-guidance-rpc:latest",
     "hospital-production-app-api:latest"
 )
 
@@ -46,10 +48,12 @@ try {
     Invoke-Docker -Arguments @("pull", "apache/kafka:4.2.0")
     Invoke-Docker -Arguments @("build", "--target", "db-migrate", "-t", $images[3], "-f", $dockerfile, ".")
     Invoke-Docker -Arguments @("tag", $images[3], $images[4])
-    Invoke-Docker -Arguments @("build", "--target", "identity-bootstrap-admin", "-t", $images[5], "-f", $dockerfile, ".")
-    Invoke-Docker -Arguments @("build", "--target", "identity-rpc", "-t", $images[6], "-f", $dockerfile, ".")
-    Invoke-Docker -Arguments @("build", "--target", "appointment-rpc", "-t", $images[7], "-f", $dockerfile, ".")
-    Invoke-Docker -Arguments @("build", "--target", "app-api", "-t", $images[8], "-f", $dockerfile, ".")
+    Invoke-Docker -Arguments @("tag", $images[3], $images[5])
+    Invoke-Docker -Arguments @("build", "--target", "identity-bootstrap-admin", "-t", $images[6], "-f", $dockerfile, ".")
+    Invoke-Docker -Arguments @("build", "--target", "identity-rpc", "-t", $images[7], "-f", $dockerfile, ".")
+    Invoke-Docker -Arguments @("build", "--target", "appointment-rpc", "-t", $images[8], "-f", $dockerfile, ".")
+    Invoke-Docker -Arguments @("build", "--target", "guidance-rpc", "-t", $images[9], "-f", $dockerfile, ".")
+    Invoke-Docker -Arguments @("build", "--target", "app-api", "-t", $images[10], "-f", $dockerfile, ".")
     Invoke-Docker -Arguments (@("save", "-o", $rawTarPath) + $images)
 
     $input = [IO.File]::OpenRead($rawTarPath)

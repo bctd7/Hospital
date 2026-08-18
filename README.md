@@ -5,7 +5,7 @@ Vue 3 和 TypeScript。
 
 ## 当前能力
 
-Identity 与 Appointment 当前规划范围均已落地，Guidance 第一版主流程也已接入：
+Identity、Appointment 与 Guidance 当前规划范围均已落地：
 
 - 手机号验证码登录、Access/Refresh Token 和授权版本失效；
 - 医院、院区、科室目录，账号与医生管理；
