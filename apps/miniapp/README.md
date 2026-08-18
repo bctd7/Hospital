@@ -78,8 +78,8 @@ npm run build:all:mp-weixin
 ```powershell
 $miniappRoot = 'C:\Users\27902\GolandProjects\Hospital\apps\miniapp'
 $wechatCli = 'C:\Program Files (x86)\Tencent\微信web开发者工具\cli.bat'
-$releaseVersion = '0.3.4'
-$releaseDescription = '增加检查报到、候检叫号与未到场展示，完善检查报告流程。'
+$releaseVersion = '0.4.0'
+$releaseDescription = '完成智能预约、当日导诊与检查导航，补齐检查规则和客户体验数据。'
 
 Set-Location $miniappRoot
 npm run test
