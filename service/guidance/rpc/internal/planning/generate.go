@@ -118,8 +118,6 @@ func visibleScheduleKey(items []PlanItem) string {
 	for _, item := range items {
 		builder.WriteString(item.ItemID)
 		builder.WriteByte('@')
-		builder.WriteString(item.RoomID)
-		builder.WriteByte('@')
 		builder.WriteString(item.ServiceDate)
 		builder.WriteByte('@')
 		builder.WriteString(item.Session)
@@ -127,6 +125,10 @@ func visibleScheduleKey(items []PlanItem) string {
 		builder.WriteString(item.PlannedStartTime)
 		builder.WriteByte('-')
 		builder.WriteString(item.PlannedEndTime)
+		builder.WriteByte('@')
+		builder.WriteString(item.CampusID)
+		builder.WriteByte('@')
+		builder.WriteString(item.Building)
 		builder.WriteByte('|')
 	}
 	return builder.String()

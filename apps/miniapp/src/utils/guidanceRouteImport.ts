@@ -46,10 +46,15 @@ export function saveGuidanceRouteItinerary(serviceDate: string, items: SmartAppo
 }
 
 export function loadGuidanceRouteItinerary(): GuidanceRouteItinerary | undefined {
-  const value = uni.getStorageSync(STORAGE_KEY) as GuidanceRouteItinerary | undefined;
+  let value: GuidanceRouteItinerary | undefined;
+  try {
+    value = uni.getStorageSync(STORAGE_KEY) as GuidanceRouteItinerary | undefined;
+  } catch {
+    return undefined;
+  }
   if (!value || !Array.isArray(value.stops) || !value.stops.length) return undefined;
   if (value.accountId !== (sessionState.principal?.account_id ?? "") || Date.parse(value.expiresAt) < Date.now()) {
-    uni.removeStorageSync(STORAGE_KEY);
+    try { uni.removeStorageSync(STORAGE_KEY); } catch { /* 下一次读取时再次校验。 */ }
     return undefined;
   }
   return value;

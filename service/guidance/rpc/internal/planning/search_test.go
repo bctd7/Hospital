@@ -22,7 +22,7 @@ const (
 )
 
 func TestVisibleScheduleKeyIgnoresPlanPresentationButKeepsRealDifferences(t *testing.T) {
-	base := []PlanItem{{ItemID: searchItemA, RoomID: searchRoomA, ServiceDate: "2026-08-18", Session: "morning", PlannedStartTime: "09:00", PlannedEndTime: "09:15", Reason: "原因一"}}
+	base := []PlanItem{{ItemID: searchItemA, RoomID: searchRoomA, CampusID: "campus-a", Building: "1号楼", ServiceDate: "2026-08-18", Session: "morning", PlannedStartTime: "09:00", PlannedEndTime: "09:15", Reason: "原因一"}}
 	sameSchedule := append([]PlanItem(nil), base...)
 	sameSchedule[0].Reason = "另一段解释"
 	if visibleScheduleKey(base) != visibleScheduleKey(sameSchedule) {
@@ -30,8 +30,35 @@ func TestVisibleScheduleKeyIgnoresPlanPresentationButKeepsRealDifferences(t *tes
 	}
 	differentRoom := append([]PlanItem(nil), base...)
 	differentRoom[0].RoomID = searchRoomB
-	if visibleScheduleKey(base) == visibleScheduleKey(differentRoom) {
-		t.Fatal("a different room assignment must remain a distinct plan")
+	if visibleScheduleKey(base) != visibleScheduleKey(differentRoom) {
+		t.Fatal("an equivalent room in the same building must not create an alternative plan")
+	}
+	differentBuilding := append([]PlanItem(nil), base...)
+	differentBuilding[0].Building = "2号楼"
+	if visibleScheduleKey(base) == visibleScheduleKey(differentBuilding) {
+		t.Fatal("a different building route must remain a distinct plan")
+	}
+}
+
+func TestGenerateDoesNotUseEquivalentRoomsToFillAlternativePlans(t *testing.T) {
+	manager := newSearchTestManager(
+		[]string{searchItemA},
+		nil,
+		map[string][]Option{
+			searchItemA: {
+				searchOption(searchItemA, searchRoomA, "1号楼", "2026-08-18", "morning", 3),
+				searchOption(searchItemA, searchRoomB, "1号楼", "2026-08-18", "morning", 3),
+			},
+		},
+		nil,
+	)
+
+	plans, err := manager.Generate(context.Background(), patientPrincipal(), searchCommand(searchItemA))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(plans) != 1 {
+		t.Fatalf("equivalent rooms in one building produced %d plans, want 1", len(plans))
 	}
 }
 
@@ -556,7 +583,7 @@ func TestSearchUsesConservativeCapacityWhenUpstreamReturnsDuplicateOptions(t *te
 	}
 }
 
-func TestSearchDoesNotReturnPermutationOnlyDuplicates(t *testing.T) {
+func TestSearchKeepsDifferentExecutionOrdersAsAlternativePlans(t *testing.T) {
 	itemIDs := []string{searchItemA, searchItemB, searchItemC}
 	options := map[string][]Option{
 		searchItemA: {searchOption(searchItemA, searchRoomA, "1号楼", "2026-08-18", "morning", 3)},
@@ -566,8 +593,8 @@ func TestSearchDoesNotReturnPermutationOnlyDuplicates(t *testing.T) {
 	configurations := exhaustiveConfigurations(itemIDs, 13) // 三个项目都没有准备限制。
 
 	plans := searchBestPlans(itemIDs, options, nil, configurations)
-	if len(plans) != 1 {
-		t.Fatalf("permutations of the same booking assignment are one plan, got %d", len(plans))
+	if len(plans) != maximumGeneratedPlans {
+		t.Fatalf("different project orders are visible alternatives, got %d plans", len(plans))
 	}
 }
 

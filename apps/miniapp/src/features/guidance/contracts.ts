@@ -27,11 +27,12 @@ export function normalizePreparationPreview(value: Partial<PreparationRulePrevie
 export function visiblePlanKey(plan: SmartAppointmentPlan): string {
   return plan.items.map((item) => [
     item.item_id,
-    item.room_id,
     item.service_date,
     item.session,
     item.planned_start_time,
     item.planned_end_time,
+    item.campus_id,
+    item.building,
   ].join("@")).join("|");
 }
 

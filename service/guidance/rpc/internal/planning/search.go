@@ -13,7 +13,6 @@ const maximumGeneratedPlans = 3
 
 type searchChoice struct {
 	itemID              string
-	assignmentKey       string
 	option              Option
 	plannedStartMinutes int32
 	plannedEndMinutes   int32
@@ -23,7 +22,6 @@ type searchChoice struct {
 
 type searchOptionCandidate struct {
 	option        Option
-	assignmentKey string
 	windowStart   int32
 	windowEnd     int32
 	duration      int32
@@ -160,7 +158,7 @@ func searchBestPlansWithTravel(itemIDs []string, options map[string][]Option, ru
 				capacityIndex = index
 			}
 			searcher.options[itemIndex] = append(searcher.options[itemIndex], searchOptionCandidate{
-				option: option, assignmentKey: itemIDs[itemIndex] + "@" + optionCapacityKey(option), windowStart: windowStart, windowEnd: windowEnd, duration: duration, capacityIndex: capacityIndex,
+				option: option, windowStart: windowStart, windowEnd: windowEnd, duration: duration, capacityIndex: capacityIndex,
 			})
 		}
 	}
@@ -280,7 +278,7 @@ func (s *planSearcher) visit(state searchState) {
 				s.capacityUsage[capacityIndex]++
 			}
 			s.path = append(s.path, searchChoice{
-				itemID: itemID, assignmentKey: candidate.assignmentKey, option: option, plannedStartMinutes: earliestStart, plannedEndMinutes: end,
+				itemID: itemID, option: option, plannedStartMinutes: earliestStart, plannedEndMinutes: end,
 				travelMinutes: travel.minutes, travelEstimated: travel.estimated,
 			})
 			s.visit(next)
@@ -391,9 +389,8 @@ func (s *planSearcher) acceptState(state searchState) bool {
 func (s *planSearcher) addResult(state searchState) {
 	keyParts := make([]string, 0, len(s.path))
 	for _, choice := range s.path {
-		keyParts = append(keyParts, choice.assignmentKey)
+		keyParts = append(keyParts, semanticChoiceKey(choice))
 	}
-	sort.Strings(keyParts)
 	key := strings.Join(keyParts, "|")
 	for index, candidate := range s.results {
 		if candidate.key != key {
@@ -408,6 +405,20 @@ func (s *planSearcher) addResult(state searchState) {
 	}
 	s.results = append(s.results, searchCandidate{choices: append([]searchChoice(nil), s.path...), score: state.score, key: key})
 	s.sortAndTrimResults()
+}
+
+// semanticChoiceKey 只描述患者能够感知的安排。同一项目在同一楼栋、同一时刻
+// 换到等价房间不会产生新方案；日期、时段、顺序、时刻或楼栋变化仍会保留。
+func semanticChoiceKey(choice searchChoice) string {
+	return strings.Join([]string{
+		choice.itemID,
+		choice.option.ServiceDate,
+		choice.option.Session,
+		formatClockMinutes(choice.plannedStartMinutes),
+		formatClockMinutes(choice.plannedEndMinutes),
+		choice.option.CampusID,
+		choice.option.Building,
+	}, "@")
 }
 
 func (s *planSearcher) sortAndTrimResults() {

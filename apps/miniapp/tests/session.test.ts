@@ -14,6 +14,7 @@ import {
   initializeFromPhone,
   handleUnauthorized,
   logout,
+  prepareAuthenticatedRequest,
   refreshOnce,
   restoreSession,
   sessionState,
@@ -189,6 +190,50 @@ describe("session store", () => {
     completeRefresh?.(tokenResponse);
     await expect(Promise.all([first, second])).resolves.toEqual([true, true]);
     expect(authMocks.refreshToken).toHaveBeenCalledTimes(1);
+  });
+
+  it("validates one restored session only once before concurrent business requests", async () => {
+    storage.set("hospital:session", {
+      version: 1,
+      tokens: {
+        accessToken: "stored-access-token",
+        refreshToken: "stored-refresh-token",
+        accessExpiresAt: Date.now() + 60000,
+        refreshExpiresAt: Date.now() + 120000,
+      },
+      principal,
+    });
+    restoreSession();
+    let finishRefresh: ((value: typeof tokenResponse) => void) | undefined;
+    authMocks.refreshToken.mockReturnValue(new Promise((resolve) => { finishRefresh = resolve; }));
+    authMocks.getCurrentIdentity.mockResolvedValue(principal);
+
+    const first = prepareAuthenticatedRequest();
+    const second = prepareAuthenticatedRequest();
+    expect(first).toBe(second);
+    expect(authMocks.refreshToken).toHaveBeenCalledTimes(1);
+    finishRefresh?.(tokenResponse);
+    await expect(Promise.all([first, second])).resolves.toEqual([true, true]);
+    expect(authMocks.refreshToken).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears a restored session when its refresh token is no longer valid", async () => {
+    storage.set("hospital:session", {
+      version: 1,
+      tokens: {
+        accessToken: "stored-access-token",
+        refreshToken: "invalid-refresh-token",
+        accessExpiresAt: Date.now() + 60000,
+        refreshExpiresAt: Date.now() + 120000,
+      },
+      principal,
+    });
+    restoreSession();
+    authMocks.refreshToken.mockRejectedValue({ statusCode: 401, code: "UNAUTHENTICATED" });
+
+    await expect(prepareAuthenticatedRequest()).resolves.toBe(false);
+    expect(sessionState.status).toBe("guest");
+    expect(storage.has("hospital:session")).toBe(false);
   });
 
   it("clears the rejected session and returns to entry when identity changes", async () => {

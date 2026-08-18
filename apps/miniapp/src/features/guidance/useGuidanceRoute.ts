@@ -50,7 +50,7 @@ export function useGuidanceRoute() {
     { value: "walking", label: "步行" }, { value: "transit", label: "公交" }, { value: "driving", label: "驾车" },
   ];
 
-  onLoad((query) => { void initializeRoutePage(query?.source === "today"); });
+  onLoad(() => { void initializeRoutePage(); });
   onShow(() => {
     if (pageReady.value && importedItinerary.value) void refreshProgress(false);
   });
@@ -99,8 +99,10 @@ export function useGuidanceRoute() {
 
   function choosePoint(target: "origin" | "destination") { searchTarget.value = target; }
 
-  async function initializeRoutePage(importToday: boolean) {
-    if (importToday) await loadImportedRoute();
+  async function initializeRoutePage() {
+    // 无论从“当日导诊”还是导航入口进入，都先恢复同一份本地行程快照。
+    // 页面在进度和当前阶段解析完成前保持初始化态，避免原生地图反复挂载。
+    await loadImportedRoute();
     pageReady.value = true;
   }
 
@@ -192,10 +194,10 @@ export function useGuidanceRoute() {
     }
   }
 
-  function cancelCurrentRoute() {
+  function cancelCurrentRoute(preserveMountedMap = false) {
     routeRequest.cancel();
     loading.value = false;
-    route.value = undefined;
+    if (!preserveMountedMap) route.value = undefined;
     error.value = "";
   }
 
@@ -213,12 +215,15 @@ export function useGuidanceRoute() {
   }
 
   function chooseMode(mode: GuidanceTravelMode) {
-    cancelCurrentRoute();
+    if (travelMode.value === mode) return;
+    const shouldRefreshMountedRoute = Boolean(route.value && origin.value && destination.value);
+    cancelCurrentRoute(shouldRefreshMountedRoute);
     travelMode.value = mode;
     if (importedItinerary.value) {
       importedItinerary.value = { ...importedItinerary.value, transportMode: mode };
       updateGuidanceRouteItinerary({ transportMode: mode });
     }
+    if (shouldRefreshMountedRoute) void calculateRoute();
   }
 
   function swapPoints() {
@@ -235,6 +240,7 @@ export function useGuidanceRoute() {
     const requestedOrigin = origin.value;
     const requestedDestination = destination.value;
     const requestedMode = effectiveMode.value;
+    const previousRoute = route.value;
     loading.value = true;
     error.value = "";
     try {
@@ -245,7 +251,7 @@ export function useGuidanceRoute() {
       uni.createMapContext("guidance-route-map").includePoints({ points: result.polyline, padding: [56, 40, 56, 40] });
     } catch (cause) {
       if (!routeRequest.isCurrent(token)) return;
-      route.value = undefined;
+      route.value = previousRoute;
       if (cause instanceof ApiError && cause.code === "SERVICE_UNAVAILABLE") error.value = "路线服务暂不可用，请稍后重试";
       else if (cause instanceof ApiError && cause.code === "NOT_FOUND") error.value = "没有找到可用路线，请重新选择地点或出行方式";
       else error.value = cause instanceof Error ? cause.message : "路线计算失败，请稍后重试";

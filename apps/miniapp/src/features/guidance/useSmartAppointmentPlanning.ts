@@ -101,6 +101,7 @@ export function useSmartAppointmentPlanning() {
     const requestedItemIds = [...selectedItemIds.value];
     const requestedDates = [...selectedDates.value];
     generating.value = true;
+    plans.value = [];
     errorMessage.value = "";
     try {
       const availability = requestedDates.map((serviceDate) => ({
@@ -113,8 +114,9 @@ export function useSmartAppointmentPlanning() {
       }));
       const result = await guidanceApi.generateSmartAppointmentPlans(requestedItemIds, availability);
       if (!planRequest.isCurrent(token)) return;
-      plans.value = distinctSmartAppointmentPlans(result.plans);
-      if (!plans.value.length) errorMessage.value = "当前选择无法生成预约方案，请检查已有预约，或重新选择日期和时段";
+      const nextPlans = distinctSmartAppointmentPlans(result.plans);
+      plans.value = nextPlans;
+      if (!nextPlans.length) errorMessage.value = "当前选择无法生成预约方案，请检查已有预约，或重新选择日期和时段";
     } catch (error) {
       if (!planRequest.isCurrent(token)) return;
       plans.value = [];

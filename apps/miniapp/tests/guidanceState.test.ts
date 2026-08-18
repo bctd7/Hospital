@@ -5,7 +5,7 @@ import { routeEndpointsChanged } from "@/features/guidance/routeState";
 import { createLatestRequestGuard } from "@/features/shared/latestRequest";
 import type { SmartAppointmentPlan } from "@/types/guidance";
 
-function plan(planId: string, roomId = "room-1"): SmartAppointmentPlan {
+function plan(planId: string, roomId = "room-1", building = "2号楼"): SmartAppointmentPlan {
   return {
     plan_id: planId,
     title: planId,
@@ -13,7 +13,7 @@ function plan(planId: string, roomId = "room-1"): SmartAppointmentPlan {
     expires_at: "2026-08-18T12:00:00Z",
     items: [{
       item_id: "item-1", item_name: "腹部彩超", room_id: roomId, room_display_name: "US301室",
-      campus_id: "campus-1", building: "2号楼", floor_number: 3, room_number: "US301",
+      campus_id: "campus-1", building, floor_number: 3, room_number: "US301",
       service_date: "2026-08-19", session: "morning", estimated_duration_minutes: 25,
       reason: "reason", planned_start_time: "09:00", planned_end_time: "09:25",
       travel_minutes: 0, travel_time_estimated: false,
@@ -44,7 +44,7 @@ describe("guidance stable page state", () => {
   });
 
   it("does not show a duplicate alternative plan", () => {
-    expect(distinctSmartAppointmentPlans([plan("primary"), plan("duplicate"), plan("different", "room-2")]))
+    expect(distinctSmartAppointmentPlans([plan("primary"), plan("duplicate", "room-2"), plan("different", "room-3", "3号楼")]))
       .toHaveLength(2);
   });
 
@@ -59,5 +59,22 @@ describe("guidance stable page state", () => {
   it("keeps an existing map mounted when resolved endpoints did not change", () => {
     const point = { name: "1号楼", address: "上海", latitude: 31.2, longitude: 121.4 };
     expect(routeEndpointsChanged(point, point, { ...point }, { ...point })).toBe(false);
+  });
+
+  it("replaces the mounted map only when a route endpoint really changes", () => {
+    const origin = { name: "院外起点", address: "上海", latitude: 31.2, longitude: 121.4 };
+    const firstBuilding = { name: "1号楼", address: "上海", latitude: 31.21, longitude: 121.41 };
+    const secondBuilding = { name: "2号楼", address: "上海", latitude: 31.22, longitude: 121.42 };
+    expect(routeEndpointsChanged(origin, firstBuilding, origin, secondBuilding)).toBe(true);
+  });
+
+  it("invalidates every older route response during rapid mode or stage changes", () => {
+    const guard = createLatestRequestGuard();
+    const walking = guard.begin();
+    const transit = guard.begin();
+    const driving = guard.begin();
+    expect(guard.isCurrent(walking)).toBe(false);
+    expect(guard.isCurrent(transit)).toBe(false);
+    expect(guard.isCurrent(driving)).toBe(true);
   });
 });

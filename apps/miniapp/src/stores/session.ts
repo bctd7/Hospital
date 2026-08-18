@@ -38,6 +38,7 @@ const state = reactive<SessionView>({
 let tokens: SessionTokenPair | null = null;
 let refreshTask: Promise<boolean> | null = null;
 let forcedReauthenticationTask: Promise<void> | null = null;
+let restoredSessionNeedsValidation = false;
 
 export const sessionState = readonly(state);
 
@@ -114,6 +115,7 @@ function removePersistedSession() {
 
 function setGuestSession() {
   tokens = null;
+  restoredSessionNeedsValidation = false;
   state.principal = null;
   state.status = "guest";
   state.appVariant = "patient";
@@ -129,6 +131,7 @@ export function restoreSession() {
     }
 
     tokens = stored.tokens;
+    restoredSessionNeedsValidation = true;
     state.principal = stored.principal;
     state.appVariant = stored.appVariant
       ? normalizeAppVariant(stored.appVariant, stored.principal)
@@ -174,15 +177,26 @@ async function performRefresh(): Promise<boolean> {
 
   try {
     tokens = tokenPairFromResponse(await requestTokenRefresh(currentRefreshToken));
+    restoredSessionNeedsValidation = false;
     state.principal = await getCurrentIdentity(false);
     state.appVariant = normalizeAppVariant(state.appVariant, state.principal);
     state.status = "authenticated";
     persistSession();
     return true;
-  } catch {
-    setGuestSession();
-    return false;
+  } catch (error) {
+    if (isUnauthorizedFailure(error)) {
+      setGuestSession();
+      return false;
+    }
+    // 网络暂时不可用不等于会话失效。保留本地会话，让调用方展示网络错误并允许重试。
+    throw error;
   }
+}
+
+export function prepareAuthenticatedRequest(): Promise<boolean> {
+  if (!tokens) return Promise.resolve(false);
+  if (!restoredSessionNeedsValidation && hasUsableAccessToken()) return Promise.resolve(true);
+  return refreshOnce();
 }
 
 export function refreshOnce(): Promise<boolean> {
@@ -235,6 +249,7 @@ export async function initializeFromPhone(phone: string, verificationCode: strin
   state.status = "authenticating";
   try {
     tokens = tokenPairFromResponse(await phoneLogin(phone, verificationCode));
+    restoredSessionNeedsValidation = false;
     state.principal = await getCurrentIdentity(false);
     state.appVariant = resolveAppVariant(state.principal);
     state.status = "authenticated";
@@ -263,6 +278,13 @@ export async function logout(): Promise<void> {
 
 configureAuthAdapter({
   getAccessToken,
+  prepareAuthenticatedRequest,
   refreshOnce,
   handleUnauthorized,
 });
+
+function isUnauthorizedFailure(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const value = error as { statusCode?: number; code?: string };
+  return value.statusCode === 401 || value.code === "UNAUTHENTICATED";
+}
