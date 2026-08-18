@@ -65,6 +65,33 @@ CREATE TABLE appointment_examination_item_audit (
             REFERENCES appointment_examination_item_operations (operation_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+CREATE TABLE appointment_examination_item_configuration_transactions (
+    transaction_id             CHAR(36)      NOT NULL,
+    operation_id               CHAR(36)      NOT NULL,
+    operator_account_id        CHAR(36)      NOT NULL,
+    action                     VARCHAR(16)   NOT NULL,
+    item_id                    CHAR(36)      NOT NULL,
+    owner_department_id        CHAR(36)      NOT NULL,
+    item_name                  VARCHAR(128)  NOT NULL,
+    description_snapshot       TEXT          NOT NULL,
+    estimated_duration_minutes SMALLINT UNSIGNED NOT NULL,
+    expected_version           BIGINT UNSIGNED NOT NULL,
+    state                      VARCHAR(16)   NOT NULL,
+    request_fingerprint        CHAR(64)      NOT NULL,
+    result_version             BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    created_at                 DATETIME(3)   NOT NULL,
+    updated_at                 DATETIME(3)   NOT NULL,
+    PRIMARY KEY (transaction_id),
+    UNIQUE KEY uq_appointment_item_configuration_operation (operation_id),
+    KEY idx_appointment_item_configuration_item (item_id, created_at),
+    KEY idx_appointment_item_configuration_state (state, updated_at),
+    CONSTRAINT chk_appointment_item_configuration_action CHECK (action IN ('create', 'update')),
+    CONSTRAINT chk_appointment_item_configuration_state CHECK (state IN ('prepared', 'confirmed', 'cancelled')),
+    CONSTRAINT chk_appointment_item_configuration_duration CHECK (
+        estimated_duration_minutes BETWEEN 5 AND 480 AND MOD(estimated_duration_minutes, 5) = 0
+    )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 CREATE TABLE appointment_rooms (
     id              CHAR(36)        NOT NULL,
     department_id   CHAR(36)        NOT NULL,

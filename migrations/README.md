@@ -14,29 +14,35 @@ migrations/
 压平，Guidance 从首个版本开始使用独立初始迁移：
 
 - `identity/000001_identity_initial_schema`：12 张业务表；
-- `appointment/000001_appointment_initial_schema`：20 张业务表；
-- `guidance/000001_guidance_initial_schema`：检查项目直接先后关系。
+- `appointment/000001_appointment_initial_schema`：21 张业务表；
+- `guidance/000001_guidance_initial_schema`：直接先后关系、项目准备配置、配置事务和智能预约候选。
 
 `schema_migrations` 由迁移工具维护，不属于业务模型。仓库中已经不存在需要按顺序回放的旧业务迁移。
 
+```powershell
+.\scripts\database\validate-flat-migrations.ps1
+```
+
+该检查会验证三个服务都只有一对 `000001`、up/down 创建与删除表一致，并确认综合测试 SQL 没有引用已经删除的旧表。
+
 ## 执行器
 
-迁移工具位于 `tools/db-migrate`，使用仓库锁定的 `golang-migrate`。Compose 只创建数据库和服务账号，
+迁移工具位于 `tools/database/migrate`，使用仓库锁定的 `golang-migrate`。Compose 只创建数据库和服务账号，
 不会替代版本化迁移。
 
 ```powershell
-.\scripts\migrate.ps1 -Service identity -Direction up
-.\scripts\migrate.ps1 -Service identity -Direction version
-.\scripts\migrate.ps1 -Service appointment -Direction up
-.\scripts\migrate.ps1 -Service appointment -Direction version
-.\scripts\migrate.ps1 -Service guidance -Direction up
-.\scripts\migrate.ps1 -Service guidance -Direction version
+.\scripts\database\migrate.ps1 -Service identity -Direction up
+.\scripts\database\migrate.ps1 -Service identity -Direction version
+.\scripts\database\migrate.ps1 -Service appointment -Direction up
+.\scripts\database\migrate.ps1 -Service appointment -Direction version
+.\scripts\database\migrate.ps1 -Service guidance -Direction up
+.\scripts\database\migrate.ps1 -Service guidance -Direction version
 ```
 
 本地首次初始化使用：
 
 ```powershell
-.\scripts\db-bootstrap-local.ps1
+.\scripts\database\bootstrap-local.ps1
 ```
 
 ## 约束

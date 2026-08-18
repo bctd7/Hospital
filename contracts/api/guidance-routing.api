@@ -24,26 +24,28 @@ type (
 		Places []GuidanceLocationPoint `json:"places"`
 	}
 
-	WalkingRouteStepResponse {
+	GuidanceRouteStepResponse {
 		Instruction    string `json:"instruction"`
 		RoadName       string `json:"road_name"`
 		DistanceMeters int32  `json:"distance_meters"`
 		DurationSeconds int32 `json:"duration_seconds"`
 	}
 
-	CalculateWalkingRouteRequest {
+	CalculateGuidanceRouteRequest {
 		Origin      GuidanceLocationPoint `json:"origin"`
 		Destination GuidanceLocationPoint `json:"destination"`
+		Mode        string                `json:"mode,options=walking|transit|driving"`
 	}
 
-	WalkingRouteResponse {
+	GuidanceRouteResponse {
 		Origin          GuidanceLocationPoint       `json:"origin"`
 		Destination     GuidanceLocationPoint       `json:"destination"`
 		DistanceMeters  int32                       `json:"distance_meters"`
 		DurationSeconds int32                       `json:"duration_seconds"`
 		Polyline        []GuidanceRoutePoint        `json:"polyline"`
-		Steps           []WalkingRouteStepResponse `json:"steps"`
+		Steps           []GuidanceRouteStepResponse `json:"steps"`
 		Provider        string                      `json:"provider"`
+		Mode            string                      `json:"mode"`
 	}
 )
 
@@ -57,6 +59,6 @@ service app-api {
 	@handler searchGuidancePlaces
 	get /guidance/places/search (SearchGuidancePlacesRequest) returns (SearchGuidancePlacesResponse)
 
-	@handler calculateWalkingRoute
-	post /guidance/routes/walking (CalculateWalkingRouteRequest) returns (WalkingRouteResponse)
+	@handler calculateGuidanceRoute
+	post /guidance/routes (CalculateGuidanceRouteRequest) returns (GuidanceRouteResponse)
 }

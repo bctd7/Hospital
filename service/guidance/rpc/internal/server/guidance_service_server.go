@@ -43,6 +43,41 @@ func (s *GuidanceServiceServer) ListPrecedenceRules(ctx context.Context, in *v1_
 	return l.ListPrecedenceRules(in)
 }
 
+func (s *GuidanceServiceServer) PreviewPreparationRules(ctx context.Context, in *v1_guidancev1.PreviewPreparationRulesRequest) (*v1_guidancev1.PreparationRulePreview, error) {
+	l := logic.NewPreviewPreparationRulesLogic(ctx, s.svcCtx)
+	return l.PreviewPreparationRules(in)
+}
+
+func (s *GuidanceServiceServer) GetExaminationItemConfiguration(ctx context.Context, in *v1_guidancev1.GetExaminationItemConfigurationRequest) (*v1_guidancev1.ExaminationItemConfiguration, error) {
+	l := logic.NewGetExaminationItemConfigurationLogic(ctx, s.svcCtx)
+	return l.GetExaminationItemConfiguration(in)
+}
+
+func (s *GuidanceServiceServer) GetExaminationItemPatientReminders(ctx context.Context, in *v1_guidancev1.GetExaminationItemPatientRemindersRequest) (*v1_guidancev1.ExaminationItemPatientReminders, error) {
+	l := logic.NewGetExaminationItemPatientRemindersLogic(ctx, s.svcCtx)
+	return l.GetExaminationItemPatientReminders(in)
+}
+
+func (s *GuidanceServiceServer) ConfigureExaminationItem(ctx context.Context, in *v1_guidancev1.ConfigureExaminationItemRequest) (*v1_guidancev1.ExaminationItemConfiguration, error) {
+	l := logic.NewConfigureExaminationItemLogic(ctx, s.svcCtx)
+	return l.ConfigureExaminationItem(in)
+}
+
+func (s *GuidanceServiceServer) GenerateSmartAppointmentPlans(ctx context.Context, in *v1_guidancev1.GenerateSmartAppointmentPlansRequest) (*v1_guidancev1.SmartAppointmentPlansResponse, error) {
+	l := logic.NewGenerateSmartAppointmentPlansLogic(ctx, s.svcCtx)
+	return l.GenerateSmartAppointmentPlans(in)
+}
+
+func (s *GuidanceServiceServer) ConfirmSmartAppointmentPlan(ctx context.Context, in *v1_guidancev1.ConfirmSmartAppointmentPlanRequest) (*v1_guidancev1.ConfirmedSmartAppointmentPlan, error) {
+	l := logic.NewConfirmSmartAppointmentPlanLogic(ctx, s.svcCtx)
+	return l.ConfirmSmartAppointmentPlan(in)
+}
+
+func (s *GuidanceServiceServer) GetTodayExaminationRecommendation(ctx context.Context, in *v1_guidancev1.GetTodayExaminationRecommendationRequest) (*v1_guidancev1.TodayExaminationRecommendation, error) {
+	l := logic.NewGetTodayExaminationRecommendationLogic(ctx, s.svcCtx)
+	return l.GetTodayExaminationRecommendation(in)
+}
+
 func (s *GuidanceServiceServer) SearchPlaces(ctx context.Context, in *v1_guidancev1.SearchPlacesRequest) (*v1_guidancev1.SearchPlacesResponse, error) {
 	l := logic.NewSearchPlacesLogic(ctx, s.svcCtx)
 	return l.SearchPlaces(in)

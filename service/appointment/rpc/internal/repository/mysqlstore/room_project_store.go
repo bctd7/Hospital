@@ -63,7 +63,9 @@ func (s *Store) ListRooms(ctx context.Context, departmentID string, offset, limi
 
 func (s *Store) GetItemSummary(ctx context.Context, itemID string) (appointmentmanager.ItemSummary, error) {
 	var value appointmentmanager.ItemSummary
-	err := s.db.QueryRowContext(ctx, `SELECT id, owner_department_id, name, status, version FROM appointment_examination_items WHERE id = ?`, itemID).Scan(&value.ItemID, &value.DepartmentID, &value.Name, &value.Status, &value.Version)
+	err := s.db.QueryRowContext(ctx, `SELECT id, owner_department_id, name, estimated_duration_minutes, status, version FROM appointment_examination_items WHERE id = ?`, itemID).Scan(
+		&value.ItemID, &value.DepartmentID, &value.Name, &value.EstimatedDurationMinutes, &value.Status, &value.Version,
+	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return appointmentmanager.ItemSummary{}, appointmentmanager.ErrNotFound
 	}

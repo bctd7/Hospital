@@ -6,7 +6,7 @@
 
 | 组件 | 镜像 | 主机地址 | 用途 |
 |---|---|---|---|
-| MySQL | `mysql:8.4.11` | `127.0.0.1:3306` | 独立的 Identity 与 Appointment 业务数据库和账号 |
+| MySQL | `mysql:8.4.11` | `127.0.0.1:3306` | 独立的 Identity、Appointment 与 Guidance 业务数据库和账号 |
 | Redis | `redis:7.4.10-alpine` | `127.0.0.1:6379` | Refresh Session、授权版本和 Appointment 热点缓存 |
 | Kafka | `apache/kafka:4.2.0` | `127.0.0.1:9092` | 传递 Identity Outbox 授权版本事件 |
 
@@ -27,12 +27,12 @@ docker compose `
 推荐直接从仓库根目录执行：
 
 ```powershell
-.\scripts\db-bootstrap-local.ps1
+.\scripts\database\bootstrap-local.ps1
 ```
 
 该脚本会启动 MySQL、幂等创建当前服务数据库和账号，并只执行尚未运行的迁移，不会删除已有数据。
 MySQL 初始化脚本仍只会在数据卷第一次创建时运行，表结构不再依赖初始化目录中的 SQL 挂载。
-旧数据库第一次接入版本管理时，按 `scripts/README.md` 完成一次基线登记。
+当前体验数据库不接收旧结构基线登记；需要升级到最新压平结构时直接重建三个服务数据库并执行 `000001`。
 
 `.env.example` 默认设置 `IDENTITY_KAFKA_ENABLED=true`，因此标准 Identity 开发环境同时启动 Kafka。只有明确
 关闭 Kafka 授权版本同步、只调试不涉及授权变化的局部功能时，才使用精简启动：

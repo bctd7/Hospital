@@ -21,6 +21,13 @@ Identity 只提供账号、院区、科室和授权上下文；医生是授权�
 预约创建在一个 MySQL 事务内消耗周额度、声明患者项目占用、锁定日期容量、保存项目/房间/地址/时间/预计时长
 快照并记录幂等结果。缓存只加速读取，不参与容量和资格裁决。
 
+智能预约确认复用同一组事务规则，并由批量命令在一个 MySQL 事务内创建整组预约；任一项目的额度、重复占用、
+窗口或共享容量校验失败时整组都不落库。重复确认同一个 Guidance 方案返回首次创建的预约 ID，不重复占用容量。
+
+项目创建和项目基本事实更新不再提供可绕过规则配置的公开 HTTP 写入口。Guidance 是完整项目配置协调者，Appointment
+只保存自身项目事实和不可见的 TCC 预提交记录；Guidance 确认规则落库后才最后确认 Appointment 项目，失败则幂等
+取消。房间关联、项目周窗口、容量和报告模板仍由 Appointment 资源管理独立维护，不进入该分布式事务。
+
 ## 检查报到与房间队列
 
 ```text
@@ -84,21 +91,23 @@ service/appointment/rpc/internal/
 
 ## 数据、缓存与验证
 
-初始迁移为 `migrations/appointment/000001_appointment_initial_schema`，当前共 20 张业务表，其中队列主体、成员和
+初始迁移为 `migrations/appointment/000001_appointment_initial_schema`，其中队列主体、成员和
 事件分别是 `appointment_check_queues`、`appointment_check_queue_entries` 和
-`appointment_check_queue_events`。契约事实源是 `contracts/api/appointment-*.api` 与
+`appointment_check_queue_events`，项目配置参与记录为
+`appointment_examination_item_configuration_transactions`。契约事实源是 `contracts/api/appointment-*.api` 与
 `contracts/proto/appointment/v1/appointment.proto`。
 
 - 资源热点缓存 5 分钟并带随机抖动，预约候选使用 20 秒短缓存；
 - 相同缓存键并发回源在单实例合并，Redis 失败时回源 MySQL；
 - 所有报到、候检号、叫号轮次、超时、容量、唯一占用和状态迁移均由 MySQL 事务裁决；
-- 综合测试数据包含 31 条预约，覆盖八种预约状态、四个科室今日数据、五个共享队列、窗口内顺延与窗口后未到场
-  两个叫号超时对照案例，以及空白待写、
-  草稿、正式报告和更正版本；真实超级管理员账号继续复用原有身份，不生成同手机号重复患者。
+- 综合测试数据包含 21 个检查项目和 34 条预约，覆盖八种预约状态、六个科室、五个共享队列、窗口内顺延与窗口后
+  未到场两个叫号超时案例，以及空白待写、草稿、正式报告和更正版本；`13482154556` 绑定当日导诊组合，
+  `15363658538` 以普通超声科医生身份同时绑定患者侧历史、当前和未来记录。三个真实账号都复用唯一
+  `account_id`，不生成同手机号重复账号。
 
 ```powershell
-.\scripts\seed-comprehensive-test-data.ps1 -Reset
-.\scripts\check.ps1
+.\scripts\database\seed-comprehensive-test-data.ps1 -Reset
+.\scripts\quality\verify-repository.ps1
 ```
 
 ## 当前不包含

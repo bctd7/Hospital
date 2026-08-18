@@ -13,10 +13,12 @@ interface RequestOptions<TData = unknown> {
   data?: TData;
   authenticated?: boolean;
   retryOnUnauthorized?: boolean;
+  timeoutMs?: number;
 }
 
 interface AuthAdapter {
   getAccessToken: () => string;
+  prepareAuthenticatedRequest?: () => Promise<boolean>;
   refreshOnce: () => Promise<boolean>;
   handleUnauthorized: (rejectedAccessToken: string) => Promise<void>;
 }
@@ -74,7 +76,7 @@ function directRequest<TData>(
       method: options.method ?? "GET",
       data: options.data as UniApp.RequestOptions["data"],
       header: headers,
-      timeout: API_REQUEST_TIMEOUT_MS,
+      timeout: options.timeoutMs ?? API_REQUEST_TIMEOUT_MS,
       success: (response) => {
         resolve({ statusCode: response.statusCode, data: response.data });
       },
@@ -113,10 +115,24 @@ async function sendRequest<TResponse, TData>(
   retried: boolean,
 ): Promise<TResponse> {
   const authenticated = options.authenticated ?? false;
-  const accessToken = authenticated ? authAdapter?.getAccessToken() ?? "" : "";
+  let accessToken = authenticated ? authAdapter?.getAccessToken() ?? "" : "";
 
   if (authenticated && !accessToken) {
     throw new ApiError("需要登录后才能执行此操作", 401);
+  }
+
+  // 冷启动恢复的是本地快照，服务端会话可能已经重启或失效。首批业务请求
+  // 共享一次预检刷新，避免多个页面拿旧 Token 同时撞出一串 401。
+  if (authenticated && !retried && authAdapter?.prepareAuthenticatedRequest) {
+    const rejectedAccessToken = accessToken;
+    if (!await authAdapter.prepareAuthenticatedRequest()) {
+      await authAdapter.handleUnauthorized(rejectedAccessToken);
+      throw new ApiError("登录状态已失效，请重新登录", 401, false, "UNAUTHENTICATED");
+    }
+    accessToken = authAdapter.getAccessToken();
+    if (!accessToken) {
+      throw new ApiError("登录状态已失效，请重新登录", 401, false, "UNAUTHENTICATED");
+    }
   }
 
   const headers: Record<string, string> = {
@@ -143,12 +159,14 @@ async function sendRequest<TResponse, TData>(
     authAdapter;
 
   if (canRefresh) {
-    try {
-      if (await authAdapter!.refreshOnce()) {
-        return sendRequest<TResponse, TData>(options, true);
-      }
-    } catch {
-      // Refresh errors are converted to the original unauthorized response below.
+    // 另一个并发请求可能已经用同一个旧 Token 完成刷新。此时直接用新
+    // Token 重试，不能再次旋转 Refresh Token。
+    const currentAccessToken = authAdapter!.getAccessToken();
+    if (currentAccessToken && currentAccessToken !== accessToken) {
+      return sendRequest<TResponse, TData>(options, true);
+    }
+    if (await authAdapter!.refreshOnce()) {
+      return sendRequest<TResponse, TData>(options, true);
     }
   }
 

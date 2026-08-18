@@ -1,356 +1,83 @@
-# 线上操作手册
+# 线上部署手册
 
-当前调用链：
+本目录是体验环境后端部署的唯一入口。当前稳定方案是：在 Windows 开发机按 `main` 构建离线 Docker 镜像包，
+通过 SSH 上传到 ECS，再由服务器导入镜像并启动 Compose。不要在服务器临时改代码，也不要切换到另一套发布方式。
+
+## 当前拓扑
 
 ```text
 微信小程序
-  → CloudBase AnyService（hospitalapi）
-  → ECS:8888
-  → App API
-  ├→ Identity RPC
-  └→ Appointment RPC
-  → 各自的 MySQL / Redis
-  → Outbox → Kafka → Redis 授权版本同步
+  -> CloudBase AnyService（hospitalapi）
+  -> ECS:8888 / App API
+       -> Identity RPC   -> hospital_identity
+       -> Appointment RPC -> hospital_appointment
+       -> Guidance RPC   -> hospital_guidance
+  -> Redis / Kafka
 ```
 
-先判断你要做哪件事：
+一次性任务包括 `identity-migrate`、`appointment-migrate`、`guidance-migrate`、
+`identity-bootstrap-admin` 和 `kafka-init`。它们显示 `Exited (0)` 表示执行成功，不是服务崩溃。
 
-| 场景 | 需要重新部署后端 | 需要重新上传小程序 |
-|---|---:|---:|
-| 只换 ECS 服务器，CloudBase 环境和服务标识不变 | 是 | 否 |
-| 换 CloudBase 环境或 AnyService 服务标识 | 否 | 是 |
-| 修改 Go 后端代码 | 是 | 否 |
-| 修改小程序代码 | 否 | 是 |
-| 增加表或修改表结构 | 是 | 通常否 |
-| 增加一个全新的业务数据库 | 是 | 视前端接口是否变化而定 |
+## 一、服务器配置
 
-## 零、从空数据卷发布当前体验版
-
-当前版本前后端、数据库结构和 Identity 异步授权同步都发生了变化。首次使用空数据卷时，需要完整部署应用栈，
-但“完整部署”不等于重装服务器或手写 SQL：
-
-```text
-构建最新镜像
-  -> MySQL 创建空数据库
-  -> identity-migrate 与 appointment-migrate 分别执行压平后的 000001 后退出
-  -> identity-bootstrap-admin 创建医院根节点和多个超级管理员后退出
-  -> Kafka 启动，kafka-init 创建授权事件 Topic 后退出
-  -> Redis、identity-rpc、appointment-rpc、app-api 启动
-  -> 后端健康检查通过
-  -> 构建并上传微信体验版
-```
-
-`identity-migrate`、`identity-bootstrap-admin` 和 `kafka-init` 是一次性任务，显示 `Exited (0)` 表示成功，
-不是服务崩溃。
-以后再次执行 `deploy.sh` 时，迁移只运行新版本，管理员初始化按手机号指纹幂等跳过已有账号。
-当前 Compose 使用单节点 Kafka（副本数 1），适合体验环境，不是高可用生产集群。
-
-如果服务器以前运行过旧体验版，而本次已经明确决定不要旧数据，先核对并删除**这三个指定卷**：
-
-```bash
-cd /opt/hospital/deploy/production
-docker compose --env-file .env.production -f docker-compose.yml down
-docker volume inspect hospital-production-mysql-data hospital-production-redis-data hospital-production-kafka-data
-docker volume rm hospital-production-mysql-data hospital-production-redis-data hospital-production-kafka-data
-```
-
-这一步会永久删除旧账号、组织、审计、会话和未处理消息，只用于本次“全新体验环境”初始化；若卷本来不存在，
-直接跳过。不要把删卷命令加入日常发布脚本。
-
-### 1. 配置两个体验管理员
-
-复制 `env.example` 为服务器上的 `.env.production`，至少替换以下内容：
-
-```dotenv
-IDENTITY_BOOTSTRAP_HOSPITAL_CODE=HOSPITAL
-IDENTITY_BOOTSTRAP_HOSPITAL_NAME=体验医院名称
-IDENTITY_BOOTSTRAP_ADMIN_PHONES=第一个管理员手机号,第二个管理员手机号
-```
-
-手机号原文只保存在服务器 `.env.production`，不得提交 Git。初始化任务为每个号码直接创建可短信登录的
-`staff` 账号，授予 `super_admin`，并写入授权审计和 Outbox；数据库只保存 HMAC 指纹和脱敏手机号。
-除唯一医院根节点和这组管理员外，不创建院区、科室、医生或演示业务数据。
-
-以后需要追加初始化管理员时，在服务器修改手机号列表后单独运行：
-
-```bash
-docker compose --env-file .env.production -f docker-compose.yml run --rm identity-bootstrap-admin
-```
-
-已有管理员会幂等跳过，新手机号会新增管理员；从列表删除手机号不会自动撤销已有管理员。
-
-### 2. 部署后端
-
-```bash
-cd /opt/hospital/deploy/production
-chmod 600 .env.production
-chmod +x scripts/*.sh
-./scripts/deploy.sh
-```
-
-检查一次性任务和常驻服务：
-
-```bash
-docker compose --env-file .env.production -f docker-compose.yml ps -a
-docker compose --env-file .env.production -f docker-compose.yml logs identity-migrate identity-bootstrap-admin
-curl --fail http://127.0.0.1:8888/api/v1/health
-```
-
-两个管理员手机号属于真实用户账号，随后使用各自手机号接收真实短信验证码登录。需要完整体验数据时执行下方受保护的体验数据脚本；
-不执行脚本时，院区、科室和医生需通过 Identity 管理接口建立。
-
-体验版需要预置完整测试链路时，只能在刚完成迁移和两个管理员初始化、尚无业务数据的数据库上执行：
-
-```bash
-cd /opt/hospital/deploy/production
-EXPERIENCE_SEED_ACKNOWLEDGE=fresh-experience-database ./scripts/seed-experience.sh
-```
-
-该脚本保留 `.env.production` 中的两个真实超级管理员，另外创建两名医生和三名虚假患者，并将
-自动识别配置中唯一一位 153 开头管理员，将其既有 `account_id` 复用为一名报告测试患者；不会创建同手机号的第二个账号，也不会
-修改管理员的账号类型、角色、手机号或已有个人资料。脚本还会创建两个院区、四个科室、
-六个房间、十个检查项目，以及待检查、检查中、已完成、已取消、未到场、报告草稿、正式报告和更正版本数据。
-消息场景同时覆盖预约成功、两次到院提醒、预约取消、未到场、报告到期、报告超时、报告发布和报告更正。
-“当日急诊 CT”会按照执行脚本时的上午或下午自动配置当前有效窗口，并把最晚到院时间放在当前时间附近，
-便于体验到院提醒和开始检查。
-检测到已有科室或 Appointment 业务数据时脚本会拒绝执行，不会覆盖现有数据。
-
-### 3. 上传体验版
-
-后端健康检查和两个管理员登录均成功后，再在开发机通过终端完成构建和上传：
-
-```powershell
-$miniappRoot = 'C:\Users\27902\GolandProjects\Hospital\apps\miniapp'
-$wechatCli = 'C:\Program Files (x86)\Tencent\微信web开发者工具\cli.bat'
-$releaseVersion = '0.3.4'
-$releaseDescription = '增加检查报到、候检叫号与未到场展示，完善检查报告流程。'
-
-Set-Location $miniappRoot
-npm run test
-npm run type-check
-npm run build:mp-weixin
-
-& $wechatCli upload `
-  --project (Join-Path $miniappRoot 'dist\build\mp-weixin') `
-  --version $releaseVersion `
-  --desc $releaseDescription `
-  --lang zh
-```
-
-不要从 `apps/miniapp` 项目根目录或 `dist/dev/mp-weixin` 上传；两者固定用于直连本机 `127.0.0.1` 的开发调试。
-构建前关闭正在打开 `dist/build/mp-weixin` 的开发者工具项目，避免重建产物时出现目录删除提示。终端输出
-`√ upload` 后，再到微信公众平台将该版本设为体验版。不要先上传依赖尚未部署接口的小程序。
-
-## 一、更换 ECS 服务器
-
-目标：把数据库、配置和服务搬到新服务器，最后只修改 AnyService 源站 IP。
-
-### 1. 在旧服务器备份
-
-```bash
-cd /opt/hospital/deploy/production
-./scripts/backup.sh
-```
-
-确认输出的 `.sql.gz` 存在，并执行：
-
-```bash
-gzip -t backups/hospital-时间戳.sql.gz
-```
-
-### 2. 准备新服务器
-
-- 安装 Ubuntu 22.04、Docker Engine 和 Compose v2；
-- 安全组开放 SSH `22` 和后端源站 `8888`；
-- 不开放 MySQL `3306`、Redis `6379`、Identity RPC `8080` 和 Appointment RPC `8081`；
-- 把同一版本仓库放到 `/opt/hospital`；
-- 把旧服务器的 `.env.production` 安全复制到新服务器：
+服务器文件：
 
 ```text
 /opt/hospital/deploy/production/.env.production
 ```
 
-必须保留原来的 Token 公私钥、手机号指纹密钥和短信配置。否则现有会话可能失效，手机号指纹也无法继续匹配旧账号。
+由 `env.example` 创建，权限保持 `600`。以下配置必须存在：
 
-### 3. 首次启动并恢复数据
-
-```bash
-cd /opt/hospital/deploy/production
-chmod 600 .env.production
-chmod +x scripts/*.sh
-./scripts/deploy.sh
-docker compose --env-file .env.production -f docker-compose.yml stop app-api identity-rpc appointment-rpc
-```
-
-把备份上传到新服务器后恢复：
-
-```bash
-gunzip -c /path/to/hospital-时间戳.sql.gz \
-  | docker compose --env-file .env.production -f docker-compose.yml exec -T mysql \
-    sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot'
-
-./scripts/deploy.sh
-```
-
-### 4. 验证新服务器
-
-```bash
-curl --fail http://127.0.0.1:8888/api/v1/health
-docker compose --env-file .env.production -f docker-compose.yml ps
-```
-
-再测试一次真实短信登录。
-
-### 5. 切换 AnyService
-
-进入 CloudBase → AnyService → `hospitalapi`，只把源站从旧 IP 改为：
-
-```text
-新服务器公网IP:8888
-```
-
-CloudBase 环境 ID 和服务标识没有变化，因此小程序不需要重新构建或上传。
-
-### 6. 回滚
-
-新服务器验证完成前不要释放旧服务器。回滚时把 AnyService 源站 IP 改回旧服务器，并重新启动旧服务器服务。
-
-## 二、更换 CloudBase 或 AnyService
-
-这里的“更换 CloudBase”包括：换云开发环境、重新创建 AnyService、修改 AnyService 服务标识。
-
-### 1. 创建新服务
-
-在新的 CloudBase 环境中创建 AnyService：
-
-```text
-服务标识：hospitalapi
-源站协议：HTTP
-源站地址：ECS公网IP:8888
-```
-
-把新环境绑定到小程序 AppID：
-
-```text
-wx8ba66b98c93423fd
-```
-
-### 2. 修改小程序本地生产配置
-
-编辑不会提交 Git 的文件：
-
-```text
-apps/miniapp/.env.production
-```
+- Identity、Appointment、Guidance 三个 MySQL DSN；
+- Redis、Kafka、JWT、手机号 HMAC 与短信配置；
+- 高德 Web 服务 Key；需要模型解析时配置 Guidance LLM；
+- 唯一医院根节点；
+- 两名真实超级管理员；
+- 第三位真实医生体验账号。
 
 ```dotenv
-VITE_API_TRANSPORT=cloudbase
-VITE_CLOUDBASE_ENV_ID=新的云开发环境ID
-VITE_ANYSERVICE_NAME=hospitalapi
+IDENTITY_BOOTSTRAP_HOSPITAL_CODE=SH-SECOND-PEOPLES-HOSPITAL
+IDENTITY_BOOTSTRAP_HOSPITAL_NAME=上海市第二人民医院
+IDENTITY_BOOTSTRAP_ADMIN_PHONES=第一名真实管理员,第二名真实管理员
+EXPERIENCE_REAL_DOCTOR_PHONE=第三位真实医生
 ```
 
-如果服务标识不是 `hospitalapi`，同时修改 `VITE_ANYSERVICE_NAME`。
+真实手机号只保存在服务器 `.env.production`。数据库保存手机号 HMAC 指纹和脱敏快照。
 
-### 3. 重新构建并上传
+## 二、本地验证并构建离线镜像
+
+部署前必须保证目标提交已经推送到 `main`，本地 `main` 与工作区干净：
 
 ```powershell
-$miniappRoot = 'C:\Users\27902\GolandProjects\Hospital\apps\miniapp'
-$wechatCli = 'C:\Program Files (x86)\Tencent\微信web开发者工具\cli.bat'
-$releaseVersion = '填写新版本号'
-$releaseDescription = '填写面向体验客户的版本说明'
-
-Set-Location $miniappRoot
-npm run type-check
-npm run test
-npm run build:mp-weixin
-
-& $wechatCli upload `
-  --project (Join-Path $miniappRoot 'dist\build\mp-weixin') `
-  --version $releaseVersion `
-  --desc $releaseDescription `
-  --lang zh
+Set-Location C:\Users\27902\GolandProjects\Hospital
+git switch main
+git pull --ff-only origin main
+git status --short
+.\scripts\quality\verify-repository.ps1
 ```
 
-终端输出 `√ upload` 后，到微信公众平台把新版本设为体验版。
-
-### 4. 验证
-
-在开发者工具 Console 调用 `/api/v1/health`，再在手机体验版完成一次短信登录。
-
-ECS、MySQL、Redis 和 Kafka 没有变化，所以不需要搬数据库或消息数据。
-
-## 三、加入新代码后如何发布
-
-### 情况 A：只修改小程序代码
+构建完整离线镜像包：
 
 ```powershell
-$miniappRoot = 'C:\Users\27902\GolandProjects\Hospital\apps\miniapp'
-$wechatCli = 'C:\Program Files (x86)\Tencent\微信web开发者工具\cli.bat'
-$releaseVersion = '填写新版本号'
-$releaseDescription = '填写面向体验客户的版本说明'
-
-Set-Location $miniappRoot
-npm run type-check
-npm run test
-npm run build:mp-weixin
-
-& $wechatCli upload `
-  --project (Join-Path $miniappRoot 'dist\build\mp-weixin') `
-  --version $releaseVersion `
-  --desc $releaseDescription `
-  --lang zh
+$archive = Join-Path $env:TEMP 'hospital-images.tar.gz'
+if (Test-Path -LiteralPath $archive) { Remove-Item -LiteralPath $archive -Force }
+.\deploy\production\scripts\export-images.ps1 -OutputPath $archive
+Get-FileHash -Algorithm SHA256 $archive
 ```
 
-然后：
+镜像包包含 MySQL、Redis、Kafka、三个迁移任务、管理员初始化、三个 RPC 和 App API，不允许手工漏传 Guidance。
 
-```text
-确认终端输出 √ upload
-→ 微信公众平台版本管理
-→ 设为体验版
-```
+## 三、上传并部署
 
-不需要重启 ECS。
-
-### 情况 B：只修改 Go 后端代码
-
-先在本地检查并提交代码：
+服务器地址：`121.41.119.163`，部署密钥：`$env:USERPROFILE\.ssh\hospital_ecs`。
 
 ```powershell
-cd C:\Users\27902\GolandProjects\Hospital
-.\scripts\check.ps1
+$archive = Join-Path $env:TEMP 'hospital-images.tar.gz'
+scp -i "$env:USERPROFILE\.ssh\hospital_ecs" -o BatchMode=yes `
+  $archive root@121.41.119.163:/tmp/hospital-images.tar.gz
 ```
 
-让服务器获取同一个提交后执行：
-
-```bash
-cd /opt/hospital/deploy/production
-./scripts/backup.sh
-./scripts/deploy.sh
-```
-
-验证：
-
-```bash
-curl --fail http://127.0.0.1:8888/api/v1/health
-docker compose --env-file .env.production -f docker-compose.yml logs --tail=100 app-api identity-rpc appointment-rpc
-```
-
-后端接口兼容时，小程序不需要重新上传。
-
-### 情况 C：服务器无法从 Docker Hub 拉镜像
-
-在 Windows 开发机导出镜像：
-
-```powershell
-.\deploy\production\scripts\export-images.ps1 `
-  -OutputPath "$env:TEMP\hospital-images.tar.gz"
-
-scp -i "$env:USERPROFILE\.ssh\hospital_ecs" `
-  "$env:TEMP\hospital-images.tar.gz" `
-  root@服务器IP:/tmp/hospital-images.tar.gz
-```
-
-服务器先备份，再导入并部署：
+普通发布保留数据库，先在服务器备份，再导入镜像：
 
 ```bash
 cd /opt/hospital/deploy/production
@@ -358,74 +85,106 @@ cd /opt/hospital/deploy/production
 ./scripts/import-images.sh /tmp/hospital-images.tar.gz
 ```
 
-### 情况 D：前后端都修改
+本项目尚未上线且明确要求重置全部体验数据时，才执行下面的完整替换。删除目标仅限三个明确命名的卷：
 
-先发布后端并验证健康，再上传小程序新版本。不要先上传依赖新接口的小程序。
-
-## 四、加入新数据库或修改表结构
-
-### 情况 A：只给现有 `hospital_identity` 增加表或字段
-
-不要修改已经执行过的 `000001` 至 `000005`。新增一组迁移，例如：
-
-```text
-migrations/identity/000006_add_xxx.up.sql
-migrations/identity/000006_add_xxx.down.sql
+```bash
+cd /opt/hospital/deploy/production
+docker compose --env-file .env.production -f docker-compose.yml down --remove-orphans
+docker volume inspect hospital-production-mysql-data hospital-production-redis-data hospital-production-kafka-data
+docker volume rm hospital-production-mysql-data hospital-production-redis-data hospital-production-kafka-data
+./scripts/import-images.sh /tmp/hospital-images.tar.gz
 ```
 
-本地验证：
+不得把删卷操作放入日常 `deploy.sh` 或 `import-images.sh`。
+
+## 四、装载综合体验数据
+
+只允许在三个压平迁移和两名超级管理员初始化完成、尚无业务数据的空库执行：
+
+```bash
+cd /opt/hospital/deploy/production
+set -a
+source ./.env.production
+set +a
+EXPERIENCE_SEED_ACKNOWLEDGE=fresh-experience-database ./scripts/seed-experience.sh
+```
+
+脚本会验证：
+
+- 恰好两名超级管理员；
+- `EXPERIENCE_REAL_DOCTOR_PHONE` 创建为普通科室医生，且没有超级管理员角色；
+- 只有一个上海市第二人民医院院区，地点限 1、2、3 号楼；
+- 客户 Excel 的十五类检查项目和补充项目全部存在；
+- 周一至周日均有上午/下午窗口；
+- 八种预约状态、队列、消息、报告草稿/发布/更正和 Guidance 规则齐全；
+- 第三位真实医生同时绑定患者侧历史报告、当前及未来记录。
+
+脚本检测到已有科室或业务数据会拒绝执行，不会覆盖线上数据。
+
+## 五、健康检查
+
+```bash
+cd /opt/hospital/deploy/production
+curl --fail http://127.0.0.1:8888/api/v1/health
+docker compose --env-file .env.production -f docker-compose.yml ps -a
+docker compose --env-file .env.production -f docker-compose.yml logs --tail=100 \
+  identity-rpc appointment-rpc guidance-rpc app-api kafka
+```
+
+常驻服务 `identity-rpc`、`appointment-rpc`、`guidance-rpc` 与 `app-api` 都必须处于运行状态。健康检查通过后，再上传
+依赖这些接口的小程序。
+
+## 六、小程序构建与上传
+
+必须从小程序源码目录执行，`--project` 必须指向发布产物，不要在 `dist/build/mp-weixin` 内再次拼接 `dist`：
 
 ```powershell
-.\scripts\migrate.ps1 -Service identity -Direction up
-.\scripts\migrate.ps1 -Service identity -Direction version
-.\scripts\check.ps1
+$miniappRoot = 'C:\Users\27902\GolandProjects\Hospital\apps\miniapp'
+$wechatCli = 'C:\Program Files (x86)\Tencent\微信web开发者工具\cli.bat'
+$releaseVersion = '填写新版本号'
+$releaseDescription = '填写面向体验客户的版本说明'
+
+Set-Location $miniappRoot
+npm run test
+npm run type-check
+npm run build:mp-weixin
+
+& $wechatCli upload `
+  --project (Join-Path $miniappRoot 'dist\build\mp-weixin') `
+  --version $releaseVersion `
+  --desc $releaseDescription `
+  --lang zh
 ```
 
-发布时：
+终端显示 `√ upload` 后，再到微信公众平台把该版本设为体验版。开发者工具日常联调导入
+`apps/miniapp/dist/dev/mp-weixin`；发布上传只使用 `apps/miniapp/dist/build/mp-weixin`。
+
+## 七、备份与恢复
+
+`backup.sh` 备份 `hospital_identity`、`hospital_appointment` 和 `hospital_guidance` 三个数据库：
 
 ```bash
 cd /opt/hospital/deploy/production
 ./scripts/backup.sh
+gzip -t backups/hospital-时间戳.sql.gz
+```
+
+恢复时先停止四个业务服务，再导入 SQL，最后重新部署：
+
+```bash
+docker compose --env-file .env.production -f docker-compose.yml stop \
+  app-api identity-rpc appointment-rpc guidance-rpc
+gunzip -c /path/to/hospital-时间戳.sql.gz \
+  | docker compose --env-file .env.production -f docker-compose.yml exec -T mysql \
+    sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot'
 ./scripts/deploy.sh
 ```
 
-`identity-migrate` 会跳过已执行版本，只执行新的 `000006`。迁移失败时后端不会继续启动。
+## 八、禁止事项
 
-### 情况 B：增加一个全新的业务数据库
-
-需要同时完成以下内容：
-
-1. 新建迁移目录：
-
-   ```text
-   migrations/新服务名/
-   ```
-
-2. 在 `.env.example` 和 `deploy/production/env.example` 增加数据库账号、密码和 DSN；
-3. 更新 `deploy/compose/mysql/init/001-create-service-databases.sh`，为全新数据卷创建数据库和账号；
-4. 更新 `scripts/migrate.ps1`，让 `-Service` 支持新服务；
-5. 在 `deploy/production/docker-compose.yml` 增加对应的迁移任务，并让业务服务依赖迁移成功；
-6. 更新 `.github/workflows/ci.yml`，在隔离数据库中测试新迁移；
-7. 更新 `scripts/backup.sh`，把新数据库加入备份列表；
-8. 在业务服务配置中注入新 DSN；
-9. 先在空数据库完成一次 `up → down → up` 验证，再部署。
-
-注意：`docker-entrypoint-initdb.d` 只在 MySQL 数据卷第一次初始化时运行。已有服务器增加新数据库时，不能只修改初始化脚本；还必须在部署前对现有 MySQL 实例执行一次经过评审的幂等数据库/账号创建脚本。
-
-## 五、任何操作完成后都检查
-
-```bash
-curl --fail http://127.0.0.1:8888/api/v1/health
-docker compose --env-file .env.production -f docker-compose.yml ps
-docker compose --env-file .env.production -f docker-compose.yml logs --tail=100 app-api identity-rpc appointment-rpc kafka
-```
-
-然后在手机体验版验证：启动、短信登录、退出登录和关键页面。
-
-## 六、禁止事项
-
-- 不提交 `.env.production`、AccessKey、Token 私钥；
-- 除“零、从空数据卷发布当前体验版”中已经明确确认的数据重置外，不删除 MySQL、Redis 和 Kafka 数据卷；
-- 不改写已经在共享环境执行过的迁移；
-- 不在没有备份的情况下执行生产数据库迁移；
-- 不在新服务器验证完成前释放旧服务器。
+- 不提交 `.env.production`、AccessKey、LLM Key、AppSecret、短信密钥或 Token 私钥；
+- 不在服务器工作区直接修改代码；
+- 不从功能分支直接发布，部署前必须先合并并推送 `main`；
+- 未明确要求重置体验环境时，不删除 MySQL、Redis 或 Kafka 卷；
+- 不绕过迁移任务手写线上表结构；
+- 不在 Guidance 未健康时只凭 App API 健康就宣布部署成功。

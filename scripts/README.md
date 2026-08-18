@@ -1,61 +1,48 @@
-# 开发与运维脚本
+# 仓库脚本
 
-本目录保存已经实现、可重复执行且失败时返回非零退出码的开发脚本。
+`scripts/` 是开发、生成、数据库和质量检查的人工入口。目录按操作目的划分，不再把所有 PowerShell 与大段测试
+SQL 平铺在同一级。
 
-| 脚本 | 用途 |
-|---|---|
-| `start-backend.ps1` | 按 UTF-8 加载 `.env`，构建并启动 Identity RPC、Appointment RPC 与 App API |
-| `seed-comprehensive-test-data.ps1` | 向已经执行最新版迁移的本地 Identity 与 Appointment 数据库写入综合联调数据 |
-| `db-bootstrap-local.ps1` | 启动本地 MySQL、幂等创建数据库/账号并执行迁移 |
-| `migrate.ps1` | 执行升级、受限回滚、版本查询和显式基线登记 |
-| `check.ps1` | 校验契约、Compose、Go 和微信小程序 |
-| `lib/environment.ps1` | 脚本共享的 UTF-8 环境变量加载与校验 |
+```text
+scripts/
+├─ contracts/
+│  └─ generate-protobuf.ps1          # 验证或生成 gRPC 契约
+├─ database/
+│  ├─ bootstrap-local.ps1            # 初始化本地数据库和服务账号
+│  ├─ migrate.ps1                    # 统一迁移入口
+│  ├─ validate-flat-migrations.ps1   # 校验单一初始版本与灌数表引用
+│  ├─ seed-comprehensive-test-data.ps1
+│  └─ seed-comprehensive-test-data.sql
+├─ development/
+│  └─ start-backend.ps1              # 构建并启动四个后端进程
+├─ quality/
+│  └─ verify-repository.ps1          # 契约、Go、Compose 和小程序总检查
+└─ lib/
+   └─ environment.ps1                # PowerShell 共用的 UTF-8 环境读取
+```
 
-## 常用命令
+## 常用入口
 
 ```powershell
 Copy-Item .env.example .env
-.\scripts\db-bootstrap-local.ps1
-.\scripts\start-backend.ps1 -Restart
-.\scripts\migrate.ps1 -Service identity -Direction version
-.\scripts\check.ps1
+.\scripts\database\bootstrap-local.ps1
+.\scripts\database\seed-comprehensive-test-data.ps1 -Reset
+.\scripts\development\start-backend.ps1 -Restart
+.\scripts\quality\verify-repository.ps1
 ```
 
-`start-backend.ps1` 会覆盖当前进程继承的同名变量，以 `.env` 的 UTF-8 值为准，避免 Windows PowerShell
-错误解码阿里云中文签名。运行日志写到系统临时目录 `hospital-backend`。
+## 组织规则
 
-综合测试数据仅允许在 `APP_ENV=local` 使用。它包含多院区、多科室、医生、患者、检查资源、完整预约状态、
-预约与科室消息、草稿、正式及更正报告。首次向空库写入可直接执行；需要清理旧测试数据并按压平后的
-`000001` 迁移重建时，显式使用 `-Reset`。该模式也会清空本地 Redis 中的登录会话、授权版本和 Appointment 缓存，
-避免固定测试账号复用旧缓存。
+- 人工工作流放 `scripts/`，可被镜像复用的独立 Go 命令放 `tools/`；
+- 跨脚本共用代码只放 `lib/`，业务 SQL 不进入通用库；
+- 脚本必须从自身位置解析仓库根目录，不能依赖调用者当前目录；
+- 失败必须返回非零退出码，破坏性数据库操作必须使用显式 `-Reset` 或确认参数；
+- 不保留仅为旧文件路径服务的兼容脚本；修改入口后同步仓库文档和部署调用方。
 
-```powershell
-.\scripts\seed-comprehensive-test-data.ps1
-.\scripts\seed-comprehensive-test-data.ps1 -Reset
-```
+详细说明：
 
-核心体验账号和展示范围：
-
-- `13482154556`：本地联调超级管理员，可切换四个科室，查看全部预约状态及科室消息；
-- `15363658538`：本地联调超级管理员，同时复用其既有 `account_id` 绑定患者侧测试记录，可看到跨科室待检查、未到场、四份正式报告、报告更正和已读/未读效果；
-- `13800000001`、`13800000002`：放射科和超声科医生，本地短信模拟环境用于验证医生固定科室；
-- `13900000002` 至 `13900000004`：用于取消、未到场、检查中、报告草稿及报告超时场景。
-
-生产环境 `.env.production` 配置的两个超级管理员手机号属于真实用户，不是可以另行生成的虚假患者。生产灌数
-必须复用部署初始化得到的管理员 `account_id`，不得为相同手机号创建第二个账号，也不得修改其账号类型、角色、
-手机号或已有个人资料。需要让管理员体验患者功能时，只能把预约、检查记录、报告等测试业务数据关联到该既有
-账号。生产脚本会自动识别配置中唯一一位 153 开头的管理员，并在导入前后校验其超级管理员身份和已发布报告
-绑定；发现重复账号、多个 153 管理员或绑定缺失时直接失败。上面的完整号码只是本地联调配置，不是生产账号清单。
-
-资源数据包含两个院区、四个科室、六个严格地址房间、十个项目，以及同项目多房间、同房间多项目、停用项目、
-七天上午/下午窗口和日期容量。当前综合数据包含 31 条预约，覆盖 `confirmed`、`queued`、`called`、
-`in_progress`、`report_pending`、`completed`、`no_show`、`canceled` 八种状态；四个科室都有今日展示数据，
-五个房间拥有候检队列，并预置“窗口内过号顺延”和“窗口结束后过号未到场”两个一分钟对照案例；八份报告覆盖
-空白待写、草稿、正式发布和更正历史。科室消息能够展示新预约、取消、
-未到场、叫号、过号顺延、报告到期和报告超时。
-
-基线登记只适用于已经人工确认结构与目标迁移完全一致的旧数据库。它只写迁移版本，不创建或修复表，必须
-显式提供 `-AcknowledgeExistingSchema`。
-
-生产部署、备份和换服使用 `deploy/production` 中的脚本。任何脚本都不得内置真实密码、AccessKey、
-AppSecret 或 Token 私钥。
+- [契约生成](./contracts/README.md)
+- [数据库与综合测试数据](./database/README.md)
+- [本地后端启动](./development/README.md)
+- [统一质量检查](./quality/README.md)
+- [Go 工具](../tools/README.md)

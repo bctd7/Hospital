@@ -10,6 +10,8 @@ import (
 	appointmentcatalog "hospital/service/app/api/internal/handler/appointmentcatalog"
 	appointmentresources "hospital/service/app/api/internal/handler/appointmentresources"
 	auth "hospital/service/app/api/internal/handler/auth"
+	guidanceconfiguration "hospital/service/app/api/internal/handler/guidanceconfiguration"
+	guidanceplanning "hospital/service/app/api/internal/handler/guidanceplanning"
 	guidancerouting "hospital/service/app/api/internal/handler/guidancerouting"
 	guidancerules "hospital/service/app/api/internal/handler/guidancerules"
 	identityadmin "hospital/service/app/api/internal/handler/identityadmin"
@@ -162,19 +164,9 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					Handler: appointmentcatalog.ListExaminationItemsHandler(serverCtx),
 				},
 				{
-					Method:  http.MethodPost,
-					Path:    "/admin/appointment/examination-items",
-					Handler: appointmentcatalog.CreateExaminationItemHandler(serverCtx),
-				},
-				{
 					Method:  http.MethodGet,
 					Path:    "/admin/appointment/examination-items/:itemId",
 					Handler: appointmentcatalog.GetExaminationItemHandler(serverCtx),
-				},
-				{
-					Method:  http.MethodPut,
-					Path:    "/admin/appointment/examination-items/:itemId",
-					Handler: appointmentcatalog.UpdateExaminationItemHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPost,
@@ -347,13 +339,66 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Route{
 				{
 					Method:  http.MethodGet,
+					Path:    "/guidance/examination-items/:itemId/reminders",
+					Handler: guidanceconfiguration.GetExaminationItemPatientRemindersHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/admin/guidance/examination-items/:itemId/configuration",
+					Handler: guidanceconfiguration.GetExaminationItemConfigurationHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/guidance/examination-items/configuration",
+					Handler: guidanceconfiguration.ConfigureExaminationItemHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/admin/guidance/preparation-rules/preview",
+					Handler: guidanceconfiguration.PreviewPreparationRulesHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AccessToken},
+			[]rest.Route{
+				{
+					Method:  http.MethodPost,
+					Path:    "/guidance/smart-appointment/plans",
+					Handler: guidanceplanning.GenerateSmartAppointmentPlansHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodPost,
+					Path:    "/guidance/smart-appointment/plans/:planId/confirm",
+					Handler: guidanceplanning.ConfirmSmartAppointmentPlanHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
+					Path:    "/guidance/today/recommendation",
+					Handler: guidanceplanning.GetTodayExaminationRecommendationHandler(serverCtx),
+				},
+			}...,
+		),
+		rest.WithPrefix("/api/v1"),
+	)
+
+	server.AddRoutes(
+		rest.WithMiddlewares(
+			[]rest.Middleware{serverCtx.AccessToken},
+			[]rest.Route{
+				{
+					Method:  http.MethodGet,
 					Path:    "/guidance/places/search",
 					Handler: guidancerouting.SearchGuidancePlacesHandler(serverCtx),
 				},
 				{
 					Method:  http.MethodPost,
-					Path:    "/guidance/routes/walking",
-					Handler: guidancerouting.CalculateWalkingRouteHandler(serverCtx),
+					Path:    "/guidance/routes",
+					Handler: guidancerouting.CalculateGuidanceRouteHandler(serverCtx),
 				},
 			}...,
 		),

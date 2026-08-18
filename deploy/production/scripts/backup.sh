@@ -17,7 +17,7 @@ test -f .env.production || {
 mkdir -p "${backup_dir}"
 
 docker compose --env-file .env.production -f docker-compose.yml exec -T mysql \
-  sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysqldump -uroot --single-transaction --routines --triggers --events --databases hospital hospital_identity' \
+  sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysqldump -uroot --single-transaction --routines --triggers --events --databases hospital_identity hospital_appointment hospital_guidance' \
   | gzip -9 >"${target}"
 
 gzip -t "${target}"

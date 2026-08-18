@@ -1,5 +1,6 @@
 Name: guidance-rpc
 ListenOn: 0.0.0.0:8082
+Timeout: 30000
 Mode: production
 Environment: production
 Log:
@@ -27,5 +28,12 @@ AMap:
   PlaceSearchEndpoint: https://restapi.amap.com/v5/place/text
   GeocodeEndpoint: https://restapi.amap.com/v3/geocode/geo
   WalkingEndpoint: https://restapi.amap.com/v3/direction/walking
+  DrivingEndpoint: https://restapi.amap.com/v3/direction/driving
+  TransitEndpoint: https://restapi.amap.com/v3/direction/transit/integrated
   WebServiceKey: ${AMAP_WEB_SERVICE_KEY}
   TimeoutMilliseconds: 5000
+LLM:
+  Endpoint: ${GUIDANCE_LLM_ENDPOINT}
+  APIKey: ${GUIDANCE_LLM_API_KEY}
+  Model: ${GUIDANCE_LLM_MODEL}
+  TimeoutMilliseconds: 20000

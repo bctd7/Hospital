@@ -2,6 +2,7 @@ Name: app-api
 Environment: local
 Host: 0.0.0.0
 Port: 8888
+Timeout: 30000
 
 Log:
   ServiceName: app-api
@@ -31,6 +32,7 @@ GuidanceRPC:
   Endpoints:
     - 127.0.0.1:8082
   NonBlock: true
+  Timeout: 30000
 
 
 AuthorizationRedis:

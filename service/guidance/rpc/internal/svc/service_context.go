@@ -15,17 +15,22 @@ import (
 	authversion "hospital/common/authz/version"
 	"hospital/common/authz/version/redisstore"
 	"hospital/service/appointment/rpc/appointmentservice"
+	"hospital/service/guidance/rpc/internal/appointmentclient"
 	"hospital/service/guidance/rpc/internal/config"
+	"hospital/service/guidance/rpc/internal/planning"
+	"hospital/service/guidance/rpc/internal/projectconfiguration"
 	"hospital/service/guidance/rpc/internal/repository/mysqlstore"
 	"hospital/service/guidance/rpc/internal/routing"
 	"hospital/service/guidance/rpc/internal/routing/amap"
-	"hospital/service/guidance/rpc/internal/rules/precedence/appointmentcatalog"
-	precedencemanager "hospital/service/guidance/rpc/internal/rules/precedence/manager"
+	descriptionrules "hospital/service/guidance/rpc/internal/rules/description"
+	"hospital/service/guidance/rpc/internal/rules/precedence"
 )
 
 type ServiceContext struct {
 	Config                        config.Config
-	PrecedenceManager             *precedencemanager.Manager
+	PrecedenceManager             *precedence.Manager
+	ProjectConfigurationManager   *projectconfiguration.Manager
+	PlanningManager               *planning.Manager
 	RoutingManager                *routing.Manager
 	TokenManager                  *authn.TokenManager
 	AuthorizationVersionValidator *authversion.Validator
@@ -79,26 +84,47 @@ func NewServiceContext(c config.Config) (*ServiceContext, error) {
 		return nil, fmt.Errorf("create guidance authorization version validator: %w", err)
 	}
 	appointmentClient := appointmentservice.NewAppointmentService(zrpc.MustNewClient(c.AppointmentRPC))
-	directory, err := appointmentcatalog.New(appointmentClient)
+	configurationClient, err := appointmentclient.NewConfiguration(appointmentClient)
 	if err != nil {
 		return nil, err
 	}
-	manager, err := precedencemanager.New(store, directory)
+	directory, err := appointmentclient.NewPrecedenceDirectory(appointmentClient)
+	if err != nil {
+		return nil, err
+	}
+	manager, err := precedence.New(store, directory)
+	if err != nil {
+		return nil, err
+	}
+	descriptionParser := descriptionrules.NewParser(descriptionrules.NewLLMInterpreter(descriptionrules.LLMConfig{
+		Endpoint: c.LLM.Endpoint, APIKey: c.LLM.APIKey, Model: c.LLM.Model,
+		Timeout: time.Duration(c.LLM.TimeoutMilliseconds) * time.Millisecond,
+	}))
+	configurationManager, err := projectconfiguration.NewManager(store, configurationClient, configurationClient, descriptionParser)
+	if err != nil {
+		return nil, fmt.Errorf("create guidance project configuration manager: %w", err)
+	}
+	planningClient, err := appointmentclient.NewPlanning(appointmentClient)
 	if err != nil {
 		return nil, err
 	}
 	mapClient := amap.New(amap.Config{
 		PlaceSearchEndpoint: c.AMap.PlaceSearchEndpoint, GeocodeEndpoint: c.AMap.GeocodeEndpoint,
 		WalkingEndpoint: c.AMap.WalkingEndpoint,
-		WebServiceKey:   c.AMap.WebServiceKey, Timeout: time.Duration(c.AMap.TimeoutMilliseconds) * time.Millisecond,
+		DrivingEndpoint: c.AMap.DrivingEndpoint, TransitEndpoint: c.AMap.TransitEndpoint,
+		WebServiceKey: c.AMap.WebServiceKey, Timeout: time.Duration(c.AMap.TimeoutMilliseconds) * time.Millisecond,
 	})
 	routingManager, err := routing.NewManager(mapClient)
 	if err != nil {
 		return nil, fmt.Errorf("create guidance routing manager: %w", err)
 	}
+	planningManager, err := planning.NewManager(store, planningClient, routingManager)
+	if err != nil {
+		return nil, fmt.Errorf("create guidance planning manager: %w", err)
+	}
 	assembled = true
 	return &ServiceContext{
-		Config: c, PrecedenceManager: manager, RoutingManager: routingManager,
+		Config: c, PrecedenceManager: manager, ProjectConfigurationManager: configurationManager, PlanningManager: planningManager, RoutingManager: routingManager,
 		TokenManager: tokenManager, AuthorizationVersionValidator: validator,
 		store: store, authorizationRedis: authorizationRedis,
 	}, nil

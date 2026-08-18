@@ -26,11 +26,11 @@ function patientHome(): HomeWorkbenchView {
     secondaryAction: {
       id: "smart-guide",
       title: "智能导诊",
-      description: "智能导诊",
+      description: "按准备规则生成本周预约方案",
       symbol: "诊",
       tone: "cyan",
-      badge: "建设中",
-      target: { type: "unavailable", message: "智能导诊功能正在建设中" },
+      badge: "智能规划",
+      target: { type: "navigate", url: "/pages/guidance/planning/index" },
     },
     serviceGroups: [
       {
@@ -64,58 +64,16 @@ function patientHome(): HomeWorkbenchView {
         ],
       },
       {
-        id: "during-visit",
-        title: "诊中服务（待规划）",
-        actions: [
-          {
-            id: "payment",
-            title: "在线缴费",
-            description: "查看并支付待缴费用",
-            symbol: "缴",
-            tone: "blue",
-            badge: "建设中",
-            target: { type: "unavailable", message: "在线缴费功能正在建设中" },
-          },
-          {
-            id: "insurance-code",
-            title: "医保电子凭证",
-            description: "出示医保电子凭证",
-            symbol: "保",
-            tone: "cyan",
-            badge: "建设中",
-            target: { type: "unavailable", message: "医保电子凭证功能正在建设中" },
-          },
-        ],
-      },
-      {
         id: "after-visit",
         title: "诊后服务",
         actions: [
           {
-            id: "reports",
-            title: "检验报告查询",
-            description: "查询检验检查报告",
-            symbol: "查",
+            id: "patient-check-records",
+            title: "检查记录",
+            description: "查看已完成和未到场的检查",
+            symbol: "记",
             tone: "blue",
-            target: { type: "navigate", url: "/pages/profile/reports/index" },
-          },
-          {
-            id: "invoice",
-            title: "电子票据",
-            description: "查看医疗电子票据",
-            symbol: "票",
-            tone: "cyan",
-            badge: "建设中",
-            target: { type: "unavailable", message: "电子票据功能正在建设中" },
-          },
-          {
-            id: "inpatient-copy",
-            title: "住院病案复印",
-            description: "申请住院病案材料",
-            symbol: "案",
-            tone: "green",
-            badge: "建设中",
-            target: { type: "unavailable", message: "住院病案复印功能正在建设中" },
+            target: { type: "navigate", url: "/pages/profile/appointments/index?view=completed" },
           },
         ],
       },
@@ -134,15 +92,27 @@ export function buildHomeWorkbench(
   const view = { ...patientHome(), variant };
   if (variant === "staff") {
     view.primaryAction = {
-      id: "manage-examination-items",
-      title: "检查项目管理",
-      description: "维护项目、房间与每周开放时间",
+      id: "manage-examination-resources",
+      title: "检查资源管理",
+      description: "维护房间、项目关联与每周开放时间",
       symbol: "检",
       tone: "cyan",
       badge: "真实数据",
       target: {
         type: "navigate",
         url: "/pages/admin/appointment/index",
+      },
+    };
+    view.secondaryAction = {
+      id: "manage-guidance-rules",
+      title: "导诊管理",
+      description: "创建检查项目并配置先后与准备规则",
+      symbol: "导",
+      tone: "cyan",
+      badge: "真实数据",
+      target: {
+        type: "navigate",
+        url: "/pages/admin/guidance/index",
       },
     };
     const departmentId = principal?.department_id?.trim() ?? "";
@@ -177,7 +147,7 @@ export function buildHomeWorkbench(
         ? {
             ...group,
             actions: group.actions
-              .filter((action) => action.id !== "walking-route")
+              .filter((action) => action.id !== "walking-route" && action.id !== "today-guidance")
               .map((action) =>
                 action.id === "my-appointments" ? departmentBookingAction : action,
               ),
@@ -185,14 +155,11 @@ export function buildHomeWorkbench(
         : group.id === "after-visit"
           ? {
               ...group,
-              actions: [
-                departmentHistoryAction,
-                ...group.actions.filter((action) => action.id !== "reports"),
-              ],
+              actions: [departmentHistoryAction],
             }
           : group,
     );
-    view.notice = "检查项目、房间和每周配置已接入真实 Appointment 数据。";
+    view.notice = "检查资源由 Appointment 管理，项目创建与导诊规则由 Guidance 一次性配置。";
     view.mock = false;
   }
   return view;

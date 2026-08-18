@@ -77,10 +77,6 @@ const emit = defineEmits<{
   background: linear-gradient(145deg, #ffaf55, #ff812b);
 }
 
-.menu-item__symbol--gray {
-  background: linear-gradient(145deg, #c5cbd4, #9da6b2);
-}
-
 .menu-item__copy {
   display: flex;
   min-width: 0;

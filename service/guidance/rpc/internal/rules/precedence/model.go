@@ -14,6 +14,7 @@ type ProjectReference struct {
 
 type Rule struct {
 	RuleID                  string
+	OwnerItemID             string
 	PredecessorItemID       string
 	PredecessorDepartmentID string
 	PredecessorItemName     string

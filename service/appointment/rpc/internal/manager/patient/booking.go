@@ -47,6 +47,163 @@ type DeleteBookingCommand struct {
 	RequestID   string
 }
 
+type CreateBookingBatchCommand struct {
+	Items              []CreateBookingCommand
+	OperationID        string
+	RequestID          string
+	PatientDisplayName string
+	PatientPhoneMasked string
+}
+
+// CreateBookingBatch 将智能预约方案中的多个预约放在同一个 MySQL 事务中创建。
+// 任意容量、时段、重复预约或周额度校验失败，整批均不会落库。
+func (m *Manager) CreateBookingBatch(ctx context.Context, patient authn.Principal, batch CreateBookingBatchCommand) ([]Booking, error) {
+	if err := requirePatient(patient); err != nil {
+		return nil, err
+	}
+	if len(batch.Items) == 0 || len(batch.Items) > 10 {
+		return nil, ErrInvalid
+	}
+	operationID, err := normalizeUUID(batch.OperationID, "operation_id")
+	if err != nil {
+		return nil, err
+	}
+	commands := make([]CreateBookingCommand, 0, len(batch.Items))
+	serviceDates := make([]time.Time, 0, len(batch.Items))
+	now := time.Now().In(hospitalLocation)
+	for index, value := range batch.Items {
+		value.PatientDisplayName = batch.PatientDisplayName
+		value.PatientPhoneMasked = batch.PatientPhoneMasked
+		value.OperationID = uuid.NewSHA1(uuid.NameSpaceOID, []byte(fmt.Sprintf("booking-batch:%s:%d", operationID, index))).String()
+		value.RequestID = batch.RequestID
+		normalized, serviceDate, normalizeErr := normalizeCreateBooking(value)
+		if normalizeErr != nil {
+			return nil, normalizeErr
+		}
+		if validateErr := validateCurrentWeekDate(now, serviceDate); validateErr != nil {
+			return nil, validateErr
+		}
+		commands = append(commands, normalized)
+		serviceDates = append(serviceDates, serviceDate)
+	}
+
+	results := make([]Booking, len(commands))
+	departments := make(map[string]struct{})
+	err = m.bookings.WithinBookingTransaction(ctx, func(tx BookingTxStore) error {
+		for index, command := range commands {
+			fingerprint := common.RequestFingerprint(struct {
+				BatchOperationID   string
+				ItemID             string
+				RoomID             string
+				ServiceDate        string
+				Session            Session
+				PatientDisplayName string
+				PatientPhoneMasked string
+			}{operationID, command.ItemID, command.RoomID, command.ServiceDate, command.Session, command.PatientDisplayName, command.PatientPhoneMasked})
+			operation, found, findErr := tx.FindBookingOperation(ctx, command.OperationID)
+			if findErr != nil {
+				return findErr
+			}
+			if found {
+				if operation.OperatorAccountID != patient.AccountID || operation.Action != bookingActionCreate || operation.RequestFingerprint != fingerprint {
+					return ErrConflict
+				}
+				if err := json.Unmarshal(operation.ResultData, &results[index]); err != nil {
+					return fmt.Errorf("decode batch booking result: %w", err)
+				}
+				departments[results[index].DepartmentID] = struct{}{}
+				continue
+			}
+			booking, createErr := createBookingInTransaction(ctx, tx, patient, command, serviceDates[index], now, fingerprint)
+			if createErr != nil {
+				return createErr
+			}
+			results[index] = booking
+			departments[booking.DepartmentID] = struct{}{}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	for departmentID := range departments {
+		m.invalidateBookingReads(ctx, departmentID)
+	}
+	return results, nil
+}
+
+func createBookingInTransaction(ctx context.Context, tx BookingTxStore, patient authn.Principal, command CreateBookingCommand, serviceDate, now time.Time, fingerprint string) (Booking, error) {
+	bookingID := uuid.NewString()
+	weekStart, _ := currentWeek(dateOnly(serviceDate))
+	if err := tx.ConsumePatientWeeklyQuota(ctx, patient.AccountID, weekStart, patientWeeklyBookingLimit, now); err != nil {
+		return Booking{}, err
+	}
+	if err := tx.ClaimPatientItemSession(ctx, patient.AccountID, command.ItemID, serviceDate, command.Session, bookingID); err != nil {
+		return Booking{}, err
+	}
+	selection, err := tx.LockBookingSelection(ctx, command.ItemID, command.RoomID, serviceDate, command.Session)
+	if err != nil {
+		return Booking{}, err
+	}
+	cutoff, err := dateTime(serviceDate, selection.BookingCutoffTime)
+	if err != nil {
+		return Booking{}, err
+	}
+	if !now.Before(cutoff) {
+		return Booking{}, ErrBookingClosed
+	}
+	capacity, found, err := tx.FindDateCapacityForUpdate(ctx, command.RoomID, serviceDate, command.Session)
+	if err != nil {
+		return Booking{}, err
+	}
+	if !found {
+		capacity = DateCapacity{
+			CapacityID: uuid.NewString(), RoomID: command.RoomID, ServiceDate: serviceDate, Session: command.Session,
+			TotalCapacity: selection.ActiveCapacity, RoomWindowID: selection.RoomWindowID,
+			RoomWindowVersion: selection.RoomWindowVersion, Version: 1, CreatedAt: now, UpdatedAt: now,
+		}
+		if err := tx.CreateDateCapacity(ctx, capacity); err != nil {
+			return Booking{}, err
+		}
+		capacity, found, err = tx.FindDateCapacityForUpdate(ctx, command.RoomID, serviceDate, command.Session)
+		if err != nil || !found {
+			if err != nil {
+				return Booking{}, err
+			}
+			return Booking{}, ErrConflict
+		}
+	}
+	if capacity.RoomWindowID != selection.RoomWindowID || capacity.RoomWindowVersion != selection.RoomWindowVersion || capacity.TotalCapacity != selection.ActiveCapacity {
+		return Booking{}, fmt.Errorf("%w: date capacity is stale", ErrConflict)
+	}
+	if err := tx.IncreaseOccupiedCapacity(ctx, capacity.CapacityID); err != nil {
+		return Booking{}, err
+	}
+	booking := Booking{
+		BookingID: bookingID, PatientAccountID: patient.AccountID,
+		PatientDisplayName: command.PatientDisplayName, PatientPhoneMasked: command.PatientPhoneMasked,
+		PatientPhoneLast4: command.PatientPhoneMasked[len(command.PatientPhoneMasked)-4:],
+		DepartmentID:      selection.DepartmentID, ItemID: selection.ItemID, ItemName: selection.ItemName,
+		RoomID: selection.RoomID, RoomDisplayName: selection.RoomDisplayName, CampusID: selection.CampusID,
+		Building: selection.Building, FloorNumber: selection.FloorNumber, RoomNumber: selection.RoomNumber,
+		ServiceDate: serviceDate, Session: selection.Session, Status: BookingStatusConfirmed,
+		RoomOpenTime: selection.RoomOpenTime, RoomCloseTime: selection.RoomCloseTime,
+		ItemStartTime: selection.ItemStartTime, ItemEndTime: selection.ItemEndTime,
+		BookingCutoffTime: selection.BookingCutoffTime, EstimatedDurationMinutes: selection.EstimatedDurationMinutes,
+		Version: 1, CreatedAt: now, UpdatedAt: now,
+	}
+	if err := tx.CreateBooking(ctx, booking); err != nil {
+		return Booking{}, err
+	}
+	if err := tx.RecordBookingOperation(ctx, BookingOperationChange{
+		OperationID: command.OperationID, OperatorAccountID: patient.AccountID, BookingID: booking.BookingID,
+		Action: bookingActionCreate, RequestFingerprint: fingerprint, Result: booking,
+	}); err != nil {
+		return Booking{}, err
+	}
+	return booking, nil
+}
+
 // ListBookingOptions 返回本周仍可预约且未超过截止时间的房间时间选项。
 func (m *Manager) ListBookingOptions(ctx context.Context, patient authn.Principal, itemID string) ([]BookingOption, time.Time, time.Time, error) {
 	if err := requirePatient(patient); err != nil {

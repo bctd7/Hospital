@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package hospital.identity.v1;
+
+import "identity/v1/authentication.proto";
+
+option go_package = "hospital/contracts/gen/identity/v1;identityv1";
+
+// 管理员账号、医生身份与状态维护。
+message AdminAccountSummary {
+  string account_id = 1;
+  optional string nickname = 2;
+  optional string display_name = 3;
+  optional string avatar_url = 4;
+  optional string masked_phone = 5;
+  string account_status = 6;
+  string identity_type = 7;
+  optional string department_id = 8;
+  optional string department_name = 9;
+  int64 management_version = 10;
+}
+
+message AdminAccountDetail {
+  AdminAccountSummary summary = 1;
+  optional string phone_verification_status = 2;
+  optional string staff_no = 3;
+  optional string description = 4;
+  repeated string roles = 5;
+  int64 authorization_version = 6;
+  repeated string available_actions = 7;
+  string created_at = 8;
+  string updated_at = 9;
+  optional string staff_status = 10;
+}
+
+message ListAdminAccountsRequest {
+  int64 page = 1;
+  int64 page_size = 2;
+  string nickname = 3;
+  string identity_type = 4;
+  string status = 5;
+  string department_id = 6;
+  string request_id = 7;
+}
+
+message ListAdminAccountsResponse {
+  repeated AdminAccountSummary items = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  int64 total = 4;
+}
+
+message GetAdminAccountRequest {
+  string account_id = 1;
+  string request_id = 2;
+}
+
+message SearchAdminAccountByPhoneRequest {
+  string phone = 1;
+  string request_id = 2;
+}
+
+message SearchAdminAccountByPhoneResponse {
+  AdminAccountSummary identity = 1;
+  PhoneBinding phone = 2;
+}
+
+message PromoteDoctorRequest {
+  string account_id = 1;
+  string department_id = 2;
+  string display_name = 3;
+  optional string staff_no = 4;
+  optional string avatar_url = 5;
+  optional string description = 6;
+  int64 management_version = 7;
+  bool offline_verified = 8;
+  string operation_id = 9;
+  string request_id = 10;
+}
+
+message UpdateDoctorRequest {
+  string account_id = 1;
+  optional string display_name = 2;
+  optional string staff_no = 3;
+  optional string avatar_url = 4;
+  optional string description = 5;
+  int64 management_version = 6;
+  string operation_id = 7;
+  string request_id = 8;
+}
+
+message ChangeDoctorDepartmentRequest {
+  string account_id = 1;
+  string department_id = 2;
+  int64 management_version = 3;
+  string operation_id = 4;
+  string request_id = 5;
+}
+
+message AccountMutationRequest {
+  string account_id = 1;
+  int64 management_version = 2;
+  string operation_id = 3;
+  string request_id = 4;
+}

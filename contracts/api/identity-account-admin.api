@@ -1,0 +1,144 @@
+syntax = "v1"
+
+// 管理员账号、医生身份与账号状态维护。
+type (
+    AdminAccountSummaryResponse {
+        AccountID         string  `json:"account_id"`
+        Nickname          *string `json:"nickname,optional"`
+        DisplayName       *string `json:"display_name,optional"`
+        AvatarURL         *string `json:"avatar_url,optional"`
+        MaskedPhone       *string `json:"masked_phone,optional"`
+        AccountStatus     string  `json:"account_status"`
+        IdentityType      string  `json:"identity_type"`
+        DepartmentID      *string `json:"department_id,optional"`
+        DepartmentName    *string `json:"department_name,optional"`
+        ManagementVersion int64   `json:"management_version"`
+    }
+
+    AdminAccountDetailResponse {
+        AccountID               string   `json:"account_id"`
+        Nickname                *string  `json:"nickname,optional"`
+        DisplayName             *string  `json:"display_name,optional"`
+        AvatarURL               *string  `json:"avatar_url,optional"`
+        MaskedPhone             *string  `json:"masked_phone,optional"`
+        AccountStatus           string   `json:"account_status"`
+        IdentityType            string   `json:"identity_type"`
+        DepartmentID            *string  `json:"department_id,optional"`
+        DepartmentName          *string  `json:"department_name,optional"`
+        ManagementVersion       int64    `json:"management_version"`
+        PhoneVerificationStatus *string  `json:"phone_verification_status,optional"`
+        StaffNo                 *string  `json:"staff_no,optional"`
+        Description             *string  `json:"description,optional"`
+        Roles                   []string `json:"roles"`
+        AuthorizationVersion    int64    `json:"authorization_version"`
+        AvailableActions        []string `json:"available_actions"`
+        CreatedAt               string   `json:"created_at"`
+        UpdatedAt               string   `json:"updated_at"`
+        StaffStatus             *string  `json:"staff_status,optional"`
+    }
+
+    ListAdminAccountsRequest {
+        Page         int64  `form:"page,default=1"`
+        PageSize     int64  `form:"page_size,default=20"`
+        Nickname     string `form:"nickname,optional"`
+        IdentityType string `form:"identity_type,optional"`
+        Status       string `form:"status,optional"`
+        DepartmentID string `form:"department_id,optional"`
+    }
+
+    ListAdminAccountsResponse {
+        Items    []AdminAccountSummaryResponse `json:"items"`
+        Page     int64                         `json:"page"`
+        PageSize int64                         `json:"page_size"`
+        Total    int64                         `json:"total"`
+    }
+
+    AdminAccountPathRequest {
+        AccountID string `path:"accountId"`
+    }
+
+    AdminSearchAccountByPhoneRequest {
+        Phone string `json:"phone"`
+    }
+
+    PhoneBindingResponse {
+        PhoneMasked        string `json:"phone_masked"`
+        VerificationStatus string `json:"verification_status"`
+        VerificationSource string `json:"verification_source"`
+    }
+
+    AdminSearchAccountByPhoneResponse {
+        Identity AdminAccountSummaryResponse `json:"identity"`
+        Phone    PhoneBindingResponse         `json:"phone"`
+    }
+
+    PromoteDoctorRequest {
+        AccountID        string  `path:"accountId"`
+        DepartmentID     string  `json:"department_id"`
+        DisplayName      string  `json:"display_name"`
+        StaffNo          *string `json:"staff_no,optional"`
+        AvatarURL        *string `json:"avatar_url,optional"`
+        Description      *string `json:"description,optional"`
+        ManagementVersion int64  `json:"management_version"`
+        OfflineVerified  bool    `json:"offline_verified"`
+        OperationID      string  `json:"operation_id"`
+    }
+
+    UpdateDoctorRequest {
+        AccountID         string  `path:"accountId"`
+        DisplayName       *string `json:"display_name,optional"`
+        StaffNo           *string `json:"staff_no,optional"`
+        AvatarURL         *string `json:"avatar_url,optional"`
+        Description       *string `json:"description,optional"`
+        ManagementVersion int64   `json:"management_version"`
+        OperationID       string  `json:"operation_id"`
+    }
+
+    ChangeDoctorDepartmentRequest {
+        AccountID         string `path:"accountId"`
+        DepartmentID      string `json:"department_id"`
+        ManagementVersion int64  `json:"management_version"`
+        OperationID       string `json:"operation_id"`
+    }
+
+    AccountMutationRequest {
+        AccountID         string `path:"accountId"`
+        ManagementVersion int64  `json:"management_version"`
+        OperationID       string `json:"operation_id"`
+    }
+)
+
+@server (
+    prefix: /api/v1
+    group: identityadmin
+    middleware: AccessToken
+    authType: BearerAuth
+)
+service app-api {
+    @handler listAdminAccounts
+    get /admin/identity/accounts (ListAdminAccountsRequest) returns (ListAdminAccountsResponse)
+
+    @handler getAdminAccount
+    get /admin/identity/accounts/:accountId (AdminAccountPathRequest) returns (AdminAccountDetailResponse)
+
+    @handler searchAdminAccountByPhone
+    post /admin/identity/accounts/search-by-phone (AdminSearchAccountByPhoneRequest) returns (AdminSearchAccountByPhoneResponse)
+
+    @handler promoteDoctor
+    post /admin/identity/accounts/:accountId/promote-doctor (PromoteDoctorRequest) returns (AdminAccountDetailResponse)
+
+    @handler updateDoctor
+    put /admin/identity/doctors/:accountId (UpdateDoctorRequest) returns (AdminAccountDetailResponse)
+
+    @handler changeDoctorDepartment
+    put /admin/identity/doctors/:accountId/department (ChangeDoctorDepartmentRequest) returns (AdminAccountDetailResponse)
+
+    @handler revokeDoctor
+    post /admin/identity/doctors/:accountId/revoke (AccountMutationRequest) returns (AdminAccountDetailResponse)
+
+    @handler disableAccount
+    post /admin/identity/accounts/:accountId/disable (AccountMutationRequest) returns (AdminAccountDetailResponse)
+
+    @handler enableAccount
+    post /admin/identity/accounts/:accountId/enable (AccountMutationRequest) returns (AdminAccountDetailResponse)
+}

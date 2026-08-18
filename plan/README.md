@@ -9,16 +9,18 @@ Plan 中重复维护，分别以 `contracts/api/`、`contracts/proto/` 和 `cont
 |---|---|---|
 | Identity | 当前范围已完成 | 手机号认证、会话、授权版本、组织、账号与医生管理已经形成闭环 |
 | Appointment | 当前范围已完成 | 检查资源、预约、报到、候检叫号、检查、报告与消息已经形成闭环 |
-| Guidance | 基础能力已实现，规则配置已明确 | 已实现检查项目先后关系和两点步行路线；工作人员项目三步配置、准备规则与患者提醒已确认但尚未实现 |
-| 小程序 | 已接入上述真实接口 | 患者端与工作人员端共用登录身份；患者端已可搜索高德地点并在微信地图展示两点步行路线 |
-| 就诊人、缴费、医保、票据等 | 未规划或仅保留入口 | 不把展示入口误写成后端已实现能力 |
+| Guidance | 当前范围已完成 | 三步项目配置、准备规则、智能预约、整组确认、当日顺序和分阶段路线已经形成闭环 |
+| 小程序 | 已接入上述真实接口 | 患者端与工作人员端共用登录身份；工作人员配置、患者规划、当日顺序和地图页面均使用真实 HTTP |
 
 Appointment 原先按阶段拆分的 1～5 号实施稿已经合并为
 [Appointment 已实现归档](./backend/modules/implemented/02-appointment-service.md)。旧 Mock 方案、重复接口清单和已经
 完成的阶段待办不再保留；需要追溯时使用 Git 历史。
 
-Identity 与 Appointment 当前没有仍待收尾的实施阶段。归档末尾的“当前不包含”只说明产品边界，不是遗留
-任务；下一阶段从智能导诊与检查导航重新进入业务讨论。
+Identity、Appointment 与 Guidance 当前范围没有仍待收尾的实施阶段。归档末尾的“当前不包含”和 Guidance
+文档中的后续扩展只说明产品边界，不是已承诺但遗漏的任务。
+
+缴费、医保电子凭证、电子票据、住院病案复印等未规划业务不在当前小程序展示占位入口；需要正式规划并具备真实
+业务闭环后再重新进入产品范围。
 
 ## 阅读顺序
 
@@ -27,7 +29,7 @@ Identity 与 Appointment 当前没有仍待收尾的实施阶段。归档末尾�
 - [Identity 当前范围归档](./backend/modules/implemented/01-identity-service.md)；
 - [Appointment 已实现归档](./backend/modules/implemented/02-appointment-service.md)；
 - [智能导诊与检查导航页面方案](./frontend/06-intelligent-guidance-and-navigation.md)；
-- [Guidance 智能导诊业务逻辑](./backend/modules/proposals/02-guidance-service.md)。
+- [Guidance 当前范围归档](./backend/modules/implemented/03-guidance-service.md)。
 
 ## 文档边界
 

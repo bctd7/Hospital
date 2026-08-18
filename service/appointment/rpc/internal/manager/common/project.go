@@ -24,11 +24,12 @@ type ReportTemplate struct {
 
 // ItemSummary 是校验项目归属和状态时使用的最小数据。
 type ItemSummary struct {
-	ItemID       string `json:"item_id"`
-	DepartmentID string `json:"department_id"`
-	Name         string `json:"name"`
-	Status       Status `json:"status"`
-	Version      int64  `json:"version"`
+	ItemID                   string `json:"item_id"`
+	DepartmentID             string `json:"department_id"`
+	Name                     string `json:"name"`
+	EstimatedDurationMinutes int32  `json:"estimated_duration_minutes"`
+	Status                   Status `json:"status"`
+	Version                  int64  `json:"version"`
 }
 
 // ItemWeeklyWindow 表示检查项目自身的预约时间，必须完整落在房间开放窗口内。

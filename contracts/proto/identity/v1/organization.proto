@@ -1,0 +1,128 @@
+syntax = "proto3";
+
+package hospital.identity.v1;
+
+option go_package = "hospital/contracts/gen/identity/v1;identityv1";
+
+// 公开组织目录与管理员组织维护。
+message HospitalSummary {
+  string hospital_id = 1;
+  string code = 2;
+  string name = 3;
+  int64 version = 4;
+}
+
+message CampusSummary {
+  string campus_id = 1;
+  string hospital_id = 2;
+  string code = 3;
+  string name = 4;
+  int64 department_count = 5;
+  string status = 6;
+  int64 version = 7;
+}
+
+message DepartmentSummary {
+  string department_id = 1;
+  string campus_id = 2;
+  string campus_name = 3;
+  string code = 4;
+  string name = 5;
+  int64 doctor_count = 6;
+  string status = 7;
+  int64 version = 8;
+}
+
+message AdminOrganizationUnit {
+  string unit_id = 1;
+  string parent_id = 2;
+  string unit_type = 3;
+  string code = 4;
+  string name = 5;
+  string status = 6;
+  int64 child_count = 7;
+  int64 doctor_count = 8;
+  int64 version = 9;
+}
+
+message GetOrganizationContextRequest {
+  string request_id = 1;
+}
+
+message OrganizationContext {
+  HospitalSummary hospital = 1;
+  repeated CampusSummary campuses = 2;
+}
+
+message ListDepartmentsRequest {
+  string campus_id = 1;
+  string request_id = 2;
+}
+
+message ListDepartmentsResponse {
+  repeated DepartmentSummary items = 1;
+}
+
+message DoctorSummary {
+  // 医生是拥有有效医生角色和工作人员资料的 Identity 账号。
+  string account_id = 1;
+  string display_name = 2;
+  string department_id = 3;
+  optional string avatar_url = 4;
+  optional string description = 5;
+  int64 version = 6;
+}
+
+message ListDoctorsByDepartmentRequest {
+  string department_id = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  string request_id = 4;
+}
+
+message ListDoctorsByDepartmentResponse {
+  repeated DoctorSummary items = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  int64 total = 4;
+}
+
+message ListOrganizationUnitsRequest {
+  string unit_type = 1;
+  string parent_id = 2;
+  string status = 3;
+  string request_id = 4;
+}
+
+message ListOrganizationUnitsResponse {
+  repeated AdminOrganizationUnit items = 1;
+}
+
+message GetOrganizationUnitRequest {
+  string unit_id = 1;
+  string request_id = 2;
+}
+
+message CreateOrganizationUnitRequest {
+  string unit_type = 1;
+  string parent_id = 2;
+  string name = 3;
+  string operation_id = 4;
+  string request_id = 5;
+}
+
+message UpdateOrganizationUnitRequest {
+  string unit_id = 1;
+  optional string name = 2;
+  optional string parent_id = 3;
+  int64 version = 4;
+  string operation_id = 5;
+  string request_id = 6;
+}
+
+message ChangeOrganizationUnitStatusRequest {
+  string unit_id = 1;
+  int64 version = 2;
+  string operation_id = 3;
+  string request_id = 4;
+}

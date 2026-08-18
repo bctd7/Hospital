@@ -57,12 +57,6 @@
       }
     },
     {
-      "path": "pages/profile/reports/index",
-      "style": {
-        "navigationBarTitleText": "检验报告查询"
-      }
-    },
-    {
       "path": "pages/profile/reports/detail",
       "style": {
         "navigationBarTitleText": "检查报告"
@@ -75,9 +69,15 @@
       }
     },
     {
-      "path": "pages/profile/settings/index",
+      "path": "pages/guidance/planning/index",
       "style": {
-        "navigationBarTitleText": "设置"
+        "navigationBarTitleText": "智能预约"
+      }
+    },
+    {
+      "path": "pages/guidance/today/index",
+      "style": {
+        "navigationBarTitleText": "当日检查顺序"
       }
     },
     {
@@ -137,6 +137,18 @@
           "path": "appointment/report-history",
           "style": {
             "navigationBarTitleText": "报告版本记录"
+          }
+        },
+        {
+          "path": "guidance/index",
+          "style": {
+            "navigationBarTitleText": "导诊管理"
+          }
+        },
+        {
+          "path": "guidance/configuration",
+          "style": {
+            "navigationBarTitleText": "检查项目配置"
           }
         }
       ]

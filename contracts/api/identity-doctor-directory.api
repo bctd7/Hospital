@@ -1,0 +1,36 @@
+syntax = "v1"
+
+// 公开的科室医生目录。
+type (
+    DirectoryDoctorPathRequest {
+        DepartmentID string `path:"departmentId"`
+        Page         int64  `form:"page,default=1"`
+        PageSize     int64  `form:"page_size,default=20"`
+    }
+
+    DoctorSummaryResponse {
+        AccountID   string  `json:"account_id"`
+        DisplayName string  `json:"display_name"`
+        DepartmentID string `json:"department_id"`
+        AvatarURL   *string `json:"avatar_url,optional"`
+        Description *string `json:"description,optional"`
+        Version     int64   `json:"version"`
+    }
+
+    ListDoctorsResponse {
+        Items    []DoctorSummaryResponse `json:"items"`
+        Page     int64                   `json:"page"`
+        PageSize int64                   `json:"page_size"`
+        Total    int64                   `json:"total"`
+    }
+
+)
+
+@server (
+    prefix: /api/v1
+    group: organizationdirectory
+)
+service app-api {
+    @handler listDoctors
+    get /directory/departments/:departmentId/doctors (DirectoryDoctorPathRequest) returns (ListDoctorsResponse)
+}

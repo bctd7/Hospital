@@ -1,6 +1,9 @@
 package common
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 type ProjectOperation struct {
 	OperatorAccountID  string
@@ -26,6 +29,35 @@ type ProjectListFilter struct {
 	Status            Status
 	Offset            int64
 	Limit             int64
+}
+
+type ProjectConfigurationTransaction struct {
+	TransactionID            string
+	OperationID              string
+	OperatorAccountID        string
+	Action                   string
+	ItemID                   string
+	OwnerDepartmentID        string
+	ItemName                 string
+	Description              string
+	EstimatedDurationMinutes int32
+	ExpectedVersion          int64
+	State                    string
+	RequestFingerprint       string
+	ResultVersion            int64
+	CreatedAt                time.Time
+	UpdatedAt                time.Time
+}
+
+type ProjectConfigurationTxStore interface {
+	GetConfigurationTransactionForUpdate(ctx context.Context, transactionID string) (ProjectConfigurationTransaction, bool, error)
+	FindConfigurationTransactionByOperation(ctx context.Context, operationID string) (ProjectConfigurationTransaction, bool, error)
+	CreateConfigurationTransaction(ctx context.Context, transaction ProjectConfigurationTransaction) error
+	SetConfigurationTransactionState(ctx context.Context, transactionID, state string, resultVersion int64, updatedAt time.Time) error
+	GetItemForUpdate(ctx context.Context, itemID string) (ExaminationItem, error)
+	CreateItem(ctx context.Context, item ExaminationItem) error
+	UpdateItem(ctx context.Context, item ExaminationItem, expectedVersion int64) error
+	RecordChange(ctx context.Context, change ProjectChange) error
 }
 
 // ProjectTxStore 是项目写事务内使用的原子操作集合。

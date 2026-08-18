@@ -38,3 +38,22 @@ func TestHandlerDoesNotExposeInternalError(t *testing.T) {
 		t.Fatalf("unexpected response: %#v", response)
 	}
 }
+
+func TestHandlerKeepsAuthenticationAndAuthorizationDistinct(t *testing.T) {
+	tests := []struct {
+		name string
+		code codes.Code
+		want int
+	}{
+		{name: "missing or invalid session", code: codes.Unauthenticated, want: http.StatusUnauthorized},
+		{name: "department scope denied", code: codes.PermissionDenied, want: http.StatusForbidden},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			statusCode, _ := Handler(context.Background(), status.Error(test.code, test.name))
+			if statusCode != test.want {
+				t.Fatalf("status=%d, want %d", statusCode, test.want)
+			}
+		})
+	}
+}

@@ -1,0 +1,30 @@
+syntax = "v1"
+
+// 当前账号本人可维护的展示资料。
+type (
+    AccountDisplayProfileResponse {
+        Nickname          *string `json:"nickname,optional"`
+        ManagementVersion int64   `json:"management_version"`
+        MaskedPhone       *string `json:"masked_phone,optional"`
+        StaffDisplayName  *string `json:"staff_display_name,optional"`
+    }
+
+    UpdateAccountDisplayProfileRequest {
+        Nickname string `json:"nickname"`
+    }
+
+)
+
+@server (
+    prefix: /api/v1
+    group: identityprofile
+    middleware: AccessToken
+    authType: BearerAuth
+)
+service app-api {
+    @handler getAccountDisplayProfile
+    get /auth/me/display-profile returns (AccountDisplayProfileResponse)
+
+    @handler updateAccountDisplayProfile
+    put /auth/me/display-profile (UpdateAccountDisplayProfileRequest) returns (AccountDisplayProfileResponse)
+}

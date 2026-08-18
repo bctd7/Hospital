@@ -14,80 +14,90 @@ import (
 )
 
 type (
-	AddRoomExaminationItemRequest              = v1_appointmentv1.AddRoomExaminationItemRequest
-	Booking                                    = v1_appointmentv1.Booking
-	BookingOption                              = v1_appointmentv1.BookingOption
-	CallNextBookingRequest                     = v1_appointmentv1.CallNextBookingRequest
-	ChangeExaminationItemStatusRequest         = v1_appointmentv1.ChangeExaminationItemStatusRequest
-	ChangeResourceStatusRequest                = v1_appointmentv1.ChangeResourceStatusRequest
-	CheckInBookingRequest                      = v1_appointmentv1.CheckInBookingRequest
-	CompleteAndPublishExaminationReportRequest = v1_appointmentv1.CompleteAndPublishExaminationReportRequest
-	CorrectExaminationReportRequest            = v1_appointmentv1.CorrectExaminationReportRequest
-	CreateBookingRequest                       = v1_appointmentv1.CreateBookingRequest
-	CreateExaminationItemRequest               = v1_appointmentv1.CreateExaminationItemRequest
-	CreateRoomRequest                          = v1_appointmentv1.CreateRoomRequest
-	DeleteBookingRequest                       = v1_appointmentv1.DeleteBookingRequest
-	DeleteBookingResponse                      = v1_appointmentv1.DeleteBookingResponse
-	DepartmentUnreadCount                      = v1_appointmentv1.DepartmentUnreadCount
-	EndExaminationRequest                      = v1_appointmentv1.EndExaminationRequest
-	ExaminationItem                            = v1_appointmentv1.ExaminationItem
-	ExaminationItemInput                       = v1_appointmentv1.ExaminationItemInput
-	ExaminationItemReportTemplate              = v1_appointmentv1.ExaminationItemReportTemplate
-	ExaminationReport                          = v1_appointmentv1.ExaminationReport
-	ExaminationReportContent                   = v1_appointmentv1.ExaminationReportContent
-	ExaminationReportVersion                   = v1_appointmentv1.ExaminationReportVersion
-	GetBookingRequest                          = v1_appointmentv1.GetBookingRequest
-	GetExaminationItemRequest                  = v1_appointmentv1.GetExaminationItemRequest
-	GetExaminationReportRequest                = v1_appointmentv1.GetExaminationReportRequest
-	GetRoomRequest                             = v1_appointmentv1.GetRoomRequest
-	ItemWeeklyWindow                           = v1_appointmentv1.ItemWeeklyWindow
-	ListAvailableRoomsByExaminationItemRequest = v1_appointmentv1.ListAvailableRoomsByExaminationItemRequest
-	ListBookingOptionsRequest                  = v1_appointmentv1.ListBookingOptionsRequest
-	ListBookingOptionsResponse                 = v1_appointmentv1.ListBookingOptionsResponse
-	ListBookingsRequest                        = v1_appointmentv1.ListBookingsRequest
-	ListBookingsResponse                       = v1_appointmentv1.ListBookingsResponse
-	ListExaminationItemsRequest                = v1_appointmentv1.ListExaminationItemsRequest
-	ListExaminationItemsResponse               = v1_appointmentv1.ListExaminationItemsResponse
-	ListExaminationReportVersionsRequest       = v1_appointmentv1.ListExaminationReportVersionsRequest
-	ListExaminationReportVersionsResponse      = v1_appointmentv1.ListExaminationReportVersionsResponse
-	ListExaminationReportsRequest              = v1_appointmentv1.ListExaminationReportsRequest
-	ListExaminationReportsResponse             = v1_appointmentv1.ListExaminationReportsResponse
-	ListItemWeeklyWindowsResponse              = v1_appointmentv1.ListItemWeeklyWindowsResponse
-	ListMessagesRequest                        = v1_appointmentv1.ListMessagesRequest
-	ListMessagesResponse                       = v1_appointmentv1.ListMessagesResponse
-	ListMyBookingsRequest                      = v1_appointmentv1.ListMyBookingsRequest
-	ListMyExaminationReportsRequest            = v1_appointmentv1.ListMyExaminationReportsRequest
-	ListMyMessagesRequest                      = v1_appointmentv1.ListMyMessagesRequest
-	ListRoomExaminationItemsRequest            = v1_appointmentv1.ListRoomExaminationItemsRequest
-	ListRoomExaminationItemsResponse           = v1_appointmentv1.ListRoomExaminationItemsResponse
-	ListRoomWeeklyWindowsResponse              = v1_appointmentv1.ListRoomWeeklyWindowsResponse
-	ListRoomsRequest                           = v1_appointmentv1.ListRoomsRequest
-	ListRoomsResponse                          = v1_appointmentv1.ListRoomsResponse
-	ListWeeklyWindowsRequest                   = v1_appointmentv1.ListWeeklyWindowsRequest
-	MarkMessageReadRequest                     = v1_appointmentv1.MarkMessageReadRequest
-	Message                                    = v1_appointmentv1.Message
-	RetireRoomRequest                          = v1_appointmentv1.RetireRoomRequest
-	Room                                       = v1_appointmentv1.Room
-	RoomExaminationItem                        = v1_appointmentv1.RoomExaminationItem
-	RoomWeeklyWindow                           = v1_appointmentv1.RoomWeeklyWindow
-	SaveExaminationItemReportTemplateRequest   = v1_appointmentv1.SaveExaminationItemReportTemplateRequest
-	SaveExaminationReportDraftRequest          = v1_appointmentv1.SaveExaminationReportDraftRequest
-	SetItemWeeklyWindowRequest                 = v1_appointmentv1.SetItemWeeklyWindowRequest
-	SetRoomWeeklyWindowRequest                 = v1_appointmentv1.SetRoomWeeklyWindowRequest
-	StartExaminationRequest                    = v1_appointmentv1.StartExaminationRequest
-	UpdateExaminationItemRequest               = v1_appointmentv1.UpdateExaminationItemRequest
-	UpdateRoomRequest                          = v1_appointmentv1.UpdateRoomRequest
+	AddRoomExaminationItemRequest                  = v1_appointmentv1.AddRoomExaminationItemRequest
+	Booking                                        = v1_appointmentv1.Booking
+	BookingBatchItem                               = v1_appointmentv1.BookingBatchItem
+	BookingOption                                  = v1_appointmentv1.BookingOption
+	CallNextBookingRequest                         = v1_appointmentv1.CallNextBookingRequest
+	CancelExaminationItemConfigurationResponse     = v1_appointmentv1.CancelExaminationItemConfigurationResponse
+	ChangeExaminationItemStatusRequest             = v1_appointmentv1.ChangeExaminationItemStatusRequest
+	ChangeResourceStatusRequest                    = v1_appointmentv1.ChangeResourceStatusRequest
+	CheckInBookingRequest                          = v1_appointmentv1.CheckInBookingRequest
+	CompleteAndPublishExaminationReportRequest     = v1_appointmentv1.CompleteAndPublishExaminationReportRequest
+	CorrectExaminationReportRequest                = v1_appointmentv1.CorrectExaminationReportRequest
+	CreateBookingBatchRequest                      = v1_appointmentv1.CreateBookingBatchRequest
+	CreateBookingBatchResponse                     = v1_appointmentv1.CreateBookingBatchResponse
+	CreateBookingRequest                           = v1_appointmentv1.CreateBookingRequest
+	CreateExaminationItemRequest                   = v1_appointmentv1.CreateExaminationItemRequest
+	CreateRoomRequest                              = v1_appointmentv1.CreateRoomRequest
+	DeleteBookingRequest                           = v1_appointmentv1.DeleteBookingRequest
+	DeleteBookingResponse                          = v1_appointmentv1.DeleteBookingResponse
+	DepartmentUnreadCount                          = v1_appointmentv1.DepartmentUnreadCount
+	EndExaminationRequest                          = v1_appointmentv1.EndExaminationRequest
+	ExaminationItem                                = v1_appointmentv1.ExaminationItem
+	ExaminationItemConfigurationTransactionRequest = v1_appointmentv1.ExaminationItemConfigurationTransactionRequest
+	ExaminationItemInput                           = v1_appointmentv1.ExaminationItemInput
+	ExaminationItemReportTemplate                  = v1_appointmentv1.ExaminationItemReportTemplate
+	ExaminationReport                              = v1_appointmentv1.ExaminationReport
+	ExaminationReportContent                       = v1_appointmentv1.ExaminationReportContent
+	ExaminationReportVersion                       = v1_appointmentv1.ExaminationReportVersion
+	GetBookingRequest                              = v1_appointmentv1.GetBookingRequest
+	GetExaminationItemRequest                      = v1_appointmentv1.GetExaminationItemRequest
+	GetExaminationReportRequest                    = v1_appointmentv1.GetExaminationReportRequest
+	GetRoomRequest                                 = v1_appointmentv1.GetRoomRequest
+	ItemWeeklyWindow                               = v1_appointmentv1.ItemWeeklyWindow
+	ListAvailableRoomsByExaminationItemRequest     = v1_appointmentv1.ListAvailableRoomsByExaminationItemRequest
+	ListBookingOptionsRequest                      = v1_appointmentv1.ListBookingOptionsRequest
+	ListBookingOptionsResponse                     = v1_appointmentv1.ListBookingOptionsResponse
+	ListBookingsRequest                            = v1_appointmentv1.ListBookingsRequest
+	ListBookingsResponse                           = v1_appointmentv1.ListBookingsResponse
+	ListExaminationItemsRequest                    = v1_appointmentv1.ListExaminationItemsRequest
+	ListExaminationItemsResponse                   = v1_appointmentv1.ListExaminationItemsResponse
+	ListExaminationReportVersionsRequest           = v1_appointmentv1.ListExaminationReportVersionsRequest
+	ListExaminationReportVersionsResponse          = v1_appointmentv1.ListExaminationReportVersionsResponse
+	ListExaminationReportsRequest                  = v1_appointmentv1.ListExaminationReportsRequest
+	ListExaminationReportsResponse                 = v1_appointmentv1.ListExaminationReportsResponse
+	ListItemWeeklyWindowsResponse                  = v1_appointmentv1.ListItemWeeklyWindowsResponse
+	ListMessagesRequest                            = v1_appointmentv1.ListMessagesRequest
+	ListMessagesResponse                           = v1_appointmentv1.ListMessagesResponse
+	ListMyBookingsRequest                          = v1_appointmentv1.ListMyBookingsRequest
+	ListMyExaminationReportsRequest                = v1_appointmentv1.ListMyExaminationReportsRequest
+	ListMyMessagesRequest                          = v1_appointmentv1.ListMyMessagesRequest
+	ListRoomExaminationItemsRequest                = v1_appointmentv1.ListRoomExaminationItemsRequest
+	ListRoomExaminationItemsResponse               = v1_appointmentv1.ListRoomExaminationItemsResponse
+	ListRoomWeeklyWindowsResponse                  = v1_appointmentv1.ListRoomWeeklyWindowsResponse
+	ListRoomsRequest                               = v1_appointmentv1.ListRoomsRequest
+	ListRoomsResponse                              = v1_appointmentv1.ListRoomsResponse
+	ListWeeklyWindowsRequest                       = v1_appointmentv1.ListWeeklyWindowsRequest
+	MarkMessageReadRequest                         = v1_appointmentv1.MarkMessageReadRequest
+	Message                                        = v1_appointmentv1.Message
+	PrepareExaminationItemConfigurationRequest     = v1_appointmentv1.PrepareExaminationItemConfigurationRequest
+	PreparedExaminationItemConfiguration           = v1_appointmentv1.PreparedExaminationItemConfiguration
+	RetireRoomRequest                              = v1_appointmentv1.RetireRoomRequest
+	Room                                           = v1_appointmentv1.Room
+	RoomExaminationItem                            = v1_appointmentv1.RoomExaminationItem
+	RoomWeeklyWindow                               = v1_appointmentv1.RoomWeeklyWindow
+	SaveExaminationItemReportTemplateRequest       = v1_appointmentv1.SaveExaminationItemReportTemplateRequest
+	SaveExaminationReportDraftRequest              = v1_appointmentv1.SaveExaminationReportDraftRequest
+	SetItemWeeklyWindowRequest                     = v1_appointmentv1.SetItemWeeklyWindowRequest
+	SetRoomWeeklyWindowRequest                     = v1_appointmentv1.SetRoomWeeklyWindowRequest
+	StartExaminationRequest                        = v1_appointmentv1.StartExaminationRequest
+	UpdateExaminationItemRequest                   = v1_appointmentv1.UpdateExaminationItemRequest
+	UpdateRoomRequest                              = v1_appointmentv1.UpdateRoomRequest
 
 	AppointmentService interface {
 		CreateExaminationItem(ctx context.Context, in *CreateExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 		GetExaminationItem(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
-		GetExaminationItemReference(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 		ListExaminationItems(ctx context.Context, in *ListExaminationItemsRequest, opts ...grpc.CallOption) (*ListExaminationItemsResponse, error)
 		UpdateExaminationItem(ctx context.Context, in *UpdateExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 		DisableExaminationItem(ctx context.Context, in *ChangeExaminationItemStatusRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 		EnableExaminationItem(ctx context.Context, in *ChangeExaminationItemStatusRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 		GetExaminationItemReportTemplate(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItemReportTemplate, error)
 		SaveExaminationItemReportTemplate(ctx context.Context, in *SaveExaminationItemReportTemplateRequest, opts ...grpc.CallOption) (*ExaminationItemReportTemplate, error)
+		// Guidance 使用以下三个窄接口协调项目完整配置。预提交数据对普通项目查询不可见。
+		PrepareExaminationItemConfiguration(ctx context.Context, in *PrepareExaminationItemConfigurationRequest, opts ...grpc.CallOption) (*PreparedExaminationItemConfiguration, error)
+		ConfirmExaminationItemConfiguration(ctx context.Context, in *ExaminationItemConfigurationTransactionRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
+		CancelExaminationItemConfiguration(ctx context.Context, in *ExaminationItemConfigurationTransactionRequest, opts ...grpc.CallOption) (*CancelExaminationItemConfigurationResponse, error)
 		CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*Room, error)
 		GetRoom(ctx context.Context, in *GetRoomRequest, opts ...grpc.CallOption) (*Room, error)
 		ListRooms(ctx context.Context, in *ListRoomsRequest, opts ...grpc.CallOption) (*ListRoomsResponse, error)
@@ -106,6 +116,7 @@ type (
 		ListItemWeeklyWindows(ctx context.Context, in *ListWeeklyWindowsRequest, opts ...grpc.CallOption) (*ListItemWeeklyWindowsResponse, error)
 		ListBookingOptions(ctx context.Context, in *ListBookingOptionsRequest, opts ...grpc.CallOption) (*ListBookingOptionsResponse, error)
 		CreateBooking(ctx context.Context, in *CreateBookingRequest, opts ...grpc.CallOption) (*Booking, error)
+		CreateBookingBatch(ctx context.Context, in *CreateBookingBatchRequest, opts ...grpc.CallOption) (*CreateBookingBatchResponse, error)
 		CheckInBooking(ctx context.Context, in *CheckInBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 		GetMyBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 		ListMyBookings(ctx context.Context, in *ListMyBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
@@ -128,6 +139,8 @@ type (
 		ListExaminationReportVersions(ctx context.Context, in *ListExaminationReportVersionsRequest, opts ...grpc.CallOption) (*ListExaminationReportVersionsResponse, error)
 		GetMyExaminationReport(ctx context.Context, in *GetExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
 		ListMyExaminationReports(ctx context.Context, in *ListMyExaminationReportsRequest, opts ...grpc.CallOption) (*ListExaminationReportsResponse, error)
+		// Guidance 等内部服务只通过该窄用途接口确认项目归属和状态。
+		GetExaminationItemReference(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 	}
 
 	defaultAppointmentService struct {
@@ -149,11 +162,6 @@ func (m *defaultAppointmentService) CreateExaminationItem(ctx context.Context, i
 func (m *defaultAppointmentService) GetExaminationItem(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error) {
 	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.GetExaminationItem(ctx, in, opts...)
-}
-
-func (m *defaultAppointmentService) GetExaminationItemReference(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error) {
-	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
-	return client.GetExaminationItemReference(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) ListExaminationItems(ctx context.Context, in *ListExaminationItemsRequest, opts ...grpc.CallOption) (*ListExaminationItemsResponse, error) {
@@ -184,6 +192,22 @@ func (m *defaultAppointmentService) GetExaminationItemReportTemplate(ctx context
 func (m *defaultAppointmentService) SaveExaminationItemReportTemplate(ctx context.Context, in *SaveExaminationItemReportTemplateRequest, opts ...grpc.CallOption) (*ExaminationItemReportTemplate, error) {
 	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.SaveExaminationItemReportTemplate(ctx, in, opts...)
+}
+
+// Guidance 使用以下三个窄接口协调项目完整配置。预提交数据对普通项目查询不可见。
+func (m *defaultAppointmentService) PrepareExaminationItemConfiguration(ctx context.Context, in *PrepareExaminationItemConfigurationRequest, opts ...grpc.CallOption) (*PreparedExaminationItemConfiguration, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.PrepareExaminationItemConfiguration(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) ConfirmExaminationItemConfiguration(ctx context.Context, in *ExaminationItemConfigurationTransactionRequest, opts ...grpc.CallOption) (*ExaminationItem, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.ConfirmExaminationItemConfiguration(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) CancelExaminationItemConfiguration(ctx context.Context, in *ExaminationItemConfigurationTransactionRequest, opts ...grpc.CallOption) (*CancelExaminationItemConfigurationResponse, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.CancelExaminationItemConfiguration(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*Room, error) {
@@ -274,6 +298,11 @@ func (m *defaultAppointmentService) ListBookingOptions(ctx context.Context, in *
 func (m *defaultAppointmentService) CreateBooking(ctx context.Context, in *CreateBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
 	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.CreateBooking(ctx, in, opts...)
+}
+
+func (m *defaultAppointmentService) CreateBookingBatch(ctx context.Context, in *CreateBookingBatchRequest, opts ...grpc.CallOption) (*CreateBookingBatchResponse, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.CreateBookingBatch(ctx, in, opts...)
 }
 
 func (m *defaultAppointmentService) CheckInBooking(ctx context.Context, in *CheckInBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
@@ -384,4 +413,10 @@ func (m *defaultAppointmentService) GetMyExaminationReport(ctx context.Context, 
 func (m *defaultAppointmentService) ListMyExaminationReports(ctx context.Context, in *ListMyExaminationReportsRequest, opts ...grpc.CallOption) (*ListExaminationReportsResponse, error) {
 	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
 	return client.ListMyExaminationReports(ctx, in, opts...)
+}
+
+// Guidance 等内部服务只通过该窄用途接口确认项目归属和状态。
+func (m *defaultAppointmentService) GetExaminationItemReference(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error) {
+	client := v1_appointmentv1.NewAppointmentServiceClient(m.cli.Conn())
+	return client.GetExaminationItemReference(ctx, in, opts...)
 }

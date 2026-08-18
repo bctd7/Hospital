@@ -46,6 +46,19 @@ func TestLiveClient(t *testing.T) {
 	if buildingRoute.DistanceMeters <= 0 || buildingRoute.DurationSeconds <= 0 || len(buildingRoute.Polyline) < 2 {
 		t.Fatalf("unexpected building route: %#v", buildingRoute)
 	}
+	time.Sleep(time.Second)
+	origins, err := client.SearchPlaces(ctx, routing.PlaceSearchInput{Keyword: "共富二村", City: "上海市", Limit: 3})
+	if err != nil || len(origins) == 0 {
+		t.Fatalf("search transit origin: places=%#v err=%v", origins, err)
+	}
+	time.Sleep(time.Second)
+	transitRoute, err := client.CalculateRoute(ctx, routing.RouteModeTransit, origins[0], buildingTwo[0])
+	if err != nil {
+		t.Fatalf("calculate transit route with optional array fields: %v", err)
+	}
+	if transitRoute.DurationSeconds <= 0 || len(transitRoute.Polyline) < 2 || len(transitRoute.Steps) == 0 {
+		t.Fatalf("unexpected transit route: %#v", transitRoute)
+	}
 	t.Logf(
 		"1号楼 %f,%f -> 2号楼 %f,%f：%d 米，%d 秒",
 		buildingOne[0].Longitude,

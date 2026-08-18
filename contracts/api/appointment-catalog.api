@@ -13,14 +13,6 @@ type (
 		UpdatedAt         string `json:"updated_at"`
 	}
 
-	CreateExaminationItemRequest {
-		OwnerDepartmentID string `json:"owner_department_id"`
-		Name              string `json:"name"`
-		Description       string `json:"description"`
-		EstimatedDurationMinutes int32 `json:"estimated_duration_minutes"`
-		OperationID       string `json:"operation_id"`
-	}
-
 	ExaminationItemPathRequest {
 		ItemID string `path:"itemId"`
 	}
@@ -37,15 +29,6 @@ type (
 		Page     int64                     `json:"page"`
 		PageSize int64                     `json:"page_size"`
 		Total    int64                     `json:"total"`
-	}
-
-	UpdateExaminationItemRequest {
-		ItemID          string  `path:"itemId"`
-		Name            *string `json:"name,optional"`
-		Description     *string `json:"description,optional"`
-		EstimatedDurationMinutes *int32 `json:"estimated_duration_minutes,optional"`
-		ExpectedVersion int64   `json:"expected_version"`
-		OperationID     string  `json:"operation_id"`
 	}
 
 	ChangeExaminationItemStatusRequest {
@@ -90,12 +73,6 @@ service app-api {
 
 	@handler getExaminationItem
 	get /admin/appointment/examination-items/:itemId (ExaminationItemPathRequest) returns (ExaminationItemResponse)
-
-	@handler createExaminationItem
-	post /admin/appointment/examination-items (CreateExaminationItemRequest) returns (ExaminationItemResponse)
-
-	@handler updateExaminationItem
-	put /admin/appointment/examination-items/:itemId (UpdateExaminationItemRequest) returns (ExaminationItemResponse)
 
 	@handler disableExaminationItem
 	post /admin/appointment/examination-items/:itemId/disable (ChangeExaminationItemStatusRequest) returns (ExaminationItemResponse)

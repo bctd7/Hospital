@@ -176,9 +176,10 @@ type BookingResponse struct {
 	ReportVersion                 int64  `json:"report_version,omitempty"`
 }
 
-type CalculateWalkingRouteRequest struct {
+type CalculateGuidanceRouteRequest struct {
 	Origin      GuidanceLocationPoint `json:"origin"`
 	Destination GuidanceLocationPoint `json:"destination"`
+	Mode        string                `json:"mode,options=walking|transit|driving"`
 }
 
 type CallNextBookingAPIRequest struct {
@@ -196,6 +197,11 @@ type CampusSummaryResponse struct {
 	DepartmentCount int64  `json:"department_count"`
 	Status          string `json:"status"`
 	Version         int64  `json:"version"`
+}
+
+type CandidateAvailability struct {
+	ServiceDate string   `json:"service_date"`
+	Sessions    []string `json:"sessions"`
 }
 
 type ChangeAppointmentResourceStatusRequest struct {
@@ -240,6 +246,38 @@ type CompleteAndPublishReportAPIRequest struct {
 	OperationID            string `json:"operation_id"`
 }
 
+type ConfigureExaminationItemRequest struct {
+	Action                       string                          `json:"action"`
+	ItemID                       string                          `json:"item_id,optional"`
+	OwnerDepartmentID            string                          `json:"owner_department_id"`
+	ItemName                     string                          `json:"item_name"`
+	EstimatedDurationMinutes     int32                           `json:"estimated_duration_minutes"`
+	ExpectedItemVersion          int64                           `json:"expected_item_version"`
+	Description                  string                          `json:"description,optional"`
+	PrecedenceRules              []ConfiguredPrecedenceRuleInput `json:"precedence_rules"`
+	PreparationRules             []GuidancePreparationRule       `json:"preparation_rules"`
+	Reminders                    []GuidancePatientReminder       `json:"reminders"`
+	ExpectedConfigurationVersion int64                           `json:"expected_configuration_version"`
+	OperationID                  string                          `json:"operation_id"`
+}
+
+type ConfiguredPrecedenceRuleInput struct {
+	PredecessorItemID string `json:"predecessor_item_id"`
+	SuccessorItemID   string `json:"successor_item_id"`
+	StaffReason       string `json:"staff_reason"`
+	PatientMessage    string `json:"patient_message,optional"`
+}
+
+type ConfirmSmartAppointmentPlanPathRequest struct {
+	PlanID      string `path:"planId"`
+	OperationID string `json:"operation_id"`
+}
+
+type ConfirmedSmartAppointmentPlanResponse struct {
+	PlanID     string   `json:"plan_id"`
+	BookingIDs []string `json:"booking_ids"`
+}
+
 type CorrectReportAPIRequest struct {
 	ReportID              string `path:"reportId"`
 	ObjectiveFindings     string `json:"objective_findings"`
@@ -266,14 +304,6 @@ type CreateBookingAPIRequest struct {
 	ServiceDate string `json:"service_date"`
 	Session     string `json:"session"`
 	OperationID string `json:"operation_id"`
-}
-
-type CreateExaminationItemRequest struct {
-	OwnerDepartmentID        string `json:"owner_department_id"`
-	Name                     string `json:"name"`
-	Description              string `json:"description"`
-	EstimatedDurationMinutes int32  `json:"estimated_duration_minutes"`
-	OperationID              string `json:"operation_id"`
 }
 
 type CreateOrganizationUnitRequest struct {
@@ -360,6 +390,30 @@ type EndExaminationAPIRequest struct {
 	OperationID     string `json:"operation_id"`
 }
 
+type ExaminationItemConfigurationPathRequest struct {
+	ItemID string `path:"itemId"`
+}
+
+type ExaminationItemPatientRemindersResponse struct {
+	ItemID    string                    `json:"item_id"`
+	Reminders []GuidancePatientReminder `json:"reminders"`
+}
+
+type ExaminationItemConfigurationResponse struct {
+	ItemID                   string                          `json:"item_id"`
+	OwnerDepartmentID        string                          `json:"owner_department_id"`
+	ItemName                 string                          `json:"item_name"`
+	EstimatedDurationMinutes int32                           `json:"estimated_duration_minutes"`
+	Status                   string                          `json:"status"`
+	ItemVersion              int64                           `json:"item_version"`
+	Description              string                          `json:"description"`
+	PrecedenceRules          []ConfiguredPrecedenceRuleInput `json:"precedence_rules"`
+	PreparationRules         []GuidancePreparationRule       `json:"preparation_rules"`
+	Reminders                []GuidancePatientReminder       `json:"reminders"`
+	ConfigurationVersion     int64                           `json:"configuration_version"`
+	UpdatedAt                string                          `json:"updated_at"`
+}
+
 type ExaminationItemPathRequest struct {
 	ItemID string `path:"itemId"`
 }
@@ -414,6 +468,11 @@ type ExaminationReportResponse struct {
 	UpdatedAt              string                `json:"updated_at"`
 }
 
+type GenerateSmartAppointmentPlansRequest struct {
+	ItemIDs               []string                `json:"item_ids"`
+	CandidateAvailability []CandidateAvailability `json:"candidate_availability"`
+}
+
 type GuidanceLocationPoint struct {
 	Name            string  `json:"name"`
 	Address         string  `json:"address,optional"`
@@ -422,9 +481,43 @@ type GuidanceLocationPoint struct {
 	ProviderPlaceID string  `json:"provider_place_id,optional"`
 }
 
+type GuidancePatientReminder struct {
+	Text           string `json:"text"`
+	AdvanceMinutes int32  `json:"advance_minutes"`
+}
+
+type GuidancePreparationRule struct {
+	RuleType                  string `json:"rule_type"`
+	StartMode                 string `json:"start_mode"`
+	MinAdvanceMinutes         int32  `json:"min_advance_minutes"`
+	RecommendedAdvanceMinutes int32  `json:"recommended_advance_minutes"`
+	MaxAdvanceMinutes         int32  `json:"max_advance_minutes"`
+	PreviousDayTime           string `json:"previous_day_time"`
+	ReadinessHint             string `json:"readiness_hint"`
+	Source                    string `json:"source"`
+}
+
 type GuidanceRoutePoint struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
+}
+
+type GuidanceRouteResponse struct {
+	Origin          GuidanceLocationPoint       `json:"origin"`
+	Destination     GuidanceLocationPoint       `json:"destination"`
+	DistanceMeters  int32                       `json:"distance_meters"`
+	DurationSeconds int32                       `json:"duration_seconds"`
+	Polyline        []GuidanceRoutePoint        `json:"polyline"`
+	Steps           []GuidanceRouteStepResponse `json:"steps"`
+	Provider        string                      `json:"provider"`
+	Mode            string                      `json:"mode"`
+}
+
+type GuidanceRouteStepResponse struct {
+	Instruction     string `json:"instruction"`
+	RoadName        string `json:"road_name"`
+	DistanceMeters  int32  `json:"distance_meters"`
+	DurationSeconds int32  `json:"duration_seconds"`
 }
 
 type HealthResponse struct {
@@ -694,6 +787,19 @@ type PrecedenceRuleResponse struct {
 	UpdatedAt               string `json:"updated_at"`
 }
 
+type PreparationRulePreviewResponse struct {
+	Description         string                    `json:"description"`
+	PreparationRules    []GuidancePreparationRule `json:"preparation_rules"`
+	Reminders           []GuidancePatientReminder `json:"reminders"`
+	UnresolvedFragments []string                  `json:"unresolved_fragments"`
+	ParserMode          string                    `json:"parser_mode"`
+	Warning             string                    `json:"warning"`
+}
+
+type PreviewPreparationRulesRequest struct {
+	Description string `json:"description"`
+}
+
 type PromoteDoctorRequest struct {
 	AccountID         string  `path:"accountId"`
 	DepartmentID      string  `json:"department_id"`
@@ -830,10 +936,55 @@ type SetRoomWeeklyWindowAPIRequest struct {
 	OperationID     string `json:"operation_id"`
 }
 
+type SmartAppointmentPlan struct {
+	PlanID    string                     `json:"plan_id"`
+	Title     string                     `json:"title"`
+	Summary   string                     `json:"summary"`
+	Items     []SmartAppointmentPlanItem `json:"items"`
+	ExpiresAt string                     `json:"expires_at"`
+}
+
+type SmartAppointmentPlanItem struct {
+	ItemID                   string `json:"item_id"`
+	ItemName                 string `json:"item_name"`
+	RoomID                   string `json:"room_id"`
+	RoomDisplayName          string `json:"room_display_name"`
+	CampusID                 string `json:"campus_id"`
+	Building                 string `json:"building"`
+	FloorNumber              int32  `json:"floor_number"`
+	RoomNumber               string `json:"room_number"`
+	ServiceDate              string `json:"service_date"`
+	Session                  string `json:"session"`
+	EstimatedDurationMinutes int32  `json:"estimated_duration_minutes"`
+	Reason                   string `json:"reason"`
+	PlannedStartTime         string `json:"planned_start_time"`
+	PlannedEndTime           string `json:"planned_end_time"`
+	TravelMinutes            int32  `json:"travel_minutes"`
+	TravelTimeEstimated      bool   `json:"travel_time_estimated"`
+}
+
+type SmartAppointmentPlansResponse struct {
+	Plans []SmartAppointmentPlan `json:"plans"`
+}
+
 type StartExaminationAPIRequest struct {
 	BookingID       string `path:"bookingId"`
 	ExpectedVersion int64  `json:"expected_version"`
 	OperationID     string `json:"operation_id"`
+}
+
+type TodayExaminationRecommendationResponse struct {
+	ServiceDate string                     `json:"service_date"`
+	Stages      []TodayRecommendationStage `json:"stages"`
+	UpdatedAt   string                     `json:"updated_at"`
+}
+
+type TodayRecommendationStage struct {
+	StageNo int32                      `json:"stage_no"`
+	Title   string                     `json:"title"`
+	Status  string                     `json:"status"`
+	Items   []SmartAppointmentPlanItem `json:"items"`
+	Focus   string                     `json:"focus"`
 }
 
 type TokenResponse struct {
@@ -867,15 +1018,6 @@ type UpdateDoctorRequest struct {
 	OperationID       string  `json:"operation_id"`
 }
 
-type UpdateExaminationItemRequest struct {
-	ItemID                   string  `path:"itemId"`
-	Name                     *string `json:"name,optional"`
-	Description              *string `json:"description,optional"`
-	EstimatedDurationMinutes *int32  `json:"estimated_duration_minutes,optional"`
-	ExpectedVersion          int64   `json:"expected_version"`
-	OperationID              string  `json:"operation_id"`
-}
-
 type UpdateOrganizationUnitRequest struct {
 	UnitID      string  `path:"unitId"`
 	Name        *string `json:"name,optional"`
@@ -890,23 +1032,6 @@ type UpdatePrecedenceRuleRequest struct {
 	PatientMessage  string `json:"patient_message,optional"`
 	ExpectedVersion int64  `json:"expected_version"`
 	OperationID     string `json:"operation_id"`
-}
-
-type WalkingRouteResponse struct {
-	Origin          GuidanceLocationPoint      `json:"origin"`
-	Destination     GuidanceLocationPoint      `json:"destination"`
-	DistanceMeters  int32                      `json:"distance_meters"`
-	DurationSeconds int32                      `json:"duration_seconds"`
-	Polyline        []GuidanceRoutePoint       `json:"polyline"`
-	Steps           []WalkingRouteStepResponse `json:"steps"`
-	Provider        string                     `json:"provider"`
-}
-
-type WalkingRouteStepResponse struct {
-	Instruction     string `json:"instruction"`
-	RoadName        string `json:"road_name"`
-	DistanceMeters  int32  `json:"distance_meters"`
-	DurationSeconds int32  `json:"duration_seconds"`
 }
 
 type WeeklyWindowsPathRequest struct {

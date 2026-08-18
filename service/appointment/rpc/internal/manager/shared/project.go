@@ -50,10 +50,10 @@ func (m *Manager) GetStaffProject(ctx context.Context, operator authn.Principal,
 }
 
 // GetProjectReference 返回 Guidance 等后端能力需要的项目公开引用。
-// 项目名称和所属科室本来就是患者目录可见信息，因此工作人员可以跨科室读取；
-// 这里不返回报告模板、周窗口或其他管理字段。
+// 项目名称和所属科室本来就是患者目录可见信息，因此患者和工作人员都可以读取；
+// 工作人员读取跨科室前置项目时也不受本科室范围限制。这里不返回报告模板、周窗口或其他管理字段。
 func (m *Manager) GetProjectReference(ctx context.Context, operator authn.Principal, itemID string) (common.ItemSummary, error) {
-	if err := requireStaffRead(operator); err != nil {
+	if err := requirePatientView(operator); err != nil {
 		return common.ItemSummary{}, err
 	}
 	itemID, err := requiredUUID(itemID, "item_id")

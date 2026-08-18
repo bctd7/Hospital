@@ -11,6 +11,23 @@ import (
 )
 
 func (c *Client) CalculateWalkingRoute(ctx context.Context, origin, destination routing.LocationPoint) (routing.WalkingRoute, error) {
+	return c.calculateWalkingRoute(ctx, origin, destination)
+}
+
+func (c *Client) CalculateRoute(ctx context.Context, mode routing.RouteMode, origin, destination routing.LocationPoint) (routing.WalkingRoute, error) {
+	switch mode {
+	case routing.RouteModeWalking:
+		return c.calculateWalkingRoute(ctx, origin, destination)
+	case routing.RouteModeDriving:
+		return c.calculateDrivingRoute(ctx, origin, destination)
+	case routing.RouteModeTransit:
+		return c.calculateTransitRoute(ctx, origin, destination)
+	default:
+		return routing.WalkingRoute{}, routing.ErrInvalid
+	}
+}
+
+func (c *Client) calculateWalkingRoute(ctx context.Context, origin, destination routing.LocationPoint) (routing.WalkingRoute, error) {
 	query := url.Values{}
 	query.Set("origin", coordinate(origin))
 	query.Set("destination", coordinate(destination))
@@ -30,7 +47,7 @@ func (c *Client) CalculateWalkingRoute(ctx context.Context, origin, destination 
 	if len(payload.Route.Paths) == 0 {
 		return routing.WalkingRoute{}, routing.ErrNoRoute
 	}
-	return buildRoute(origin, destination, payload.Route.Paths[0])
+	return buildRoute(origin, destination, routing.RouteModeWalking, payload.Route.Paths[0])
 }
 
 func coordinate(point routing.LocationPoint) string {
@@ -54,11 +71,11 @@ type walkingStep struct {
 	Instruction string         `json:"instruction"`
 	Road        flexibleString `json:"road"`
 	Distance    string         `json:"distance"`
-	Duration    string         `json:"duration"`
+	Duration    flexibleString `json:"duration"`
 	Polyline    string         `json:"polyline"`
 }
 
-func buildRoute(origin, destination routing.LocationPoint, source walkingPath) (routing.WalkingRoute, error) {
+func buildRoute(origin, destination routing.LocationPoint, mode routing.RouteMode, source walkingPath) (routing.WalkingRoute, error) {
 	distance, err := parseInt32(source.Distance)
 	if err != nil {
 		return routing.WalkingRoute{}, fmt.Errorf("%w: invalid AMap route distance", routing.ErrProvider)
@@ -79,7 +96,7 @@ func buildRoute(origin, destination routing.LocationPoint, source walkingPath) (
 		if err != nil {
 			return routing.WalkingRoute{}, fmt.Errorf("%w: invalid AMap step distance", routing.ErrProvider)
 		}
-		stepDuration, err := parseInt32(sourceStep.Duration)
+		stepDuration, err := parseOptionalInt32(sourceStep.Duration.String())
 		if err != nil {
 			return routing.WalkingRoute{}, fmt.Errorf("%w: invalid AMap step duration", routing.ErrProvider)
 		}
@@ -93,7 +110,7 @@ func buildRoute(origin, destination routing.LocationPoint, source walkingPath) (
 	}
 	return routing.WalkingRoute{
 		Origin: origin, Destination: destination, DistanceMeters: distance, DurationSeconds: duration,
-		Polyline: points, Steps: steps, Provider: "amap",
+		Polyline: points, Steps: steps, Provider: "amap", Mode: mode,
 	}, nil
 }
 

@@ -48,26 +48,29 @@ const (
 // IdentityServiceClient is the client API for IdentityService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// IdentityService 只暴露跨进程身份能力；具体消息按认证、本人资料、组织和账号管理拆分。
 type IdentityServiceClient interface {
+	// 手机号认证与会话生命周期。
 	SendPhoneLoginCode(ctx context.Context, in *SendPhoneLoginCodeRequest, opts ...grpc.CallOption) (*SendPhoneLoginCodeResponse, error)
 	PhoneLogin(ctx context.Context, in *PhoneLoginRequest, opts ...grpc.CallOption) (*TokenPair, error)
 	RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*TokenPair, error)
 	RevokeRefreshToken(ctx context.Context, in *RevokeRefreshTokenRequest, opts ...grpc.CallOption) (*RevokeRefreshTokenResponse, error)
+	// 当前账号本人资料。
 	GetAccountDisplayProfile(ctx context.Context, in *GetAccountDisplayProfileRequest, opts ...grpc.CallOption) (*AccountDisplayProfile, error)
 	UpdateAccountDisplayProfile(ctx context.Context, in *UpdateAccountDisplayProfileRequest, opts ...grpc.CallOption) (*AccountDisplayProfile, error)
-	// Public organization directory. HTTP gateways may expose these methods
-	// without an access token, but must still apply request rate limits.
+	// 公开组织目录。HTTP 网关可以匿名开放，但仍需限流。
 	GetOrganizationContext(ctx context.Context, in *GetOrganizationContextRequest, opts ...grpc.CallOption) (*OrganizationContext, error)
 	ListDepartments(ctx context.Context, in *ListDepartmentsRequest, opts ...grpc.CallOption) (*ListDepartmentsResponse, error)
 	ListDoctorsByDepartment(ctx context.Context, in *ListDoctorsByDepartmentRequest, opts ...grpc.CallOption) (*ListDoctorsByDepartmentResponse, error)
-	// Administrator organization management.
+	// 管理员组织维护。
 	ListOrganizationUnits(ctx context.Context, in *ListOrganizationUnitsRequest, opts ...grpc.CallOption) (*ListOrganizationUnitsResponse, error)
 	GetOrganizationUnit(ctx context.Context, in *GetOrganizationUnitRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
 	CreateOrganizationUnit(ctx context.Context, in *CreateOrganizationUnitRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
 	UpdateOrganizationUnit(ctx context.Context, in *UpdateOrganizationUnitRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
 	DisableOrganizationUnit(ctx context.Context, in *ChangeOrganizationUnitStatusRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
 	EnableOrganizationUnit(ctx context.Context, in *ChangeOrganizationUnitStatusRequest, opts ...grpc.CallOption) (*AdminOrganizationUnit, error)
-	// Administrator account and doctor management.
+	// 管理员账号与医生身份维护。
 	ListAdminAccounts(ctx context.Context, in *ListAdminAccountsRequest, opts ...grpc.CallOption) (*ListAdminAccountsResponse, error)
 	GetAdminAccount(ctx context.Context, in *GetAdminAccountRequest, opts ...grpc.CallOption) (*AdminAccountDetail, error)
 	SearchAdminAccountByPhone(ctx context.Context, in *SearchAdminAccountByPhoneRequest, opts ...grpc.CallOption) (*SearchAdminAccountByPhoneResponse, error)
@@ -330,26 +333,29 @@ func (c *identityServiceClient) EnableAccount(ctx context.Context, in *AccountMu
 // IdentityServiceServer is the server API for IdentityService service.
 // All implementations must embed UnimplementedIdentityServiceServer
 // for forward compatibility.
+//
+// IdentityService 只暴露跨进程身份能力；具体消息按认证、本人资料、组织和账号管理拆分。
 type IdentityServiceServer interface {
+	// 手机号认证与会话生命周期。
 	SendPhoneLoginCode(context.Context, *SendPhoneLoginCodeRequest) (*SendPhoneLoginCodeResponse, error)
 	PhoneLogin(context.Context, *PhoneLoginRequest) (*TokenPair, error)
 	RefreshAccessToken(context.Context, *RefreshAccessTokenRequest) (*TokenPair, error)
 	RevokeRefreshToken(context.Context, *RevokeRefreshTokenRequest) (*RevokeRefreshTokenResponse, error)
+	// 当前账号本人资料。
 	GetAccountDisplayProfile(context.Context, *GetAccountDisplayProfileRequest) (*AccountDisplayProfile, error)
 	UpdateAccountDisplayProfile(context.Context, *UpdateAccountDisplayProfileRequest) (*AccountDisplayProfile, error)
-	// Public organization directory. HTTP gateways may expose these methods
-	// without an access token, but must still apply request rate limits.
+	// 公开组织目录。HTTP 网关可以匿名开放，但仍需限流。
 	GetOrganizationContext(context.Context, *GetOrganizationContextRequest) (*OrganizationContext, error)
 	ListDepartments(context.Context, *ListDepartmentsRequest) (*ListDepartmentsResponse, error)
 	ListDoctorsByDepartment(context.Context, *ListDoctorsByDepartmentRequest) (*ListDoctorsByDepartmentResponse, error)
-	// Administrator organization management.
+	// 管理员组织维护。
 	ListOrganizationUnits(context.Context, *ListOrganizationUnitsRequest) (*ListOrganizationUnitsResponse, error)
 	GetOrganizationUnit(context.Context, *GetOrganizationUnitRequest) (*AdminOrganizationUnit, error)
 	CreateOrganizationUnit(context.Context, *CreateOrganizationUnitRequest) (*AdminOrganizationUnit, error)
 	UpdateOrganizationUnit(context.Context, *UpdateOrganizationUnitRequest) (*AdminOrganizationUnit, error)
 	DisableOrganizationUnit(context.Context, *ChangeOrganizationUnitStatusRequest) (*AdminOrganizationUnit, error)
 	EnableOrganizationUnit(context.Context, *ChangeOrganizationUnitStatusRequest) (*AdminOrganizationUnit, error)
-	// Administrator account and doctor management.
+	// 管理员账号与医生身份维护。
 	ListAdminAccounts(context.Context, *ListAdminAccountsRequest) (*ListAdminAccountsResponse, error)
 	GetAdminAccount(context.Context, *GetAdminAccountRequest) (*AdminAccountDetail, error)
 	SearchAdminAccountByPhone(context.Context, *SearchAdminAccountByPhoneRequest) (*SearchAdminAccountByPhoneResponse, error)

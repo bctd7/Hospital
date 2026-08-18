@@ -549,20 +549,6 @@ export const appointmentManagementApi: AppointmentManagementApi = {
     return item(await request<ItemResponse>({ path: `/api/v1/admin/appointment/examination-items/${encodeURIComponent(itemId)}`, authenticated: true }));
   },
 
-  async createItem(departmentId, name, description, estimatedDurationMinutes) {
-    const key = `item:create:${departmentId}:${name}:${description}:${estimatedDurationMinutes}`;
-    return item(await mutation<ItemResponse>(key, "/api/v1/admin/appointment/examination-items", "POST", {
-      owner_department_id: departmentId, name, description, estimated_duration_minutes: estimatedDurationMinutes,
-    }));
-  },
-
-  async updateItem(value, name, description, estimatedDurationMinutes) {
-    const key = `item:update:${value.itemId}:${value.version}:${name}:${description}:${estimatedDurationMinutes}`;
-    return item(await mutation<ItemResponse>(key, `/api/v1/admin/appointment/examination-items/${encodeURIComponent(value.itemId)}`, "PUT", {
-      name, description, estimated_duration_minutes: estimatedDurationMinutes, expected_version: value.version,
-    }));
-  },
-
   async setItemEnabled(value, enabled) {
     const key = `item:status:${value.itemId}:${value.version}:${enabled}`;
     return item(await mutation<ItemResponse>(key, `/api/v1/admin/appointment/examination-items/${encodeURIComponent(value.itemId)}/${enabled ? "enable" : "disable"}`, "POST", statusBody(value.itemId, value.version)));
@@ -766,14 +752,6 @@ export const patientAppointmentApi: PatientAppointmentApi = {
       authenticated: true,
       data: { operation_id: operationId(), reason },
     });
-  },
-
-  async listMyReports(currentPage = 1, pageSize = 20) {
-    const value = await request<{ reports: ExaminationReportResponse[] | null; page: number; page_size: number; total: number }>({
-      path: queryPath("/api/v1/appointment/reports", { page: currentPage, page_size: pageSize }),
-      authenticated: true,
-    });
-    return page(arrayOrEmpty(value.reports).map(examinationReport), value);
   },
 
   async getMyReport(bookingId) {
