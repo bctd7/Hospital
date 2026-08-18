@@ -82,8 +82,13 @@ func (g *Planning) CreateBookingBatch(ctx context.Context, command planning.Conf
 func mapPlanningError(action string, err error) error {
 	value := status.Convert(err)
 	for _, detail := range value.Details() {
-		if info, ok := detail.(*errdetails.ErrorInfo); ok && info.GetReason() == "PATIENT_ITEM_SESSION_OCCUPIED" {
-			return planning.ErrExistingBooking
+		if info, ok := detail.(*errdetails.ErrorInfo); ok {
+			switch info.GetReason() {
+			case "PATIENT_ITEM_SESSION_OCCUPIED":
+				return planning.ErrExistingBooking
+			case "PATIENT_WEEKLY_QUOTA_EXHAUSTED":
+				return planning.ErrWeeklyQuotaFull
+			}
 		}
 	}
 	switch status.Code(err) {

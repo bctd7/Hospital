@@ -23,6 +23,8 @@ func planningRPCError(err error) error {
 		return planningStatus(codes.FailedPrecondition, "NO_SMART_APPOINTMENT_PLAN", "当前选择无法生成预约方案，请检查已有预约，或重新选择日期和时段")
 	case errors.Is(err, planning.ErrExistingBooking):
 		return planningStatus(codes.FailedPrecondition, "SMART_APPOINTMENT_EXISTING_BOOKING", "当前方案与已有预约重复，请检查我的预约，或重新选择日期和时段")
+	case errors.Is(err, planning.ErrWeeklyQuotaFull):
+		return planningStatus(codes.FailedPrecondition, "SMART_APPOINTMENT_WEEKLY_QUOTA_EXHAUSTED", "本周预约额度不足，无法一次性预约该方案中的全部检查项目")
 	case errors.Is(err, planning.ErrConflict):
 		return planningStatus(codes.Aborted, "SMART_APPOINTMENT_PLAN_CONFLICT", "预约条件已经变化，请重新生成方案")
 	case errors.Is(err, planning.ErrUnavailable):
