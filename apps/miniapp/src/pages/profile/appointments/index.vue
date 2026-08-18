@@ -6,7 +6,7 @@ import { patientAppointmentApi } from "@/api/appointment";
 import { ApiError } from "@/api/client";
 import { guidanceApi } from "@/api/guidance";
 import AppPage from "@/components/layout/AppPage.vue";
-import { confirmPatientReminders } from "@/features/guidance/patientReminders";
+import { patientReminderModalContent } from "@/features/guidance/patientReminders";
 import type { AppointmentListView, PatientBooking, PatientBookingStatus } from "@/types/appointment";
 import { formatEstimatedDuration } from "@/utils/appointmentManagement";
 
@@ -15,6 +15,8 @@ const loading = ref(false);
 const errorMessage = ref("");
 const deletingId = ref("");
 const checkingInId = ref("");
+const pendingCheckIn = ref<PatientBooking>();
+const patientReminderContent = ref("");
 const focusedBookingId = ref("");
 const view = ref<AppointmentListView>("active");
 const isCompletedView = computed(() => view.value === "completed");
@@ -87,16 +89,45 @@ async function checkIn(booking: PatientBooking) {
   if (!canCheckIn(booking) || checkingInId.value) return;
   checkingInId.value = booking.bookingId;
   try {
-		const { reminders } = await guidanceApi.getExaminationItemPatientReminders(booking.itemId);
-		if (!await confirmPatientReminders(reminders ?? [])) return;
-    const updated = await patientAppointmentApi.checkIn(booking);
-    bookings.value = bookings.value.map((value) => value.bookingId === updated.bookingId ? updated : value);
-    uni.showToast({ title: "报到成功", icon: "success" });
+    const { reminders } = await guidanceApi.getExaminationItemPatientReminders(booking.itemId);
+    const content = patientReminderModalContent(reminders ?? []);
+    if (content) {
+      pendingCheckIn.value = booking;
+      patientReminderContent.value = content;
+      return;
+    }
+    await submitCheckIn(booking);
+  } catch (error) {
+    uni.showModal({ title: "检查报到失败", content: messageOf(error, "请刷新后重试"), showCancel: false });
+  } finally {
+    if (!pendingCheckIn.value) checkingInId.value = "";
+  }
+}
+
+function cancelPatientReminder() {
+  pendingCheckIn.value = undefined;
+  patientReminderContent.value = "";
+  checkingInId.value = "";
+}
+
+async function confirmCheckIn() {
+  const booking = pendingCheckIn.value;
+  if (!booking) return;
+  pendingCheckIn.value = undefined;
+  patientReminderContent.value = "";
+  try {
+    await submitCheckIn(booking);
   } catch (error) {
     uni.showModal({ title: "检查报到失败", content: messageOf(error, "请刷新后重试"), showCancel: false });
   } finally {
     checkingInId.value = "";
   }
+}
+
+async function submitCheckIn(booking: PatientBooking) {
+  const updated = await patientAppointmentApi.checkIn(booking);
+  bookings.value = bookings.value.map((value) => value.bookingId === updated.bookingId ? updated : value);
+  uni.showToast({ title: "报到成功", icon: "success" });
 }
 
 function canCheckIn(booking: PatientBooking) {
@@ -155,9 +186,20 @@ function statusLabel(value: PatientBookingStatus) {
           <text v-else class="queue-panel__detail">{{ calledCountdown(booking) }}，并留意现场广播</text>
         </view>
         <text v-if="checkInHint(booking)" class="check-in-hint">{{ checkInHint(booking) }}</text>
-        <view v-if="booking.status === 'confirmed'" class="booking-actions">
-          <button class="check-in-button" :disabled="!canCheckIn(booking) || checkingInId === booking.bookingId" @tap="checkIn(booking)">{{ checkingInId === booking.bookingId ? '报到中…' : '检查报到' }}</button>
-          <button class="delete-button" :disabled="deletingId === booking.bookingId" @tap="requestDelete(booking)">{{ deletingId === booking.bookingId ? '删除中…' : '删除预约' }}</button>
+        <view v-if="booking.status === 'confirmed'" class="booking-actions" @tap.stop>
+          <button class="check-in-button" :disabled="!canCheckIn(booking) || checkingInId === booking.bookingId" @tap.stop="checkIn(booking)">{{ checkingInId === booking.bookingId ? '报到中…' : '检查报到' }}</button>
+          <button class="delete-button" :disabled="deletingId === booking.bookingId" @tap.stop="requestDelete(booking)">{{ deletingId === booking.bookingId ? '删除中…' : '删除预约' }}</button>
+        </view>
+      </view>
+    </view>
+
+    <view v-if="pendingCheckIn" class="reminder-mask" @tap.stop="cancelPatientReminder">
+      <view class="reminder-dialog" @tap.stop>
+        <text class="reminder-dialog__title">检查前请确认</text>
+        <text class="reminder-dialog__content">{{ patientReminderContent }}</text>
+        <view class="reminder-dialog__actions">
+          <button class="reminder-dialog__cancel" @tap.stop="cancelPatientReminder">暂不报到</button>
+          <button class="reminder-dialog__confirm" @tap.stop="confirmCheckIn">确认并报到</button>
         </view>
       </view>
     </view>
@@ -168,4 +210,7 @@ function statusLabel(value: PatientBookingStatus) {
 button::after{display:none}.state-card,.booking-card{margin-bottom:20rpx;padding:28rpx;color:#718096;font-size:24rpx;background:#fff;border:1rpx solid #e4eaf1;border-radius:18rpx}.state-card{text-align:center}.state-card--error{color:#c34c4c}.booking-card--focused{border-color:#8fc5ea;background:#f8fcff}.booking-card__heading{display:flex;align-items:center;justify-content:space-between}.booking-card__item{color:#263348;font-size:29rpx;font-weight:700}.booking-card__status{padding:6rpx 13rpx;color:#2379da;font-size:19rpx;background:#eaf4ff;border-radius:16rpx}.booking-card__status.status--called{color:#fff;background:#2188c7}.booking-card__status.status--in_progress,.booking-card__status.status--completed,.booking-card__status.status--report_pending{color:#27855f;background:#e9f8f1}.booking-card__status.status--no_show{color:#8a5b35;background:#f8efe6}.booking-card__time,.booking-card__room{display:block;margin-top:15rpx;color:#66758a;font-size:22rpx}.booking-card__room{color:#8793a3}.booking-actions{display:flex;gap:14rpx;margin-top:24rpx}.booking-actions button{flex:1;margin:0;padding:0;font-size:22rpx;line-height:64rpx;border-radius:32rpx}.delete-button{color:#d14e4e;background:#fff4f4;border:1rpx solid #f1cccc}.check-in-button{color:#fff;background:#2188c7}.check-in-button[disabled]{color:#8b98a8;background:#edf1f5}.check-in-hint{display:block;margin-top:18rpx;color:#708096;font-size:21rpx}.queue-panel{margin-top:22rpx;padding:20rpx;background:#edf7fd;border-left:6rpx solid #2188c7;border-radius:12rpx}.queue-panel--called{color:#fff;background:#2188c7}.queue-panel__number,.queue-panel__detail{display:block}.queue-panel__number{font-size:25rpx;font-weight:700}.queue-panel__detail{margin-top:8rpx;font-size:20rpx;opacity:.82}
 .booking-card__duration{display:block;margin-top:15rpx;color:#347ff0;font-size:22rpx}
 .booking-card--report{cursor:pointer}.booking-card__report-link{display:block;margin-top:18rpx;padding-top:16rpx;color:#197fbd;font-size:21rpx;text-align:right;border-top:1rpx solid #e8edf1}
+.reminder-mask{position:fixed;z-index:1000;inset:0;display:flex;align-items:center;justify-content:center;padding:42rpx;box-sizing:border-box;background:rgba(24,35,49,.48)}
+.reminder-dialog{width:100%;padding:34rpx 30rpx 26rpx;box-sizing:border-box;background:#fff;border-radius:24rpx;box-shadow:0 18rpx 60rpx rgba(27,52,72,.18)}
+.reminder-dialog__title,.reminder-dialog__content{display:block}.reminder-dialog__title{color:#263348;font-size:30rpx;font-weight:720;text-align:center}.reminder-dialog__content{margin-top:24rpx;color:#526176;font-size:24rpx;line-height:1.7;white-space:pre-wrap}.reminder-dialog__actions{display:flex;gap:16rpx;margin-top:32rpx}.reminder-dialog__actions button{flex:1;margin:0;font-size:23rpx;line-height:70rpx;border-radius:35rpx}.reminder-dialog__cancel{color:#68768a;background:#f1f4f7}.reminder-dialog__confirm{color:#fff;background:#2188c7}
 </style>

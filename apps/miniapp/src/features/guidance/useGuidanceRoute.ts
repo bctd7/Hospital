@@ -28,8 +28,17 @@ interface MapPolyline {
 }
 
 export function useGuidanceRoute() {
-  const origin = ref<GuidanceLocationPoint>();
-  const destination = ref<GuidanceLocationPoint>();
+  // 起点和终点必须作为同一份界面快照提交。若分别写两个 ref，小程序渲染层可能
+  // 先收到“新起点 + 旧终点”，再收到完整结果，原生地图参与合成时会放大这种闪烁。
+  const endpoints = ref<{ origin?: GuidanceLocationPoint; destination?: GuidanceLocationPoint }>({});
+  const origin = computed({
+    get: () => endpoints.value.origin,
+    set: (value: GuidanceLocationPoint | undefined) => replaceEndpoints(value, endpoints.value.destination),
+  });
+  const destination = computed({
+    get: () => endpoints.value.destination,
+    set: (value: GuidanceLocationPoint | undefined) => replaceEndpoints(endpoints.value.origin, value),
+  });
   const route = ref<GuidanceRoute>();
   const loading = ref(false);
   const error = ref("");
@@ -49,6 +58,11 @@ export function useGuidanceRoute() {
   const travelModes: Array<{ value: GuidanceTravelMode; label: string }> = [
     { value: "walking", label: "步行" }, { value: "transit", label: "公交" }, { value: "driving", label: "驾车" },
   ];
+
+  function replaceEndpoints(nextOrigin?: GuidanceLocationPoint, nextDestination?: GuidanceLocationPoint) {
+    if (!routeEndpointsChanged(endpoints.value.origin, endpoints.value.destination, nextOrigin, nextDestination)) return;
+    endpoints.value = { origin: nextOrigin, destination: nextDestination };
+  }
 
   onLoad(() => { void initializeRoutePage(); });
   onShow(() => {
@@ -157,8 +171,7 @@ export function useGuidanceRoute() {
       if (!stageRequest.isCurrent(token)) return;
       const endpointsChanged = routeEndpointsChanged(origin.value, destination.value, nextOrigin, nextDestination);
       selectedStopIndex.value = index;
-      origin.value = nextOrigin;
-      destination.value = nextDestination;
+      replaceEndpoints(nextOrigin, nextDestination);
       outsideRouteLeg.value = nextOutsideRouteLeg;
       error.value = "";
       if (endpointsChanged) {
@@ -205,12 +218,12 @@ export function useGuidanceRoute() {
     stageRequest.cancel();
     cancelCurrentRoute();
     if (searchTarget.value === "origin") {
-      origin.value = place;
+      replaceEndpoints(place, destination.value);
       if (importedItinerary.value && selectedStopIndex.value === 0) {
         importedItinerary.value = { ...importedItinerary.value, initialOrigin: place };
         updateGuidanceRouteItinerary({ initialOrigin: place });
       }
-    } else if (searchTarget.value === "destination") destination.value = place;
+    } else if (searchTarget.value === "destination") replaceEndpoints(origin.value, place);
     searchTarget.value = undefined;
   }
 
@@ -229,9 +242,7 @@ export function useGuidanceRoute() {
   function swapPoints() {
     stageRequest.cancel();
     cancelCurrentRoute();
-    const previous = origin.value;
-    origin.value = destination.value;
-    destination.value = previous;
+    replaceEndpoints(destination.value, origin.value);
   }
 
   async function calculateRoute() {
