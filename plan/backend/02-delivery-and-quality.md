@@ -37,7 +37,7 @@ Identity 与 Appointment 在首次体验环境发布前都已压平为单个 `00
 统一入口：
 
 ```powershell
-.\scripts\check.ps1
+.\scripts\quality\verify-repository.ps1
 ```
 
 ## 完成标准

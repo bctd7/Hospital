@@ -2,274 +2,32 @@ syntax = "proto3";
 
 package hospital.guidance.v1;
 
+import "guidance/v1/configuration.proto";
+import "guidance/v1/planning.proto";
+import "guidance/v1/precedence.proto";
+import "guidance/v1/routing.proto";
+
 option go_package = "hospital/contracts/gen/guidance/v1;guidancev1";
 
+// GuidanceService 按规则、项目配置、方案规划和地图路线四类能力组织。
 service GuidanceService {
+  // 项目直接先后关系。
   rpc CreatePrecedenceRule(CreatePrecedenceRuleRequest) returns (PrecedenceRule);
   rpc UpdatePrecedenceRule(UpdatePrecedenceRuleRequest) returns (PrecedenceRule);
   rpc DeletePrecedenceRule(DeletePrecedenceRuleRequest) returns (DeletePrecedenceRuleResponse);
   rpc ListPrecedenceRules(ListPrecedenceRulesRequest) returns (ListPrecedenceRulesResponse);
+
+  // 检查说明解析与项目完整配置。
   rpc PreviewPreparationRules(PreviewPreparationRulesRequest) returns (PreparationRulePreview);
   rpc GetExaminationItemConfiguration(GetExaminationItemConfigurationRequest) returns (ExaminationItemConfiguration);
   rpc ConfigureExaminationItem(ConfigureExaminationItemRequest) returns (ExaminationItemConfiguration);
+
+  // 智能预约与当日检查顺序。
   rpc GenerateSmartAppointmentPlans(GenerateSmartAppointmentPlansRequest) returns (SmartAppointmentPlansResponse);
   rpc ConfirmSmartAppointmentPlan(ConfirmSmartAppointmentPlanRequest) returns (ConfirmedSmartAppointmentPlan);
   rpc GetTodayExaminationRecommendation(GetTodayExaminationRecommendationRequest) returns (TodayExaminationRecommendation);
+
+  // 地点检索和单段路线。
   rpc SearchPlaces(SearchPlacesRequest) returns (SearchPlacesResponse);
   rpc CalculateWalkingRoute(CalculateWalkingRouteRequest) returns (WalkingRoute);
-}
-
-message CreatePrecedenceRuleRequest {
-  string predecessor_item_id = 1;
-  string successor_item_id = 2;
-  string staff_reason = 3;
-  string patient_message = 4;
-  string operation_id = 5;
-  string request_id = 6;
-}
-
-message UpdatePrecedenceRuleRequest {
-  string rule_id = 1;
-  string staff_reason = 2;
-  string patient_message = 3;
-  int64 expected_version = 4;
-  string operation_id = 5;
-  string request_id = 6;
-}
-
-message DeletePrecedenceRuleRequest {
-  string rule_id = 1;
-  int64 expected_version = 2;
-  string operation_id = 3;
-  string request_id = 4;
-}
-
-message DeletePrecedenceRuleResponse {
-  string rule_id = 1;
-  bool deleted = 2;
-}
-
-message ListPrecedenceRulesRequest {
-  string item_id = 1;
-  string direction = 2;
-  bool include_inferred = 3;
-  string request_id = 4;
-}
-
-message PrecedenceRule {
-  string rule_id = 1;
-  string predecessor_item_id = 2;
-  string predecessor_department_id = 3;
-  string predecessor_item_name = 4;
-  string successor_item_id = 5;
-  string successor_department_id = 6;
-  string successor_item_name = 7;
-  string staff_reason = 8;
-  string patient_message = 9;
-  bool direct = 10;
-  int32 path_length = 11;
-  int64 version = 12;
-  string created_by = 13;
-  string created_at = 14;
-  string updated_at = 15;
-}
-
-message ListPrecedenceRulesResponse {
-  repeated PrecedenceRule rules = 1;
-}
-
-message PreparationRule {
-  string rule_type = 1;
-  string start_mode = 2;
-  int32 min_advance_minutes = 3;
-  int32 recommended_advance_minutes = 4;
-  int32 max_advance_minutes = 5;
-  string previous_day_time = 6;
-  string readiness_hint = 7;
-  string source = 8;
-}
-
-message PatientReminder {
-  string text = 1;
-  int32 advance_minutes = 2;
-}
-
-message PreparationRulePreview {
-  string description = 1;
-  repeated PreparationRule preparation_rules = 2;
-  repeated PatientReminder reminders = 3;
-  repeated string unresolved_fragments = 4;
-  string parser_mode = 5;
-  string warning = 6;
-}
-
-message PreviewPreparationRulesRequest {
-  string description = 1;
-  string request_id = 2;
-}
-
-message ConfiguredPrecedenceRule {
-  string predecessor_item_id = 1;
-  string successor_item_id = 2;
-  string staff_reason = 3;
-  string patient_message = 4;
-}
-
-message ExaminationItemConfiguration {
-  string item_id = 1;
-  string owner_department_id = 2;
-  string item_name = 3;
-  int32 estimated_duration_minutes = 4;
-  string status = 5;
-  int64 item_version = 6;
-  string description = 7;
-  repeated ConfiguredPrecedenceRule precedence_rules = 8;
-  repeated PreparationRule preparation_rules = 9;
-  repeated PatientReminder reminders = 10;
-  int64 configuration_version = 11;
-  string updated_at = 12;
-}
-
-message GetExaminationItemConfigurationRequest {
-  string item_id = 1;
-  string request_id = 2;
-}
-
-message ConfigureExaminationItemRequest {
-  string action = 1;
-  string item_id = 2;
-  string owner_department_id = 3;
-  string item_name = 4;
-  int32 estimated_duration_minutes = 5;
-  int64 expected_item_version = 6;
-  string description = 7;
-  repeated ConfiguredPrecedenceRule precedence_rules = 8;
-  repeated PreparationRule preparation_rules = 9;
-  repeated PatientReminder reminders = 10;
-  int64 expected_configuration_version = 11;
-  string operation_id = 12;
-  string request_id = 13;
-}
-
-message GenerateSmartAppointmentPlansRequest {
-  repeated string item_ids = 1;
-  repeated string candidate_dates = 2;
-  string request_id = 3;
-  repeated CandidateAvailability candidate_availability = 4;
-}
-
-message CandidateAvailability {
-  string service_date = 1;
-  repeated string sessions = 2;
-}
-
-message SmartAppointmentPlanItem {
-  string item_id = 1;
-  string item_name = 2;
-  string room_id = 3;
-  string room_display_name = 4;
-  string campus_id = 5;
-  string building = 6;
-  int32 floor_number = 7;
-  string room_number = 8;
-  string service_date = 9;
-  string session = 10;
-  int32 estimated_duration_minutes = 11;
-  string reason = 12;
-  string planned_start_time = 13;
-  string planned_end_time = 14;
-  int32 travel_minutes = 15;
-  bool travel_time_estimated = 16;
-}
-
-message SmartAppointmentPlan {
-  string plan_id = 1;
-  string title = 2;
-  string summary = 3;
-  repeated SmartAppointmentPlanItem items = 4;
-  string expires_at = 5;
-}
-
-message SmartAppointmentPlansResponse {
-  repeated SmartAppointmentPlan plans = 1;
-}
-
-message ConfirmSmartAppointmentPlanRequest {
-  string plan_id = 1;
-  string operation_id = 2;
-  string patient_display_name = 3;
-  string patient_phone_masked = 4;
-  string request_id = 5;
-}
-
-message ConfirmedSmartAppointmentPlan {
-  string plan_id = 1;
-  repeated string booking_ids = 2;
-}
-
-message GetTodayExaminationRecommendationRequest {
-  string request_id = 1;
-}
-
-message TodayRecommendationStage {
-  int32 stage_no = 1;
-  string title = 2;
-  string status = 3;
-  repeated SmartAppointmentPlanItem items = 4;
-  string focus = 5;
-}
-
-message TodayExaminationRecommendation {
-  string service_date = 1;
-  repeated TodayRecommendationStage stages = 2;
-  string updated_at = 3;
-}
-
-message LocationPoint {
-  string name = 1;
-  string address = 2;
-  double latitude = 3;
-  double longitude = 4;
-  string provider_place_id = 5;
-}
-
-message SearchPlacesRequest {
-  string keyword = 1;
-  string city = 2;
-  int32 limit = 3;
-  string request_id = 4;
-}
-
-message SearchPlacesResponse {
-  repeated LocationPoint places = 1;
-}
-
-message RoutePoint {
-  double latitude = 1;
-  double longitude = 2;
-}
-
-message WalkingRouteStep {
-  string instruction = 1;
-  string road_name = 2;
-  int32 distance_meters = 3;
-  int32 duration_seconds = 4;
-}
-
-message CalculateWalkingRouteRequest {
-  LocationPoint origin = 1;
-  LocationPoint destination = 2;
-  string request_id = 3;
-  string mode = 4;
-}
-
-message WalkingRoute {
-  LocationPoint origin = 1;
-  LocationPoint destination = 2;
-  int32 distance_meters = 3;
-  int32 duration_seconds = 4;
-  repeated RoutePoint polyline = 5;
-  repeated WalkingRouteStep steps = 6;
-  string provider = 7;
-  string mode = 8;
 }

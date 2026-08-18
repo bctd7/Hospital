@@ -2,9 +2,17 @@ syntax = "proto3";
 
 package hospital.appointment.v1;
 
+import "appointment/v1/bookings.proto";
+import "appointment/v1/catalog.proto";
+import "appointment/v1/messages.proto";
+import "appointment/v1/reports.proto";
+import "appointment/v1/resources.proto";
+
 option go_package = "hospital/contracts/gen/appointment/v1;appointmentv1";
 
+// AppointmentService 按项目、资源、预约现场流程、消息和报告五类能力组织。
 service AppointmentService {
+  // 检查项目目录与报告模板。
   rpc CreateExaminationItem(CreateExaminationItemRequest) returns (ExaminationItem);
   rpc GetExaminationItem(GetExaminationItemRequest) returns (ExaminationItem);
   rpc ListExaminationItems(ListExaminationItemsRequest) returns (ListExaminationItemsResponse);
@@ -14,23 +22,22 @@ service AppointmentService {
   rpc GetExaminationItemReportTemplate(GetExaminationItemRequest) returns (ExaminationItemReportTemplate);
   rpc SaveExaminationItemReportTemplate(SaveExaminationItemReportTemplateRequest) returns (ExaminationItemReportTemplate);
 
-  // Guidance 使用以下三个窄接口协调项目完整配置。预提交数据对普通项目查询不可见。
+  // Guidance 协调完整项目配置。预提交项目对普通查询不可见。
   rpc PrepareExaminationItemConfiguration(PrepareExaminationItemConfigurationRequest) returns (PreparedExaminationItemConfiguration);
   rpc ConfirmExaminationItemConfiguration(ExaminationItemConfigurationTransactionRequest) returns (ExaminationItem);
   rpc CancelExaminationItemConfiguration(ExaminationItemConfigurationTransactionRequest) returns (CancelExaminationItemConfigurationResponse);
 
+  // 房间、项目关联与每周开放窗口。
   rpc CreateRoom(CreateRoomRequest) returns (Room);
   rpc GetRoom(GetRoomRequest) returns (Room);
   rpc ListRooms(ListRoomsRequest) returns (ListRoomsResponse);
   rpc UpdateRoom(UpdateRoomRequest) returns (Room);
   rpc RetireRoom(RetireRoomRequest) returns (Room);
-
   rpc AddRoomExaminationItem(AddRoomExaminationItemRequest) returns (RoomExaminationItem);
   rpc DisableRoomExaminationItem(ChangeResourceStatusRequest) returns (RoomExaminationItem);
   rpc EnableRoomExaminationItem(ChangeResourceStatusRequest) returns (RoomExaminationItem);
   rpc ListRoomExaminationItems(ListRoomExaminationItemsRequest) returns (ListRoomExaminationItemsResponse);
   rpc ListAvailableRoomsByExaminationItem(ListAvailableRoomsByExaminationItemRequest) returns (ListRoomExaminationItemsResponse);
-
   rpc SetRoomWeeklyWindow(SetRoomWeeklyWindowRequest) returns (RoomWeeklyWindow);
   rpc DisableRoomWeeklyWindow(ChangeResourceStatusRequest) returns (RoomWeeklyWindow);
   rpc ListRoomWeeklyWindows(ListWeeklyWindowsRequest) returns (ListRoomWeeklyWindowsResponse);
@@ -38,6 +45,7 @@ service AppointmentService {
   rpc DisableItemWeeklyWindow(ChangeResourceStatusRequest) returns (ItemWeeklyWindow);
   rpc ListItemWeeklyWindows(ListWeeklyWindowsRequest) returns (ListItemWeeklyWindowsResponse);
 
+  // 患者预约与科室现场检查流程。
   rpc ListBookingOptions(ListBookingOptionsRequest) returns (ListBookingOptionsResponse);
   rpc CreateBooking(CreateBookingRequest) returns (Booking);
   rpc CreateBookingBatch(CreateBookingBatchRequest) returns (CreateBookingBatchResponse);
@@ -45,17 +53,20 @@ service AppointmentService {
   rpc GetMyBooking(GetBookingRequest) returns (Booking);
   rpc ListMyBookings(ListMyBookingsRequest) returns (ListBookingsResponse);
   rpc DeleteMyBooking(DeleteBookingRequest) returns (DeleteBookingResponse);
-  rpc ListMyMessages(ListMyMessagesRequest) returns (ListMessagesResponse);
-  rpc MarkMyMessageRead(MarkMessageReadRequest) returns (Message);
   rpc GetBooking(GetBookingRequest) returns (Booking);
   rpc ListBookings(ListBookingsRequest) returns (ListBookingsResponse);
   rpc StartExamination(StartExaminationRequest) returns (Booking);
   rpc CallNextBooking(CallNextBookingRequest) returns (Booking);
   rpc EndExamination(EndExaminationRequest) returns (Booking);
   rpc DeleteBooking(DeleteBookingRequest) returns (DeleteBookingResponse);
+
+  // 患者本人消息与科室消息。
+  rpc ListMyMessages(ListMyMessagesRequest) returns (ListMessagesResponse);
+  rpc MarkMyMessageRead(MarkMessageReadRequest) returns (Message);
   rpc ListMessages(ListMessagesRequest) returns (ListMessagesResponse);
   rpc MarkMessageRead(MarkMessageReadRequest) returns (Message);
 
+  // 报告草稿、发布、更正和只读查询。
   rpc SaveExaminationReportDraft(SaveExaminationReportDraftRequest) returns (ExaminationReport);
   rpc CompleteAndPublishExaminationReport(CompleteAndPublishExaminationReportRequest) returns (ExaminationReport);
   rpc CorrectExaminationReport(CorrectExaminationReportRequest) returns (ExaminationReport);
@@ -65,647 +76,6 @@ service AppointmentService {
   rpc GetMyExaminationReport(GetExaminationReportRequest) returns (ExaminationReport);
   rpc ListMyExaminationReports(ListMyExaminationReportsRequest) returns (ListExaminationReportsResponse);
 
-  // Guidance 等内部服务只通过该窄用途接口确认项目归属和状态。
-  // 返回复用 ExaminationItem，避免为了只读投影引入重复消息结构。
+  // Guidance 只读确认项目归属与状态，不跨库读取 Appointment。
   rpc GetExaminationItemReference(GetExaminationItemRequest) returns (ExaminationItem);
-}
-
-// ExaminationItemInput contains only fields controlled by the caller when
-// creating an examination catalog item. IDs, status, version, and timestamps
-// are generated by Appointment Service.
-message ExaminationItemInput {
-  string owner_department_id = 1;
-  string name = 2;
-  string description = 3;
-  int32 estimated_duration_minutes = 4;
-}
-
-message CreateExaminationItemRequest {
-  ExaminationItemInput examination_item = 1;
-  string operation_id = 2;
-  string request_id = 3;
-}
-
-message GetExaminationItemRequest {
-  string item_id = 1;
-  string request_id = 2;
-}
-
-message ListExaminationItemsRequest {
-  string owner_department_id = 1;
-  string status = 2;
-  int64 page = 3;
-  int64 page_size = 4;
-  string request_id = 5;
-  string audience = 6;
-}
-
-message ListExaminationItemsResponse {
-  repeated ExaminationItem items = 1;
-  int64 page = 2;
-  int64 page_size = 3;
-  int64 total = 4;
-}
-
-message UpdateExaminationItemRequest {
-  string item_id = 1;
-  optional string name = 2;
-  optional string description = 3;
-  int64 expected_version = 4;
-  string operation_id = 5;
-  string request_id = 6;
-  optional int32 estimated_duration_minutes = 7;
-}
-
-message ChangeExaminationItemStatusRequest {
-  string item_id = 1;
-  int64 expected_version = 2;
-  string operation_id = 3;
-  string request_id = 4;
-}
-
-message ExaminationItem {
-  string item_id = 1;
-  string owner_department_id = 2;
-  string name = 3;
-  string description = 4;
-  string status = 5;
-  int64 version = 6;
-  string created_at = 7;
-  string updated_at = 8;
-  int32 estimated_duration_minutes = 9;
-}
-
-message ExaminationItemReportTemplate {
-  string item_id = 1;
-  ExaminationReportContent content = 2;
-  int64 version = 3;
-  string updated_at = 4;
-}
-
-message SaveExaminationItemReportTemplateRequest {
-  string item_id = 1;
-  ExaminationReportContent content = 2;
-  int64 expected_template_version = 3;
-  string operation_id = 4;
-  string request_id = 5;
-}
-
-message PrepareExaminationItemConfigurationRequest {
-  string transaction_id = 1;
-  string action = 2;
-  string item_id = 3;
-  string owner_department_id = 4;
-  string name = 5;
-  int32 estimated_duration_minutes = 6;
-  int64 expected_version = 7;
-  string operation_id = 8;
-  string request_id = 9;
-  // Guidance 是说明的事实来源；Appointment 只保存患者目录读取所需的发布快照。
-  string description = 10;
-}
-
-message PreparedExaminationItemConfiguration {
-  string transaction_id = 1;
-  string action = 2;
-  string item_id = 3;
-  int64 expected_version = 4;
-  string state = 5;
-}
-
-message ExaminationItemConfigurationTransactionRequest {
-  string transaction_id = 1;
-  string request_id = 2;
-}
-
-message CancelExaminationItemConfigurationResponse {
-  string transaction_id = 1;
-  bool cancelled = 2;
-}
-
-message CreateRoomRequest {
-  string department_id = 1;
-  string campus_id = 2;
-  string building = 3;
-  int32 floor_number = 4;
-  string room_number = 5;
-  string operation_id = 6;
-  string request_id = 7;
-}
-
-message GetRoomRequest {
-  string room_id = 1;
-  string request_id = 2;
-}
-
-message ListRoomsRequest {
-  string department_id = 1;
-  int64 page = 2;
-  int64 page_size = 3;
-  string request_id = 4;
-}
-
-message ListRoomsResponse {
-  repeated Room rooms = 1;
-  int64 page = 2;
-  int64 page_size = 3;
-  int64 total = 4;
-}
-
-message UpdateRoomRequest {
-  string room_id = 1;
-  string campus_id = 2;
-  string building = 3;
-  int32 floor_number = 4;
-  string room_number = 5;
-  int64 expected_version = 6;
-  string operation_id = 7;
-  string request_id = 8;
-}
-
-message RetireRoomRequest {
-  string room_id = 1;
-  int64 expected_version = 2;
-  string operation_id = 3;
-  string request_id = 4;
-}
-
-message ChangeResourceStatusRequest {
-  string resource_id = 1;
-  int64 expected_version = 2;
-  string operation_id = 3;
-  string request_id = 4;
-}
-
-message Room {
-  string room_id = 1;
-  string department_id = 2;
-  string campus_id = 3;
-  string building = 4;
-  int32 floor_number = 5;
-  string room_number = 6;
-  string display_name = 7;
-  int64 version = 8;
-  string created_at = 9;
-  string updated_at = 10;
-}
-
-message AddRoomExaminationItemRequest {
-  string room_id = 1;
-  string item_id = 2;
-  string operation_id = 3;
-  string request_id = 4;
-}
-
-message ListRoomExaminationItemsRequest {
-  string room_id = 1;
-  string status = 2;
-  int64 page = 3;
-  int64 page_size = 4;
-  string request_id = 5;
-}
-
-message ListAvailableRoomsByExaminationItemRequest {
-  string item_id = 1;
-  bool active_only = 2;
-  string request_id = 3;
-}
-
-message ListRoomExaminationItemsResponse {
-  repeated RoomExaminationItem relations = 1;
-  int64 page = 2;
-  int64 page_size = 3;
-  int64 total = 4;
-}
-
-message RoomExaminationItem {
-  string relation_id = 1;
-  string room_id = 2;
-  string item_id = 3;
-  string room_display_name = 4;
-  string item_name = 5;
-  string status = 6;
-  int64 version = 7;
-  string created_at = 8;
-  string updated_at = 9;
-  string campus_id = 10;
-  string building = 11;
-  int32 floor_number = 12;
-  string room_number = 13;
-}
-
-message SetRoomWeeklyWindowRequest {
-  string window_id = 1;
-  string room_id = 2;
-  int32 weekday = 3;
-  string session = 4;
-  string open_time = 5;
-  string close_time = 6;
-  int64 active_capacity = 7;
-  int64 expected_version = 8;
-  string operation_id = 9;
-  string request_id = 10;
-}
-
-message SetItemWeeklyWindowRequest {
-  string window_id = 1;
-  string item_id = 2;
-  int32 weekday = 3;
-  string session = 4;
-  string start_time = 5;
-  string booking_cutoff_time = 6;
-  string end_time = 7;
-  int64 expected_version = 8;
-  string operation_id = 9;
-  string request_id = 10;
-}
-
-message ListWeeklyWindowsRequest {
-  string resource_id = 1;
-  bool active_only = 2;
-  string request_id = 3;
-}
-
-message ListRoomWeeklyWindowsResponse {
-  repeated RoomWeeklyWindow windows = 1;
-}
-
-message ListItemWeeklyWindowsResponse {
-  repeated ItemWeeklyWindow windows = 1;
-}
-
-message ListBookingOptionsRequest {
-  string item_id = 1;
-  string request_id = 2;
-}
-
-message BookingOption {
-  string item_id = 1;
-  string room_id = 2;
-  string room_display_name = 3;
-  string campus_id = 4;
-  string building = 5;
-  int32 floor_number = 6;
-  string room_number = 7;
-  string service_date = 8;
-  string session = 9;
-  string room_open_time = 10;
-  string room_close_time = 11;
-  string item_start_time = 12;
-  string item_end_time = 13;
-  string booking_cutoff_time = 14;
-  int64 total_capacity = 15;
-  int64 remaining_capacity = 16;
-  int32 estimated_duration_minutes = 17;
-}
-
-message ListBookingOptionsResponse {
-  repeated BookingOption options = 1;
-  string week_start_date = 2;
-  string week_end_date = 3;
-}
-
-message CreateBookingRequest {
-  string item_id = 1;
-  string room_id = 2;
-  string service_date = 3;
-  string session = 4;
-  string operation_id = 5;
-  string request_id = 6;
-  string patient_display_name = 7;
-  string patient_phone_masked = 8;
-}
-
-message BookingBatchItem {
-  string item_id = 1;
-  string room_id = 2;
-  string service_date = 3;
-  string session = 4;
-}
-
-message CreateBookingBatchRequest {
-  repeated BookingBatchItem items = 1;
-  string operation_id = 2;
-  string request_id = 3;
-  string patient_display_name = 4;
-  string patient_phone_masked = 5;
-}
-
-message CreateBookingBatchResponse {
-  repeated Booking bookings = 1;
-}
-
-message GetBookingRequest {
-  string booking_id = 1;
-  string request_id = 2;
-}
-
-message ListMyBookingsRequest {
-  int64 page = 1;
-  int64 page_size = 2;
-  string request_id = 3;
-  string view = 4;
-}
-
-message ListBookingsRequest {
-  string department_id = 1;
-  string service_date = 2;
-  string session = 3;
-  string item_id = 4;
-  string room_id = 5;
-  string status = 6;
-  int64 page = 7;
-  int64 page_size = 8;
-  string request_id = 9;
-  string patient_keyword = 10;
-  string view = 11;
-}
-
-message DeleteBookingRequest {
-  string booking_id = 1;
-  string operation_id = 2;
-  string reason = 3;
-  string request_id = 4;
-}
-
-message DeleteBookingResponse {
-  string booking_id = 1;
-  bool deleted = 2;
-}
-
-message StartExaminationRequest {
-  string booking_id = 1;
-  int64 expected_version = 2;
-  string operation_id = 3;
-  string request_id = 4;
-  string actor_display_name = 5;
-}
-
-message CheckInBookingRequest {
-  string booking_id = 1;
-  int64 expected_version = 2;
-  string operation_id = 3;
-  string request_id = 4;
-}
-
-message CallNextBookingRequest {
-  string department_id = 1;
-  string room_id = 2;
-  string service_date = 3;
-  string operation_id = 4;
-  string request_id = 5;
-}
-
-message EndExaminationRequest {
-  string booking_id = 1;
-  int64 expected_version = 2;
-  string operation_id = 3;
-  string request_id = 4;
-  string actor_display_name = 5;
-}
-
-message Booking {
-  string booking_id = 1;
-  string patient_account_id = 2;
-  string department_id = 3;
-  string item_id = 4;
-  string item_name = 5;
-  string room_id = 6;
-  string room_display_name = 7;
-  string campus_id = 8;
-  string service_date = 9;
-  string session = 10;
-  string status = 11;
-  string room_open_time = 12;
-  string room_close_time = 13;
-  string item_start_time = 14;
-  string item_end_time = 15;
-  string booking_cutoff_time = 16;
-  int64 version = 17;
-  string created_at = 18;
-  string updated_at = 19;
-  string started_at = 22;
-  string started_by = 23;
-  string completed_at = 24;
-  string completed_by = 25;
-  string building = 26;
-  int32 floor_number = 27;
-  string room_number = 28;
-  string patient_display_name = 29;
-  string patient_phone_masked = 30;
-  string started_by_display_name = 31;
-  string completed_by_display_name = 32;
-  string report_id = 33;
-  string report_status = 34;
-  int64 report_version = 35;
-  int32 estimated_duration_minutes = 36;
-  string examination_ended_at = 37;
-  string examination_ended_by = 38;
-  string examination_ended_by_display_name = 39;
-  int64 queue_number = 40;
-  int64 current_called_queue_number = 41;
-  int64 people_ahead = 42;
-  string checked_in_at = 43;
-  string called_at = 44;
-  string call_deadline = 45;
-  int64 call_attempts = 46;
-}
-
-message ListBookingsResponse {
-  repeated Booking bookings = 1;
-  int64 page = 2;
-  int64 page_size = 3;
-  int64 total = 4;
-}
-
-message ListMyMessagesRequest {
-  int64 page = 1;
-  int64 page_size = 2;
-  string request_id = 3;
-}
-
-message ListMessagesRequest {
-  string department_id = 1;
-  int64 page = 2;
-  int64 page_size = 3;
-  string request_id = 4;
-}
-
-message MarkMessageReadRequest {
-  string message_key = 1;
-  string department_id = 2;
-  string request_id = 3;
-}
-
-message Message {
-  string message_key = 1;
-  string message_type = 2;
-  string occurred_at = 3;
-  string read_at = 4;
-  Booking booking = 5;
-  string report_id = 6;
-  string report_version_id = 7;
-  int64 report_version_no = 8;
-}
-
-message DepartmentUnreadCount {
-  string department_id = 1;
-  int64 unread_count = 2;
-}
-
-message ListMessagesResponse {
-  repeated Message messages = 1;
-  int64 page = 2;
-  int64 page_size = 3;
-  int64 total = 4;
-  int64 unread_count = 5;
-  repeated DepartmentUnreadCount department_unread_counts = 6;
-}
-
-message ExaminationReportContent {
-  string objective_findings = 1;
-  string impression = 2;
-  string recommendation = 3;
-  string notes = 4;
-}
-
-message SaveExaminationReportDraftRequest {
-  string booking_id = 1;
-  ExaminationReportContent content = 2;
-  int64 expected_report_version = 3;
-  string operation_id = 4;
-  string request_id = 5;
-  string actor_display_name = 6;
-}
-
-message CompleteAndPublishExaminationReportRequest {
-  string booking_id = 1;
-  ExaminationReportContent content = 2;
-  int64 expected_booking_version = 3;
-  int64 expected_report_version = 4;
-  string operation_id = 5;
-  string request_id = 6;
-  string actor_display_name = 7;
-  string department_name = 8;
-  string campus_name = 9;
-}
-
-message CorrectExaminationReportRequest {
-  string report_id = 1;
-  ExaminationReportContent content = 2;
-  string correction_reason = 3;
-  int64 expected_report_version = 4;
-  string operation_id = 5;
-  string request_id = 6;
-  string actor_display_name = 7;
-}
-
-message GetExaminationReportRequest {
-  string booking_id = 1;
-  string request_id = 2;
-}
-
-message ListExaminationReportsRequest {
-  string department_id = 1;
-  int64 page = 2;
-  int64 page_size = 3;
-  string request_id = 4;
-  string keyword = 5;
-}
-
-message ListExaminationReportVersionsRequest {
-  string report_id = 1;
-  string request_id = 2;
-}
-
-message ListMyExaminationReportsRequest {
-  int64 page = 1;
-  int64 page_size = 2;
-  string request_id = 3;
-}
-
-message ExaminationReportVersion {
-  string version_id = 1;
-  int64 version_no = 2;
-  string version_kind = 3;
-  string status = 4;
-  string objective_findings = 5;
-  string impression = 6;
-  string recommendation = 7;
-  string notes = 8;
-  string correction_reason = 9;
-  string authored_by = 10;
-  string published_by = 11;
-  string published_at = 12;
-  string created_at = 13;
-  string updated_at = 14;
-  string authored_by_display_name = 15;
-  string published_by_display_name = 16;
-}
-
-message ExaminationReport {
-  string report_id = 1;
-  string booking_id = 2;
-  string patient_account_id = 3;
-  string department_id = 4;
-  string item_id = 5;
-  string item_name = 6;
-  string room_id = 7;
-  string campus_id = 8;
-  string building = 9;
-  int32 floor_number = 10;
-  string room_number = 11;
-  string room_display_name = 12;
-  string status = 13;
-  string performed_by = 14;
-  string examination_started_at = 15;
-  string examination_completed_at = 16;
-  int64 version = 17;
-  ExaminationReportVersion current_version = 18;
-  string created_at = 19;
-  string updated_at = 20;
-  string patient_display_name = 21;
-  string patient_phone_masked = 22;
-  string department_name = 23;
-  string campus_name = 24;
-  string performed_by_display_name = 25;
-}
-
-message ListExaminationReportVersionsResponse {
-  repeated ExaminationReportVersion versions = 1;
-}
-
-message ListExaminationReportsResponse {
-  repeated ExaminationReport reports = 1;
-  int64 page = 2;
-  int64 page_size = 3;
-  int64 total = 4;
-}
-
-message RoomWeeklyWindow {
-  string window_id = 1;
-  string room_id = 2;
-  int32 weekday = 3;
-  string session = 4;
-  string open_time = 5;
-  string close_time = 6;
-  int64 active_capacity = 7;
-  string status = 8;
-  int64 version = 9;
-  string created_at = 10;
-  string updated_at = 11;
-}
-
-message ItemWeeklyWindow {
-  string window_id = 1;
-  string item_id = 2;
-  int32 weekday = 3;
-  string session = 4;
-  string start_time = 5;
-  string booking_cutoff_time = 6;
-  string end_time = 7;
-  string status = 8;
-  int64 version = 9;
-  string created_at = 10;
-  string updated_at = 11;
 }

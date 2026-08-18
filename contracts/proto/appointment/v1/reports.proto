@@ -1,0 +1,126 @@
+syntax = "proto3";
+
+package hospital.appointment.v1;
+
+option go_package = "hospital/contracts/gen/appointment/v1;appointmentv1";
+
+// 检查报告草稿、发布、更正与版本查询。
+message ExaminationReportContent {
+  string objective_findings = 1;
+  string impression = 2;
+  string recommendation = 3;
+  string notes = 4;
+}
+
+message SaveExaminationReportDraftRequest {
+  string booking_id = 1;
+  ExaminationReportContent content = 2;
+  int64 expected_report_version = 3;
+  string operation_id = 4;
+  string request_id = 5;
+  string actor_display_name = 6;
+}
+
+message CompleteAndPublishExaminationReportRequest {
+  string booking_id = 1;
+  ExaminationReportContent content = 2;
+  int64 expected_booking_version = 3;
+  int64 expected_report_version = 4;
+  string operation_id = 5;
+  string request_id = 6;
+  string actor_display_name = 7;
+  string department_name = 8;
+  string campus_name = 9;
+}
+
+message CorrectExaminationReportRequest {
+  string report_id = 1;
+  ExaminationReportContent content = 2;
+  string correction_reason = 3;
+  int64 expected_report_version = 4;
+  string operation_id = 5;
+  string request_id = 6;
+  string actor_display_name = 7;
+}
+
+message GetExaminationReportRequest {
+  string booking_id = 1;
+  string request_id = 2;
+}
+
+message ListExaminationReportsRequest {
+  string department_id = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  string request_id = 4;
+  string keyword = 5;
+}
+
+message ListExaminationReportVersionsRequest {
+  string report_id = 1;
+  string request_id = 2;
+}
+
+message ListMyExaminationReportsRequest {
+  int64 page = 1;
+  int64 page_size = 2;
+  string request_id = 3;
+}
+
+message ExaminationReportVersion {
+  string version_id = 1;
+  int64 version_no = 2;
+  string version_kind = 3;
+  string status = 4;
+  string objective_findings = 5;
+  string impression = 6;
+  string recommendation = 7;
+  string notes = 8;
+  string correction_reason = 9;
+  string authored_by = 10;
+  string published_by = 11;
+  string published_at = 12;
+  string created_at = 13;
+  string updated_at = 14;
+  string authored_by_display_name = 15;
+  string published_by_display_name = 16;
+}
+
+message ExaminationReport {
+  string report_id = 1;
+  string booking_id = 2;
+  string patient_account_id = 3;
+  string department_id = 4;
+  string item_id = 5;
+  string item_name = 6;
+  string room_id = 7;
+  string campus_id = 8;
+  string building = 9;
+  int32 floor_number = 10;
+  string room_number = 11;
+  string room_display_name = 12;
+  string status = 13;
+  string performed_by = 14;
+  string examination_started_at = 15;
+  string examination_completed_at = 16;
+  int64 version = 17;
+  ExaminationReportVersion current_version = 18;
+  string created_at = 19;
+  string updated_at = 20;
+  string patient_display_name = 21;
+  string patient_phone_masked = 22;
+  string department_name = 23;
+  string campus_name = 24;
+  string performed_by_display_name = 25;
+}
+
+message ListExaminationReportVersionsResponse {
+  repeated ExaminationReportVersion versions = 1;
+}
+
+message ListExaminationReportsResponse {
+  repeated ExaminationReport reports = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  int64 total = 4;
+}

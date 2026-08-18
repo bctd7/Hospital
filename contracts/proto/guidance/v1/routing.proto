@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package hospital.guidance.v1;
+
+option go_package = "hospital/contracts/gen/guidance/v1;guidancev1";
+
+// 高德地点搜索与两点路线。
+message LocationPoint {
+  string name = 1;
+  string address = 2;
+  double latitude = 3;
+  double longitude = 4;
+  string provider_place_id = 5;
+}
+
+message SearchPlacesRequest {
+  string keyword = 1;
+  string city = 2;
+  int32 limit = 3;
+  string request_id = 4;
+}
+
+message SearchPlacesResponse {
+  repeated LocationPoint places = 1;
+}
+
+message RoutePoint {
+  double latitude = 1;
+  double longitude = 2;
+}
+
+message WalkingRouteStep {
+  string instruction = 1;
+  string road_name = 2;
+  int32 distance_meters = 3;
+  int32 duration_seconds = 4;
+}
+
+message CalculateWalkingRouteRequest {
+  LocationPoint origin = 1;
+  LocationPoint destination = 2;
+  string request_id = 3;
+  string mode = 4;
+}
+
+message WalkingRoute {
+  LocationPoint origin = 1;
+  LocationPoint destination = 2;
+  int32 distance_meters = 3;
+  int32 duration_seconds = 4;
+  repeated RoutePoint polyline = 5;
+  repeated WalkingRouteStep steps = 6;
+  string provider = 7;
+  string mode = 8;
+}

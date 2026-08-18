@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$repositoryRoot = Split-Path -Parent $PSScriptRoot
+$repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 
 function Invoke-ExternalCheck {
     param(
@@ -23,6 +23,12 @@ function Invoke-ExternalCheck {
 
 Push-Location $repositoryRoot
 try {
+    Write-Host "==> Validating Protobuf contracts"
+    & (Join-Path $repositoryRoot "scripts/contracts/generate-protobuf.ps1") -Check
+
+    Write-Host "==> Validating flattened database migrations"
+    & (Join-Path $repositoryRoot "scripts/database/validate-flat-migrations.ps1")
+
     Invoke-ExternalCheck -Label "Validating go-zero API contract" -Command "goctl" -Arguments @(
         "api", "validate", "-api", "contracts/api/app.api"
     )

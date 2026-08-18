@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package hospital.guidance.v1;
+
+option go_package = "hospital/contracts/gen/guidance/v1;guidancev1";
+
+// 智能预约方案、整组确认与当日检查顺序。
+message GenerateSmartAppointmentPlansRequest {
+  repeated string item_ids = 1;
+  repeated string candidate_dates = 2;
+  string request_id = 3;
+  repeated CandidateAvailability candidate_availability = 4;
+}
+
+message CandidateAvailability {
+  string service_date = 1;
+  repeated string sessions = 2;
+}
+
+message SmartAppointmentPlanItem {
+  string item_id = 1;
+  string item_name = 2;
+  string room_id = 3;
+  string room_display_name = 4;
+  string campus_id = 5;
+  string building = 6;
+  int32 floor_number = 7;
+  string room_number = 8;
+  string service_date = 9;
+  string session = 10;
+  int32 estimated_duration_minutes = 11;
+  string reason = 12;
+  string planned_start_time = 13;
+  string planned_end_time = 14;
+  int32 travel_minutes = 15;
+  bool travel_time_estimated = 16;
+}
+
+message SmartAppointmentPlan {
+  string plan_id = 1;
+  string title = 2;
+  string summary = 3;
+  repeated SmartAppointmentPlanItem items = 4;
+  string expires_at = 5;
+}
+
+message SmartAppointmentPlansResponse {
+  repeated SmartAppointmentPlan plans = 1;
+}
+
+message ConfirmSmartAppointmentPlanRequest {
+  string plan_id = 1;
+  string operation_id = 2;
+  string patient_display_name = 3;
+  string patient_phone_masked = 4;
+  string request_id = 5;
+}
+
+message ConfirmedSmartAppointmentPlan {
+  string plan_id = 1;
+  repeated string booking_ids = 2;
+}
+
+message GetTodayExaminationRecommendationRequest {
+  string request_id = 1;
+}
+
+message TodayRecommendationStage {
+  int32 stage_no = 1;
+  string title = 2;
+  string status = 3;
+  repeated SmartAppointmentPlanItem items = 4;
+  string focus = 5;
+}
+
+message TodayExaminationRecommendation {
+  string service_date = 1;
+  repeated TodayRecommendationStage stages = 2;
+  string updated_at = 3;
+}

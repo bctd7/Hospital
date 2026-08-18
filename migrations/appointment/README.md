@@ -26,8 +26,8 @@
 本地执行：
 
 ```powershell
-.\scripts\migrate.ps1 -Service appointment -Direction up
-.\scripts\migrate.ps1 -Service appointment -Direction version
+.\scripts\database\migrate.ps1 -Service appointment -Direction up
+.\scripts\database\migrate.ps1 -Service appointment -Direction version
 ```
 
 在正式发布前如需继续调整初始结构，可以再次重建本地 Appointment 数据库。发布后不得修改已执行迁移，必须新增版本。

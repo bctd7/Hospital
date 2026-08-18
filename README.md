@@ -50,6 +50,8 @@ Guidance -> MySQL
 | `service/appointment/rpc/` | 检查资源、预约、容量、报告和消息领域 |
 | `service/guidance/rpc/` | 项目配置协调、规则、智能预约、当日顺序和路线领域 |
 | `migrations/` | Identity、Appointment 与 Guidance 数据库版本事实 |
+| `scripts/` | 按契约、数据库、开发和质量划分的人工工作流入口 |
+| `tools/` | 数据库迁移、Identity 初始化与密钥生成等独立 Go 命令 |
 | `common/` | 认证、授权与可观测性等跨服务技术能力 |
 | `plan/` | 当前有效设计、已实现归档与后续提案 |
 
@@ -57,11 +59,11 @@ Guidance -> MySQL
 
 ```powershell
 Copy-Item .env.example .env
-.\scripts\db-bootstrap-local.ps1
-.\scripts\migrate.ps1 -Service identity -Direction up
-.\scripts\migrate.ps1 -Service appointment -Direction up
-.\scripts\migrate.ps1 -Service guidance -Direction up
-.\scripts\start-backend.ps1 -Restart
+.\scripts\database\bootstrap-local.ps1
+.\scripts\database\migrate.ps1 -Service identity -Direction up
+.\scripts\database\migrate.ps1 -Service appointment -Direction up
+.\scripts\database\migrate.ps1 -Service guidance -Direction up
+.\scripts\development\start-backend.ps1 -Restart
 ```
 
 健康检查：
@@ -87,6 +89,7 @@ HTTP 契约入口是 `contracts/api/app.api`，内部 RPC 契约位于 `contract
 OpenAPI 快照，路径和字段直接以契约源文件为准。
 
 ```powershell
+.\scripts\contracts\generate-protobuf.ps1 -Check
 goctl api validate -api contracts/api/app.api
 ```
 
@@ -96,7 +99,7 @@ goctl api validate -api contracts/api/app.api
 ## 测试
 
 ```powershell
-.\scripts\check.ps1
+.\scripts\quality\verify-repository.ps1
 ```
 
 该脚本校验契约、事件 Schema、Compose、Go Test/Vet、小程序测试、TypeScript，以及开发版和发布版微信小程序

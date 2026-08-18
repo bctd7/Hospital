@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v7.34.1
-// source: contracts/proto/guidance/v1/guidance.proto
+// source: guidance/v1/guidance.proto
 
 package guidancev1
 
@@ -36,17 +36,23 @@ const (
 // GuidanceServiceClient is the client API for GuidanceService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// GuidanceService 按规则、项目配置、方案规划和地图路线四类能力组织。
 type GuidanceServiceClient interface {
+	// 项目直接先后关系。
 	CreatePrecedenceRule(ctx context.Context, in *CreatePrecedenceRuleRequest, opts ...grpc.CallOption) (*PrecedenceRule, error)
 	UpdatePrecedenceRule(ctx context.Context, in *UpdatePrecedenceRuleRequest, opts ...grpc.CallOption) (*PrecedenceRule, error)
 	DeletePrecedenceRule(ctx context.Context, in *DeletePrecedenceRuleRequest, opts ...grpc.CallOption) (*DeletePrecedenceRuleResponse, error)
 	ListPrecedenceRules(ctx context.Context, in *ListPrecedenceRulesRequest, opts ...grpc.CallOption) (*ListPrecedenceRulesResponse, error)
+	// 检查说明解析与项目完整配置。
 	PreviewPreparationRules(ctx context.Context, in *PreviewPreparationRulesRequest, opts ...grpc.CallOption) (*PreparationRulePreview, error)
 	GetExaminationItemConfiguration(ctx context.Context, in *GetExaminationItemConfigurationRequest, opts ...grpc.CallOption) (*ExaminationItemConfiguration, error)
 	ConfigureExaminationItem(ctx context.Context, in *ConfigureExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItemConfiguration, error)
+	// 智能预约与当日检查顺序。
 	GenerateSmartAppointmentPlans(ctx context.Context, in *GenerateSmartAppointmentPlansRequest, opts ...grpc.CallOption) (*SmartAppointmentPlansResponse, error)
 	ConfirmSmartAppointmentPlan(ctx context.Context, in *ConfirmSmartAppointmentPlanRequest, opts ...grpc.CallOption) (*ConfirmedSmartAppointmentPlan, error)
 	GetTodayExaminationRecommendation(ctx context.Context, in *GetTodayExaminationRecommendationRequest, opts ...grpc.CallOption) (*TodayExaminationRecommendation, error)
+	// 地点检索和单段路线。
 	SearchPlaces(ctx context.Context, in *SearchPlacesRequest, opts ...grpc.CallOption) (*SearchPlacesResponse, error)
 	CalculateWalkingRoute(ctx context.Context, in *CalculateWalkingRouteRequest, opts ...grpc.CallOption) (*WalkingRoute, error)
 }
@@ -182,17 +188,23 @@ func (c *guidanceServiceClient) CalculateWalkingRoute(ctx context.Context, in *C
 // GuidanceServiceServer is the server API for GuidanceService service.
 // All implementations must embed UnimplementedGuidanceServiceServer
 // for forward compatibility.
+//
+// GuidanceService 按规则、项目配置、方案规划和地图路线四类能力组织。
 type GuidanceServiceServer interface {
+	// 项目直接先后关系。
 	CreatePrecedenceRule(context.Context, *CreatePrecedenceRuleRequest) (*PrecedenceRule, error)
 	UpdatePrecedenceRule(context.Context, *UpdatePrecedenceRuleRequest) (*PrecedenceRule, error)
 	DeletePrecedenceRule(context.Context, *DeletePrecedenceRuleRequest) (*DeletePrecedenceRuleResponse, error)
 	ListPrecedenceRules(context.Context, *ListPrecedenceRulesRequest) (*ListPrecedenceRulesResponse, error)
+	// 检查说明解析与项目完整配置。
 	PreviewPreparationRules(context.Context, *PreviewPreparationRulesRequest) (*PreparationRulePreview, error)
 	GetExaminationItemConfiguration(context.Context, *GetExaminationItemConfigurationRequest) (*ExaminationItemConfiguration, error)
 	ConfigureExaminationItem(context.Context, *ConfigureExaminationItemRequest) (*ExaminationItemConfiguration, error)
+	// 智能预约与当日检查顺序。
 	GenerateSmartAppointmentPlans(context.Context, *GenerateSmartAppointmentPlansRequest) (*SmartAppointmentPlansResponse, error)
 	ConfirmSmartAppointmentPlan(context.Context, *ConfirmSmartAppointmentPlanRequest) (*ConfirmedSmartAppointmentPlan, error)
 	GetTodayExaminationRecommendation(context.Context, *GetTodayExaminationRecommendationRequest) (*TodayExaminationRecommendation, error)
+	// 地点检索和单段路线。
 	SearchPlaces(context.Context, *SearchPlacesRequest) (*SearchPlacesResponse, error)
 	CalculateWalkingRoute(context.Context, *CalculateWalkingRouteRequest) (*WalkingRoute, error)
 	mustEmbedUnimplementedGuidanceServiceServer()
@@ -535,5 +547,5 @@ var GuidanceService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "contracts/proto/guidance/v1/guidance.proto",
+	Metadata: "guidance/v1/guidance.proto",
 }

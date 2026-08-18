@@ -1,3 +1,4 @@
+// 数据库迁移命令只执行版本化 SQL；服务选择和环境安全限制由 scripts/database/migrate.ps1 负责。
 package main
 
 import (
@@ -23,7 +24,6 @@ type options struct {
 	dsnEnvironment string
 	direction      string
 	steps          int
-	baseline       uint
 }
 
 func main() {
@@ -35,11 +35,10 @@ func main() {
 
 func parseOptions() options {
 	var opts options
-	flag.StringVar(&opts.migrationsPath, "migrations", "", "directory containing migration SQL files")
-	flag.StringVar(&opts.dsnEnvironment, "dsn-env", "", "environment variable containing the MySQL DSN")
-	flag.StringVar(&opts.direction, "direction", "up", "migration operation: up, down, version, or baseline")
-	flag.IntVar(&opts.steps, "steps", 1, "number of migrations to roll back")
-	flag.UintVar(&opts.baseline, "baseline-version", 0, "existing schema version to record during baseline")
+	flag.StringVar(&opts.migrationsPath, "migrations", "", "迁移 SQL 所在目录")
+	flag.StringVar(&opts.dsnEnvironment, "dsn-env", "", "保存 MySQL DSN 的环境变量名称")
+	flag.StringVar(&opts.direction, "direction", "up", "迁移操作：up、down 或 version")
+	flag.IntVar(&opts.steps, "steps", 1, "down 时回滚的迁移版本数")
 	flag.Parse()
 	return opts
 }
@@ -86,8 +85,6 @@ func run(opts options) error {
 		return runDown(runner, opts.steps)
 	case "version":
 		return printVersion(runner)
-	case "baseline":
-		return runBaseline(runner, opts.baseline)
 	default:
 		return fmt.Errorf("unsupported direction %q", opts.direction)
 	}
@@ -153,25 +150,6 @@ func runDown(runner *migrate.Migrate, steps int) error {
 		return fmt.Errorf("roll back %d migration(s): %w", steps, err)
 	}
 	return printVersion(runner)
-}
-
-func runBaseline(runner *migrate.Migrate, version uint) error {
-	if version == 0 {
-		return errors.New("-baseline-version must be greater than zero")
-	}
-
-	currentVersion, dirty, err := runner.Version()
-	if err == nil {
-		return fmt.Errorf("database already has migration version %d (dirty=%t)", currentVersion, dirty)
-	}
-	if !errors.Is(err, migrate.ErrNilVersion) {
-		return fmt.Errorf("read current migration version before baseline: %w", err)
-	}
-	if err := runner.Force(int(version)); err != nil {
-		return fmt.Errorf("record baseline version %d: %w", version, err)
-	}
-	fmt.Printf("recorded existing schema as migration version %d; no schema SQL was executed\n", version)
-	return nil
 }
 
 func printVersion(runner *migrate.Migrate) error {

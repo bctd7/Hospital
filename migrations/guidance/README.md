@@ -9,7 +9,7 @@ Guidance 使用独立数据库 `hospital_guidance`。当前压平后的初始迁
 - `guidance_smart_appointment_plans`：短期智能预约候选及其原子确认结果，用于幂等重试。
 
 ```powershell
-.\scripts\migrate.ps1 -Service guidance -Direction up
+.\scripts\database\migrate.ps1 -Service guidance -Direction up
 ```
 
 表中只保存 Appointment 项目和科室的稳定 ID 与必要名称快照，不建立跨数据库外键，也不直接读取 Appointment

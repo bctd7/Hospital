@@ -140,17 +140,18 @@ Appointment 需要 MySQL、授权版本 Redis、业务缓存 Redis 和 Identity 
 默认装配见 `rpc/etc/appointment.yaml`，真实密钥只存在于本地 `.env` 或部署 Secret，不写入 README。
 
 ```powershell
-.\scripts\migrate.ps1 -Service appointment -Direction up
-.\scripts\seed-comprehensive-test-data.ps1 -Reset
-.\scripts\start-backend.ps1 -Restart
+.\scripts\database\migrate.ps1 -Service appointment -Direction up
+.\scripts\database\seed-comprehensive-test-data.ps1 -Reset
+.\scripts\development\start-backend.ps1 -Restart
 go test ./service/appointment/...
 go test ./service/app/api/...
 goctl api validate -api contracts/api/app.api
-.\scripts\check.ps1
+.\scripts\quality\verify-repository.ps1
 ```
 
 综合测试数据覆盖多科室、严格地址房间、共享容量、八种预约状态、候检叫号、过号顺延、未到场、草稿、正式与
-更正报告，以及患者/科室消息。具体体验账号和场景见 [`scripts/README.md`](../../scripts/README.md)。
+更正报告，以及患者/科室消息。具体体验账号和场景见
+[`scripts/database/README.md`](../../scripts/database/README.md)。
 
 ## 当前不包含
 

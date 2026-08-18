@@ -102,16 +102,16 @@ AMAP_WEB_SERVICE_KEY=你的高德Web服务Key
 同一请求中降级到确定性解析，而不是把 `context deadline exceeded` 直接暴露给前端。
 
 ```powershell
-.\scripts\migrate.ps1 -Service guidance -Direction up
-.\scripts\seed-comprehensive-test-data.ps1 -Reset
-.\scripts\start-backend.ps1 -Restart
+.\scripts\database\migrate.ps1 -Service guidance -Direction up
+.\scripts\database\seed-comprehensive-test-data.ps1 -Reset
+.\scripts\development\start-backend.ps1 -Restart
 go test ./service/guidance/...
-.\scripts\check.ps1
+.\scripts\quality\verify-repository.ps1
 ```
 
 综合数据中 `13482154556` 复用真实超级管理员账号作为患者侧导诊体验账号，预置今日“血常规 → 冠状动脉 CTA
 → 泌尿系彩超”三条预约。可直接验证先后关系、饮水项目后置和逐站导航；提前规划的完整组合与预期结果见
-[`scripts/README.md`](../../scripts/README.md#智能导诊联调组合)。
+[`scripts/database/README.md`](../../scripts/database/README.md#智能导诊联调组合)。
 
 ## 当前不包含
 

@@ -5,8 +5,8 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$repositoryRoot = Split-Path -Parent $PSScriptRoot
-. (Join-Path $PSScriptRoot "lib/environment.ps1")
+$repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+. (Join-Path (Split-Path -Parent $PSScriptRoot) "lib/environment.ps1")
 Import-ProjectEnvironment -RepositoryRoot $repositoryRoot -Override
 
 if ((Get-RequiredEnvironmentValue -Name "APP_ENV") -ne "local") {
@@ -58,7 +58,7 @@ DROP DATABASE IF EXISTS hospital_guidance;
     if ($LASTEXITCODE -ne 0) {
         throw "Failed to reset local Identity, Appointment, and Guidance databases."
     }
-    & (Join-Path $PSScriptRoot "db-bootstrap-local.ps1")
+    & (Join-Path $PSScriptRoot "bootstrap-local.ps1")
     if ($LASTEXITCODE -ne 0) {
         throw "Failed to rebuild the latest local database schema."
     }
@@ -86,7 +86,7 @@ try {
     [Environment]::SetEnvironmentVariable("IDENTITY_BOOTSTRAP_ADMIN_PHONES", "13482154556,15363658538", "Process")
     Push-Location $repositoryRoot
     try {
-        & go run ./tools/identity-bootstrap-admin
+        & go run ./tools/identity/bootstrap-admin
         if ($LASTEXITCODE -ne 0) {
             throw "Failed to bootstrap the local comprehensive-test administrator."
         }

@@ -4,19 +4,19 @@
 
 ```text
 contracts/
-├── api/       # 对外 HTTP 的 go-zero .api 源文件
-├── proto/     # 内部 gRPC Protobuf 源文件
-├── gen/       # Protobuf 生成的共享 Go 类型和 Client
+├── api/       # 对外 HTTP：按身份、预约与导诊能力拆分的 go-zero 源文件
+├── proto/     # 内部 gRPC：每个服务一个入口文件，消息再按能力拆分
+├── gen/       # Protobuf 生成的共享 Go 类型和 Client，不手工修改
 ├── authz/     # permission 目录与生成 Go 常量
-└── events/    # Outbox/Kafka 事件 Schema
+└── events/    # Outbox/Kafka 事件 Schema 与 Go 信封
 ```
 
 ## 当前入口
 
 - HTTP：`contracts/api/app.api`；
-- Identity RPC：`contracts/proto/identity/v1/identity.proto`；
-- Appointment RPC：`contracts/proto/appointment/v1/appointment.proto`；
-- Guidance RPC：`contracts/proto/guidance/v1/guidance.proto`；
+- Identity RPC 服务入口：`contracts/proto/identity/v1/identity.proto`，消息按认证、本人资料、组织和账号管理拆分；
+- Appointment RPC 服务入口：`contracts/proto/appointment/v1/appointment.proto`，消息按项目、资源、预约、消息和报告拆分；
+- Guidance RPC 服务入口：`contracts/proto/guidance/v1/guidance.proto`，消息按先后规则、完整配置、方案和路线拆分；
 - 权限目录：`contracts/authz/permissions.yaml`；
 - 事件信封：`contracts/events/event-envelope.schema.json`；
 
@@ -33,6 +33,7 @@ contracts/
 ## 校验
 
 ```powershell
+.\scripts\contracts\generate-protobuf.ps1 -Check
 goctl api validate -api contracts/api/app.api
 go test ./contracts/...
 ```

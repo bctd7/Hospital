@@ -1,3 +1,4 @@
+// 管理员初始化命令在空 Identity 库中幂等创建医院根节点，并授予配置手机号超级管理员角色。
 package main
 
 import (

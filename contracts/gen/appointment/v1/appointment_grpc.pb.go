@@ -53,14 +53,14 @@ const (
 	AppointmentService_GetMyBooking_FullMethodName                        = "/hospital.appointment.v1.AppointmentService/GetMyBooking"
 	AppointmentService_ListMyBookings_FullMethodName                      = "/hospital.appointment.v1.AppointmentService/ListMyBookings"
 	AppointmentService_DeleteMyBooking_FullMethodName                     = "/hospital.appointment.v1.AppointmentService/DeleteMyBooking"
-	AppointmentService_ListMyMessages_FullMethodName                      = "/hospital.appointment.v1.AppointmentService/ListMyMessages"
-	AppointmentService_MarkMyMessageRead_FullMethodName                   = "/hospital.appointment.v1.AppointmentService/MarkMyMessageRead"
 	AppointmentService_GetBooking_FullMethodName                          = "/hospital.appointment.v1.AppointmentService/GetBooking"
 	AppointmentService_ListBookings_FullMethodName                        = "/hospital.appointment.v1.AppointmentService/ListBookings"
 	AppointmentService_StartExamination_FullMethodName                    = "/hospital.appointment.v1.AppointmentService/StartExamination"
 	AppointmentService_CallNextBooking_FullMethodName                     = "/hospital.appointment.v1.AppointmentService/CallNextBooking"
 	AppointmentService_EndExamination_FullMethodName                      = "/hospital.appointment.v1.AppointmentService/EndExamination"
 	AppointmentService_DeleteBooking_FullMethodName                       = "/hospital.appointment.v1.AppointmentService/DeleteBooking"
+	AppointmentService_ListMyMessages_FullMethodName                      = "/hospital.appointment.v1.AppointmentService/ListMyMessages"
+	AppointmentService_MarkMyMessageRead_FullMethodName                   = "/hospital.appointment.v1.AppointmentService/MarkMyMessageRead"
 	AppointmentService_ListMessages_FullMethodName                        = "/hospital.appointment.v1.AppointmentService/ListMessages"
 	AppointmentService_MarkMessageRead_FullMethodName                     = "/hospital.appointment.v1.AppointmentService/MarkMessageRead"
 	AppointmentService_SaveExaminationReportDraft_FullMethodName          = "/hospital.appointment.v1.AppointmentService/SaveExaminationReportDraft"
@@ -77,7 +77,10 @@ const (
 // AppointmentServiceClient is the client API for AppointmentService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// AppointmentService 按项目、资源、预约现场流程、消息和报告五类能力组织。
 type AppointmentServiceClient interface {
+	// 检查项目目录与报告模板。
 	CreateExaminationItem(ctx context.Context, in *CreateExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 	GetExaminationItem(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 	ListExaminationItems(ctx context.Context, in *ListExaminationItemsRequest, opts ...grpc.CallOption) (*ListExaminationItemsResponse, error)
@@ -86,10 +89,11 @@ type AppointmentServiceClient interface {
 	EnableExaminationItem(ctx context.Context, in *ChangeExaminationItemStatusRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 	GetExaminationItemReportTemplate(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItemReportTemplate, error)
 	SaveExaminationItemReportTemplate(ctx context.Context, in *SaveExaminationItemReportTemplateRequest, opts ...grpc.CallOption) (*ExaminationItemReportTemplate, error)
-	// Guidance 使用以下三个窄接口协调项目完整配置。预提交数据对普通项目查询不可见。
+	// Guidance 协调完整项目配置。预提交项目对普通查询不可见。
 	PrepareExaminationItemConfiguration(ctx context.Context, in *PrepareExaminationItemConfigurationRequest, opts ...grpc.CallOption) (*PreparedExaminationItemConfiguration, error)
 	ConfirmExaminationItemConfiguration(ctx context.Context, in *ExaminationItemConfigurationTransactionRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 	CancelExaminationItemConfiguration(ctx context.Context, in *ExaminationItemConfigurationTransactionRequest, opts ...grpc.CallOption) (*CancelExaminationItemConfigurationResponse, error)
+	// 房间、项目关联与每周开放窗口。
 	CreateRoom(ctx context.Context, in *CreateRoomRequest, opts ...grpc.CallOption) (*Room, error)
 	GetRoom(ctx context.Context, in *GetRoomRequest, opts ...grpc.CallOption) (*Room, error)
 	ListRooms(ctx context.Context, in *ListRoomsRequest, opts ...grpc.CallOption) (*ListRoomsResponse, error)
@@ -106,6 +110,7 @@ type AppointmentServiceClient interface {
 	SetItemWeeklyWindow(ctx context.Context, in *SetItemWeeklyWindowRequest, opts ...grpc.CallOption) (*ItemWeeklyWindow, error)
 	DisableItemWeeklyWindow(ctx context.Context, in *ChangeResourceStatusRequest, opts ...grpc.CallOption) (*ItemWeeklyWindow, error)
 	ListItemWeeklyWindows(ctx context.Context, in *ListWeeklyWindowsRequest, opts ...grpc.CallOption) (*ListItemWeeklyWindowsResponse, error)
+	// 患者预约与科室现场检查流程。
 	ListBookingOptions(ctx context.Context, in *ListBookingOptionsRequest, opts ...grpc.CallOption) (*ListBookingOptionsResponse, error)
 	CreateBooking(ctx context.Context, in *CreateBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 	CreateBookingBatch(ctx context.Context, in *CreateBookingBatchRequest, opts ...grpc.CallOption) (*CreateBookingBatchResponse, error)
@@ -113,16 +118,18 @@ type AppointmentServiceClient interface {
 	GetMyBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 	ListMyBookings(ctx context.Context, in *ListMyBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
 	DeleteMyBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
-	ListMyMessages(ctx context.Context, in *ListMyMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error)
-	MarkMyMessageRead(ctx context.Context, in *MarkMessageReadRequest, opts ...grpc.CallOption) (*Message, error)
 	GetBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 	ListBookings(ctx context.Context, in *ListBookingsRequest, opts ...grpc.CallOption) (*ListBookingsResponse, error)
 	StartExamination(ctx context.Context, in *StartExaminationRequest, opts ...grpc.CallOption) (*Booking, error)
 	CallNextBooking(ctx context.Context, in *CallNextBookingRequest, opts ...grpc.CallOption) (*Booking, error)
 	EndExamination(ctx context.Context, in *EndExaminationRequest, opts ...grpc.CallOption) (*Booking, error)
 	DeleteBooking(ctx context.Context, in *DeleteBookingRequest, opts ...grpc.CallOption) (*DeleteBookingResponse, error)
+	// 患者本人消息与科室消息。
+	ListMyMessages(ctx context.Context, in *ListMyMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error)
+	MarkMyMessageRead(ctx context.Context, in *MarkMessageReadRequest, opts ...grpc.CallOption) (*Message, error)
 	ListMessages(ctx context.Context, in *ListMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error)
 	MarkMessageRead(ctx context.Context, in *MarkMessageReadRequest, opts ...grpc.CallOption) (*Message, error)
+	// 报告草稿、发布、更正和只读查询。
 	SaveExaminationReportDraft(ctx context.Context, in *SaveExaminationReportDraftRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
 	CompleteAndPublishExaminationReport(ctx context.Context, in *CompleteAndPublishExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
 	CorrectExaminationReport(ctx context.Context, in *CorrectExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
@@ -131,8 +138,7 @@ type AppointmentServiceClient interface {
 	ListExaminationReportVersions(ctx context.Context, in *ListExaminationReportVersionsRequest, opts ...grpc.CallOption) (*ListExaminationReportVersionsResponse, error)
 	GetMyExaminationReport(ctx context.Context, in *GetExaminationReportRequest, opts ...grpc.CallOption) (*ExaminationReport, error)
 	ListMyExaminationReports(ctx context.Context, in *ListMyExaminationReportsRequest, opts ...grpc.CallOption) (*ListExaminationReportsResponse, error)
-	// Guidance 等内部服务只通过该窄用途接口确认项目归属和状态。
-	// 返回复用 ExaminationItem，避免为了只读投影引入重复消息结构。
+	// Guidance 只读确认项目归属与状态，不跨库读取 Appointment。
 	GetExaminationItemReference(ctx context.Context, in *GetExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItem, error)
 }
 
@@ -484,26 +490,6 @@ func (c *appointmentServiceClient) DeleteMyBooking(ctx context.Context, in *Dele
 	return out, nil
 }
 
-func (c *appointmentServiceClient) ListMyMessages(ctx context.Context, in *ListMyMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListMessagesResponse)
-	err := c.cc.Invoke(ctx, AppointmentService_ListMyMessages_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *appointmentServiceClient) MarkMyMessageRead(ctx context.Context, in *MarkMessageReadRequest, opts ...grpc.CallOption) (*Message, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Message)
-	err := c.cc.Invoke(ctx, AppointmentService_MarkMyMessageRead_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *appointmentServiceClient) GetBooking(ctx context.Context, in *GetBookingRequest, opts ...grpc.CallOption) (*Booking, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Booking)
@@ -558,6 +544,26 @@ func (c *appointmentServiceClient) DeleteBooking(ctx context.Context, in *Delete
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteBookingResponse)
 	err := c.cc.Invoke(ctx, AppointmentService_DeleteBooking_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) ListMyMessages(ctx context.Context, in *ListMyMessagesRequest, opts ...grpc.CallOption) (*ListMessagesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListMessagesResponse)
+	err := c.cc.Invoke(ctx, AppointmentService_ListMyMessages_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appointmentServiceClient) MarkMyMessageRead(ctx context.Context, in *MarkMessageReadRequest, opts ...grpc.CallOption) (*Message, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Message)
+	err := c.cc.Invoke(ctx, AppointmentService_MarkMyMessageRead_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -677,7 +683,10 @@ func (c *appointmentServiceClient) GetExaminationItemReference(ctx context.Conte
 // AppointmentServiceServer is the server API for AppointmentService service.
 // All implementations must embed UnimplementedAppointmentServiceServer
 // for forward compatibility.
+//
+// AppointmentService 按项目、资源、预约现场流程、消息和报告五类能力组织。
 type AppointmentServiceServer interface {
+	// 检查项目目录与报告模板。
 	CreateExaminationItem(context.Context, *CreateExaminationItemRequest) (*ExaminationItem, error)
 	GetExaminationItem(context.Context, *GetExaminationItemRequest) (*ExaminationItem, error)
 	ListExaminationItems(context.Context, *ListExaminationItemsRequest) (*ListExaminationItemsResponse, error)
@@ -686,10 +695,11 @@ type AppointmentServiceServer interface {
 	EnableExaminationItem(context.Context, *ChangeExaminationItemStatusRequest) (*ExaminationItem, error)
 	GetExaminationItemReportTemplate(context.Context, *GetExaminationItemRequest) (*ExaminationItemReportTemplate, error)
 	SaveExaminationItemReportTemplate(context.Context, *SaveExaminationItemReportTemplateRequest) (*ExaminationItemReportTemplate, error)
-	// Guidance 使用以下三个窄接口协调项目完整配置。预提交数据对普通项目查询不可见。
+	// Guidance 协调完整项目配置。预提交项目对普通查询不可见。
 	PrepareExaminationItemConfiguration(context.Context, *PrepareExaminationItemConfigurationRequest) (*PreparedExaminationItemConfiguration, error)
 	ConfirmExaminationItemConfiguration(context.Context, *ExaminationItemConfigurationTransactionRequest) (*ExaminationItem, error)
 	CancelExaminationItemConfiguration(context.Context, *ExaminationItemConfigurationTransactionRequest) (*CancelExaminationItemConfigurationResponse, error)
+	// 房间、项目关联与每周开放窗口。
 	CreateRoom(context.Context, *CreateRoomRequest) (*Room, error)
 	GetRoom(context.Context, *GetRoomRequest) (*Room, error)
 	ListRooms(context.Context, *ListRoomsRequest) (*ListRoomsResponse, error)
@@ -706,6 +716,7 @@ type AppointmentServiceServer interface {
 	SetItemWeeklyWindow(context.Context, *SetItemWeeklyWindowRequest) (*ItemWeeklyWindow, error)
 	DisableItemWeeklyWindow(context.Context, *ChangeResourceStatusRequest) (*ItemWeeklyWindow, error)
 	ListItemWeeklyWindows(context.Context, *ListWeeklyWindowsRequest) (*ListItemWeeklyWindowsResponse, error)
+	// 患者预约与科室现场检查流程。
 	ListBookingOptions(context.Context, *ListBookingOptionsRequest) (*ListBookingOptionsResponse, error)
 	CreateBooking(context.Context, *CreateBookingRequest) (*Booking, error)
 	CreateBookingBatch(context.Context, *CreateBookingBatchRequest) (*CreateBookingBatchResponse, error)
@@ -713,16 +724,18 @@ type AppointmentServiceServer interface {
 	GetMyBooking(context.Context, *GetBookingRequest) (*Booking, error)
 	ListMyBookings(context.Context, *ListMyBookingsRequest) (*ListBookingsResponse, error)
 	DeleteMyBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error)
-	ListMyMessages(context.Context, *ListMyMessagesRequest) (*ListMessagesResponse, error)
-	MarkMyMessageRead(context.Context, *MarkMessageReadRequest) (*Message, error)
 	GetBooking(context.Context, *GetBookingRequest) (*Booking, error)
 	ListBookings(context.Context, *ListBookingsRequest) (*ListBookingsResponse, error)
 	StartExamination(context.Context, *StartExaminationRequest) (*Booking, error)
 	CallNextBooking(context.Context, *CallNextBookingRequest) (*Booking, error)
 	EndExamination(context.Context, *EndExaminationRequest) (*Booking, error)
 	DeleteBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error)
+	// 患者本人消息与科室消息。
+	ListMyMessages(context.Context, *ListMyMessagesRequest) (*ListMessagesResponse, error)
+	MarkMyMessageRead(context.Context, *MarkMessageReadRequest) (*Message, error)
 	ListMessages(context.Context, *ListMessagesRequest) (*ListMessagesResponse, error)
 	MarkMessageRead(context.Context, *MarkMessageReadRequest) (*Message, error)
+	// 报告草稿、发布、更正和只读查询。
 	SaveExaminationReportDraft(context.Context, *SaveExaminationReportDraftRequest) (*ExaminationReport, error)
 	CompleteAndPublishExaminationReport(context.Context, *CompleteAndPublishExaminationReportRequest) (*ExaminationReport, error)
 	CorrectExaminationReport(context.Context, *CorrectExaminationReportRequest) (*ExaminationReport, error)
@@ -731,8 +744,7 @@ type AppointmentServiceServer interface {
 	ListExaminationReportVersions(context.Context, *ListExaminationReportVersionsRequest) (*ListExaminationReportVersionsResponse, error)
 	GetMyExaminationReport(context.Context, *GetExaminationReportRequest) (*ExaminationReport, error)
 	ListMyExaminationReports(context.Context, *ListMyExaminationReportsRequest) (*ListExaminationReportsResponse, error)
-	// Guidance 等内部服务只通过该窄用途接口确认项目归属和状态。
-	// 返回复用 ExaminationItem，避免为了只读投影引入重复消息结构。
+	// Guidance 只读确认项目归属与状态，不跨库读取 Appointment。
 	GetExaminationItemReference(context.Context, *GetExaminationItemRequest) (*ExaminationItem, error)
 	mustEmbedUnimplementedAppointmentServiceServer()
 }
@@ -846,12 +858,6 @@ func (UnimplementedAppointmentServiceServer) ListMyBookings(context.Context, *Li
 func (UnimplementedAppointmentServiceServer) DeleteMyBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteMyBooking not implemented")
 }
-func (UnimplementedAppointmentServiceServer) ListMyMessages(context.Context, *ListMyMessagesRequest) (*ListMessagesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListMyMessages not implemented")
-}
-func (UnimplementedAppointmentServiceServer) MarkMyMessageRead(context.Context, *MarkMessageReadRequest) (*Message, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method MarkMyMessageRead not implemented")
-}
 func (UnimplementedAppointmentServiceServer) GetBooking(context.Context, *GetBookingRequest) (*Booking, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBooking not implemented")
 }
@@ -869,6 +875,12 @@ func (UnimplementedAppointmentServiceServer) EndExamination(context.Context, *En
 }
 func (UnimplementedAppointmentServiceServer) DeleteBooking(context.Context, *DeleteBookingRequest) (*DeleteBookingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteBooking not implemented")
+}
+func (UnimplementedAppointmentServiceServer) ListMyMessages(context.Context, *ListMyMessagesRequest) (*ListMessagesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMyMessages not implemented")
+}
+func (UnimplementedAppointmentServiceServer) MarkMyMessageRead(context.Context, *MarkMessageReadRequest) (*Message, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MarkMyMessageRead not implemented")
 }
 func (UnimplementedAppointmentServiceServer) ListMessages(context.Context, *ListMessagesRequest) (*ListMessagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListMessages not implemented")
@@ -1536,42 +1548,6 @@ func _AppointmentService_DeleteMyBooking_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AppointmentService_ListMyMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListMyMessagesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AppointmentServiceServer).ListMyMessages(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AppointmentService_ListMyMessages_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppointmentServiceServer).ListMyMessages(ctx, req.(*ListMyMessagesRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AppointmentService_MarkMyMessageRead_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MarkMessageReadRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AppointmentServiceServer).MarkMyMessageRead(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AppointmentService_MarkMyMessageRead_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AppointmentServiceServer).MarkMyMessageRead(ctx, req.(*MarkMessageReadRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _AppointmentService_GetBooking_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetBookingRequest)
 	if err := dec(in); err != nil {
@@ -1676,6 +1652,42 @@ func _AppointmentService_DeleteBooking_Handler(srv interface{}, ctx context.Cont
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppointmentServiceServer).DeleteBooking(ctx, req.(*DeleteBookingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_ListMyMessages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMyMessagesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).ListMyMessages(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_ListMyMessages_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).ListMyMessages(ctx, req.(*ListMyMessagesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AppointmentService_MarkMyMessageRead_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MarkMessageReadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppointmentServiceServer).MarkMyMessageRead(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AppointmentService_MarkMyMessageRead_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppointmentServiceServer).MarkMyMessageRead(ctx, req.(*MarkMessageReadRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2022,14 +2034,6 @@ var AppointmentService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AppointmentService_DeleteMyBooking_Handler,
 		},
 		{
-			MethodName: "ListMyMessages",
-			Handler:    _AppointmentService_ListMyMessages_Handler,
-		},
-		{
-			MethodName: "MarkMyMessageRead",
-			Handler:    _AppointmentService_MarkMyMessageRead_Handler,
-		},
-		{
 			MethodName: "GetBooking",
 			Handler:    _AppointmentService_GetBooking_Handler,
 		},
@@ -2052,6 +2056,14 @@ var AppointmentService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteBooking",
 			Handler:    _AppointmentService_DeleteBooking_Handler,
+		},
+		{
+			MethodName: "ListMyMessages",
+			Handler:    _AppointmentService_ListMyMessages_Handler,
+		},
+		{
+			MethodName: "MarkMyMessageRead",
+			Handler:    _AppointmentService_MarkMyMessageRead_Handler,
 		},
 		{
 			MethodName: "ListMessages",

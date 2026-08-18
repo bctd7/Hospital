@@ -50,6 +50,6 @@ HTTP Handler
 3. 增加 Migration、Manager、Repository 和协议适配；
 4. 补充单元测试、数据库集成测试和必要的 HTTP 链路测试；
 5. 更新相应 README 与已实现归档；
-6. 运行 `scripts/check.ps1`。
+6. 运行 `scripts/quality/verify-repository.ps1`。
 
 不为尚无数据所有权、发布边界或真实调用方的概念提前创建服务和空目录。

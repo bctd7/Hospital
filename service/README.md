@@ -7,7 +7,7 @@
 | App API | `service/app/api/app.go` | 8888 | 小程序 HTTP、Token 中间件、协议转换与统一错误 |
 | Identity RPC | `service/identity/rpc/identity.go` | 8080 | 登录、会话、账号、权限、组织和医生 |
 | Appointment RPC | `service/appointment/rpc/appointment.go` | 8081 | 检查资源、预约、容量、报到、候检叫号、检查、报告和消息 |
-| Guidance RPC | `service/guidance/rpc/guidance.go` | 8082 | 完整项目配置协调、检查规则、智能预约、当日顺序、地点检索和两点步行路线 |
+| Guidance RPC | `service/guidance/rpc/guidance.go` | 8082 | 完整项目配置协调、检查规则、智能预约、当日顺序、地点检索和两点路线 |
 
 ```text
 Miniapp -> App API -> Identity RPC
@@ -59,6 +59,7 @@ server -> logic -> manager -> store -> repository
 - 生成代码：`contracts/gen/`、各 RPC Client、Handler、Types 和 Server 骨架。
 
 ```powershell
+.\scripts\contracts\generate-protobuf.ps1 -Check
 goctl api validate -api contracts/api/app.api
 goctl api go -api contracts/api/app.api -dir service/app/api --style go_zero
 ```
@@ -66,8 +67,8 @@ goctl api go -api contracts/api/app.api -dir service/app/api --style go_zero
 ## 启动与检查
 
 ```powershell
-.\scripts\start-backend.ps1 -Restart
-.\scripts\check.ps1
+.\scripts\development\start-backend.ps1 -Restart
+.\scripts\quality\verify-repository.ps1
 ```
 
 只有同时具备明确数据所有权、独立发布边界和真实调用方时才增加新服务；检查报告当前属于 Appointment，

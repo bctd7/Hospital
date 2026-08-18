@@ -5,8 +5,8 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$repositoryRoot = Split-Path -Parent $PSScriptRoot
-. (Join-Path $PSScriptRoot "lib/environment.ps1")
+$repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+. (Join-Path (Split-Path -Parent $PSScriptRoot) "lib/environment.ps1")
 
 # Override inherited values so a stale or incorrectly decoded shell environment
 # cannot silently replace the UTF-8 values from the project .env file.

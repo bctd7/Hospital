@@ -11,7 +11,7 @@ fi
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 deploy_dir="$(cd -- "${script_dir}/.." && pwd)"
 repository_root="$(cd -- "${deploy_dir}/../.." && pwd)"
-seed_file="${repository_root}/scripts/seed-comprehensive-test-data.sql"
+seed_file="${repository_root}/scripts/database/seed-comprehensive-test-data.sql"
 
 cd "${deploy_dir}"
 test -f .env.production || { echo "Missing ${deploy_dir}/.env.production" >&2; exit 1; }

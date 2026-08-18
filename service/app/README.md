@@ -82,10 +82,10 @@ RPC 字段分别以 `contracts/proto/identity/v1/identity.proto`、`appointment/
 App API 没有 MySQL DSN；如果新增代码需要直接连接业务数据库，说明服务边界已经被破坏。
 
 ```powershell
-.\scripts\start-backend.ps1 -Restart
+.\scripts\development\start-backend.ps1 -Restart
 go test ./service/app/api/...
 goctl api validate -api contracts/api/app.api
-.\scripts\check.ps1
+.\scripts\quality\verify-repository.ps1
 ```
 
 Guidance 的模型解析和路线调用链比普通 RPC 更长，当前 App API 与 Guidance Client 预留 30 秒超时；其他超时仍由

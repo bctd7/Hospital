@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package hospital.guidance.v1;
+
+option go_package = "hospital/contracts/gen/guidance/v1;guidancev1";
+
+// 项目完整配置、准备规则解析与人工确认。
+message PreparationRule {
+  string rule_type = 1;
+  string start_mode = 2;
+  int32 min_advance_minutes = 3;
+  int32 recommended_advance_minutes = 4;
+  int32 max_advance_minutes = 5;
+  string previous_day_time = 6;
+  string readiness_hint = 7;
+  string source = 8;
+}
+
+message PatientReminder {
+  string text = 1;
+  int32 advance_minutes = 2;
+}
+
+message PreparationRulePreview {
+  string description = 1;
+  repeated PreparationRule preparation_rules = 2;
+  repeated PatientReminder reminders = 3;
+  repeated string unresolved_fragments = 4;
+  string parser_mode = 5;
+  string warning = 6;
+}
+
+message PreviewPreparationRulesRequest {
+  string description = 1;
+  string request_id = 2;
+}
+
+message ConfiguredPrecedenceRule {
+  string predecessor_item_id = 1;
+  string successor_item_id = 2;
+  string staff_reason = 3;
+  string patient_message = 4;
+}
+
+message ExaminationItemConfiguration {
+  string item_id = 1;
+  string owner_department_id = 2;
+  string item_name = 3;
+  int32 estimated_duration_minutes = 4;
+  string status = 5;
+  int64 item_version = 6;
+  string description = 7;
+  repeated ConfiguredPrecedenceRule precedence_rules = 8;
+  repeated PreparationRule preparation_rules = 9;
+  repeated PatientReminder reminders = 10;
+  int64 configuration_version = 11;
+  string updated_at = 12;
+}
+
+message GetExaminationItemConfigurationRequest {
+  string item_id = 1;
+  string request_id = 2;
+}
+
+message ConfigureExaminationItemRequest {
+  string action = 1;
+  string item_id = 2;
+  string owner_department_id = 3;
+  string item_name = 4;
+  int32 estimated_duration_minutes = 5;
+  int64 expected_item_version = 6;
+  string description = 7;
+  repeated ConfiguredPrecedenceRule precedence_rules = 8;
+  repeated PreparationRule preparation_rules = 9;
+  repeated PatientReminder reminders = 10;
+  int64 expected_configuration_version = 11;
+  string operation_id = 12;
+  string request_id = 13;
+}

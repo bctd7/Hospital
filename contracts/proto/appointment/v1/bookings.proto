@@ -1,0 +1,190 @@
+syntax = "proto3";
+
+package hospital.appointment.v1;
+
+option go_package = "hospital/contracts/gen/appointment/v1;appointmentv1";
+
+// 预约选项、批量预约、报到、叫号与检查状态。
+message ListBookingOptionsRequest {
+  string item_id = 1;
+  string request_id = 2;
+}
+
+message BookingOption {
+  string item_id = 1;
+  string room_id = 2;
+  string room_display_name = 3;
+  string campus_id = 4;
+  string building = 5;
+  int32 floor_number = 6;
+  string room_number = 7;
+  string service_date = 8;
+  string session = 9;
+  string room_open_time = 10;
+  string room_close_time = 11;
+  string item_start_time = 12;
+  string item_end_time = 13;
+  string booking_cutoff_time = 14;
+  int64 total_capacity = 15;
+  int64 remaining_capacity = 16;
+  int32 estimated_duration_minutes = 17;
+}
+
+message ListBookingOptionsResponse {
+  repeated BookingOption options = 1;
+  string week_start_date = 2;
+  string week_end_date = 3;
+}
+
+message CreateBookingRequest {
+  string item_id = 1;
+  string room_id = 2;
+  string service_date = 3;
+  string session = 4;
+  string operation_id = 5;
+  string request_id = 6;
+  string patient_display_name = 7;
+  string patient_phone_masked = 8;
+}
+
+message BookingBatchItem {
+  string item_id = 1;
+  string room_id = 2;
+  string service_date = 3;
+  string session = 4;
+}
+
+message CreateBookingBatchRequest {
+  repeated BookingBatchItem items = 1;
+  string operation_id = 2;
+  string request_id = 3;
+  string patient_display_name = 4;
+  string patient_phone_masked = 5;
+}
+
+message CreateBookingBatchResponse {
+  repeated Booking bookings = 1;
+}
+
+message GetBookingRequest {
+  string booking_id = 1;
+  string request_id = 2;
+}
+
+message ListMyBookingsRequest {
+  int64 page = 1;
+  int64 page_size = 2;
+  string request_id = 3;
+  string view = 4;
+}
+
+message ListBookingsRequest {
+  string department_id = 1;
+  string service_date = 2;
+  string session = 3;
+  string item_id = 4;
+  string room_id = 5;
+  string status = 6;
+  int64 page = 7;
+  int64 page_size = 8;
+  string request_id = 9;
+  string patient_keyword = 10;
+  string view = 11;
+}
+
+message DeleteBookingRequest {
+  string booking_id = 1;
+  string operation_id = 2;
+  string reason = 3;
+  string request_id = 4;
+}
+
+message DeleteBookingResponse {
+  string booking_id = 1;
+  bool deleted = 2;
+}
+
+message StartExaminationRequest {
+  string booking_id = 1;
+  int64 expected_version = 2;
+  string operation_id = 3;
+  string request_id = 4;
+  string actor_display_name = 5;
+}
+
+message CheckInBookingRequest {
+  string booking_id = 1;
+  int64 expected_version = 2;
+  string operation_id = 3;
+  string request_id = 4;
+}
+
+message CallNextBookingRequest {
+  string department_id = 1;
+  string room_id = 2;
+  string service_date = 3;
+  string operation_id = 4;
+  string request_id = 5;
+}
+
+message EndExaminationRequest {
+  string booking_id = 1;
+  int64 expected_version = 2;
+  string operation_id = 3;
+  string request_id = 4;
+  string actor_display_name = 5;
+}
+
+message Booking {
+  string booking_id = 1;
+  string patient_account_id = 2;
+  string department_id = 3;
+  string item_id = 4;
+  string item_name = 5;
+  string room_id = 6;
+  string room_display_name = 7;
+  string campus_id = 8;
+  string service_date = 9;
+  string session = 10;
+  string status = 11;
+  string room_open_time = 12;
+  string room_close_time = 13;
+  string item_start_time = 14;
+  string item_end_time = 15;
+  string booking_cutoff_time = 16;
+  int64 version = 17;
+  string created_at = 18;
+  string updated_at = 19;
+  string started_at = 22;
+  string started_by = 23;
+  string completed_at = 24;
+  string completed_by = 25;
+  string building = 26;
+  int32 floor_number = 27;
+  string room_number = 28;
+  string patient_display_name = 29;
+  string patient_phone_masked = 30;
+  string started_by_display_name = 31;
+  string completed_by_display_name = 32;
+  string report_id = 33;
+  string report_status = 34;
+  int64 report_version = 35;
+  int32 estimated_duration_minutes = 36;
+  string examination_ended_at = 37;
+  string examination_ended_by = 38;
+  string examination_ended_by_display_name = 39;
+  int64 queue_number = 40;
+  int64 current_called_queue_number = 41;
+  int64 people_ahead = 42;
+  string checked_in_at = 43;
+  string called_at = 44;
+  string call_deadline = 45;
+  int64 call_attempts = 46;
+}
+
+message ListBookingsResponse {
+  repeated Booking bookings = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  int64 total = 4;
+}

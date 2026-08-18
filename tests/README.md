@@ -13,7 +13,7 @@
 | Appointment MySQL 集成测试 | `service/appointment/rpc/internal/repository/mysqlstore/*_integration_test.go` |
 | HTTP Logic/错误映射 | `service/app/api/internal/**/**/*_test.go` |
 | 小程序单元测试 | `apps/miniapp/tests/` |
-| 全量工程检查 | `scripts/check.ps1` |
+| 全量工程检查 | `scripts/quality/verify-repository.ps1` |
 
 只有需要同时启动多个独立服务、且无法归属某个服务包的测试才进入本目录。不要把服务内部测试为了“看起来
 整齐”搬离包目录。

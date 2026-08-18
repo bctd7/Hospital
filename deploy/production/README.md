@@ -317,7 +317,7 @@ npm run build:mp-weixin
 
 ```powershell
 cd C:\Users\27902\GolandProjects\Hospital
-.\scripts\check.ps1
+.\scripts\quality\verify-repository.ps1
 ```
 
 让服务器获取同一个提交后执行：
@@ -376,9 +376,9 @@ migrations/identity/000006_add_xxx.down.sql
 本地验证：
 
 ```powershell
-.\scripts\migrate.ps1 -Service identity -Direction up
-.\scripts\migrate.ps1 -Service identity -Direction version
-.\scripts\check.ps1
+.\scripts\database\migrate.ps1 -Service identity -Direction up
+.\scripts\database\migrate.ps1 -Service identity -Direction version
+.\scripts\quality\verify-repository.ps1
 ```
 
 发布时：
@@ -403,7 +403,7 @@ cd /opt/hospital/deploy/production
 
 2. 在 `.env.example` 和 `deploy/production/env.example` 增加数据库账号、密码和 DSN；
 3. 更新 `deploy/compose/mysql/init/001-create-service-databases.sh`，为全新数据卷创建数据库和账号；
-4. 更新 `scripts/migrate.ps1`，让 `-Service` 支持新服务；
+4. 更新 `scripts/database/migrate.ps1`，让 `-Service` 支持新服务；
 5. 在 `deploy/production/docker-compose.yml` 增加对应的迁移任务，并让业务服务依赖迁移成功；
 6. 更新 `.github/workflows/ci.yml`，在隔离数据库中测试新迁移；
 7. 更新 `scripts/backup.sh`，把新数据库加入备份列表；

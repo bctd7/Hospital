@@ -106,8 +106,8 @@ service/appointment/rpc/internal/
   原有身份，不生成同手机号重复患者。
 
 ```powershell
-.\scripts\seed-comprehensive-test-data.ps1 -Reset
-.\scripts\check.ps1
+.\scripts\database\seed-comprehensive-test-data.ps1 -Reset
+.\scripts\quality\verify-repository.ps1
 ```
 
 ## 当前不包含

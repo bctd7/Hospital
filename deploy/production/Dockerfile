@@ -18,9 +18,9 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
     go build -trimpath -ldflags="-s -w" -o /out/app-api ./service/app/api && \
     CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
-    go build -trimpath -ldflags="-s -w" -o /out/db-migrate ./tools/db-migrate && \
+    go build -trimpath -ldflags="-s -w" -o /out/db-migrate ./tools/database/migrate && \
     CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} \
-    go build -trimpath -ldflags="-s -w" -o /out/identity-bootstrap-admin ./tools/identity-bootstrap-admin
+    go build -trimpath -ldflags="-s -w" -o /out/identity-bootstrap-admin ./tools/identity/bootstrap-admin
 
 FROM alpine:3.22 AS db-migrate
 

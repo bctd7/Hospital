@@ -1,0 +1,119 @@
+syntax = "proto3";
+
+package hospital.appointment.v1;
+
+import "appointment/v1/reports.proto";
+
+option go_package = "hospital/contracts/gen/appointment/v1;appointmentv1";
+
+// 检查项目、报告模板与 Guidance 完整配置事务。
+// 新建项目时只允许调用方填写业务字段；ID、状态、版本和时间戳由 Appointment 生成。
+message ExaminationItemInput {
+  string owner_department_id = 1;
+  string name = 2;
+  string description = 3;
+  int32 estimated_duration_minutes = 4;
+}
+
+message CreateExaminationItemRequest {
+  ExaminationItemInput examination_item = 1;
+  string operation_id = 2;
+  string request_id = 3;
+}
+
+message GetExaminationItemRequest {
+  string item_id = 1;
+  string request_id = 2;
+}
+
+message ListExaminationItemsRequest {
+  string owner_department_id = 1;
+  string status = 2;
+  int64 page = 3;
+  int64 page_size = 4;
+  string request_id = 5;
+  string audience = 6;
+}
+
+message ListExaminationItemsResponse {
+  repeated ExaminationItem items = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  int64 total = 4;
+}
+
+message UpdateExaminationItemRequest {
+  string item_id = 1;
+  optional string name = 2;
+  optional string description = 3;
+  int64 expected_version = 4;
+  string operation_id = 5;
+  string request_id = 6;
+  optional int32 estimated_duration_minutes = 7;
+}
+
+message ChangeExaminationItemStatusRequest {
+  string item_id = 1;
+  int64 expected_version = 2;
+  string operation_id = 3;
+  string request_id = 4;
+}
+
+message ExaminationItem {
+  string item_id = 1;
+  string owner_department_id = 2;
+  string name = 3;
+  string description = 4;
+  string status = 5;
+  int64 version = 6;
+  string created_at = 7;
+  string updated_at = 8;
+  int32 estimated_duration_minutes = 9;
+}
+
+message ExaminationItemReportTemplate {
+  string item_id = 1;
+  ExaminationReportContent content = 2;
+  int64 version = 3;
+  string updated_at = 4;
+}
+
+message SaveExaminationItemReportTemplateRequest {
+  string item_id = 1;
+  ExaminationReportContent content = 2;
+  int64 expected_template_version = 3;
+  string operation_id = 4;
+  string request_id = 5;
+}
+
+message PrepareExaminationItemConfigurationRequest {
+  string transaction_id = 1;
+  string action = 2;
+  string item_id = 3;
+  string owner_department_id = 4;
+  string name = 5;
+  int32 estimated_duration_minutes = 6;
+  int64 expected_version = 7;
+  string operation_id = 8;
+  string request_id = 9;
+  // Guidance 是说明的事实来源；Appointment 只保存患者目录读取所需的发布快照。
+  string description = 10;
+}
+
+message PreparedExaminationItemConfiguration {
+  string transaction_id = 1;
+  string action = 2;
+  string item_id = 3;
+  int64 expected_version = 4;
+  string state = 5;
+}
+
+message ExaminationItemConfigurationTransactionRequest {
+  string transaction_id = 1;
+  string request_id = 2;
+}
+
+message CancelExaminationItemConfigurationResponse {
+  string transaction_id = 1;
+  bool cancelled = 2;
+}

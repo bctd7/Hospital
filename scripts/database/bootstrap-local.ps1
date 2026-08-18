@@ -1,16 +1,16 @@
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$repositoryRoot = Split-Path -Parent $PSScriptRoot
+$repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $composeFile = Join-Path $repositoryRoot "deploy/compose/docker-compose.yml"
 $environmentFile = Join-Path $repositoryRoot ".env"
 
-. (Join-Path $PSScriptRoot "lib/environment.ps1")
+. (Join-Path (Split-Path -Parent $PSScriptRoot) "lib/environment.ps1")
 Import-ProjectEnvironment -RepositoryRoot $repositoryRoot
 
 $applicationEnvironment = Get-RequiredEnvironmentValue -Name "APP_ENV"
 if ($applicationEnvironment -ne "local") {
-    throw "db-bootstrap-local.ps1 is restricted to APP_ENV=local. Current value: $applicationEnvironment"
+    throw "bootstrap-local.ps1 is restricted to APP_ENV=local. Current value: $applicationEnvironment"
 }
 if (-not (Test-Path -LiteralPath $environmentFile)) {
     throw "Local bootstrap requires $environmentFile. Copy .env.example to .env and review its values first."

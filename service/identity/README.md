@@ -104,9 +104,9 @@ docker compose `
   -f deploy/compose/docker-compose.yml `
   up -d mysql redis kafka
 
-.\scripts\db-bootstrap-local.ps1
-.\scripts\migrate.ps1 -Service identity -Direction up
-.\scripts\start-backend.ps1 -Restart
+.\scripts\database\bootstrap-local.ps1
+.\scripts\database\migrate.ps1 -Service identity -Direction up
+.\scripts\development\start-backend.ps1 -Restart
 ```
 
 统一启动脚本按 UTF-8 读取 `.env`，避免 Windows PowerShell 破坏阿里云中文签名。
@@ -129,7 +129,7 @@ LOCAL_SMS_CODE=246810
 
 ```powershell
 go test ./service/identity/rpc/...
-.\scripts\check.ps1
+.\scripts\quality\verify-repository.ps1
 ```
 
 MySQL 集成测试通过 `IDENTITY_TEST_MYSQL_DSN` 显式启用。阶段收尾已经验证组织、账号和医生生命周期，

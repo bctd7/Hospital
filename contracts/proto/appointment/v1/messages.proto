@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package hospital.appointment.v1;
+
+import "appointment/v1/bookings.proto";
+
+option go_package = "hospital/contracts/gen/appointment/v1;appointmentv1";
+
+// 患者本人消息与科室工作人员消息。
+message ListMyMessagesRequest {
+  int64 page = 1;
+  int64 page_size = 2;
+  string request_id = 3;
+}
+
+message ListMessagesRequest {
+  string department_id = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  string request_id = 4;
+}
+
+message MarkMessageReadRequest {
+  string message_key = 1;
+  string department_id = 2;
+  string request_id = 3;
+}
+
+message Message {
+  string message_key = 1;
+  string message_type = 2;
+  string occurred_at = 3;
+  string read_at = 4;
+  Booking booking = 5;
+  string report_id = 6;
+  string report_version_id = 7;
+  int64 report_version_no = 8;
+}
+
+message DepartmentUnreadCount {
+  string department_id = 1;
+  int64 unread_count = 2;
+}
+
+message ListMessagesResponse {
+  repeated Message messages = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+  int64 total = 4;
+  int64 unread_count = 5;
+  repeated DepartmentUnreadCount department_unread_counts = 6;
+}

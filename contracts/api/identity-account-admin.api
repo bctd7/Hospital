@@ -1,39 +1,7 @@
 syntax = "v1"
 
+// 管理员账号、医生身份与账号状态维护。
 type (
-    AccountDisplayProfileResponse {
-        Nickname          *string `json:"nickname,optional"`
-        ManagementVersion int64   `json:"management_version"`
-        MaskedPhone       *string `json:"masked_phone,optional"`
-        StaffDisplayName  *string `json:"staff_display_name,optional"`
-    }
-
-    UpdateAccountDisplayProfileRequest {
-        Nickname string `json:"nickname"`
-    }
-
-    DirectoryDoctorPathRequest {
-        DepartmentID string `path:"departmentId"`
-        Page         int64  `form:"page,default=1"`
-        PageSize     int64  `form:"page_size,default=20"`
-    }
-
-    DoctorSummaryResponse {
-        AccountID   string  `json:"account_id"`
-        DisplayName string  `json:"display_name"`
-        DepartmentID string `json:"department_id"`
-        AvatarURL   *string `json:"avatar_url,optional"`
-        Description *string `json:"description,optional"`
-        Version     int64   `json:"version"`
-    }
-
-    ListDoctorsResponse {
-        Items    []DoctorSummaryResponse `json:"items"`
-        Page     int64                   `json:"page"`
-        PageSize int64                   `json:"page_size"`
-        Total    int64                   `json:"total"`
-    }
-
     AdminAccountSummaryResponse {
         AccountID         string  `json:"account_id"`
         Nickname          *string `json:"nickname,optional"`
@@ -139,29 +107,6 @@ type (
         OperationID       string `json:"operation_id"`
     }
 )
-
-@server (
-    prefix: /api/v1
-    group: identityprofile
-    middleware: AccessToken
-    authType: BearerAuth
-)
-service app-api {
-    @handler getAccountDisplayProfile
-    get /auth/me/display-profile returns (AccountDisplayProfileResponse)
-
-    @handler updateAccountDisplayProfile
-    put /auth/me/display-profile (UpdateAccountDisplayProfileRequest) returns (AccountDisplayProfileResponse)
-}
-
-@server (
-    prefix: /api/v1
-    group: organizationdirectory
-)
-service app-api {
-    @handler listDoctors
-    get /directory/departments/:departmentId/doctors (DirectoryDoctorPathRequest) returns (ListDoctorsResponse)
-}
 
 @server (
     prefix: /api/v1

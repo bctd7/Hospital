@@ -1,3 +1,4 @@
+// Token 密钥生成命令输出 Identity Access Token 使用的 Ed25519 Base64 密钥对。
 package main
 
 import (
