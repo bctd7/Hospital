@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { onBeforeUnmount, ref, watch } from "vue";
+
 import PlaceSearchSheet from "@/components/guidance/PlaceSearchSheet.vue";
+import { createStableNativeMapReveal } from "@/features/guidance/stableNativeMap";
 import { useGuidanceRoute } from "@/features/guidance/useGuidanceRoute";
 
 const {
@@ -9,6 +12,22 @@ const {
   mapCenter, markers, polylines, mapPoints, distanceText, durationText, providerText, actionLabel, durationLabel,
   choosePoint, selectStage, refreshProgress, selectPlace, chooseMode, swapPoints, calculateRoute, modeLabel,
 } = useGuidanceRoute();
+
+const routeMapReady = ref(false);
+const routeMapReveal = createStableNativeMapReveal((ready) => {
+  routeMapReady.value = ready;
+});
+
+watch(route, (value) => {
+  if (value) routeMapReveal.prepare();
+  else routeMapReveal.dispose();
+});
+
+onBeforeUnmount(routeMapReveal.dispose);
+
+function markRouteMapUpdated() {
+  routeMapReveal.updated();
+}
 </script>
 
 <template>
@@ -81,16 +100,21 @@ const {
         <text class="route-summary__provider">{{ providerText }}</text>
       </view>
 
-      <map
-        id="guidance-route-map"
-        class="route-map"
-        :latitude="mapCenter.latitude"
-        :longitude="mapCenter.longitude"
-        :markers="markers"
-        :polyline="polylines"
-        :include-points="mapPoints"
-        :show-location="false"
-      />
+      <view class="route-map-stage">
+        <view v-if="!routeMapReady" class="route-map-loading">正在加载完整路线…</view>
+        <map
+          id="guidance-route-map"
+          class="route-map"
+          :class="{ 'route-map--ready': routeMapReady }"
+          :latitude="mapCenter.latitude"
+          :longitude="mapCenter.longitude"
+          :markers="markers"
+          :polyline="polylines"
+          :include-points="mapPoints"
+          :show-location="false"
+          @updated="markRouteMapUpdated"
+        />
+      </view>
 
       <view v-if="route.steps.length" class="steps-panel">
         <text class="steps-panel__title">{{ modeLabel(route.mode) }}指引</text>
@@ -144,7 +168,10 @@ button::after { display: none; }
 .route-result { margin-top: 22rpx; overflow: hidden; }
 .route-summary { position: relative; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 22rpx; padding: 24rpx; }
 .route-summary__label,.route-summary__value { display: block; }.route-summary__label { color: #8a96a7; font-size: 21rpx; }.route-summary__value { margin-top: 5rpx; color: #233146; font-size: 30rpx; font-weight: 730; }.route-summary__provider { grid-column: 1 / -1; color: #8995a5; font-size: 19rpx; }
-.route-map { width: 100%; height: 560rpx; }
+.route-map-stage { position: relative; width: 100%; height: 560rpx; overflow: hidden; background: #eef3f7; }
+.route-map-loading { position: absolute; z-index: 1; inset: 0; display: flex; align-items: center; justify-content: center; color: #8d99a8; font-size: 22rpx; background: #eef3f7; }
+.route-map { position: relative; z-index: 2; width: 100%; height: 560rpx; opacity: 0; }
+.route-map--ready { opacity: 1; }
 .steps-panel { padding: 26rpx 24rpx 10rpx; }.steps-panel__title { color: #233146; font-size: 28rpx; font-weight: 720; }
 .route-step { display: flex; padding: 24rpx 0; border-bottom: 1rpx solid #edf0f4; }.route-step:last-child { border-bottom: 0; }.route-step__index { display: flex; align-items: center; justify-content: center; width: 42rpx; height: 42rpx; flex: 0 0 auto; color: #168fe4; font-size: 20rpx; font-weight: 700; background: #e9f5fc; border-radius: 50%; }.route-step__content { min-width: 0; margin-left: 18rpx; }.route-step__instruction,.route-step__meta { display: block; }.route-step__instruction { color: #354256; font-size: 24rpx; line-height: 1.55; }.route-step__meta { margin-top: 6rpx; color: #909baa; font-size: 20rpx; }
 .empty-state { margin-top: 22rpx; padding: 58rpx 30rpx; text-align: center; }.empty-state__title,.empty-state__description { display: block; }.empty-state__title { color: #546275; font-size: 27rpx; font-weight: 680; }.empty-state__description { margin-top: 12rpx; color: #98a2b0; font-size: 21rpx; line-height: 1.5; }

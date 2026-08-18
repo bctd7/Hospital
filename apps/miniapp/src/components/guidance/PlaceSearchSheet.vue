@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, ref, watch } from "vue";
 
 import { ApiError } from "@/api/client";
 import { guidanceApi } from "@/api/guidance";
+import { createStableNativeMapReveal } from "@/features/guidance/stableNativeMap";
 import type { GuidanceLocationPoint } from "@/types/guidance";
 
 const props = defineProps<{
@@ -22,7 +23,9 @@ const searched = ref(false);
 const error = ref("");
 const mapMounted = ref(false);
 const mapReady = ref(false);
-let mapMountTimer: ReturnType<typeof setTimeout> | undefined;
+const mapReveal = createStableNativeMapReveal((ready) => {
+  mapReady.value = ready;
+});
 
 interface PreviewMarker {
   id: number;
@@ -67,25 +70,27 @@ const previewMarkers = computed<PreviewMarker[]>(() => places.value.map((place, 
 })));
 
 watch(() => props.visible, (visible) => {
-  if (mapMountTimer) clearTimeout(mapMountTimer);
+  mapReveal.dispose();
   mapMounted.value = false;
-  mapReady.value = false;
   if (!visible) return;
   keyword.value = "";
   places.value = [];
   searched.value = false;
   error.value = "";
-  mapMountTimer = setTimeout(() => {
-    mapMounted.value = true;
-  }, 180);
 }, { immediate: true });
 
 onBeforeUnmount(() => {
-  if (mapMountTimer) clearTimeout(mapMountTimer);
+  mapReveal.dispose();
 });
 
-function markMapReady() {
-  mapReady.value = true;
+function prepareMapPreview() {
+  mapReveal.prepare();
+  mapMounted.value = true;
+}
+
+function markMapUpdated() {
+  if (!mapMounted.value) return;
+  mapReveal.updated();
 }
 
 async function search() {
@@ -100,7 +105,14 @@ async function search() {
     const result = await guidanceApi.searchPlaces({ keyword: value, city: "上海市", limit: 15 });
     places.value = result.places;
     searched.value = true;
+    if (result.places.length) prepareMapPreview();
+    else {
+      mapReveal.dispose();
+      mapMounted.value = false;
+    }
   } catch (cause) {
+    mapReveal.dispose();
+    mapMounted.value = false;
     places.value = [];
     searched.value = true;
     if (cause instanceof ApiError && cause.code === "SERVICE_UNAVAILABLE") {
@@ -142,7 +154,9 @@ async function search() {
           <text class="place-preview__hint">地图编号与下方结果对应</text>
         </view>
         <view class="place-preview__stage">
-          <view v-if="!mapReady" class="place-preview__placeholder">地图加载中</view>
+          <view v-if="!mapReady" class="place-preview__placeholder">
+            {{ places.length ? "地图加载中" : "搜索后将在这里预览候选位置" }}
+          </view>
           <map
             v-if="mapMounted"
             class="place-preview__map"
@@ -152,7 +166,7 @@ async function search() {
             :markers="previewMarkers"
             :include-points="previewPoints"
             :show-location="false"
-            @updated="markMapReady"
+            @updated="markMapUpdated"
           />
         </view>
       </view>

@@ -1,5 +1,5 @@
 import { onLoad, onShow } from "@dcloudio/uni-app";
-import { computed, nextTick, ref } from "vue";
+import { computed, ref } from "vue";
 
 import { ApiError } from "@/api/client";
 import { guidanceApi } from "@/api/guidance";
@@ -247,8 +247,6 @@ export function useGuidanceRoute() {
       const result = await guidanceApi.calculateRoute({ origin: requestedOrigin, destination: requestedDestination, mode: requestedMode });
       if (!routeRequest.isCurrent(token)) return;
       route.value = result;
-      await nextTick();
-      uni.createMapContext("guidance-route-map").includePoints({ points: result.polyline, padding: [56, 40, 56, 40] });
     } catch (cause) {
       if (!routeRequest.isCurrent(token)) return;
       route.value = previousRoute;
