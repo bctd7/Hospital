@@ -14,37 +14,39 @@ import (
 )
 
 type (
-	CalculateWalkingRouteRequest             = v1_guidancev1.CalculateWalkingRouteRequest
-	ConfigureExaminationItemRequest          = v1_guidancev1.ConfigureExaminationItemRequest
-	ConfiguredPrecedenceRule                 = v1_guidancev1.ConfiguredPrecedenceRule
-	ConfirmSmartAppointmentPlanRequest       = v1_guidancev1.ConfirmSmartAppointmentPlanRequest
-	ConfirmedSmartAppointmentPlan            = v1_guidancev1.ConfirmedSmartAppointmentPlan
-	CreatePrecedenceRuleRequest              = v1_guidancev1.CreatePrecedenceRuleRequest
-	DeletePrecedenceRuleRequest              = v1_guidancev1.DeletePrecedenceRuleRequest
-	DeletePrecedenceRuleResponse             = v1_guidancev1.DeletePrecedenceRuleResponse
-	ExaminationItemConfiguration             = v1_guidancev1.ExaminationItemConfiguration
-	GenerateSmartAppointmentPlansRequest     = v1_guidancev1.GenerateSmartAppointmentPlansRequest
-	GetExaminationItemConfigurationRequest   = v1_guidancev1.GetExaminationItemConfigurationRequest
-	GetTodayExaminationRecommendationRequest = v1_guidancev1.GetTodayExaminationRecommendationRequest
-	ListPrecedenceRulesRequest               = v1_guidancev1.ListPrecedenceRulesRequest
-	ListPrecedenceRulesResponse              = v1_guidancev1.ListPrecedenceRulesResponse
-	LocationPoint                            = v1_guidancev1.LocationPoint
-	PatientReminder                          = v1_guidancev1.PatientReminder
-	PrecedenceRule                           = v1_guidancev1.PrecedenceRule
-	PreparationRule                          = v1_guidancev1.PreparationRule
-	PreparationRulePreview                   = v1_guidancev1.PreparationRulePreview
-	PreviewPreparationRulesRequest           = v1_guidancev1.PreviewPreparationRulesRequest
-	RoutePoint                               = v1_guidancev1.RoutePoint
-	SearchPlacesRequest                      = v1_guidancev1.SearchPlacesRequest
-	SearchPlacesResponse                     = v1_guidancev1.SearchPlacesResponse
-	SmartAppointmentPlan                     = v1_guidancev1.SmartAppointmentPlan
-	SmartAppointmentPlanItem                 = v1_guidancev1.SmartAppointmentPlanItem
-	SmartAppointmentPlansResponse            = v1_guidancev1.SmartAppointmentPlansResponse
-	TodayExaminationRecommendation           = v1_guidancev1.TodayExaminationRecommendation
-	TodayRecommendationStage                 = v1_guidancev1.TodayRecommendationStage
-	UpdatePrecedenceRuleRequest              = v1_guidancev1.UpdatePrecedenceRuleRequest
-	WalkingRoute                             = v1_guidancev1.WalkingRoute
-	WalkingRouteStep                         = v1_guidancev1.WalkingRouteStep
+	CalculateWalkingRouteRequest              = v1_guidancev1.CalculateWalkingRouteRequest
+	ConfigureExaminationItemRequest           = v1_guidancev1.ConfigureExaminationItemRequest
+	ConfiguredPrecedenceRule                  = v1_guidancev1.ConfiguredPrecedenceRule
+	ConfirmSmartAppointmentPlanRequest        = v1_guidancev1.ConfirmSmartAppointmentPlanRequest
+	ConfirmedSmartAppointmentPlan             = v1_guidancev1.ConfirmedSmartAppointmentPlan
+	CreatePrecedenceRuleRequest               = v1_guidancev1.CreatePrecedenceRuleRequest
+	DeletePrecedenceRuleRequest               = v1_guidancev1.DeletePrecedenceRuleRequest
+	DeletePrecedenceRuleResponse              = v1_guidancev1.DeletePrecedenceRuleResponse
+	ExaminationItemConfiguration              = v1_guidancev1.ExaminationItemConfiguration
+	ExaminationItemPatientReminders           = v1_guidancev1.ExaminationItemPatientReminders
+	GenerateSmartAppointmentPlansRequest      = v1_guidancev1.GenerateSmartAppointmentPlansRequest
+	GetExaminationItemConfigurationRequest    = v1_guidancev1.GetExaminationItemConfigurationRequest
+	GetExaminationItemPatientRemindersRequest = v1_guidancev1.GetExaminationItemPatientRemindersRequest
+	GetTodayExaminationRecommendationRequest  = v1_guidancev1.GetTodayExaminationRecommendationRequest
+	ListPrecedenceRulesRequest                = v1_guidancev1.ListPrecedenceRulesRequest
+	ListPrecedenceRulesResponse               = v1_guidancev1.ListPrecedenceRulesResponse
+	LocationPoint                             = v1_guidancev1.LocationPoint
+	PatientReminder                           = v1_guidancev1.PatientReminder
+	PrecedenceRule                            = v1_guidancev1.PrecedenceRule
+	PreparationRule                           = v1_guidancev1.PreparationRule
+	PreparationRulePreview                    = v1_guidancev1.PreparationRulePreview
+	PreviewPreparationRulesRequest            = v1_guidancev1.PreviewPreparationRulesRequest
+	RoutePoint                                = v1_guidancev1.RoutePoint
+	SearchPlacesRequest                       = v1_guidancev1.SearchPlacesRequest
+	SearchPlacesResponse                      = v1_guidancev1.SearchPlacesResponse
+	SmartAppointmentPlan                      = v1_guidancev1.SmartAppointmentPlan
+	SmartAppointmentPlanItem                  = v1_guidancev1.SmartAppointmentPlanItem
+	SmartAppointmentPlansResponse             = v1_guidancev1.SmartAppointmentPlansResponse
+	TodayExaminationRecommendation            = v1_guidancev1.TodayExaminationRecommendation
+	TodayRecommendationStage                  = v1_guidancev1.TodayRecommendationStage
+	UpdatePrecedenceRuleRequest               = v1_guidancev1.UpdatePrecedenceRuleRequest
+	WalkingRoute                              = v1_guidancev1.WalkingRoute
+	WalkingRouteStep                          = v1_guidancev1.WalkingRouteStep
 
 	GuidanceService interface {
 		CreatePrecedenceRule(ctx context.Context, in *CreatePrecedenceRuleRequest, opts ...grpc.CallOption) (*PrecedenceRule, error)
@@ -53,6 +55,7 @@ type (
 		ListPrecedenceRules(ctx context.Context, in *ListPrecedenceRulesRequest, opts ...grpc.CallOption) (*ListPrecedenceRulesResponse, error)
 		PreviewPreparationRules(ctx context.Context, in *PreviewPreparationRulesRequest, opts ...grpc.CallOption) (*PreparationRulePreview, error)
 		GetExaminationItemConfiguration(ctx context.Context, in *GetExaminationItemConfigurationRequest, opts ...grpc.CallOption) (*ExaminationItemConfiguration, error)
+		GetExaminationItemPatientReminders(ctx context.Context, in *GetExaminationItemPatientRemindersRequest, opts ...grpc.CallOption) (*ExaminationItemPatientReminders, error)
 		ConfigureExaminationItem(ctx context.Context, in *ConfigureExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItemConfiguration, error)
 		GenerateSmartAppointmentPlans(ctx context.Context, in *GenerateSmartAppointmentPlansRequest, opts ...grpc.CallOption) (*SmartAppointmentPlansResponse, error)
 		ConfirmSmartAppointmentPlan(ctx context.Context, in *ConfirmSmartAppointmentPlanRequest, opts ...grpc.CallOption) (*ConfirmedSmartAppointmentPlan, error)
@@ -100,6 +103,11 @@ func (m *defaultGuidanceService) PreviewPreparationRules(ctx context.Context, in
 func (m *defaultGuidanceService) GetExaminationItemConfiguration(ctx context.Context, in *GetExaminationItemConfigurationRequest, opts ...grpc.CallOption) (*ExaminationItemConfiguration, error) {
 	client := v1_guidancev1.NewGuidanceServiceClient(m.cli.Conn())
 	return client.GetExaminationItemConfiguration(ctx, in, opts...)
+}
+
+func (m *defaultGuidanceService) GetExaminationItemPatientReminders(ctx context.Context, in *GetExaminationItemPatientRemindersRequest, opts ...grpc.CallOption) (*ExaminationItemPatientReminders, error) {
+	client := v1_guidancev1.NewGuidanceServiceClient(m.cli.Conn())
+	return client.GetExaminationItemPatientReminders(ctx, in, opts...)
 }
 
 func (m *defaultGuidanceService) ConfigureExaminationItem(ctx context.Context, in *ConfigureExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItemConfiguration, error) {

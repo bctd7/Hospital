@@ -20,6 +20,7 @@ service GuidanceService {
   // 检查说明解析与项目完整配置。
   rpc PreviewPreparationRules(PreviewPreparationRulesRequest) returns (PreparationRulePreview);
   rpc GetExaminationItemConfiguration(GetExaminationItemConfigurationRequest) returns (ExaminationItemConfiguration);
+  rpc GetExaminationItemPatientReminders(GetExaminationItemPatientRemindersRequest) returns (ExaminationItemPatientReminders);
   rpc ConfigureExaminationItem(ConfigureExaminationItemRequest) returns (ExaminationItemConfiguration);
 
   // 智能预约与当日检查顺序。

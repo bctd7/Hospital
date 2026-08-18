@@ -562,6 +562,112 @@ func (x *GetExaminationItemConfigurationRequest) GetRequestId() string {
 	return ""
 }
 
+// ExaminationItemPatientReminders 是患者执行检查前需要主动确认的普通提醒。
+// 它不包含工作人员设置理由、项目先后提示或准备状态的 readiness_hint。
+type ExaminationItemPatientReminders struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ItemId        string                 `protobuf:"bytes,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	Reminders     []*PatientReminder     `protobuf:"bytes,2,rep,name=reminders,proto3" json:"reminders,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExaminationItemPatientReminders) Reset() {
+	*x = ExaminationItemPatientReminders{}
+	mi := &file_guidance_v1_configuration_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExaminationItemPatientReminders) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExaminationItemPatientReminders) ProtoMessage() {}
+
+func (x *ExaminationItemPatientReminders) ProtoReflect() protoreflect.Message {
+	mi := &file_guidance_v1_configuration_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExaminationItemPatientReminders.ProtoReflect.Descriptor instead.
+func (*ExaminationItemPatientReminders) Descriptor() ([]byte, []int) {
+	return file_guidance_v1_configuration_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ExaminationItemPatientReminders) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+func (x *ExaminationItemPatientReminders) GetReminders() []*PatientReminder {
+	if x != nil {
+		return x.Reminders
+	}
+	return nil
+}
+
+type GetExaminationItemPatientRemindersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ItemId        string                 `protobuf:"bytes,1,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	RequestId     string                 `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetExaminationItemPatientRemindersRequest) Reset() {
+	*x = GetExaminationItemPatientRemindersRequest{}
+	mi := &file_guidance_v1_configuration_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetExaminationItemPatientRemindersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetExaminationItemPatientRemindersRequest) ProtoMessage() {}
+
+func (x *GetExaminationItemPatientRemindersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_guidance_v1_configuration_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetExaminationItemPatientRemindersRequest.ProtoReflect.Descriptor instead.
+func (*GetExaminationItemPatientRemindersRequest) Descriptor() ([]byte, []int) {
+	return file_guidance_v1_configuration_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetExaminationItemPatientRemindersRequest) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+func (x *GetExaminationItemPatientRemindersRequest) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
 type ConfigureExaminationItemRequest struct {
 	state                        protoimpl.MessageState      `protogen:"open.v1"`
 	Action                       string                      `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"`
@@ -583,7 +689,7 @@ type ConfigureExaminationItemRequest struct {
 
 func (x *ConfigureExaminationItemRequest) Reset() {
 	*x = ConfigureExaminationItemRequest{}
-	mi := &file_guidance_v1_configuration_proto_msgTypes[7]
+	mi := &file_guidance_v1_configuration_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -595,7 +701,7 @@ func (x *ConfigureExaminationItemRequest) String() string {
 func (*ConfigureExaminationItemRequest) ProtoMessage() {}
 
 func (x *ConfigureExaminationItemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_guidance_v1_configuration_proto_msgTypes[7]
+	mi := &file_guidance_v1_configuration_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -608,7 +714,7 @@ func (x *ConfigureExaminationItemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConfigureExaminationItemRequest.ProtoReflect.Descriptor instead.
 func (*ConfigureExaminationItemRequest) Descriptor() ([]byte, []int) {
-	return file_guidance_v1_configuration_proto_rawDescGZIP(), []int{7}
+	return file_guidance_v1_configuration_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *ConfigureExaminationItemRequest) GetAction() string {
@@ -755,6 +861,13 @@ const file_guidance_v1_configuration_proto_rawDesc = "" +
 	"&GetExaminationItemConfigurationRequest\x12\x17\n" +
 	"\aitem_id\x18\x01 \x01(\tR\x06itemId\x12\x1d\n" +
 	"\n" +
+	"request_id\x18\x02 \x01(\tR\trequestId\"\x7f\n" +
+	"\x1fExaminationItemPatientReminders\x12\x17\n" +
+	"\aitem_id\x18\x01 \x01(\tR\x06itemId\x12C\n" +
+	"\treminders\x18\x02 \x03(\v2%.hospital.guidance.v1.PatientReminderR\treminders\"c\n" +
+	")GetExaminationItemPatientRemindersRequest\x12\x17\n" +
+	"\aitem_id\x18\x01 \x01(\tR\x06itemId\x12\x1d\n" +
+	"\n" +
 	"request_id\x18\x02 \x01(\tR\trequestId\"\xaf\x05\n" +
 	"\x1fConfigureExaminationItemRequest\x12\x16\n" +
 	"\x06action\x18\x01 \x01(\tR\x06action\x12\x17\n" +
@@ -785,16 +898,18 @@ func file_guidance_v1_configuration_proto_rawDescGZIP() []byte {
 	return file_guidance_v1_configuration_proto_rawDescData
 }
 
-var file_guidance_v1_configuration_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_guidance_v1_configuration_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_guidance_v1_configuration_proto_goTypes = []any{
-	(*PreparationRule)(nil),                        // 0: hospital.guidance.v1.PreparationRule
-	(*PatientReminder)(nil),                        // 1: hospital.guidance.v1.PatientReminder
-	(*PreparationRulePreview)(nil),                 // 2: hospital.guidance.v1.PreparationRulePreview
-	(*PreviewPreparationRulesRequest)(nil),         // 3: hospital.guidance.v1.PreviewPreparationRulesRequest
-	(*ConfiguredPrecedenceRule)(nil),               // 4: hospital.guidance.v1.ConfiguredPrecedenceRule
-	(*ExaminationItemConfiguration)(nil),           // 5: hospital.guidance.v1.ExaminationItemConfiguration
-	(*GetExaminationItemConfigurationRequest)(nil), // 6: hospital.guidance.v1.GetExaminationItemConfigurationRequest
-	(*ConfigureExaminationItemRequest)(nil),        // 7: hospital.guidance.v1.ConfigureExaminationItemRequest
+	(*PreparationRule)(nil),                           // 0: hospital.guidance.v1.PreparationRule
+	(*PatientReminder)(nil),                           // 1: hospital.guidance.v1.PatientReminder
+	(*PreparationRulePreview)(nil),                    // 2: hospital.guidance.v1.PreparationRulePreview
+	(*PreviewPreparationRulesRequest)(nil),            // 3: hospital.guidance.v1.PreviewPreparationRulesRequest
+	(*ConfiguredPrecedenceRule)(nil),                  // 4: hospital.guidance.v1.ConfiguredPrecedenceRule
+	(*ExaminationItemConfiguration)(nil),              // 5: hospital.guidance.v1.ExaminationItemConfiguration
+	(*GetExaminationItemConfigurationRequest)(nil),    // 6: hospital.guidance.v1.GetExaminationItemConfigurationRequest
+	(*ExaminationItemPatientReminders)(nil),           // 7: hospital.guidance.v1.ExaminationItemPatientReminders
+	(*GetExaminationItemPatientRemindersRequest)(nil), // 8: hospital.guidance.v1.GetExaminationItemPatientRemindersRequest
+	(*ConfigureExaminationItemRequest)(nil),           // 9: hospital.guidance.v1.ConfigureExaminationItemRequest
 }
 var file_guidance_v1_configuration_proto_depIdxs = []int32{
 	0, // 0: hospital.guidance.v1.PreparationRulePreview.preparation_rules:type_name -> hospital.guidance.v1.PreparationRule
@@ -802,14 +917,15 @@ var file_guidance_v1_configuration_proto_depIdxs = []int32{
 	4, // 2: hospital.guidance.v1.ExaminationItemConfiguration.precedence_rules:type_name -> hospital.guidance.v1.ConfiguredPrecedenceRule
 	0, // 3: hospital.guidance.v1.ExaminationItemConfiguration.preparation_rules:type_name -> hospital.guidance.v1.PreparationRule
 	1, // 4: hospital.guidance.v1.ExaminationItemConfiguration.reminders:type_name -> hospital.guidance.v1.PatientReminder
-	4, // 5: hospital.guidance.v1.ConfigureExaminationItemRequest.precedence_rules:type_name -> hospital.guidance.v1.ConfiguredPrecedenceRule
-	0, // 6: hospital.guidance.v1.ConfigureExaminationItemRequest.preparation_rules:type_name -> hospital.guidance.v1.PreparationRule
-	1, // 7: hospital.guidance.v1.ConfigureExaminationItemRequest.reminders:type_name -> hospital.guidance.v1.PatientReminder
-	8, // [8:8] is the sub-list for method output_type
-	8, // [8:8] is the sub-list for method input_type
-	8, // [8:8] is the sub-list for extension type_name
-	8, // [8:8] is the sub-list for extension extendee
-	0, // [0:8] is the sub-list for field type_name
+	1, // 5: hospital.guidance.v1.ExaminationItemPatientReminders.reminders:type_name -> hospital.guidance.v1.PatientReminder
+	4, // 6: hospital.guidance.v1.ConfigureExaminationItemRequest.precedence_rules:type_name -> hospital.guidance.v1.ConfiguredPrecedenceRule
+	0, // 7: hospital.guidance.v1.ConfigureExaminationItemRequest.preparation_rules:type_name -> hospital.guidance.v1.PreparationRule
+	1, // 8: hospital.guidance.v1.ConfigureExaminationItemRequest.reminders:type_name -> hospital.guidance.v1.PatientReminder
+	9, // [9:9] is the sub-list for method output_type
+	9, // [9:9] is the sub-list for method input_type
+	9, // [9:9] is the sub-list for extension type_name
+	9, // [9:9] is the sub-list for extension extendee
+	0, // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_guidance_v1_configuration_proto_init() }
@@ -823,7 +939,7 @@ func file_guidance_v1_configuration_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_guidance_v1_configuration_proto_rawDesc), len(file_guidance_v1_configuration_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

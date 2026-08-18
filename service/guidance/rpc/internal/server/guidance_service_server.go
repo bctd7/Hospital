@@ -53,6 +53,11 @@ func (s *GuidanceServiceServer) GetExaminationItemConfiguration(ctx context.Cont
 	return l.GetExaminationItemConfiguration(in)
 }
 
+func (s *GuidanceServiceServer) GetExaminationItemPatientReminders(ctx context.Context, in *v1_guidancev1.GetExaminationItemPatientRemindersRequest) (*v1_guidancev1.ExaminationItemPatientReminders, error) {
+	l := logic.NewGetExaminationItemPatientRemindersLogic(ctx, s.svcCtx)
+	return l.GetExaminationItemPatientReminders(in)
+}
+
 func (s *GuidanceServiceServer) ConfigureExaminationItem(ctx context.Context, in *v1_guidancev1.ConfigureExaminationItemRequest) (*v1_guidancev1.ExaminationItemConfiguration, error) {
 	l := logic.NewConfigureExaminationItemLogic(ctx, s.svcCtx)
 	return l.ConfigureExaminationItem(in)

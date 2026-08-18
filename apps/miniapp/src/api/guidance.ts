@@ -9,11 +9,19 @@ import type {
   SearchGuidancePlacesInput,
   SearchGuidancePlacesResult,
   GuidanceRoute,
+	GuidancePatientReminder,
   SmartAppointmentPlan,
   TodayExaminationRecommendation,
 } from "@/types/guidance";
 
 export const guidanceApi = {
+	getExaminationItemPatientReminders(itemId: string) {
+		return request<{ item_id: string; reminders: GuidancePatientReminder[] }>({
+			path: `/api/v1/guidance/examination-items/${encodeURIComponent(itemId)}/reminders`,
+			method: "GET",
+			authenticated: true,
+		});
+	},
 	async previewPreparationRules(description: string) {
 		const value = await request<PreparationRulePreview, { description: string }>({
 			path: "/api/v1/admin/guidance/preparation-rules/preview",

@@ -400,7 +400,7 @@ VALUES
  1, DATE_SUB(@now, INTERVAL 18 MINUTE), @now),
 (@booking_guidance_cta, @account_guidance_admin, '导诊体验账号', @phone_guidance_admin_masked, @phone_guidance_admin_last4,
  @dept_radiology_main, @item_cta, @room_ct201, @today, @current_session, 'confirmed',
- @guidance_room_open_time, @guidance_room_close_time, @guidance_item_start_time, @guidance_item_end_time, @guidance_item_cutoff_time, 45,
+ @current_open_time, @guidance_room_close_time, @current_start_time, @guidance_item_end_time, @guidance_item_cutoff_time, 45,
  1, DATE_SUB(@now, INTERVAL 17 MINUTE), @now),
 (@booking_guidance_urinary, @account_guidance_admin, '导诊体验账号', @phone_guidance_admin_masked, @phone_guidance_admin_last4,
  @dept_ultrasound_main, @item_urinary_ultrasound, @room_us301, @today, @current_session, 'confirmed',

@@ -62,6 +62,18 @@ message GetExaminationItemConfigurationRequest {
   string request_id = 2;
 }
 
+// ExaminationItemPatientReminders 是患者执行检查前需要主动确认的普通提醒。
+// 它不包含工作人员设置理由、项目先后提示或准备状态的 readiness_hint。
+message ExaminationItemPatientReminders {
+  string item_id = 1;
+  repeated PatientReminder reminders = 2;
+}
+
+message GetExaminationItemPatientRemindersRequest {
+  string item_id = 1;
+  string request_id = 2;
+}
+
 message ConfigureExaminationItemRequest {
   string action = 1;
   string item_id = 2;

@@ -394,6 +394,11 @@ type ExaminationItemConfigurationPathRequest struct {
 	ItemID string `path:"itemId"`
 }
 
+type ExaminationItemPatientRemindersResponse struct {
+	ItemID    string                    `json:"item_id"`
+	Reminders []GuidancePatientReminder `json:"reminders"`
+}
+
 type ExaminationItemConfigurationResponse struct {
 	ItemID                   string                          `json:"item_id"`
 	OwnerDepartmentID        string                          `json:"owner_department_id"`

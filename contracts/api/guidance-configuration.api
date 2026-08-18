@@ -56,6 +56,11 @@ type (
 		ItemID string `path:"itemId"`
 	}
 
+	ExaminationItemPatientRemindersResponse {
+		ItemID    string                    `json:"item_id"`
+		Reminders []GuidancePatientReminder `json:"reminders"`
+	}
+
 	ConfigureExaminationItemRequest {
 		Action                       string                          `json:"action"`
 		ItemID                       string                          `json:"item_id,optional"`
@@ -79,6 +84,9 @@ type (
 	authType:   BearerAuth
 )
 service app-api {
+	@handler getExaminationItemPatientReminders
+	get /guidance/examination-items/:itemId/reminders (ExaminationItemConfigurationPathRequest) returns (ExaminationItemPatientRemindersResponse)
+
 	@handler previewPreparationRules
 	post /admin/guidance/preparation-rules/preview (PreviewPreparationRulesRequest) returns (PreparationRulePreviewResponse)
 

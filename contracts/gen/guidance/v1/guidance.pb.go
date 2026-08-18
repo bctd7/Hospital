@@ -24,14 +24,15 @@ var File_guidance_v1_guidance_proto protoreflect.FileDescriptor
 
 const file_guidance_v1_guidance_proto_rawDesc = "" +
 	"\n" +
-	"\x1aguidance/v1/guidance.proto\x12\x14hospital.guidance.v1\x1a\x1fguidance/v1/configuration.proto\x1a\x1aguidance/v1/planning.proto\x1a\x1cguidance/v1/precedence.proto\x1a\x19guidance/v1/routing.proto2\xa1\f\n" +
+	"\x1aguidance/v1/guidance.proto\x12\x14hospital.guidance.v1\x1a\x1fguidance/v1/configuration.proto\x1a\x1aguidance/v1/planning.proto\x1a\x1cguidance/v1/precedence.proto\x1a\x19guidance/v1/routing.proto2\xc0\r\n" +
 	"\x0fGuidanceService\x12o\n" +
 	"\x14CreatePrecedenceRule\x121.hospital.guidance.v1.CreatePrecedenceRuleRequest\x1a$.hospital.guidance.v1.PrecedenceRule\x12o\n" +
 	"\x14UpdatePrecedenceRule\x121.hospital.guidance.v1.UpdatePrecedenceRuleRequest\x1a$.hospital.guidance.v1.PrecedenceRule\x12}\n" +
 	"\x14DeletePrecedenceRule\x121.hospital.guidance.v1.DeletePrecedenceRuleRequest\x1a2.hospital.guidance.v1.DeletePrecedenceRuleResponse\x12z\n" +
 	"\x13ListPrecedenceRules\x120.hospital.guidance.v1.ListPrecedenceRulesRequest\x1a1.hospital.guidance.v1.ListPrecedenceRulesResponse\x12}\n" +
 	"\x17PreviewPreparationRules\x124.hospital.guidance.v1.PreviewPreparationRulesRequest\x1a,.hospital.guidance.v1.PreparationRulePreview\x12\x93\x01\n" +
-	"\x1fGetExaminationItemConfiguration\x12<.hospital.guidance.v1.GetExaminationItemConfigurationRequest\x1a2.hospital.guidance.v1.ExaminationItemConfiguration\x12\x85\x01\n" +
+	"\x1fGetExaminationItemConfiguration\x12<.hospital.guidance.v1.GetExaminationItemConfigurationRequest\x1a2.hospital.guidance.v1.ExaminationItemConfiguration\x12\x9c\x01\n" +
+	"\"GetExaminationItemPatientReminders\x12?.hospital.guidance.v1.GetExaminationItemPatientRemindersRequest\x1a5.hospital.guidance.v1.ExaminationItemPatientReminders\x12\x85\x01\n" +
 	"\x18ConfigureExaminationItem\x125.hospital.guidance.v1.ConfigureExaminationItemRequest\x1a2.hospital.guidance.v1.ExaminationItemConfiguration\x12\x90\x01\n" +
 	"\x1dGenerateSmartAppointmentPlans\x12:.hospital.guidance.v1.GenerateSmartAppointmentPlansRequest\x1a3.hospital.guidance.v1.SmartAppointmentPlansResponse\x12\x8c\x01\n" +
 	"\x1bConfirmSmartAppointmentPlan\x128.hospital.guidance.v1.ConfirmSmartAppointmentPlanRequest\x1a3.hospital.guidance.v1.ConfirmedSmartAppointmentPlan\x12\x99\x01\n" +
@@ -40,28 +41,30 @@ const file_guidance_v1_guidance_proto_rawDesc = "" +
 	"\x15CalculateWalkingRoute\x122.hospital.guidance.v1.CalculateWalkingRouteRequest\x1a\".hospital.guidance.v1.WalkingRouteB/Z-hospital/contracts/gen/guidance/v1;guidancev1b\x06proto3"
 
 var file_guidance_v1_guidance_proto_goTypes = []any{
-	(*CreatePrecedenceRuleRequest)(nil),              // 0: hospital.guidance.v1.CreatePrecedenceRuleRequest
-	(*UpdatePrecedenceRuleRequest)(nil),              // 1: hospital.guidance.v1.UpdatePrecedenceRuleRequest
-	(*DeletePrecedenceRuleRequest)(nil),              // 2: hospital.guidance.v1.DeletePrecedenceRuleRequest
-	(*ListPrecedenceRulesRequest)(nil),               // 3: hospital.guidance.v1.ListPrecedenceRulesRequest
-	(*PreviewPreparationRulesRequest)(nil),           // 4: hospital.guidance.v1.PreviewPreparationRulesRequest
-	(*GetExaminationItemConfigurationRequest)(nil),   // 5: hospital.guidance.v1.GetExaminationItemConfigurationRequest
-	(*ConfigureExaminationItemRequest)(nil),          // 6: hospital.guidance.v1.ConfigureExaminationItemRequest
-	(*GenerateSmartAppointmentPlansRequest)(nil),     // 7: hospital.guidance.v1.GenerateSmartAppointmentPlansRequest
-	(*ConfirmSmartAppointmentPlanRequest)(nil),       // 8: hospital.guidance.v1.ConfirmSmartAppointmentPlanRequest
-	(*GetTodayExaminationRecommendationRequest)(nil), // 9: hospital.guidance.v1.GetTodayExaminationRecommendationRequest
-	(*SearchPlacesRequest)(nil),                      // 10: hospital.guidance.v1.SearchPlacesRequest
-	(*CalculateWalkingRouteRequest)(nil),             // 11: hospital.guidance.v1.CalculateWalkingRouteRequest
-	(*PrecedenceRule)(nil),                           // 12: hospital.guidance.v1.PrecedenceRule
-	(*DeletePrecedenceRuleResponse)(nil),             // 13: hospital.guidance.v1.DeletePrecedenceRuleResponse
-	(*ListPrecedenceRulesResponse)(nil),              // 14: hospital.guidance.v1.ListPrecedenceRulesResponse
-	(*PreparationRulePreview)(nil),                   // 15: hospital.guidance.v1.PreparationRulePreview
-	(*ExaminationItemConfiguration)(nil),             // 16: hospital.guidance.v1.ExaminationItemConfiguration
-	(*SmartAppointmentPlansResponse)(nil),            // 17: hospital.guidance.v1.SmartAppointmentPlansResponse
-	(*ConfirmedSmartAppointmentPlan)(nil),            // 18: hospital.guidance.v1.ConfirmedSmartAppointmentPlan
-	(*TodayExaminationRecommendation)(nil),           // 19: hospital.guidance.v1.TodayExaminationRecommendation
-	(*SearchPlacesResponse)(nil),                     // 20: hospital.guidance.v1.SearchPlacesResponse
-	(*WalkingRoute)(nil),                             // 21: hospital.guidance.v1.WalkingRoute
+	(*CreatePrecedenceRuleRequest)(nil),               // 0: hospital.guidance.v1.CreatePrecedenceRuleRequest
+	(*UpdatePrecedenceRuleRequest)(nil),               // 1: hospital.guidance.v1.UpdatePrecedenceRuleRequest
+	(*DeletePrecedenceRuleRequest)(nil),               // 2: hospital.guidance.v1.DeletePrecedenceRuleRequest
+	(*ListPrecedenceRulesRequest)(nil),                // 3: hospital.guidance.v1.ListPrecedenceRulesRequest
+	(*PreviewPreparationRulesRequest)(nil),            // 4: hospital.guidance.v1.PreviewPreparationRulesRequest
+	(*GetExaminationItemConfigurationRequest)(nil),    // 5: hospital.guidance.v1.GetExaminationItemConfigurationRequest
+	(*GetExaminationItemPatientRemindersRequest)(nil), // 6: hospital.guidance.v1.GetExaminationItemPatientRemindersRequest
+	(*ConfigureExaminationItemRequest)(nil),           // 7: hospital.guidance.v1.ConfigureExaminationItemRequest
+	(*GenerateSmartAppointmentPlansRequest)(nil),      // 8: hospital.guidance.v1.GenerateSmartAppointmentPlansRequest
+	(*ConfirmSmartAppointmentPlanRequest)(nil),        // 9: hospital.guidance.v1.ConfirmSmartAppointmentPlanRequest
+	(*GetTodayExaminationRecommendationRequest)(nil),  // 10: hospital.guidance.v1.GetTodayExaminationRecommendationRequest
+	(*SearchPlacesRequest)(nil),                       // 11: hospital.guidance.v1.SearchPlacesRequest
+	(*CalculateWalkingRouteRequest)(nil),              // 12: hospital.guidance.v1.CalculateWalkingRouteRequest
+	(*PrecedenceRule)(nil),                            // 13: hospital.guidance.v1.PrecedenceRule
+	(*DeletePrecedenceRuleResponse)(nil),              // 14: hospital.guidance.v1.DeletePrecedenceRuleResponse
+	(*ListPrecedenceRulesResponse)(nil),               // 15: hospital.guidance.v1.ListPrecedenceRulesResponse
+	(*PreparationRulePreview)(nil),                    // 16: hospital.guidance.v1.PreparationRulePreview
+	(*ExaminationItemConfiguration)(nil),              // 17: hospital.guidance.v1.ExaminationItemConfiguration
+	(*ExaminationItemPatientReminders)(nil),           // 18: hospital.guidance.v1.ExaminationItemPatientReminders
+	(*SmartAppointmentPlansResponse)(nil),             // 19: hospital.guidance.v1.SmartAppointmentPlansResponse
+	(*ConfirmedSmartAppointmentPlan)(nil),             // 20: hospital.guidance.v1.ConfirmedSmartAppointmentPlan
+	(*TodayExaminationRecommendation)(nil),            // 21: hospital.guidance.v1.TodayExaminationRecommendation
+	(*SearchPlacesResponse)(nil),                      // 22: hospital.guidance.v1.SearchPlacesResponse
+	(*WalkingRoute)(nil),                              // 23: hospital.guidance.v1.WalkingRoute
 }
 var file_guidance_v1_guidance_proto_depIdxs = []int32{
 	0,  // 0: hospital.guidance.v1.GuidanceService.CreatePrecedenceRule:input_type -> hospital.guidance.v1.CreatePrecedenceRuleRequest
@@ -70,26 +73,28 @@ var file_guidance_v1_guidance_proto_depIdxs = []int32{
 	3,  // 3: hospital.guidance.v1.GuidanceService.ListPrecedenceRules:input_type -> hospital.guidance.v1.ListPrecedenceRulesRequest
 	4,  // 4: hospital.guidance.v1.GuidanceService.PreviewPreparationRules:input_type -> hospital.guidance.v1.PreviewPreparationRulesRequest
 	5,  // 5: hospital.guidance.v1.GuidanceService.GetExaminationItemConfiguration:input_type -> hospital.guidance.v1.GetExaminationItemConfigurationRequest
-	6,  // 6: hospital.guidance.v1.GuidanceService.ConfigureExaminationItem:input_type -> hospital.guidance.v1.ConfigureExaminationItemRequest
-	7,  // 7: hospital.guidance.v1.GuidanceService.GenerateSmartAppointmentPlans:input_type -> hospital.guidance.v1.GenerateSmartAppointmentPlansRequest
-	8,  // 8: hospital.guidance.v1.GuidanceService.ConfirmSmartAppointmentPlan:input_type -> hospital.guidance.v1.ConfirmSmartAppointmentPlanRequest
-	9,  // 9: hospital.guidance.v1.GuidanceService.GetTodayExaminationRecommendation:input_type -> hospital.guidance.v1.GetTodayExaminationRecommendationRequest
-	10, // 10: hospital.guidance.v1.GuidanceService.SearchPlaces:input_type -> hospital.guidance.v1.SearchPlacesRequest
-	11, // 11: hospital.guidance.v1.GuidanceService.CalculateWalkingRoute:input_type -> hospital.guidance.v1.CalculateWalkingRouteRequest
-	12, // 12: hospital.guidance.v1.GuidanceService.CreatePrecedenceRule:output_type -> hospital.guidance.v1.PrecedenceRule
-	12, // 13: hospital.guidance.v1.GuidanceService.UpdatePrecedenceRule:output_type -> hospital.guidance.v1.PrecedenceRule
-	13, // 14: hospital.guidance.v1.GuidanceService.DeletePrecedenceRule:output_type -> hospital.guidance.v1.DeletePrecedenceRuleResponse
-	14, // 15: hospital.guidance.v1.GuidanceService.ListPrecedenceRules:output_type -> hospital.guidance.v1.ListPrecedenceRulesResponse
-	15, // 16: hospital.guidance.v1.GuidanceService.PreviewPreparationRules:output_type -> hospital.guidance.v1.PreparationRulePreview
-	16, // 17: hospital.guidance.v1.GuidanceService.GetExaminationItemConfiguration:output_type -> hospital.guidance.v1.ExaminationItemConfiguration
-	16, // 18: hospital.guidance.v1.GuidanceService.ConfigureExaminationItem:output_type -> hospital.guidance.v1.ExaminationItemConfiguration
-	17, // 19: hospital.guidance.v1.GuidanceService.GenerateSmartAppointmentPlans:output_type -> hospital.guidance.v1.SmartAppointmentPlansResponse
-	18, // 20: hospital.guidance.v1.GuidanceService.ConfirmSmartAppointmentPlan:output_type -> hospital.guidance.v1.ConfirmedSmartAppointmentPlan
-	19, // 21: hospital.guidance.v1.GuidanceService.GetTodayExaminationRecommendation:output_type -> hospital.guidance.v1.TodayExaminationRecommendation
-	20, // 22: hospital.guidance.v1.GuidanceService.SearchPlaces:output_type -> hospital.guidance.v1.SearchPlacesResponse
-	21, // 23: hospital.guidance.v1.GuidanceService.CalculateWalkingRoute:output_type -> hospital.guidance.v1.WalkingRoute
-	12, // [12:24] is the sub-list for method output_type
-	0,  // [0:12] is the sub-list for method input_type
+	6,  // 6: hospital.guidance.v1.GuidanceService.GetExaminationItemPatientReminders:input_type -> hospital.guidance.v1.GetExaminationItemPatientRemindersRequest
+	7,  // 7: hospital.guidance.v1.GuidanceService.ConfigureExaminationItem:input_type -> hospital.guidance.v1.ConfigureExaminationItemRequest
+	8,  // 8: hospital.guidance.v1.GuidanceService.GenerateSmartAppointmentPlans:input_type -> hospital.guidance.v1.GenerateSmartAppointmentPlansRequest
+	9,  // 9: hospital.guidance.v1.GuidanceService.ConfirmSmartAppointmentPlan:input_type -> hospital.guidance.v1.ConfirmSmartAppointmentPlanRequest
+	10, // 10: hospital.guidance.v1.GuidanceService.GetTodayExaminationRecommendation:input_type -> hospital.guidance.v1.GetTodayExaminationRecommendationRequest
+	11, // 11: hospital.guidance.v1.GuidanceService.SearchPlaces:input_type -> hospital.guidance.v1.SearchPlacesRequest
+	12, // 12: hospital.guidance.v1.GuidanceService.CalculateWalkingRoute:input_type -> hospital.guidance.v1.CalculateWalkingRouteRequest
+	13, // 13: hospital.guidance.v1.GuidanceService.CreatePrecedenceRule:output_type -> hospital.guidance.v1.PrecedenceRule
+	13, // 14: hospital.guidance.v1.GuidanceService.UpdatePrecedenceRule:output_type -> hospital.guidance.v1.PrecedenceRule
+	14, // 15: hospital.guidance.v1.GuidanceService.DeletePrecedenceRule:output_type -> hospital.guidance.v1.DeletePrecedenceRuleResponse
+	15, // 16: hospital.guidance.v1.GuidanceService.ListPrecedenceRules:output_type -> hospital.guidance.v1.ListPrecedenceRulesResponse
+	16, // 17: hospital.guidance.v1.GuidanceService.PreviewPreparationRules:output_type -> hospital.guidance.v1.PreparationRulePreview
+	17, // 18: hospital.guidance.v1.GuidanceService.GetExaminationItemConfiguration:output_type -> hospital.guidance.v1.ExaminationItemConfiguration
+	18, // 19: hospital.guidance.v1.GuidanceService.GetExaminationItemPatientReminders:output_type -> hospital.guidance.v1.ExaminationItemPatientReminders
+	17, // 20: hospital.guidance.v1.GuidanceService.ConfigureExaminationItem:output_type -> hospital.guidance.v1.ExaminationItemConfiguration
+	19, // 21: hospital.guidance.v1.GuidanceService.GenerateSmartAppointmentPlans:output_type -> hospital.guidance.v1.SmartAppointmentPlansResponse
+	20, // 22: hospital.guidance.v1.GuidanceService.ConfirmSmartAppointmentPlan:output_type -> hospital.guidance.v1.ConfirmedSmartAppointmentPlan
+	21, // 23: hospital.guidance.v1.GuidanceService.GetTodayExaminationRecommendation:output_type -> hospital.guidance.v1.TodayExaminationRecommendation
+	22, // 24: hospital.guidance.v1.GuidanceService.SearchPlaces:output_type -> hospital.guidance.v1.SearchPlacesResponse
+	23, // 25: hospital.guidance.v1.GuidanceService.CalculateWalkingRoute:output_type -> hospital.guidance.v1.WalkingRoute
+	13, // [13:26] is the sub-list for method output_type
+	0,  // [0:13] is the sub-list for method input_type
 	0,  // [0:0] is the sub-list for extension type_name
 	0,  // [0:0] is the sub-list for extension extendee
 	0,  // [0:0] is the sub-list for field type_name

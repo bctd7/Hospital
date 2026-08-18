@@ -339,6 +339,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			[]rest.Route{
 				{
 					Method:  http.MethodGet,
+					Path:    "/guidance/examination-items/:itemId/reminders",
+					Handler: guidanceconfiguration.GetExaminationItemPatientRemindersHandler(serverCtx),
+				},
+				{
+					Method:  http.MethodGet,
 					Path:    "/admin/guidance/examination-items/:itemId/configuration",
 					Handler: guidanceconfiguration.GetExaminationItemConfigurationHandler(serverCtx),
 				},

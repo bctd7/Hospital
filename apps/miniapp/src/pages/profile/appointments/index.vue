@@ -4,7 +4,9 @@ import { computed, ref } from "vue";
 
 import { patientAppointmentApi } from "@/api/appointment";
 import { ApiError } from "@/api/client";
+import { guidanceApi } from "@/api/guidance";
 import AppPage from "@/components/layout/AppPage.vue";
+import { confirmPatientReminders } from "@/features/guidance/patientReminders";
 import type { AppointmentListView, PatientBooking, PatientBookingStatus } from "@/types/appointment";
 import { formatEstimatedDuration } from "@/utils/appointmentManagement";
 
@@ -85,6 +87,8 @@ async function checkIn(booking: PatientBooking) {
   if (!canCheckIn(booking) || checkingInId.value) return;
   checkingInId.value = booking.bookingId;
   try {
+		const { reminders } = await guidanceApi.getExaminationItemPatientReminders(booking.itemId);
+		if (!await confirmPatientReminders(reminders ?? [])) return;
     const updated = await patientAppointmentApi.checkIn(booking);
     bookings.value = bookings.value.map((value) => value.bookingId === updated.bookingId ? updated : value);
     uni.showToast({ title: "报到成功", icon: "success" });

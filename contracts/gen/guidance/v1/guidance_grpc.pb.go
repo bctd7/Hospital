@@ -19,18 +19,19 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	GuidanceService_CreatePrecedenceRule_FullMethodName              = "/hospital.guidance.v1.GuidanceService/CreatePrecedenceRule"
-	GuidanceService_UpdatePrecedenceRule_FullMethodName              = "/hospital.guidance.v1.GuidanceService/UpdatePrecedenceRule"
-	GuidanceService_DeletePrecedenceRule_FullMethodName              = "/hospital.guidance.v1.GuidanceService/DeletePrecedenceRule"
-	GuidanceService_ListPrecedenceRules_FullMethodName               = "/hospital.guidance.v1.GuidanceService/ListPrecedenceRules"
-	GuidanceService_PreviewPreparationRules_FullMethodName           = "/hospital.guidance.v1.GuidanceService/PreviewPreparationRules"
-	GuidanceService_GetExaminationItemConfiguration_FullMethodName   = "/hospital.guidance.v1.GuidanceService/GetExaminationItemConfiguration"
-	GuidanceService_ConfigureExaminationItem_FullMethodName          = "/hospital.guidance.v1.GuidanceService/ConfigureExaminationItem"
-	GuidanceService_GenerateSmartAppointmentPlans_FullMethodName     = "/hospital.guidance.v1.GuidanceService/GenerateSmartAppointmentPlans"
-	GuidanceService_ConfirmSmartAppointmentPlan_FullMethodName       = "/hospital.guidance.v1.GuidanceService/ConfirmSmartAppointmentPlan"
-	GuidanceService_GetTodayExaminationRecommendation_FullMethodName = "/hospital.guidance.v1.GuidanceService/GetTodayExaminationRecommendation"
-	GuidanceService_SearchPlaces_FullMethodName                      = "/hospital.guidance.v1.GuidanceService/SearchPlaces"
-	GuidanceService_CalculateWalkingRoute_FullMethodName             = "/hospital.guidance.v1.GuidanceService/CalculateWalkingRoute"
+	GuidanceService_CreatePrecedenceRule_FullMethodName               = "/hospital.guidance.v1.GuidanceService/CreatePrecedenceRule"
+	GuidanceService_UpdatePrecedenceRule_FullMethodName               = "/hospital.guidance.v1.GuidanceService/UpdatePrecedenceRule"
+	GuidanceService_DeletePrecedenceRule_FullMethodName               = "/hospital.guidance.v1.GuidanceService/DeletePrecedenceRule"
+	GuidanceService_ListPrecedenceRules_FullMethodName                = "/hospital.guidance.v1.GuidanceService/ListPrecedenceRules"
+	GuidanceService_PreviewPreparationRules_FullMethodName            = "/hospital.guidance.v1.GuidanceService/PreviewPreparationRules"
+	GuidanceService_GetExaminationItemConfiguration_FullMethodName    = "/hospital.guidance.v1.GuidanceService/GetExaminationItemConfiguration"
+	GuidanceService_GetExaminationItemPatientReminders_FullMethodName = "/hospital.guidance.v1.GuidanceService/GetExaminationItemPatientReminders"
+	GuidanceService_ConfigureExaminationItem_FullMethodName           = "/hospital.guidance.v1.GuidanceService/ConfigureExaminationItem"
+	GuidanceService_GenerateSmartAppointmentPlans_FullMethodName      = "/hospital.guidance.v1.GuidanceService/GenerateSmartAppointmentPlans"
+	GuidanceService_ConfirmSmartAppointmentPlan_FullMethodName        = "/hospital.guidance.v1.GuidanceService/ConfirmSmartAppointmentPlan"
+	GuidanceService_GetTodayExaminationRecommendation_FullMethodName  = "/hospital.guidance.v1.GuidanceService/GetTodayExaminationRecommendation"
+	GuidanceService_SearchPlaces_FullMethodName                       = "/hospital.guidance.v1.GuidanceService/SearchPlaces"
+	GuidanceService_CalculateWalkingRoute_FullMethodName              = "/hospital.guidance.v1.GuidanceService/CalculateWalkingRoute"
 )
 
 // GuidanceServiceClient is the client API for GuidanceService service.
@@ -47,6 +48,7 @@ type GuidanceServiceClient interface {
 	// 检查说明解析与项目完整配置。
 	PreviewPreparationRules(ctx context.Context, in *PreviewPreparationRulesRequest, opts ...grpc.CallOption) (*PreparationRulePreview, error)
 	GetExaminationItemConfiguration(ctx context.Context, in *GetExaminationItemConfigurationRequest, opts ...grpc.CallOption) (*ExaminationItemConfiguration, error)
+	GetExaminationItemPatientReminders(ctx context.Context, in *GetExaminationItemPatientRemindersRequest, opts ...grpc.CallOption) (*ExaminationItemPatientReminders, error)
 	ConfigureExaminationItem(ctx context.Context, in *ConfigureExaminationItemRequest, opts ...grpc.CallOption) (*ExaminationItemConfiguration, error)
 	// 智能预约与当日检查顺序。
 	GenerateSmartAppointmentPlans(ctx context.Context, in *GenerateSmartAppointmentPlansRequest, opts ...grpc.CallOption) (*SmartAppointmentPlansResponse, error)
@@ -119,6 +121,16 @@ func (c *guidanceServiceClient) GetExaminationItemConfiguration(ctx context.Cont
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ExaminationItemConfiguration)
 	err := c.cc.Invoke(ctx, GuidanceService_GetExaminationItemConfiguration_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *guidanceServiceClient) GetExaminationItemPatientReminders(ctx context.Context, in *GetExaminationItemPatientRemindersRequest, opts ...grpc.CallOption) (*ExaminationItemPatientReminders, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ExaminationItemPatientReminders)
+	err := c.cc.Invoke(ctx, GuidanceService_GetExaminationItemPatientReminders_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -199,6 +211,7 @@ type GuidanceServiceServer interface {
 	// 检查说明解析与项目完整配置。
 	PreviewPreparationRules(context.Context, *PreviewPreparationRulesRequest) (*PreparationRulePreview, error)
 	GetExaminationItemConfiguration(context.Context, *GetExaminationItemConfigurationRequest) (*ExaminationItemConfiguration, error)
+	GetExaminationItemPatientReminders(context.Context, *GetExaminationItemPatientRemindersRequest) (*ExaminationItemPatientReminders, error)
 	ConfigureExaminationItem(context.Context, *ConfigureExaminationItemRequest) (*ExaminationItemConfiguration, error)
 	// 智能预约与当日检查顺序。
 	GenerateSmartAppointmentPlans(context.Context, *GenerateSmartAppointmentPlansRequest) (*SmartAppointmentPlansResponse, error)
@@ -234,6 +247,9 @@ func (UnimplementedGuidanceServiceServer) PreviewPreparationRules(context.Contex
 }
 func (UnimplementedGuidanceServiceServer) GetExaminationItemConfiguration(context.Context, *GetExaminationItemConfigurationRequest) (*ExaminationItemConfiguration, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetExaminationItemConfiguration not implemented")
+}
+func (UnimplementedGuidanceServiceServer) GetExaminationItemPatientReminders(context.Context, *GetExaminationItemPatientRemindersRequest) (*ExaminationItemPatientReminders, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetExaminationItemPatientReminders not implemented")
 }
 func (UnimplementedGuidanceServiceServer) ConfigureExaminationItem(context.Context, *ConfigureExaminationItemRequest) (*ExaminationItemConfiguration, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ConfigureExaminationItem not implemented")
@@ -382,6 +398,24 @@ func _GuidanceService_GetExaminationItemConfiguration_Handler(srv interface{}, c
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GuidanceService_GetExaminationItemPatientReminders_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetExaminationItemPatientRemindersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GuidanceServiceServer).GetExaminationItemPatientReminders(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GuidanceService_GetExaminationItemPatientReminders_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GuidanceServiceServer).GetExaminationItemPatientReminders(ctx, req.(*GetExaminationItemPatientRemindersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _GuidanceService_ConfigureExaminationItem_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ConfigureExaminationItemRequest)
 	if err := dec(in); err != nil {
@@ -520,6 +554,10 @@ var GuidanceService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetExaminationItemConfiguration",
 			Handler:    _GuidanceService_GetExaminationItemConfiguration_Handler,
+		},
+		{
+			MethodName: "GetExaminationItemPatientReminders",
+			Handler:    _GuidanceService_GetExaminationItemPatientReminders_Handler,
 		},
 		{
 			MethodName: "ConfigureExaminationItem",
