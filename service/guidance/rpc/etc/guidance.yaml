@@ -1,6 +1,6 @@
 Name: guidance-rpc
 ListenOn: 0.0.0.0:8082
-Timeout: 15000
+Timeout: 30000
 Mode: dev
 Environment: "${APP_ENV}"
 Log:
@@ -36,4 +36,4 @@ LLM:
   Endpoint: ${GUIDANCE_LLM_ENDPOINT}
   APIKey: ${GUIDANCE_LLM_API_KEY}
   Model: ${GUIDANCE_LLM_MODEL}
-  TimeoutMilliseconds: 10000
+  TimeoutMilliseconds: 20000

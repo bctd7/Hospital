@@ -156,6 +156,13 @@ END;
 SET @expired_cutoff_time = TIME(DATE_SUB(@local_now, INTERVAL 5 MINUTE));
 SET @expired_end_time = TIME(DATE_SUB(@local_now, INTERVAL 1 MINUTE));
 SET @current_close_time = CASE WHEN @current_session = 'morning' THEN '11:59:59' ELSE '23:59:59' END;
+-- 智能导诊体验账号使用标准上午/下午窗口，不绑定灌数瞬间前后的短窗口。
+-- 这样当天重建数据后，三条预约在整个当前大窗内都能稳定用于“当日导诊”演示。
+SET @guidance_room_open_time = CASE WHEN @current_session = 'morning' THEN '08:00:00' ELSE '12:00:00' END;
+SET @guidance_item_start_time = CASE WHEN @current_session = 'morning' THEN '09:00:00' ELSE '14:00:00' END;
+SET @guidance_item_cutoff_time = CASE WHEN @current_session = 'morning' THEN '11:30:00' ELSE '16:30:00' END;
+SET @guidance_item_end_time = CASE WHEN @current_session = 'morning' THEN '12:00:00' ELSE '17:00:00' END;
+SET @guidance_room_close_time = CASE WHEN @current_session = 'morning' THEN '12:00:00' ELSE '18:00:00' END;
 SET @current_session_started_at = CASE
     WHEN @current_session = 'morning' THEN TIMESTAMP(@today, '00:00:00')
     ELSE TIMESTAMP(@today, '12:00:00')
@@ -389,15 +396,15 @@ INSERT INTO appointment_bookings
 VALUES
 (@booking_guidance_blood, @account_guidance_admin, '导诊体验账号', @phone_guidance_admin_masked, @phone_guidance_admin_last4,
  @dept_laboratory_east, @item_blood, @room_lab201, @today, @current_session, 'confirmed',
- @current_open_time, @current_close_time, @current_start_time, @current_end_time, @current_cutoff_time, 10,
+ @guidance_room_open_time, @guidance_room_close_time, @guidance_item_start_time, @guidance_item_end_time, @guidance_item_cutoff_time, 10,
  1, DATE_SUB(@now, INTERVAL 18 MINUTE), @now),
 (@booking_guidance_cta, @account_guidance_admin, '导诊体验账号', @phone_guidance_admin_masked, @phone_guidance_admin_last4,
  @dept_radiology_main, @item_cta, @room_ct201, @today, @current_session, 'confirmed',
- @current_open_time, @current_close_time, @current_start_time, @current_end_time, @current_cutoff_time, 45,
+ @guidance_room_open_time, @guidance_room_close_time, @guidance_item_start_time, @guidance_item_end_time, @guidance_item_cutoff_time, 45,
  1, DATE_SUB(@now, INTERVAL 17 MINUTE), @now),
 (@booking_guidance_urinary, @account_guidance_admin, '导诊体验账号', @phone_guidance_admin_masked, @phone_guidance_admin_last4,
  @dept_ultrasound_main, @item_urinary_ultrasound, @room_us301, @today, @current_session, 'confirmed',
- @current_open_time, @current_close_time, @current_start_time, @current_end_time, @current_cutoff_time, 20,
+ @guidance_room_open_time, @guidance_room_close_time, @guidance_item_start_time, @guidance_item_end_time, @guidance_item_cutoff_time, 20,
  1, DATE_SUB(@now, INTERVAL 16 MINUTE), @now);
 
 INSERT INTO appointment_check_queues

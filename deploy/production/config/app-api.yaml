@@ -2,7 +2,7 @@ Name: app-api
 Environment: production
 Host: 0.0.0.0
 Port: 8888
-Timeout: 15000
+Timeout: 30000
 
 Log:
   ServiceName: app-api
@@ -32,7 +32,7 @@ GuidanceRPC:
   Endpoints:
     - guidance-rpc:8082
   NonBlock: true
-  Timeout: 15000
+  Timeout: 30000
 
 AuthorizationRedis:
   Addr: ${REDIS_HOST}:${REDIS_PORT}

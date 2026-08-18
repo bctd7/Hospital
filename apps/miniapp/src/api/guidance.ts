@@ -19,6 +19,7 @@ export const guidanceApi = {
 			method: "POST",
 			data: { description },
 			authenticated: true,
+			timeoutMs: 32000,
 		});
 	},
 	getExaminationItemConfiguration(itemId: string) {

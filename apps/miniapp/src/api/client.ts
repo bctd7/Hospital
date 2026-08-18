@@ -13,6 +13,7 @@ interface RequestOptions<TData = unknown> {
   data?: TData;
   authenticated?: boolean;
   retryOnUnauthorized?: boolean;
+  timeoutMs?: number;
 }
 
 interface AuthAdapter {
@@ -74,7 +75,7 @@ function directRequest<TData>(
       method: options.method ?? "GET",
       data: options.data as UniApp.RequestOptions["data"],
       header: headers,
-      timeout: API_REQUEST_TIMEOUT_MS,
+      timeout: options.timeoutMs ?? API_REQUEST_TIMEOUT_MS,
       success: (response) => {
         resolve({ statusCode: response.statusCode, data: response.data });
       },

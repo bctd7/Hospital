@@ -9,6 +9,27 @@ vi.mock("@/api/client", () => ({
 describe("guidance HTTP adapter", () => {
   beforeEach(() => requestMock.mockReset());
 
+  it("allows the model-backed preparation preview to finish before the client times out", async () => {
+    requestMock.mockResolvedValueOnce({
+      description: "检查前需空腹 8～12 小时",
+      preparation_rules: [],
+      reminders: [],
+      unresolved_fragments: [],
+      parser_mode: "llm",
+    });
+    const { guidanceApi } = await import("@/api/guidance");
+
+    await guidanceApi.previewPreparationRules("检查前需空腹 8～12 小时");
+
+    expect(requestMock).toHaveBeenCalledWith({
+      path: "/api/v1/admin/guidance/preparation-rules/preview",
+      method: "POST",
+      data: { description: "检查前需空腹 8～12 小时" },
+      authenticated: true,
+      timeoutMs: 32000,
+    });
+  });
+
   it("posts two unified location points and a travel mode to the authenticated route endpoint", async () => {
     requestMock.mockResolvedValueOnce({
       origin: { name: "A", address: "", latitude: 31.2, longitude: 121.4 },
