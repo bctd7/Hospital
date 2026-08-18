@@ -1,7 +1,9 @@
 package amap
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"strings"
@@ -45,14 +47,39 @@ type transitPlan struct {
 }
 
 type transitSegment struct {
-	Walking struct {
-		Distance string        `json:"distance"`
-		Duration string        `json:"duration"`
-		Steps    []walkingStep `json:"steps"`
-	} `json:"walking"`
-	Bus struct {
-		BusLines []transitBusLine `json:"buslines"`
-	} `json:"bus"`
+	Walking transitWalking `json:"walking"`
+	Bus     transitBus     `json:"bus"`
+}
+
+type transitWalking struct {
+	Distance string        `json:"distance"`
+	Duration string        `json:"duration"`
+	Steps    []walkingStep `json:"steps"`
+}
+
+func (w *transitWalking) UnmarshalJSON(value []byte) error {
+	return unmarshalOptionalTransitObject(value, (*transitWalkingAlias)(w))
+}
+
+type transitWalkingAlias transitWalking
+
+type transitBus struct {
+	BusLines []transitBusLine `json:"buslines"`
+}
+
+func (b *transitBus) UnmarshalJSON(value []byte) error {
+	return unmarshalOptionalTransitObject(value, (*transitBusAlias)(b))
+}
+
+type transitBusAlias transitBus
+
+// 高德在公交方案的可选路段不存在时，会把对象返回成空数组而不是空对象。
+func unmarshalOptionalTransitObject(value []byte, target any) error {
+	trimmed := bytes.TrimSpace(value)
+	if bytes.Equal(trimmed, []byte("null")) || bytes.Equal(trimmed, []byte("[]")) {
+		return nil
+	}
+	return json.Unmarshal(trimmed, target)
 }
 
 type transitBusLine struct {
