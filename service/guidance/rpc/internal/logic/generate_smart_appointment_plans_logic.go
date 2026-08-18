@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"errors"
 
 	v1_guidancev1 "hospital/contracts/gen/guidance/v1"
 	"hospital/service/guidance/rpc/internal/planning"
@@ -37,6 +38,11 @@ func (l *GenerateSmartAppointmentPlansLogic) GenerateSmartAppointmentPlans(in *v
 		ItemIDs: in.GetItemIds(), CandidateDates: in.GetCandidateDates(), CandidateAvailability: availability,
 	})
 	if err != nil {
+		// 找不到可行方案是一次有效的求解结果，不应表现为 HTTP 409。
+		// 方案确认后的容量或版本变化仍由确认接口返回真正的冲突。
+		if errors.Is(err, planning.ErrNoPlan) || errors.Is(err, planning.ErrExistingBooking) {
+			return &v1_guidancev1.SmartAppointmentPlansResponse{Plans: make([]*v1_guidancev1.SmartAppointmentPlan, 0)}, nil
+		}
 		return nil, planningRPCError(err)
 	}
 	response := &v1_guidancev1.SmartAppointmentPlansResponse{Plans: make([]*v1_guidancev1.SmartAppointmentPlan, 0, len(plans))}

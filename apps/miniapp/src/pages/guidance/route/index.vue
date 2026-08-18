@@ -1,278 +1,20 @@
 <script setup lang="ts">
-import { onLoad, onShow } from "@dcloudio/uni-app";
-import { computed, nextTick, ref } from "vue";
-
-import { ApiError } from "@/api/client";
-import { guidanceApi } from "@/api/guidance";
 import PlaceSearchSheet from "@/components/guidance/PlaceSearchSheet.vue";
-import type { GuidanceLocationPoint, GuidanceRoute, GuidanceTravelMode, TodayExaminationRecommendation } from "@/types/guidance";
-import { loadGuidanceRouteItinerary, updateGuidanceRouteItinerary, type GuidanceRouteItinerary } from "@/utils/guidanceRouteImport";
+import { useGuidanceRoute } from "@/features/guidance/useGuidanceRoute";
 
-interface MapMarker {
-  id: number;
-  latitude: number;
-  longitude: number;
-  title: string;
-  width: number;
-  height: number;
-  label: { content: string; color: string; fontSize: number; borderRadius: number; bgColor: string; padding: number };
-}
-
-interface MapPolyline {
-  points: Array<{ latitude: number; longitude: number }>;
-  color: string;
-  width: number;
-  arrowLine: boolean;
-  borderColor: string;
-  borderWidth: number;
-}
-
-const origin = ref<GuidanceLocationPoint>();
-const destination = ref<GuidanceLocationPoint>();
-const route = ref<GuidanceRoute>();
-const loading = ref(false);
-const error = ref("");
-const searchTarget = ref<"origin" | "destination">();
-const importedItinerary = ref<GuidanceRouteItinerary>();
-const recommendation = ref<TodayExaminationRecommendation>();
-const selectedStopIndex = ref(-1);
-const resolvedStops = ref<Record<number, GuidanceLocationPoint>>({});
-const refreshingProgress = ref(false);
-const travelMode = ref<GuidanceTravelMode>("walking");
-const outsideRouteLeg = ref(true);
-const travelModes: Array<{ value: GuidanceTravelMode; label: string }> = [
-  { value: "walking", label: "步行" },
-  { value: "transit", label: "公交" },
-  { value: "driving", label: "驾车" },
-];
-
-onLoad((query) => {
-  if (query?.source === "today") void loadImportedRoute();
-});
-onShow(() => {
-  if (importedItinerary.value) void refreshProgress(false);
-});
-
-const canCalculate = computed(() => Boolean(origin.value && destination.value && !loading.value));
-const activeItemIdsInRecommendedOrder = computed(() => recommendation.value?.stages
-  .filter((stage) => stage.status !== "completed")
-  .flatMap((stage) => stage.items.map((item) => item.item_id)) ?? []);
-const activeItemIds = computed(() => new Set(activeItemIdsInRecommendedOrder.value));
-const completedItemIdsInRecommendedOrder = computed(() => recommendation.value?.stages
-  .filter((stage) => stage.status === "completed")
-  .flatMap((stage) => stage.items.map((item) => item.item_id)) ?? []);
-const currentStopIndex = computed(() => {
-  const itinerary = importedItinerary.value;
-  if (!itinerary) return -1;
-  if (!recommendation.value) return 0;
-  const nextItemId = activeItemIdsInRecommendedOrder.value[0];
-  return nextItemId ? itinerary.stops.findIndex((stop) => stop.itemId === nextItemId) : -1;
-});
-const completedStopCount = computed(() => importedItinerary.value?.stops.filter((stop) => recommendation.value && !activeItemIds.value.has(stop.itemId)).length ?? 0);
-const isOutsideStage = computed(() => !importedItinerary.value || outsideRouteLeg.value);
-const effectiveMode = computed<GuidanceTravelMode>(() => isOutsideStage.value ? travelMode.value : "walking");
-const mapCenter = computed(() => {
-  const points = route.value?.polyline ?? [];
-  if (points.length > 0) return points[Math.floor(points.length / 2)]!;
-  return origin.value ?? destination.value ?? { latitude: 31.2304, longitude: 121.4737 };
-});
-const markers = computed<MapMarker[]>(() => {
-  if (!route.value) return [];
-  return [
-    marker(1, route.value.origin, "起"),
-    marker(2, route.value.destination, "终"),
-  ];
-});
-const polylines = computed<MapPolyline[]>(() => route.value?.polyline.length
-  ? [{
-      points: route.value.polyline,
-      color: "#168fe4",
-      width: 6,
-      arrowLine: true,
-      borderColor: "#ffffff",
-      borderWidth: 2,
-    }]
-  : []);
-const mapPoints = computed(() => route.value?.polyline ?? []);
-const distanceText = computed(() => {
-  const meters = route.value?.distance_meters ?? 0;
-  return meters >= 1000 ? `${(meters / 1000).toFixed(1)} 公里` : `${meters} 米`;
-});
-const durationText = computed(() => {
-  const seconds = route.value?.duration_seconds ?? 0;
-  if (seconds <= 0) return "少于 1 分钟";
-  const minutes = Math.max(1, Math.ceil(seconds / 60));
-  return minutes >= 60 ? `${Math.floor(minutes / 60)} 小时 ${minutes % 60} 分钟` : `${minutes} 分钟`;
-});
-const providerText = computed(() => route.value?.provider === "local" ? "起点和终点位于同一位置" : `高德地图${modeLabel(route.value?.mode ?? effectiveMode.value)}路线`);
-const actionLabel = computed(() => `计算${modeLabel(effectiveMode.value)}路线`);
-const durationLabel = computed(() => effectiveMode.value === "walking" ? "预计步行" : effectiveMode.value === "transit" ? "预计公交" : "预计驾车");
-
-function marker(id: number, point: GuidanceLocationPoint, content: string): MapMarker {
-  return {
-    id,
-    latitude: point.latitude,
-    longitude: point.longitude,
-    title: point.name,
-    width: 28,
-    height: 28,
-    label: {
-      content,
-      color: "#ffffff",
-      fontSize: 12,
-      borderRadius: 14,
-      bgColor: id === 1 ? "#168fe4" : "#16a085",
-      padding: 6,
-    },
-  };
-}
-
-function choosePoint(target: "origin" | "destination") {
-  searchTarget.value = target;
-}
-
-async function loadImportedRoute() {
-  const itinerary = loadGuidanceRouteItinerary();
-  if (!itinerary?.stops.length) return;
-  importedItinerary.value = itinerary;
-  travelMode.value = itinerary.transportMode ?? "walking";
-  origin.value = itinerary.initialOrigin;
-  await refreshProgress(false);
-}
-
-async function resolveStop(index: number) {
-  const cached = resolvedStops.value[index];
-  if (cached) return cached;
-  const stop = importedItinerary.value?.stops[index];
-  if (!stop) return undefined;
-  const result = await guidanceApi.searchPlaces({ keyword: stop.searchKeyword, city: "上海市", limit: 8 });
-  const exact = result.places.find((place) => place.name.includes(stop.building)) ?? result.places[0];
-  if (exact) resolvedStops.value = { ...resolvedStops.value, [index]: exact };
-  return exact;
-}
-
-async function selectStage(index: number, followCurrentProgress = false) {
-  const itinerary = importedItinerary.value;
-  if (!itinerary || index < 0 || index >= itinerary.stops.length) return;
-  selectedStopIndex.value = index;
-  route.value = undefined;
-  error.value = "";
-  try {
-    destination.value = await resolveStop(index);
-    if (followCurrentProgress) {
-      const completedIds = completedItemIdsInRecommendedOrder.value;
-      const lastCompletedItemId = completedIds[completedIds.length - 1];
-      const completedIndex = lastCompletedItemId
-        ? itinerary.stops.findIndex((stop) => stop.itemId === lastCompletedItemId)
-        : -1;
-      if (completedIndex >= 0) {
-        origin.value = await resolveStop(completedIndex);
-        outsideRouteLeg.value = false;
-      } else {
-        origin.value = itinerary.initialOrigin;
-        outsideRouteLeg.value = true;
-        if (!origin.value) searchTarget.value = "origin";
-      }
-    } else if (index === 0) {
-      origin.value = itinerary.initialOrigin;
-      outsideRouteLeg.value = true;
-      if (!origin.value) searchTarget.value = "origin";
-    } else {
-      origin.value = await resolveStop(index - 1);
-      outsideRouteLeg.value = false;
-    }
-  } catch {
-    error.value = "当前检查楼栋暂时无法定位，请手动选择地点";
-  }
-}
-
-async function refreshProgress(showToast = true) {
-  if (!importedItinerary.value || refreshingProgress.value) return;
-  refreshingProgress.value = true;
-  try {
-    recommendation.value = await guidanceApi.getTodayExaminationRecommendation();
-    const nextIndex = currentStopIndex.value;
-    if (nextIndex >= 0) await selectStage(nextIndex, true);
-    else {
-      selectedStopIndex.value = -1;
-      route.value = undefined;
-      if (showToast) uni.showToast({ title: "今日检查已全部完成", icon: "success" });
-    }
-  } catch (cause) {
-    if (showToast) uni.showToast({ title: cause instanceof Error ? cause.message : "检查进度刷新失败", icon: "none" });
-  } finally {
-    refreshingProgress.value = false;
-  }
-}
-
-function selectPlace(place: GuidanceLocationPoint) {
-  if (searchTarget.value === "origin") {
-    origin.value = place;
-    if (importedItinerary.value && selectedStopIndex.value === 0) {
-      importedItinerary.value = { ...importedItinerary.value, initialOrigin: place };
-      updateGuidanceRouteItinerary({ initialOrigin: place });
-    }
-  }
-  else if (searchTarget.value === "destination") destination.value = place;
-  searchTarget.value = undefined;
-  route.value = undefined;
-  error.value = "";
-}
-
-function chooseMode(mode: GuidanceTravelMode) {
-  travelMode.value = mode;
-  route.value = undefined;
-  if (importedItinerary.value) {
-    importedItinerary.value = { ...importedItinerary.value, transportMode: mode };
-    updateGuidanceRouteItinerary({ transportMode: mode });
-  }
-}
-
-function swapPoints() {
-  const previous = origin.value;
-  origin.value = destination.value;
-  destination.value = previous;
-  route.value = undefined;
-  error.value = "";
-}
-
-async function calculateRoute() {
-  if (!origin.value || !destination.value || loading.value) return;
-  loading.value = true;
-  error.value = "";
-  try {
-    route.value = await guidanceApi.calculateRoute({
-      origin: origin.value,
-      destination: destination.value,
-      mode: effectiveMode.value,
-    });
-    await nextTick();
-    uni.createMapContext("guidance-route-map").includePoints({
-      points: route.value.polyline,
-      padding: [56, 40, 56, 40],
-    });
-  } catch (cause) {
-    route.value = undefined;
-    if (cause instanceof ApiError && cause.code === "SERVICE_UNAVAILABLE") {
-      error.value = "路线服务暂不可用，请稍后重试";
-    } else if (cause instanceof ApiError && cause.code === "NOT_FOUND") {
-      error.value = "没有找到可用路线，请重新选择地点或出行方式";
-    } else {
-      error.value = cause instanceof Error ? cause.message : "路线计算失败，请稍后重试";
-    }
-    uni.showToast({ title: error.value, icon: "none" });
-  } finally {
-    loading.value = false;
-  }
-}
-
-function modeLabel(mode: GuidanceTravelMode) {
-  return ({ walking: "步行", transit: "公交", driving: "驾车" } as Record<GuidanceTravelMode, string>)[mode];
-}
+const {
+  origin, destination, route, loading, error, searchTarget, importedItinerary, recommendation,
+  selectedStopIndex, refreshingProgress, travelMode, travelModes, pageReady,
+  canCalculate, activeItemIds, currentStopIndex, completedStopCount, isOutsideStage,
+  mapCenter, markers, polylines, mapPoints, distanceText, durationText, providerText, actionLabel, durationLabel,
+  choosePoint, selectStage, refreshProgress, selectPlace, chooseMode, swapPoints, calculateRoute, modeLabel,
+} = useGuidanceRoute();
 </script>
 
 <template>
   <view class="route-page">
+    <view v-if="!pageReady" class="route-initializing">正在准备检查导航…</view>
+    <template v-else>
     <view class="intro">
       <text class="intro__title">检查导航</text>
       <text class="intro__description">院外首段可选择出行方式；进入医院后，系统按检查进度自动切换下一段楼栋步行路线。</text>
@@ -373,12 +115,14 @@ function modeLabel(mode: GuidanceTravelMode) {
       @close="searchTarget = undefined"
       @select="selectPlace"
     />
+    </template>
   </view>
 </template>
 
 <style scoped>
 button::after { display: none; }
 .route-page { min-height: 100vh; padding: 28rpx 24rpx 80rpx; box-sizing: border-box; background: #f3f6fa; }
+.route-initializing{padding:160rpx 24rpx;color:#8794a5;font-size:23rpx;text-align:center}
 .intro { padding: 6rpx 8rpx 24rpx; }
 .intro__title,.intro__description { display: block; }
 .intro__title { color: #172235; font-size: 40rpx; font-weight: 750; }

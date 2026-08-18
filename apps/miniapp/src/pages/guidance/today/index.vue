@@ -7,6 +7,7 @@ import { saveGuidanceRouteItinerary } from "@/utils/guidanceRouteImport";
 
 const recommendation = ref<TodayExaminationRecommendation>();
 const loading = ref(false);
+const importing = ref(false);
 const errorMessage = ref("");
 
 const routeItems = computed(() => recommendation.value?.stages
@@ -29,7 +30,7 @@ async function loadRecommendation() {
 
 function adoptRecommendation() {
   const value = recommendation.value;
-  if (!value || !routeItems.value.length) return;
+  if (!value || !routeItems.value.length || importing.value) return;
   uni.showModal({
     title: "采用今日推荐",
     content: "是否将该方案导入检查导航？导入后请先选择院外出发地址。",
@@ -37,8 +38,12 @@ function adoptRecommendation() {
     cancelText: "暂不导入",
     success: (result) => {
       if (!result.confirm) return;
+      importing.value = true;
       saveGuidanceRouteItinerary(value.service_date, routeItems.value);
-      void uni.navigateTo({ url: "/pages/guidance/route/index?source=today" });
+      void uni.navigateTo({
+        url: "/pages/guidance/route/index?source=today",
+        fail: () => { importing.value = false; },
+      });
     },
   });
 }
@@ -78,7 +83,7 @@ function locationText(item: SmartAppointmentPlanItem) { return `${item.building}
           </view>
         </view>
       </view>
-      <view v-if="routeItems.length" class="bottom-action"><view><text>采用这份顺序建议</text><text>可继续导入地图并选择院外起点</text></view><button @tap="adoptRecommendation">采用方案</button></view>
+      <view v-if="routeItems.length" class="bottom-action"><view><text>采用这份顺序建议</text><text>可继续导入地图并选择院外起点</text></view><button :loading="importing" :disabled="importing" @tap="adoptRecommendation">采用方案</button></view>
     </template>
   </view>
 </template>

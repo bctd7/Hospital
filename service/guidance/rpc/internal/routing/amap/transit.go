@@ -82,7 +82,7 @@ func buildTransitRoute(origin, destination routing.LocationPoint, source transit
 			if err != nil {
 				return routing.WalkingRoute{}, fmt.Errorf("%w: invalid AMap transit walking distance", routing.ErrProvider)
 			}
-			stepDuration, err := parseOptionalInt32(walk.Duration)
+			stepDuration, err := parseOptionalInt32(walk.Duration.String())
 			if err != nil {
 				return routing.WalkingRoute{}, fmt.Errorf("%w: invalid AMap transit walking duration", routing.ErrProvider)
 			}

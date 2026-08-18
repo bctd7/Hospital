@@ -26,6 +26,17 @@ func TestParserAcceptsValidatedModelCandidate(t *testing.T) {
 	}
 }
 
+func TestParserNormalizesNullModelCollections(t *testing.T) {
+	parser := NewParser(interpreterStub{preview: Preview{}})
+	preview, err := parser.Parse(context.Background(), "仅保留普通患者提示")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if preview.Rules == nil || preview.Reminders == nil || preview.UnresolvedFragments == nil {
+		t.Fatalf("model collections must be normalized to empty slices: %#v", preview)
+	}
+}
+
 func TestParserFallsBackWhenModelCandidateIsInvalid(t *testing.T) {
 	parser := NewParser(interpreterStub{preview: Preview{Rules: []Rule{{RuleType: "invented"}}}})
 	preview, err := parser.Parse(context.Background(), "检查前空腹")

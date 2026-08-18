@@ -78,7 +78,7 @@ watch(() => props.visible, (visible) => {
   mapMountTimer = setTimeout(() => {
     mapMounted.value = true;
   }, 180);
-});
+}, { immediate: true });
 
 onBeforeUnmount(() => {
   if (mapMountTimer) clearTimeout(mapMountTimer);

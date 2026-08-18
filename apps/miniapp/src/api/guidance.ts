@@ -1,5 +1,6 @@
 import { request } from "@/api/client";
 import { operationId } from "@/api/management/httpShared";
+import { normalizeGuidancePlaces, normalizeGuidanceRoute, normalizePreparationPreview } from "@/features/guidance/contracts";
 import type {
   CalculateGuidanceRouteInput,
   ConfigureExaminationItemInput,
@@ -13,14 +14,15 @@ import type {
 } from "@/types/guidance";
 
 export const guidanceApi = {
-	previewPreparationRules(description: string) {
-		return request<PreparationRulePreview, { description: string }>({
+	async previewPreparationRules(description: string) {
+		const value = await request<PreparationRulePreview, { description: string }>({
 			path: "/api/v1/admin/guidance/preparation-rules/preview",
 			method: "POST",
 			data: { description },
 			authenticated: true,
 			timeoutMs: 32000,
 		});
+		return normalizePreparationPreview(value);
 	},
 	getExaminationItemConfiguration(itemId: string) {
 		return request<ExaminationItemConfiguration>({
@@ -60,20 +62,22 @@ export const guidanceApi = {
       authenticated: true,
     });
   },
-  searchPlaces(input: SearchGuidancePlacesInput) {
-    return request<SearchGuidancePlacesResult, SearchGuidancePlacesInput>({
+  async searchPlaces(input: SearchGuidancePlacesInput) {
+		const value = await request<SearchGuidancePlacesResult, SearchGuidancePlacesInput>({
       path: "/api/v1/guidance/places/search",
       method: "GET",
       data: input,
-      authenticated: true,
-    });
-  },
-  calculateRoute(input: CalculateGuidanceRouteInput) {
-    return request<GuidanceRoute, CalculateGuidanceRouteInput>({
+			authenticated: true,
+		});
+		return { places: normalizeGuidancePlaces(value.places) };
+	},
+  async calculateRoute(input: CalculateGuidanceRouteInput) {
+		const value = await request<GuidanceRoute, CalculateGuidanceRouteInput>({
       path: "/api/v1/guidance/routes",
       method: "POST",
       data: input,
-      authenticated: true,
-    });
-  },
+			authenticated: true,
+		});
+		return normalizeGuidanceRoute(value);
+	},
 };

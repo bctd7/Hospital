@@ -2,6 +2,7 @@ package planning
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"hospital/common/authn"
@@ -89,12 +90,19 @@ func (m *Manager) Generate(ctx context.Context, patient authn.Principal, command
 	}
 	requestFingerprint := fingerprint(command)
 	plans := make([]Plan, 0, len(candidates))
-	for variant, candidate := range candidates {
+	seenSchedules := make(map[string]struct{}, len(candidates))
+	for _, candidate := range candidates {
 		items := make([]PlanItem, 0, len(candidate.choices))
 		for _, selected := range candidate.choices {
 			itemID, choice := selected.itemID, selected.option
 			items = append(items, PlanItem{ItemID: itemID, ItemName: projects[itemID].Name, RoomID: choice.RoomID, RoomDisplayName: choice.RoomDisplayName, CampusID: choice.CampusID, Building: choice.Building, FloorNumber: choice.FloorNumber, RoomNumber: choice.RoomNumber, ServiceDate: choice.ServiceDate, Session: choice.Session, EstimatedDurationMinutes: choice.EstimatedDurationMinutes, PlannedStartTime: formatClockMinutes(selected.plannedStartMinutes), PlannedEndTime: formatClockMinutes(selected.plannedEndMinutes), TravelMinutes: selected.travelMinutes, TravelTimeEstimated: selected.travelEstimated, Reason: planReason(itemID, configurations[itemID], rules, items)})
 		}
+		scheduleKey := visibleScheduleKey(items)
+		if _, duplicated := seenSchedules[scheduleKey]; duplicated {
+			continue
+		}
+		seenSchedules[scheduleKey] = struct{}{}
+		variant := len(plans)
 		plan := Plan{PlanID: uuid.NewString(), PatientAccountID: patient.AccountID, Title: planTitle(variant), Summary: planSummary(items), Items: items, ExpiresAt: time.Now().UTC().Add(30 * time.Minute)}
 		if err := m.store.SavePlan(ctx, plan, requestFingerprint); err != nil {
 			return nil, err
@@ -102,4 +110,24 @@ func (m *Manager) Generate(ctx context.Context, patient authn.Principal, command
 		plans = append(plans, plan)
 	}
 	return plans, nil
+}
+
+// visibleScheduleKey 只使用患者能够实际区分的预约安排，不把随机 PlanID、标题或解释文案算成新方案。
+func visibleScheduleKey(items []PlanItem) string {
+	var builder strings.Builder
+	for _, item := range items {
+		builder.WriteString(item.ItemID)
+		builder.WriteByte('@')
+		builder.WriteString(item.RoomID)
+		builder.WriteByte('@')
+		builder.WriteString(item.ServiceDate)
+		builder.WriteByte('@')
+		builder.WriteString(item.Session)
+		builder.WriteByte('@')
+		builder.WriteString(item.PlannedStartTime)
+		builder.WriteByte('-')
+		builder.WriteString(item.PlannedEndTime)
+		builder.WriteByte('|')
+	}
+	return builder.String()
 }

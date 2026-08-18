@@ -53,7 +53,7 @@ func TestClientSearchesPlacesAndCalculatesWalkingRoute(t *testing.T) {
 			_, _ = writer.Write([]byte(`{
                   "status":"1","info":"OK","infocode":"10000",
                   "route":{"transits":[{"duration":"900","walking_distance":"180","segments":[
-                    {"walking":{"distance":"180","duration":"150","steps":[{"instruction":"步行至车站","road":"院区路","distance":"180","duration":"150","polyline":"121.400000,31.200000;121.402000,31.202000"}]},
+					{"walking":{"distance":"180","duration":"150","steps":[{"instruction":"步行至车站","road":[],"distance":"180","duration":[],"polyline":"121.400000,31.200000;121.402000,31.202000"}]},
                      "bus":{"buslines":[{"name":"医院专线","distance":"1800","duration":"750","polyline":"121.402000,31.202000;121.410000,31.210000","departure_stop":{"name":"一号楼站"},"arrival_stop":{"name":"二号楼站"}}]}}
                   ]}]}
                 }`))
@@ -105,6 +105,9 @@ func TestClientSearchesPlacesAndCalculatesWalkingRoute(t *testing.T) {
 	)
 	if err != nil || transit.Mode != routing.RouteModeTransit || transit.DistanceMeters != 1980 || len(transit.Steps) != 2 {
 		t.Fatalf("unexpected transit route: %#v, %v", transit, err)
+	}
+	if transit.Steps[0].DurationSeconds != 0 || transit.Steps[0].RoadName != "" {
+		t.Fatalf("array-valued optional transit fields must be normalized: %#v", transit.Steps[0])
 	}
 }
 

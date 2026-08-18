@@ -27,11 +27,13 @@ func NewParser(interpreter Interpreter) *Parser {
 
 func (p *Parser) Parse(ctx context.Context, value string) (Preview, error) {
 	fallback, err := Parse(value)
+	fallback = normalizePreview(fallback)
 	if err != nil || p == nil || p.interpreter == nil || strings.TrimSpace(value) == "" {
 		return fallback, err
 	}
 	preview, interpretErr := p.interpreter.Interpret(ctx, value)
 	if interpretErr == nil {
+		preview = normalizePreview(preview)
 		preview.Description = strings.TrimSpace(value)
 		preview.ParserMode = "llm"
 		for index := range preview.Rules {
@@ -45,6 +47,21 @@ func (p *Parser) Parse(ctx context.Context, value string) (Preview, error) {
 	}
 	fallback.Warning = "模型解析暂不可用或结果未通过校验，当前展示医院默认解析结果，请人工确认。"
 	return fallback, nil
+}
+
+// normalizePreview 把模型省略或显式返回 null 的集合统一为 JSON 空数组。
+// 这是 Guidance 对外契约的一部分，页面不需要猜测第三方模型的空值习惯。
+func normalizePreview(value Preview) Preview {
+	if value.Rules == nil {
+		value.Rules = make([]Rule, 0)
+	}
+	if value.Reminders == nil {
+		value.Reminders = make([]Reminder, 0)
+	}
+	if value.UnresolvedFragments == nil {
+		value.UnresolvedFragments = make([]string, 0)
+	}
+	return value
 }
 
 type LLMConfig struct {

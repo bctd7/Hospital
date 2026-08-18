@@ -21,6 +21,20 @@ const (
 	searchRoomC = "20000000-0000-4000-8000-000000000003"
 )
 
+func TestVisibleScheduleKeyIgnoresPlanPresentationButKeepsRealDifferences(t *testing.T) {
+	base := []PlanItem{{ItemID: searchItemA, RoomID: searchRoomA, ServiceDate: "2026-08-18", Session: "morning", PlannedStartTime: "09:00", PlannedEndTime: "09:15", Reason: "原因一"}}
+	sameSchedule := append([]PlanItem(nil), base...)
+	sameSchedule[0].Reason = "另一段解释"
+	if visibleScheduleKey(base) != visibleScheduleKey(sameSchedule) {
+		t.Fatal("presentation-only differences must not create an alternative plan")
+	}
+	differentRoom := append([]PlanItem(nil), base...)
+	differentRoom[0].RoomID = searchRoomB
+	if visibleScheduleKey(base) == visibleScheduleKey(differentRoom) {
+		t.Fatal("a different room assignment must remain a distinct plan")
+	}
+}
+
 func TestGenerateFindsFeasiblePlanInsteadOfConsumingSharedCapacityGreedily(t *testing.T) {
 	manager := newSearchTestManager(
 		[]string{searchItemA, searchItemB},
