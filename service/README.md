@@ -4,7 +4,7 @@
 
 | 服务 | 入口 | 端口 | 职责 |
 |---|---|---:|---|
-| App API | `service/app/api/app.go` | 8888 | 小程序 HTTP、Token 中间件、协议转换与页面聚合 |
+| App API | `service/app/api/app.go` | 8888 | 小程序 HTTP、Token 中间件、协议转换与统一错误 |
 | Identity RPC | `service/identity/rpc/identity.go` | 8080 | 登录、会话、账号、权限、组织和医生 |
 | Appointment RPC | `service/appointment/rpc/appointment.go` | 8081 | 检查资源、预约、容量、报到、候检叫号、检查、报告和消息 |
 | Guidance RPC | `service/guidance/rpc/guidance.go` | 8082 | 完整项目配置协调、检查规则、智能预约、当日顺序、地点检索和两点步行路线 |
@@ -34,11 +34,22 @@ server -> logic -> manager -> store -> repository
 
 详细导航：
 
+- [App API](./app/README.md)；
 - [Identity](./identity/README.md)；
 - [Identity 内部结构](./identity/rpc/internal/README.md)；
 - [Appointment](./appointment/README.md)；
 - [Appointment 内部结构](./appointment/rpc/internal/README.md)；
 - [Guidance](./guidance/README.md)。
+
+## 文档分工
+
+- `plan/backend` 记录业务目标、服务边界、稳定规则、已实现状态和后续提案；
+- `service/*/README.md` 说明当前代码如何承载这些规则，包括调用关系、目录导航、配置、运行和验证；
+- `contracts/api` 与 `contracts/proto` 是接口、字段和错误契约的唯一事实来源；
+- Migration 是数据库结构的唯一事实来源，README 和 Plan 不复制完整表定义。
+
+服务 README 可以概括主要业务能力，便于从代码入口理解服务，但不维护逐接口清单；模块 Plan 可以引用当前代码
+结构说明落地位置，但不替代代码导航。两类文档都从服务职责和业务边界出发，不按页面临时需求或数据库表拆主题。
 
 ## 契约与生成
 

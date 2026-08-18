@@ -1,5 +1,8 @@
 # 后端模块状态
 
+这里按业务模块维护“当前已经具备什么”和“后续准备改变什么”，不按 HTTP/RPC 接口、数据表或代码包建立章节。
+逐接口字段以 `contracts/` 为准，代码导航和运行方式以对应 `service/*/README.md` 为准。
+
 ## 已实现
 
 - [Identity 当前范围](./implemented/01-identity-service.md)：认证、会话、授权版本、组织、账号和医生管理；

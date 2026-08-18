@@ -1,7 +1,9 @@
 # Identity 身份服务
 
 Identity Service 是账号、登录会话、角色权限、医院组织和医生档案的数据拥有者。当前规划范围已经完成，
-后续业务服务通过 Access Token、Identity RPC 和授权事件使用这些能力，不得直接访问 Identity 数据表。
+后续业务服务通过 Access Token、Identity RPC 和授权事件使用这些能力，不得直接访问 Identity 数据表。稳定业务
+范围见 [Identity 当前范围归档](../../plan/backend/modules/implemented/01-identity-service.md)；本 README 说明当前代码
+组织、运行方式和验证入口，不维护逐接口字段。
 
 ## 已实现能力
 
@@ -143,7 +145,7 @@ MySQL 集成测试通过 `IDENTITY_TEST_MYSQL_DSN` 显式启用。阶段收尾�
 6. 新查询要明确是公共目录、本人查询还是管理员查询，不能共用一个返回对象泄漏字段；
 7. 新接口完成后同步生成代码、消费方，并补充数据库集成与 HTTP 全链路测试。
 
-## 暂不包含
+## 当前不包含
 
 - 多医院租户；
 - 多科室任职和排班；
