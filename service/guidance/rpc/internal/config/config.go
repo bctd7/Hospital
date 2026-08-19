@@ -27,13 +27,13 @@ type Config struct {
 		WalkingEndpoint     string `json:",default=https://restapi.amap.com/v3/direction/walking"`
 		DrivingEndpoint     string `json:",default=https://restapi.amap.com/v3/direction/driving"`
 		TransitEndpoint     string `json:",default=https://restapi.amap.com/v3/direction/transit/integrated"`
-		WebServiceKey       string `json:",optional"`
+		WebServiceKey       string `json:",optional,env=AMAP_WEB_SERVICE_KEY"`
 		TimeoutMilliseconds int64  `json:",default=5000"`
 	}
 	LLM struct {
-		Endpoint            string `json:",optional"`
-		APIKey              string `json:",optional"`
-		Model               string `json:",optional"`
+		Endpoint            string `json:",optional,env=GUIDANCE_LLM_ENDPOINT"`
+		APIKey              string `json:",optional,env=GUIDANCE_LLM_API_KEY"`
+		Model               string `json:",optional,env=GUIDANCE_LLM_MODEL"`
 		TimeoutMilliseconds int64  `json:",default=10000"`
 	}
 }
