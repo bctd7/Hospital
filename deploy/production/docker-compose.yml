@@ -270,6 +270,8 @@ services:
     mem_limit: 256m
     networks:
       - backend
+      # Guidance 需要访问高德和大模型等公网服务；内部 RPC 仍通过 backend 通信。
+      - edge
 
   app-api:
     build:
