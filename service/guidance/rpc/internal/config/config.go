@@ -1,6 +1,14 @@
 package config
 
-import "github.com/zeromicro/go-zero/zrpc"
+import (
+	"errors"
+	"os"
+	"strings"
+
+	"github.com/zeromicro/go-zero/zrpc"
+)
+
+var ErrIncompleteProviderEnvironment = errors.New("incomplete guidance provider environment")
 
 type Config struct {
 	zrpc.RpcServerConf
@@ -27,13 +35,42 @@ type Config struct {
 		WalkingEndpoint     string `json:",default=https://restapi.amap.com/v3/direction/walking"`
 		DrivingEndpoint     string `json:",default=https://restapi.amap.com/v3/direction/driving"`
 		TransitEndpoint     string `json:",default=https://restapi.amap.com/v3/direction/transit/integrated"`
-		WebServiceKey       string `json:",optional,env=AMAP_WEB_SERVICE_KEY"`
+		WebServiceKey       string `json:",optional"`
 		TimeoutMilliseconds int64  `json:",default=5000"`
 	}
 	LLM struct {
-		Endpoint            string `json:",optional,env=GUIDANCE_LLM_ENDPOINT"`
-		APIKey              string `json:",optional,env=GUIDANCE_LLM_API_KEY"`
-		Model               string `json:",optional,env=GUIDANCE_LLM_MODEL"`
+		Endpoint            string `json:",optional"`
+		APIKey              string `json:",optional"`
+		Model               string `json:",optional"`
 		TimeoutMilliseconds int64  `json:",default=10000"`
 	}
+}
+
+// BindProviderEnvironment 在配置文件加载后显式绑定第三方服务配置。
+// 生产镜像不再依赖配置库对 ${VAR} 的隐式展开行为。
+func BindProviderEnvironment(c *Config) error {
+	if c == nil {
+		return ErrIncompleteProviderEnvironment
+	}
+	bind := func(name string, target *string) {
+		if value, exists := os.LookupEnv(name); exists {
+			*target = strings.TrimSpace(value)
+		}
+	}
+	bind("AMAP_WEB_SERVICE_KEY", &c.AMap.WebServiceKey)
+	bind("GUIDANCE_LLM_ENDPOINT", &c.LLM.Endpoint)
+	bind("GUIDANCE_LLM_API_KEY", &c.LLM.APIKey)
+	bind("GUIDANCE_LLM_MODEL", &c.LLM.Model)
+
+	llmValues := []string{c.LLM.Endpoint, c.LLM.APIKey, c.LLM.Model}
+	configured := 0
+	for _, value := range llmValues {
+		if strings.TrimSpace(value) != "" {
+			configured++
+		}
+	}
+	if configured != 0 && configured != len(llmValues) {
+		return ErrIncompleteProviderEnvironment
+	}
+	return nil
 }

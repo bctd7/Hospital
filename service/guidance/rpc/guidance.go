@@ -23,6 +23,9 @@ func main() {
 	flag.Parse()
 	var c config.Config
 	conf.MustLoad(*configFile, &c, conf.UseEnv())
+	if err := config.BindProviderEnvironment(&c); err != nil {
+		panic(err)
+	}
 	svcCtx, err := svc.NewServiceContext(c)
 	if err != nil {
 		panic(err)

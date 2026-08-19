@@ -31,6 +31,7 @@ func (l *SearchPlacesLogic) SearchPlaces(in *guidancev1.SearchPlacesRequest) (*g
 		Keyword: in.Keyword, City: in.City, Limit: in.Limit,
 	})
 	if err != nil {
+		l.Errorf("search places with map provider: %v", err)
 		return nil, mapRPCError(err)
 	}
 	response := &guidancev1.SearchPlacesResponse{Places: make([]*guidancev1.LocationPoint, 0, len(places))}

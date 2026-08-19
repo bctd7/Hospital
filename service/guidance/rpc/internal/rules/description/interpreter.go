@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 // Interpreter 只把自然语言转换为候选封闭结构，不拥有保存规则的权限。
@@ -44,6 +46,11 @@ func (p *Parser) Parse(ctx context.Context, value string) (Preview, error) {
 		if Validate(preview.Rules, preview.Reminders) == nil {
 			return preview, nil
 		}
+	}
+	if interpretErr != nil {
+		logx.WithContext(ctx).Errorf("interpret preparation description with LLM: %v", interpretErr)
+	} else {
+		logx.WithContext(ctx).Error("interpret preparation description with LLM: response did not satisfy the closed rule contract")
 	}
 	fallback.Warning = "模型解析暂不可用或结果未通过校验，当前展示医院默认解析结果，请人工确认。"
 	return fallback, nil
